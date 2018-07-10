@@ -6,9 +6,28 @@
   <base href="/">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/x-icon" href="assets/icons/favicon-bn.ico">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Google Analytics -->
+  <!--
+  <script>    
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-103068391-2', 'auto');   // none');
+    // ga('send', 'pageview');
+  </script>
+  -->
+
 </head>
-<body>
-  <app-root></app-root>
+<body oncontextmenu="return false;">
+  <app-root>
+    <div style="width: 138px; height: 32px; position: absolute; top: 0; right: 0; bottom: 0; left: 0; margin: auto;">
+        <img src="assets/images/logo_32px.png" style="width: 100%;">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    </div>    
+  </app-root>
 </body>
 </html>
