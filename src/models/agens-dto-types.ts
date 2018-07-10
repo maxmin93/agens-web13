@@ -18,22 +18,22 @@ export interface ILabelDto extends IResponseDto {
 };
 
 export interface IClientDto extends IResponseDto {
+  group: string;
 
   ssid: string;
   user_name: string;
   user_ip: string;
   timestamp: string;
   valid: boolean;
-
 };
 
-export interface IMetaDto extends IResponseDto {
+export interface ISchemaDto extends IResponseDto {
+  group: string;
 
   is_dirty: boolean;
   graph: IGraphType;
   labels: Array<ILabelType>;
-  meta: IGraph;
-
+  schema_graph: IGraph;
 };
 
 export interface IRequestDto {

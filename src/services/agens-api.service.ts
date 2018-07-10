@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import * as CONFIG from '../global.config';
 
-import { IClientDto, IMetaDto } from '../models/agens-dto-types'
+import { IClientDto, ISchemaDto } from '../models/agens-dto-types'
 
 declare var randomColor: any;
 
@@ -26,7 +26,7 @@ export class AgensApiService {
   currentMenu = this.menuSource.asObservable();
   
   public client:IClientDto = null;  // ssid, user_name, user_ip, timestamp, valid
-  public meta:IMetaDto = null;      // graph, labels, meta
+  public meta:ISchemaDto = null;      // graph, labels, meta
   
   constructor () {
     if( CONFIG.DEV_MODE ){

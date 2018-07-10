@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-// import { Observable } from 'rxjs';
 
-// import * as _global from '../global.config';
 import { AgensApiService } from './agens-api.service';
 
 import { IClientDto } from '../models/agens-dto-types';
