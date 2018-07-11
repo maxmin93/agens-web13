@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
+
+import { AgensDataService } from '../../../services/agens-data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -7,9 +10,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DashboardComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    private _api: AgensDataService,
+    public _snackBar: MatSnackBar    
+  ) { }
 
   ngOnInit() {
+    console.log( 'Dashboard:', this._api.getClient() );
   }
 
 }

@@ -13,7 +13,7 @@ export const MOBILE_WIDTH: number = 1024;
 ///////////////////////////////////////////////////////////////
 
 export enum StateType { 
-  PENDING='PENDING', SUCCESS='SUCCESS', FAIL='FAIL', KILLED='KILLED', NONE='NONE' 
+  PENDING='PENDING', SUCCESS='SUCCESS', FAIL='FAIL', KILLED='KILLED', ERROR='ERROR', NONE='NONE' 
 };
 export enum RequestType { 
   CREATE='CREATE', DROP='DROP', QUERY='QUERY', KILL='KILL', NONE='NONE' 

@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+
+import { AgensDataService } from '../../services/agens-data.service';
 
 @Component({
   selector: 'app-main',
@@ -7,9 +9,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MainComponent implements OnInit {
 
-  constructor() { }
+  private currentPath: string = '/';
+
+  productTitle: string;
+  currentMenu: string = "main";
+
+  constructor(
+    private cd: ChangeDetectorRef,
+    private _api: AgensDataService
+  ) { }
 
   ngOnInit() {
+    this.productTitle = this._api.getClient().product_name+' '+this._api.getClient().product_version;
   }
 
 }

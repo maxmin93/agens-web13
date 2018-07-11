@@ -1,3 +1,26 @@
-<p>
-  main works!
-</p>
+<!-- menu toolbar -->
+<mat-toolbar id="appToolbar">
+   
+    <h1 class="header__title">{{productTitle}}</h1>
+    <!-- <h1 class="header__title">AgensBrowser</h1> -->
+    <mat-button-toggle-group #menuGroup="matButtonToggleGroup">
+        <mat-button-toggle value="main" disabled="{{currentMenu=='main'}}" [routerLink]="['/']" matTooltip="show meta-graph of Graph DB" matTooltipPosition="above">
+            dashboard
+        </mat-button-toggle>
+        <mat-button-toggle value="graph" disabled="{{currentMenu=='graph'}}" [routerLink]="['/graph']" matTooltip="query to Graph DB by cypher" matTooltipPosition="above">
+            <mat-icon>pie_chart</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="history" disabled="{{currentMenu=='history'}}" [routerLink]="['/history']" matTooltip="show your query histories" matTooltipPosition="above">
+            <mat-icon>history</mat-icon>
+        </mat-button-toggle>
+
+        <a matTooltip="show help documents" matTooltipPosition="above" href="http://bitnine.net/documentation/" target="_new">
+            <mat-icon>help</mat-icon>
+        </a>
+    </mat-button-toggle-group>
+    <!-- <button id="button-logout" mat-button (click)="logout()">logout</button> -->
+
+</mat-toolbar>
+
+<!-- sub-pages -->
+<router-outlet></router-outlet>
