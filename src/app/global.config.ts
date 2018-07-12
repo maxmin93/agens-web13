@@ -6,7 +6,7 @@ export const AGENS_CORE_API: string = 'api/core';
 export const AGENS_MNGR_API: string = 'api/manager';
 export const AGENS_AUTH_API: string = 'api/auth';
 
-export const USER_KEY: string = 'agensUser';
+export const USER_KEY: string = 'agens-ssid';
 
 export const MOBILE_WIDTH: number = 1024;
 

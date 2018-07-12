@@ -3,7 +3,7 @@ import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from
 
 import { AgensDataService } from './agens-data.service';
 import { Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
 
 @Injectable()
 export class AuthGuardService implements CanActivate {
@@ -15,15 +15,15 @@ export class AuthGuardService implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):Observable<boolean> {
-    let isValid$ = this._api.isValid();
+    let isValid$ = this._api.getIsValid$();
     isValid$.subscribe(x => {
       if( !x ){
         console.log(`isValid=${x}, move to "/login" by force`);
         this._router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
       }
     });
-
-    return this._api.auth_valid();
+    
+    return this._api.auth_valid().pipe( first() );
   }
 
 }

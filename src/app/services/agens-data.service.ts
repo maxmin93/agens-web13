@@ -4,8 +4,9 @@ import { MatSnackBar } from '@angular/material';
 
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto } from '../models/agens-dto-types'
+import { IClientDto, ISchemaDto, IResponseDto } from '../models/agens-response-types'
 import * as CONFIG from '../global.config';
 
 @Injectable({
@@ -19,8 +20,11 @@ export class AgensDataService {
     auth: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_AUTH_API}`
   };
 
-  private lastResponse = new Subject<IResponseDto>();
-  private isValid$ = new Subject<boolean>(); // new BehaviorSubject<boolean>(false);
+  private lastResponse$ = new Subject<IResponseDto>();
+  private isValid$ = new Subject<boolean>();
+
+  private productTitle$ = new BehaviorSubject<string>('Bitnine');
+  private currentMenu$ = new BehaviorSubject<string>("login");
 
   private client:IClientDto = null;      // ssid, user_name, user_ip, timestamp, valid
   private schema:ISchemaDto = null;      // graph, labels, meta
@@ -38,32 +42,37 @@ export class AgensDataService {
     }
   }
 
-  public getSSID():string {
-    console.log( 'getSSID()', this.client );
-    return (this.client !== null) ? this.client.ssid : 'None';
+  getSSID():string {
+    let ssid = localStorage.getItem('agens-ssid');
+    return _.isNil(ssid) ? 'Nil' : ssid;
   }
-  public getProductInfo():any {
-    return { 
-        name: (this.client !== null) ? this.client.product_name : 'AgensBrowser web'
-        , version: (this.client !== null) ? this.client.product_version : ''
-      };
-  }
-  public getClient():IClientDto {
+
+  getClient():IClientDto {
     return this.client;
   }
-
-  public isValid():Observable<boolean> {
+  getIsValid$():Observable<boolean> {
     return this.isValid$.asObservable();
   }
-
-  public setResponses(dto:IResponseDto) {
-    if( dto ) this.lastResponse.next(dto);
-    else this.lastResponse.next();
+  getCurrentMenu$():Observable<string> {
+    return this.currentMenu$.asObservable();
   }
-  public getResponse():Observable<IResponseDto> {
-    return this.lastResponse.asObservable();
+  getProductTitle$():Observable<string> {
+    return this.productTitle$.asObservable();
   }
 
+  setResponses(dto:IResponseDto) {
+    if( dto ) this.lastResponse$.next(dto);
+    else this.lastResponse$.next();
+  }
+  getResponse():Observable<IResponseDto> {
+    return this.lastResponse$.asObservable();
+  }
+
+  /////////////////////////////////////////////////
+
+  changeMenu(menu: string) {
+    this.currentMenu$.next(menu);
+  }
 
   /////////////////////////////////////////////////
 
@@ -73,14 +82,14 @@ export class AgensDataService {
 
   auth_valid() {
     const url = `${this.api.auth}/valid`;
-    console.log( `[${this.getSSID()}] url => ${url}`);
     this._http.get<IClientDto>(url, {headers: this.createAuthorizationHeader()})
         .subscribe({
           next: dto => {
             this.setResponses(<IResponseDto>dto);
-            console.log( 'auth_valid::subscribe', dto );
-
-            if(dto.valid === true) this.isValid$.next(true);
+            if(dto.valid === true){
+              this.saveClient(dto);
+              this.isValid$.next(true);
+            }
             else this.isValid$.next(false);
           },
           error: err => {
@@ -89,26 +98,32 @@ export class AgensDataService {
               state: CONFIG.StateType.ERROR,
               message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
             });
-
-            this.client = null;
             this.isValid$.next(false);
           }
-        });
+        });0
 
     return this.isValid$.asObservable();
   }
 
   auth_connect():Observable<boolean> {
     const url = `${this.api.auth}/connect`;
-    // console.log( `[${this.getSSID()}] url => ${url}`);
+    console.log( `[${this.getSSID()}] auth_connect => ${url}`);
     return this._http.get<IClientDto>(url, {headers: new HttpHeaders({'Content-Type': 'application/json'})})
         .pipe( map(dto => {
           this.setResponses(<IResponseDto>dto);
-          this.client = dto;
-
-          if(dto.valid === true) return true;
+          if( dto.valid === true ){
+            this.saveClient(dto);
+            this.isValid$.next(true);
+            localStorage.setItem('agens-ssid', dto.ssid);
+            return true;
+          } 
           else return false;
         }) );
+  }
+
+  private saveClient(dto:IClientDto){   
+    this.client = dto;
+    this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
   }
 
 }

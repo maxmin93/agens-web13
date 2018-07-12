@@ -1,21 +1,24 @@
 import { StateType, RequestType } from '../global.config';
-import { IGraphType, ILabelType } from './agens-ddl-types';
-import { IGraph, IRecord } from './agens-dml-types';
+import { IDatasource, IGraph, ILabel, IRecord } from './agens-data-types';
 
 export interface IResponseDto {
   group: string;
+
   state: StateType;   // enum Type
   message: string;
   _link?: string;
-
 };
 
 export interface ILabelDto extends IResponseDto {
+  // group == 'label_info'
+
   request?: IRequestDto;
-  label: ILabelType;
+  label: ILabel;
 };
 
 export interface IClientDto extends IResponseDto {
+  // group == 'label_info'
+  
   ssid: string;
   valid: boolean; 
   user_name: string;
@@ -26,10 +29,11 @@ export interface IClientDto extends IResponseDto {
 };
 
 export interface ISchemaDto extends IResponseDto {
+  // group == 'schema'
+
   is_dirty: boolean;
-  graph: IGraphType;
-  labels: Array<ILabelType>;
-  schema_graph: IGraph;
+  datasource: IDatasource;
+  labels: Array<ILabel>;
 };
 
 export interface IRequestDto {
@@ -42,7 +46,9 @@ export interface IRequestDto {
 };
 
 export interface IResultDto extends IResponseDto {
+  // group == 'result'
+
   request: IRequestDto;
-  graph: IGraph;
-  record: IRecord;
+  hasGraph: boolean;
+  hasRecord: boolean;
 };

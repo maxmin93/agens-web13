@@ -3,13 +3,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { MatSnackBar } from '@angular/material';
 
-import { AgensDataService } from '../../services/agens-data.service';
-import { IResponseDto } from '../../models/agens-dto-types';
-
 import { Angulartics2 } from 'angulartics2';
 import { Observable } from 'rxjs';
+import * as _ from 'lodash';
 
-import * as CONFIG from '../../global.config';
+import { AgensDataService } from '../services/agens-data.service';
+import { IResponseDto } from '../models/agens-response-types';
+
+import * as CONFIG from '../global.config';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,7 @@ import * as CONFIG from '../../global.config';
 })
 export class LoginComponent implements OnInit {
 
-  private waitTime: number = 4000;
+  private waitTime: number = 3000;
   private returnUrl: string;
 
   constructor(

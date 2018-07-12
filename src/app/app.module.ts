@@ -37,9 +37,9 @@ import { GraphComponent } from './main/graph/graph.component';
 import { HistoryComponent } from './main/history/history.component';
 
 // Services
-import { AuthGuardService } from '../services/auth-guard.service';
-import { AgensDataService } from '../services/agens-data.service'
-import { AgensUtilService } from '../services/agens-util.service'
+import { AuthGuardService } from './services/auth-guard.service';
+import { AgensDataService } from './services/agens-data.service'
+import { AgensUtilService } from './services/agens-util.service'
 // import { WindowRefService } from '../services/window-ref.service';
 
 // // Dialogs
@@ -88,7 +88,6 @@ import { AgensUtilService } from '../services/agens-util.service'
 
     appRoutes,
     Angulartics2Module.forRoot([ Angulartics2GoogleAnalytics ]),
-    //Angulartics2Module.forChild(),
 
     PrettyJsonModule
   ], 
@@ -99,7 +98,6 @@ import { AgensUtilService } from '../services/agens-util.service'
     AuthGuardService,  
     AgensDataService,
     AgensUtilService
-    //{ provide: JsonPipe, useClass: SafeJsonPipe }
   ], 
   // additional providers needed for this module
   entryComponents: [ 
