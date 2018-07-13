@@ -1,15 +1,15 @@
-.card__dashboard {                
+.card-dashboard {                
         
-  .card__dashboard-admin-info {                
+  .card-dashboard-admin-info {                
 
-          .card__dashboard-admin-info-list {                        
+          .card-dashboard-admin-info-list {                        
                   display: flex; 
                   
-                  .card__dashboard-admin-info-list-box { 
+                  .card-dashboard-admin-info-list-box { 
                           flex-grow: 1;                                
                           padding: .6rem .8rem .2rem;                          
                           
-                          .card__dashboard-admin-info-list-content { 
+                          .card-dashboard-admin-info-list-content { 
                                   display: flex; 
                                   flex-wrap: wrap;
                                   flex-direction: row; 
@@ -48,10 +48,10 @@
                                                   font-size: .815rem; 
                                           }
                                   }
-                                  .card__dash__text { 
+                                  .card-dash-text { 
                                           flex-grow: 2;                                                 
                                   } 
-                                  .card__dash__number { 
+                                  .card-dash-number { 
                                           flex-grow: 1;                                                  
                                   }
                           }
@@ -59,16 +59,16 @@
           }
   }
   
-  .card__dashboard-meta-graph { 
+  .card-dashboard-meta-graph { 
           width: 100%;                 
           height: auto;
           min-height: 410px;    
 
-          .card__dashboard-meta-graph-canvas { 
+          .card-dashboard-meta-graph-canvas { 
                   height: 310px; 
           }
 
-          .card__dashboard-meta-info {
+          .card-dashboard-meta-info {
                   background-color: #fff;  
                   display: flex;
                   justify-content: space-between;
@@ -130,9 +130,9 @@
           }                    
   }       
   
-  .card__dashboard-meta-table {
+  .card-dashboard-meta-table {
           
-          .card__dashboard-meta-table-label{                         
+          .card-dashboard-meta-table-label{                         
                   width: 60%;
 
                   &:last-child { 

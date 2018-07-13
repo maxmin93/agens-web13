@@ -1,4 +1,4 @@
-import { ElemType, ValueType } from '../global.config';
+import { ValueType } from '../global.config';
 
 export interface IDatasource {
   oid: string;
@@ -18,13 +18,17 @@ export interface IGraph {
   labels_size: number;
   nodes_size: number;
   edges_size: number;
+
+  labels?: Array<ILabel>;
+  nodes?: Array<INode>;
+  edges?: Array<IEdge>;
 };
 
 export interface ILabel {
   group: string;        // group == 'labels'
 
   oid: string;
-  type: ElemType;
+  type: string;         // type = { nodes, edges }
   name: string;
   owner: string;
   desc: string;
@@ -51,12 +55,11 @@ export interface IElement {
   };
   classes?: string;
 
-  getType?: () => ElemType;
-  getLabel?: () => string;          // labels[0]
-  getPropertyId?: () => string;
-  getPropertyName?: () => string;
-  getProperty?: (key:string) => any;
-  setProperty?: (key:string, val:any) => void;
+  equalLabel: (label:string) => boolean;
+  getPropertyId: () => string;
+  getPropertyName: () => string;
+  getProperty: (key:string) => any;
+  setProperty: (key:string, val:any) => void;
 };
 
 export interface INode extends IElement {

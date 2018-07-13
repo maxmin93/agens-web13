@@ -1,20 +1,20 @@
-<div id="top" class="card__dashboard content scrollbar">
+<div id="top" class="card-dashboard content scrollbar">
 
-    <div class="card card__dashboard-admin-info">
+    <div class="card card-dashboard-admin-info">
         <h2>Database</h2>
-        <div class="card__dashboard-admin-info-list">
-            <div class="card__dashboard-admin-info-list-box">                
-                <div class="card__dashboard-admin-info-list-content">
-                    <div class="card__dash__text">
+        <div class="card-dashboard-admin-info-list">
+            <div class="card-dashboard-admin-info-list-box">                
+                <div class="card-dashboard-admin-info-list-content">
+                    <div class="card-dash-text">
                         <p><span>URI</span><b>{{graphInfo.jdbc_url}}</b></p>
                         <p><span>Name</span><b>{{graphInfo.name}} (owner: {{graphInfo.owner}})</b></p>
                     </div>
-                    <div class="card__dash__number">
+                    <div class="card-dash-number">
                         <p><span>Total NodeTypes</span><b>{{metaInfo.nodes_size_total}} ({{metaInfo.nodes_size_data}})</b></p>
                         <p><span>Total EdgeTypes</span><b>{{metaInfo.edges_size_total}} ({{metaInfo.edges_size_data}})</b></p>
                     </div>
                 </div>
-                <div class="card__dashboard-admin-info-list-content">
+                <div class="card-dashboard-admin-info-list-content">
                     <p><span>Desc</span><b>{{graphInfo.desc}}</b></p>
                 </div>                  
             </div>
@@ -22,23 +22,23 @@
         <mat-progress-bar mode="indeterminate" *ngIf="isLoading">Loading...</mat-progress-bar>
     </div>
 
-    <div class="card card__dashboard-meta-graph">
+    <div class="card card-dashboard-meta-graph">
         <h2>Meta Graph</h2>
-        <div id="graph-meta" class="card__dashboard-meta-graph-canvas"></div>
-        <div class="card__dashboard-meta-info">
+        <div id="meta-graph" #divGraph class="card-dashboard-meta-graph-canvas"></div>
+        <div class="card-dashboard-meta-info">
             <ul>
-                <li><span class="span__info">TYPE</span>{{selectedLabel.type}}</li>
-                <li><span class="span__info">NAME</span><strong>{{selectedLabel.name}}</strong></li>
-                <li><span class="span__info">OWNER</span>{{selectedLabel.owner}}</li>
-                <li><span class="span__info">SIZE</span>{{selectedLabel.size | number}}</li>
-                <li><span class="span__info">DESC</span>{{selectedLabel.desc}}</li>
+                <li><span class="span-info">TYPE</span>{{selectedLabel.type}}</li>
+                <li><span class="span-info">NAME</span><strong>{{selectedLabel.name}}</strong></li>
+                <li><span class="span-info">OWNER</span>{{selectedLabel.owner}}</li>
+                <li><span class="span-info">SIZE</span>{{selectedLabel.size | number}}</li>
+                <li><span class="span-info">DESC</span>{{selectedLabel.desc}}</li>
             </ul>
             <a (click)="openCreateLabelInputDialog()"><span>Create Label</span></a>
         </div>
     </div>     
 
-    <div class="wrapped-box-flex card__dashboard-meta-table">
-        <div class="card card__dashboard-meta-table-label">       
+    <div class="wrapped-box-flex card-dashboard-meta-table">
+        <div class="card card-dashboard-meta-table-label">       
             <h2>Label List</h2>
             <ngx-datatable #tableLabels class='material' 
                 [columnMode]="'force'" [limit]="5"
@@ -65,7 +65,7 @@
             </ngx-datatable>
         </div>
 
-        <div class="card card__dashboard-meta-table-label">
+        <div class="card card-dashboard-meta-table-label">
             <h2>Properties of Label</h2>
             <ngx-datatable #tableProperties class='material' 
                 [columnMode]="'force'" [limit]="5"

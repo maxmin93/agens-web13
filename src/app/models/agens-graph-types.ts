@@ -1,12 +1,57 @@
 import * as _ from 'lodash';
 
 import { IGraph, ILabel, IElement, INode, IEdge, IProperty, IStyle } from './agens-data-types';
-import { IRecord, IColumn, IRow } from './agens-data-types';
-import { ElemType, ValueType } from '../global.config';
+
+export class Label implements ILabel {
+  readonly group: string = 'labels';      // group == 'labels'
+
+  oid: string;
+  type: string;       // type = { nodes, edges }
+  name: string = '';
+  owner: string = '';
+  desc: string = '';
+  size: number = 0;
+  size_not_empty: number = 0;
+  is_dirty: boolean = true;
+  properties: Array<IProperty> = new Array<IProperty>();
+  neighbors: Array<string> = new Array<string>();
+
+  _style?: IStyle;            // styles (user property appended after API call)
+
+  constructor(oid:string, type:string){
+    this.group = 'labels';
+    this.oid = oid;
+    this.type = type;
+  }
+
+  get color():string {
+    return (this._style) ? this._style.color : undefined;
+  }
+  set color(val:string) {
+    if( this._style ) this._style.color = val;
+    else this._style = <IStyle>{ color: val, width: undefined, title: undefined };
+  }
+
+  get width():string {
+    return (this._style) ? this._style.width : undefined;
+  }
+  set width(val:string) {
+    if( this._style ) this._style.width = val;
+    else this._style = <IStyle>{ color: undefined, width: val, title: undefined };
+  }
+
+  get title():string {
+    return (this._style) ? this._style.title : undefined;
+  }
+  set title(val:string) {
+    if( this._style ) this._style.title = val;
+    else this._style = <IStyle>{ color: undefined, width: undefined, title: val };
+  }
+};
 
 export class Element implements IElement {
+  readonly group: string;     // group == 'nodes'
 
-  group: string;        // group == 'nodes'
   data: {
     id: string;
     parent?: string;
@@ -19,8 +64,13 @@ export class Element implements IElement {
   };
   classes?: string;
 
-  constructor(id:string){
-    this.group = 'nodes';
+  constructor(group:string, id:string = undefined){
+    // generate random id
+    if( id === undefined ){
+      let chars = "abcdefghijklmnopqrstufwxyzABCDEFGHIJKLMNOPQRSTUFWXYZ1234567890";
+      id = _.sampleSize(chars, 12).join('');
+    }
+    this.group = group;
     this.data.id = id;
     this.data.labels = new Array<string>();
     this.data.props = new Map<string,any>();
@@ -61,12 +111,52 @@ export class Element implements IElement {
     this.data.props.set(key, val);
   };
 
+  addClass(style:string) {
+    if( this.classes === undefined || this.classes === '' ) this.classes = style;
+    else if( this.classes.includes(style) ) undefined;
+    else this.classes += ' ' + style;
+  }
+  removeClass(style:string) {
+    if( this.classes === undefined || this.classes === '' ) this.classes = style;
+    else if( !this.classes.includes(style) ) undefined;
+    else this.classes = this.classes.replace(style, '').replace(/&nbsp;&nbsp;/g,' ');
+  }
+
+  get color():string {
+    return (this.scratch._style) ? this.scratch._style.color : undefined;
+  }
+  set color(val:string) {
+    if( this.scratch._style ) this.scratch._style.color = val;
+    else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined };
+  }
+
+  get width():string {
+    return (this.scratch._style) ? this.scratch._style.width : undefined;
+  }
+  set width(val:string) {
+    if( this.scratch._style ) this.scratch._style.width = val;
+    else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined };
+  }
+
+  get title():string {
+    return (this.scratch._style) ? this.scratch._style.title : undefined;
+  }
+  set title(val:string) {
+    if( this.scratch._style ) this.scratch._style.title = val;
+    else this.scratch._style = <IStyle>{ color: undefined, width: undefined, title: val };
+  }
 };
 
-export class Node extends Element {
+export class Node extends Element implements INode {
+  readonly group: string = 'nodes';
+
+  constructor(id:string){
+    super('nodes', id);
+  }
 }
 
-export class Edge extends Element {
+export class Edge extends Element implements IEdge {
+  readonly group: string = 'edges';
 
   data: {
     id: string;
@@ -76,6 +166,12 @@ export class Edge extends Element {
     source: string;           // only EDGE
     target: string;           // only EDGE
   };
+
+  constructor(id:string, source:string, target:string){
+    super('edges', id);
+    this.source = source;
+    this.target = target;
+  }
 
   get source():string {
     return this.data.source;
@@ -90,5 +186,5 @@ export class Edge extends Element {
   set target(id:string) {
     this.data.target = id;
   }
-  
 }
+

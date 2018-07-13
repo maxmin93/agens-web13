@@ -10,6 +10,8 @@ export const USER_KEY: string = 'agens-ssid';
 
 export const MOBILE_WIDTH: number = 1024;
 
+export const MAX_COLOR_SIZE:number = 40;
+
 ///////////////////////////////////////////////////////////////
 
 export enum StateType { 
@@ -21,7 +23,4 @@ export enum RequestType {
 export enum ValueType { 
   NODE='NODE', EDGE='EDGE', GRAPH='GRAPH', ID='ID', NUMBER='NUMBER', STRING='STRING'
   , ARRAY='ARRAY', OBJECT='OBJECT', BOOLEAN='BOOLEAN', NULL='NULL' 
-};
-export enum ElemType { 
-  EDGE='EDGE', NODE='NODE', NONE='NONE' 
 };
