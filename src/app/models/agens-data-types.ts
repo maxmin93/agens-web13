@@ -1,6 +1,8 @@
 import { ValueType } from '../global.config';
 
 export interface IDatasource {
+  group: string;        // group == 'datasource'
+  
   oid: string;
   name: string;
   owner: string;

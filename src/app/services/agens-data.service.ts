@@ -3,10 +3,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material';
 
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto } from '../models/agens-response-types'
+import { IClientDto, ISchemaDto, IResponseDto } from '../models/agens-response-types';
+import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty } from '../models/agens-data-types';
+
 import * as CONFIG from '../global.config';
 
 @Injectable({
@@ -27,7 +29,13 @@ export class AgensDataService {
   private currentMenu$ = new BehaviorSubject<string>("login");
 
   private client:IClientDto = null;      // ssid, user_name, user_ip, timestamp, valid
-  private schema:ISchemaDto = null;      // graph, labels, meta
+  private schema:any = {
+      info$: new Subject<ISchemaDto>(),
+      graph$: new Subject<IGraph>(),
+      labels$: new Subject<ILabel>(),
+      nodes$: new Subject<INode>(),
+      edges$: new Subject<IEdge>()
+    };
   
   constructor (
     private _http: HttpClient,
@@ -42,16 +50,10 @@ export class AgensDataService {
     }
   }
 
-  getSSID():string {
-    let ssid = localStorage.getItem('agens-ssid');
-    return _.isNil(ssid) ? 'Nil' : ssid;
-  }
+  /////////////////////////////////////////////////
 
-  getClient():IClientDto {
-    return this.client;
-  }
-  getIsValid$():Observable<boolean> {
-    return this.isValid$.asObservable();
+  changeMenu(menu: string) {
+    this.currentMenu$.next(menu);
   }
   getCurrentMenu$():Observable<string> {
     return this.currentMenu$.asObservable();
@@ -60,9 +62,23 @@ export class AgensDataService {
     return this.productTitle$.asObservable();
   }
 
+  /////////////////////////////////////////////////
+
+  getSSID():string {
+    let ssid = localStorage.getItem('agens-ssid');
+    return _.isNil(ssid) ? 'Nil' : ssid;
+  }
+  getClient():IClientDto {
+    return this.client;
+  }
+  getIsValid$():Observable<boolean> {
+    return this.isValid$.asObservable();
+  }
+
   setResponses(dto:IResponseDto) {
-    if( dto ) this.lastResponse$.next(dto);
-    else this.lastResponse$.next();
+    if( dto && dto.hasOwnProperty('state') && dto.hasOwnProperty('message') ) 
+      this.lastResponse$.next(dto);
+    // else this.lastResponse$.next();
   }
   getResponse():Observable<IResponseDto> {
     return this.lastResponse$.asObservable();
@@ -70,8 +86,8 @@ export class AgensDataService {
 
   /////////////////////////////////////////////////
 
-  changeMenu(menu: string) {
-    this.currentMenu$.next(menu);
+  getSchemaSubjects():any {
+    return this.schema;
   }
 
   /////////////////////////////////////////////////
@@ -100,7 +116,7 @@ export class AgensDataService {
             });
             this.isValid$.next(false);
           }
-        });0
+        });
 
     return this.isValid$.asObservable();
   }
@@ -124,6 +140,40 @@ export class AgensDataService {
   private saveClient(dto:IClientDto){   
     this.client = dto;
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
+  }
+
+  core_schema():any {
+    const url = `${this.api.core}/schema`;
+    this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( filter(x => x.group) )
+        .subscribe({
+          next: dto => {
+            this.setResponses(<IResponseDto>dto);
+            switch( dto.group ){
+              case 'schema':  this.schema.info$.next(); break;
+              case 'graph':   this.schema.graph$.next(); break;
+              case 'labels':  this.schema.labels$.next(); break;
+              case 'nodes':   this.schema.nodes$.next(); break;
+              case 'edges':   this.schema.edges$.next(); break;
+            }
+          },
+          error: err => {
+            this.setResponses(<IResponseDto>{
+              group: 'core.schema',
+              state: CONFIG.StateType.ERROR,
+              message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+            });
+          },
+          complete: () => {
+            this.schema.info$.complete();
+            this.schema.graph$.complete();
+            this.schema.labels$.complete();
+            this.schema.nodes$.complete();
+            this.schema.edges$.complete();
+          }
+        });
+
+    return this.schema;
   }
 
 }

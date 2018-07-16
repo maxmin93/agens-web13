@@ -1,11 +1,18 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
 
+import { Observable, of, from } from 'rxjs';
+
 import { Angulartics2 } from 'angulartics2';
 import * as _ from 'lodash';
 
 // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
 import { DatatableComponent } from '@swimlane/ngx-datatable';
+// dialogs
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+
+import { ConfirmDeleteLabelDialog } from './dialogs/confirm-delete-label.dialog';
+import { CreateLabelInputDialog } from './dialogs/create-label-input.dialog';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
@@ -34,6 +41,20 @@ export class DashboardComponent implements AfterViewInit {
   graphInfo: IDatasource = <IDatasource>{ oid: '', name: '', owner: '', desc: '', jdbc_url: '', is_dirty: true };
   metaInfo: any = { labels_size: 0, nodes_size_total: 0, edges_size_total: 0, nodes_size_data: 0, edges_size_data: 0 };
 
+  // 참고 https://codecraft.tv/courses/angular/pipes/async-pipe/
+  // datasource: any = {
+  //   jdbc_url: of<string>(''),    
+  //   name: of<string>(''),
+  //   desc: of<string>(''),
+  //   owner: of<string>('')
+  // };
+  datasource_jdbc_url: Observable<string>;    
+  datasource_name: Observable<string>;
+  datasource_desc: Observable<string>;
+  datasource_owner: Observable<string>;
+
+  schemaLabels: Observable<ILabel[]>;
+
   // 선택 label
   selectedLabels: ILabel[] = [];
   selectedLabel: ILabel = { group: 'labels', oid: '', type: '', name: '', owner: '', desc: ''
@@ -57,6 +78,9 @@ export class DashboardComponent implements AfterViewInit {
     { name: 'KEY', prop: 'key' },
     { name: 'TYPE', prop: 'type' }
   ];
+  
+  // core.schema Subjects : info$, graph$, labels$, nodes$, edges$
+  schema: any = null;
 
   // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
   @ViewChild('tableLabels') tableLabels: DatatableComponent;
@@ -70,17 +94,17 @@ export class DashboardComponent implements AfterViewInit {
     private _api: AgensDataService,
     private _util: AgensUtilService,
   ) { 
+  }
+
+  ngOnInit(){
     // prepare to call this.function from external javascript
     window['angularComponentRef'] = {
       zone: this._ngZone,
       cyCanvasCallback: () => this.cyCanvasCallback(),
-      cyElemCallback: (value) => this.cyElemCallback(value),
-      cyNodeCallback: (value) => this.cyNodeCallback(value),
+      cyElemCallback: (target) => this.cyElemCallback(target),
+      cyNodeCallback: (target) => this.cyNodeCallback(target),
       component: this
-    };    
-  }
-
-  ngOnInit(){
+    };
   }
 
   ngAfterViewInit() {
@@ -93,6 +117,9 @@ export class DashboardComponent implements AfterViewInit {
 
     // pallets 생성 : luminosity='dark'
     this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);
+
+    // schemaData
+    this.callCoreSchema();
   }
 
 
@@ -101,11 +128,11 @@ export class DashboardComponent implements AfterViewInit {
   }
 
   // graph elements 중 node 클릭 콜백 함수
-  cyNodeCallback(cyTarget:any):void {
+  cyNodeCallback(target:any):void {
   }
 
   // graph elements 클릭 콜백 함수
-  cyElemCallback(cyTarget:any):void {
+  cyElemCallback(target:any):void {
     // // qtip2
     // cyTarget.qtip({ 
     //   style: 'qtip-blue',
@@ -118,6 +145,31 @@ export class DashboardComponent implements AfterViewInit {
     //         return text;
     //       }
     //   } });
+  }
+
+  //////////////////////////////////////////////
+
+  callCoreSchema(){
+    this.isLoading = true;
+
+    this.schema = this._api.getSchemaSubjects();
+    this.schema.info$.subscribe({
+      next: x => {
+        console.log( 'this.schema.info$.subscribe:', x );
+        this.datasource_jdbc_url = of( x.datasource.jdbc_url );
+        this.datasource_name = of( x.datasource.name );
+        this.datasource_owner = of( x.datasource.owner );
+        this.datasource_desc = of( x.datasource.desc );
+
+        this.schemaLabels = from( x.lables );
+      },
+      complete: () => {
+        this.isLoading = false;
+        console.log( 'callSchemaData done!' );
+      }
+    });
+
+    this._api.core_schema();
   }
 
 }

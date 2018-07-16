@@ -6,8 +6,8 @@
             <div class="card-dashboard-admin-info-list-box">                
                 <div class="card-dashboard-admin-info-list-content">
                     <div class="card-dash-text">
-                        <p><span>URI</span><b>{{graphInfo.jdbc_url}}</b></p>
-                        <p><span>Name</span><b>{{graphInfo.name}} (owner: {{graphInfo.owner}})</b></p>
+                        <p><span>URI</span><b>{{datasource_jdbc_url | async}}</b></p>
+                        <p><span>Name</span><b>{{datasource_name | async}} (owner: {{datasource_owner | async}})</b></p>
                     </div>
                     <div class="card-dash-number">
                         <p><span>Total NodeTypes</span><b>{{metaInfo.nodes_size_total}} ({{metaInfo.nodes_size_data}})</b></p>
@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <div class="card-dashboard-admin-info-list-content">
-                    <p><span>Desc</span><b>{{graphInfo.desc}}</b></p>
+                    <p><span>Desc</span><b>{{datasource_desc | async}}</b></p>
                 </div>                  
             </div>
         </div>
