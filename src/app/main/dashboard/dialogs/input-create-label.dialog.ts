@@ -9,7 +9,7 @@ import * as CONFIG from '../../../global.config';
 import { ILabel, IProperty } from '../../../models/agens-data-types';
 
 @Component({
-  selector: 'app-create-label-input-dialog',
+  selector: 'app-input-create-label-dialog',
   template: `
     <h2 mat-dialog-title>
       New Label Input<br/>
@@ -67,7 +67,7 @@ import { ILabel, IProperty } from '../../../models/agens-data-types';
 
     `]
 })
-export class CreateLabelInputDialog implements OnInit {
+export class InputCreateLabelDialog implements OnInit {
 
   labelForm: FormGroup;
   labelTypeCtl: FormControl;
@@ -85,7 +85,7 @@ export class CreateLabelInputDialog implements OnInit {
     };
 
   constructor(
-    public dialogRef: MatDialogRef<CreateLabelInputDialog>,
+    public dialogRef: MatDialogRef<InputCreateLabelDialog>,
     @Inject(MAT_DIALOG_DATA) public data: Array<ILabel>
   ) { 
   }

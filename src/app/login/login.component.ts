@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(){
     // initialize ssid
-    localStorage.removeItem('agens-ssid');
+    localStorage.removeItem(CONFIG.USER_KEY);
     // get return url from route parameters or default to '/'
     this.returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/';
 

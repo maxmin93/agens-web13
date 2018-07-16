@@ -48,21 +48,16 @@ export class MainComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(){
     this._api.getProductTitle$().subscribe(
       x => {
-        this.productTitle = x;
-        this.cd.detectChanges();  // ExpressionChangedAfterItHasBeenCheckedError
+        // ExpressionChangedAfterItHasBeenCheckedError 방지 (ChangeDetectorRef 비추)
+        Promise.resolve(null).then(() => this.productTitle = x);
       }
     );
-
     this._api.getCurrentMenu$().subscribe(
       x => {
-        this.currentMenu = x;
-        this.cd.detectChanges();  // ExpressionChangedAfterItHasBeenCheckedError
+        // ExpressionChangedAfterItHasBeenCheckedError 방지 (ChangeDetectorRef 비추)
+        Promise.resolve(null).then(() => this.currentMenu = x);
       }
     );
-
-    // this._api.getResponse().subscribe(
-    //   x => this._snackBar.open(x.message, x.state, { duration: 3000, })
-    // );    
   }
 
   /**

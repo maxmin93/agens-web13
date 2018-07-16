@@ -104,52 +104,42 @@
 
   agens.styles = {
     nodeLabel: function(e){
-      if( e.data('$$style') !== undefined ){
-        if( e.data('$$style')._self.label !== null )
-          return e.data('props').hasOwnProperty(e.data('$$style')._self.label) ? 
-                  e.data('props')[e.data('$$style')._self.label] : '';
-        if( e.data('$$style')._label.label !== null )
-          return e.data('props').hasOwnProperty(e.data('$$style')._label.label) ? 
-                  e.data('props')[e.data('$$style')._label.label] : '';
+      if( e.scratch('_style') !== undefined ){
+        if( e.scratch('_style').title !== null )
+          return e.data('props').hasOwnProperty(e.scratch('_style').title) ? 
+                  e.data('props')[e.scratch('_style').title] : '';
       }
       return e.data('name');
     },
     nodeColor: function(e){
-      if( e.data('$$style') !== undefined ){
-        if( e.data('$$style')._self.color !== null ) return e.data('$$style')._self.color;
-        if( e.data('$$style')._label.color !== null ) return e.data('$$style')._label.color;
+      if( e.scratch('_style') !== undefined ){
+        if( e.scratch('_style').color !== null ) return e.scratch('_style').color;
       }
       return '#68bdf6';
     },
     nodeWidth: function(e){
-      if( e.data('$$style') !== undefined ){
-        if( e.data('$$style')._self.size !== null ) return e.data('$$style')._self.size;
-        if( e.data('$$style')._label.size !== null ) return e.data('$$style')._label.size;
+      if( e.scratch('_style') !== undefined ){
+        if( e.scratch('_style').width !== null ) return e.scratch('_style').width;
       }
       return '55px';
     },
     edgeLabel: function(e){
-      if( e.data('$$style') !== undefined ){
-        if( e.data('$$style')._self.label !== null )
-          return e.data('props').hasOwnProperty(e.data('$$style')._self.label) ? 
-                  e.data('props')[e.data('$$style')._self.label] : '';
-        if( e.data('$$style')._label.label !== null )
-          return e.data('props').hasOwnProperty(e.data('$$style')._label.label) ? 
-                  e.data('props')[e.data('$$style')._label.label] : '';
+      if( e.scratch('_style') !== undefined ){
+        if( e.scratch('_style').title !== null )
+          return e.data('props').hasOwnProperty(e.scratch('_style').title) ? 
+                  e.data('props')[e.scratch('_style').title] : '';
       }
       return e.data('name');
     },
     edgeColor: function(e){
-      if( e.data('$$style') !== undefined ){
-        if( e.data('$$style')._self.color !== null ) return e.data('$$style')._self.color;
-        if( e.data('$$style')._label.color !== null ) return e.data('$$style')._label.color;
+      if( e.scratch('_style') !== undefined ){
+        if( e.scratch('_style').color !== null ) return e.scratch('_style').color;
       }
       return '#a5abb6';
     },
     edgeWidth: function(e){
-      if( e.data('$$style') !== undefined ){
-        if( e.data('$$style')._self.size !== null ) return e.data('$$style')._self.size;
-        if( e.data('$$style')._label.size !== null ) return e.data('$$style')._label.size;
+      if( e.scratch('_style') !== undefined ){
+        if( e.scratch('_style').width !== null ) return e.scratch('_style').width;
       }
       return '2px';
     }

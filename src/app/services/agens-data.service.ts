@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material';
 
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
+import { map, filter, concatAll } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { IClientDto, ISchemaDto, IResponseDto } from '../models/agens-response-types';
@@ -48,6 +48,16 @@ export class AgensDataService {
         auth: 'http://127.0.0.1:8085/'+CONFIG.AGENS_AUTH_API,
       };
     }
+
+    this.lastResponse$.subscribe(
+      x => this._snackBar.open(x.message, x.state, { duration: 3000, })
+    );
+  }
+
+  openSnackBar() {
+    this.getResponse().subscribe(
+      x => this._snackBar.open(x.message, x.state, { duration: 3000, })
+    );    
   }
 
   /////////////////////////////////////////////////
@@ -65,7 +75,7 @@ export class AgensDataService {
   /////////////////////////////////////////////////
 
   getSSID():string {
-    let ssid = localStorage.getItem('agens-ssid');
+    let ssid = localStorage.getItem(CONFIG.USER_KEY);
     return _.isNil(ssid) ? 'Nil' : ssid;
   }
   getClient():IClientDto {
@@ -130,7 +140,7 @@ export class AgensDataService {
           if( dto.valid === true ){
             this.saveClient(dto);
             this.isValid$.next(true);
-            localStorage.setItem('agens-ssid', dto.ssid);
+            localStorage.setItem(CONFIG.USER_KEY, dto.ssid);
             return true;
           } 
           else return false;
@@ -142,19 +152,19 @@ export class AgensDataService {
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
   }
 
-  core_schema():any {
+  core_schema():Subscription {
     const url = `${this.api.core}/schema`;
-    this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
-        .pipe( filter(x => x.group) )
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
         .subscribe({
-          next: dto => {
-            this.setResponses(<IResponseDto>dto);
-            switch( dto.group ){
-              case 'schema':  this.schema.info$.next(); break;
-              case 'graph':   this.schema.graph$.next(); break;
-              case 'labels':  this.schema.labels$.next(); break;
-              case 'nodes':   this.schema.nodes$.next(); break;
-              case 'edges':   this.schema.edges$.next(); break;
+          next: x => {
+            this.setResponses(<IResponseDto>x);
+            switch( x['group'] ){
+              case 'schema':  this.schema.info$.next(x); break;
+              case 'graph':   this.schema.graph$.next(x); break;
+              case 'labels':  this.schema.labels$.next(x); break;
+              case 'nodes':   this.schema.nodes$.next(x); break;
+              case 'edges':   this.schema.edges$.next(x); break;
             }
           },
           error: err => {
@@ -172,8 +182,6 @@ export class AgensDataService {
             this.schema.edges$.complete();
           }
         });
-
-    return this.schema;
   }
 
 }
