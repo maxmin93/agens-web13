@@ -59,7 +59,7 @@ import { ILabel, IProperty } from '../../../models/agens-data-types';
     </div>
     <div mat-dialog-actions>
       <button mat-button type="submit" class="btn btn-default" 
-            [disabled]="!labelForm.valid" (click)="onSubmit(labelForm)" tabindex="2">Submit</button>
+            [disabled]="!labelForm.valid" (click)="onSubmit()" tabindex="2">Submit</button>
       <button mat-button (click)="onCancel()" tabindex="-1" class="btn">Cancel</button>
     </div>  
     `,

@@ -17,6 +17,7 @@ import { InputCreateLabelDialog } from './dialogs/input-create-label.dialog';
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty } from '../../models/agens-data-types'
+import { IResponseDto } from '../../models/agens-response-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import * as CONFIG from '../../global.config';
 import { ISchemaDto } from '../../models/agens-response-types';
@@ -114,7 +115,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     agens.graph.defaultSetting.hideEdgeTitle = false;
 
     this.cy = agens.graph.graphFactory(
-      this.divCanvas.nativeElement, 'single', false
+      this.divCanvas.nativeElement, {
+        selectionType: 'single',    // 'single' or 'multiple'
+        boxSelectionEnabled: false, // if single then false, else true
+        useCxtmenu: true,          // whether to use Context menu or not
+        hideNodeTitle: false,       // hide nodes' title
+        hideEdgeTitle: false,       // hide edges' title
+      }
     );
 
     // pallets 생성 : luminosity='dark'
@@ -139,7 +146,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
     this.cy.elements(':selected').unselect();
-    this.graphFindLabel(target.id());
+    this.selectFromGraph(target.id());
   }
 
   //////////////////////////////////////////////
@@ -248,45 +255,21 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   showTable(labels:Array<ILabel>){
-    this.tableLabelsRows = labels;
+    this.tableLabelsRows = [...labels];
 
     // graph에 select 처리
     if( labels.length > 0 ){
       this.selectedLabel = this.tableLabelsRows[0];
-      this.graphSelectElement(this.selectedLabel);
+      this.selectFromTable(this.selectedLabel);
     }    
   }
 
   showGraph(){
-    this.changeLayout('dagre');
+    this.cy.$api.changeLayout('dagre');
     this.cy.style(agens.graph.stylelist['dark']).update();
   }
 
   ////////////////////////////////////////////////////////
-
-  changeLayout(layout:string='euler'){
-    let elements = this.cy.elements(':visible');
-
-    let layoutOption = {
-      name: layout,
-      fit: true, padding: 30, boundingBox: undefined, 
-      nodeDimensionsIncludeLabels: true, randomize: true,
-      animate: false, animationDuration: 2800, maxSimulationTime: 2800, 
-      ready: function(){}, stop: function(){},
-      // for euler
-      springLength: edge => 120, springCoeff: edge => 0.0008,
-    };
-
-    // adjust layout
-    let layoutHandler = elements.layout(layoutOption);
-    layoutHandler.on('layoutstart', function(){
-      // 최대 3초(3000ms) 안에는 멈추도록 설정
-      setTimeout(function(){
-        layoutHandler.stop();
-      }, 3000);
-    });
-    layoutHandler.run();
-  }
 
   // ** 참고: https://github.com/davidmerfield/randomColor
   injectElementStyle( ele:IElement ){
@@ -306,7 +289,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   // 클릭된 element 해당하는 label 정보를 화면에 연결하기
-  graphFindLabel(id:string):ILabel {
+  selectFromGraph(id:string):ILabel {
     // console.log( 'clicked id=', id.valueOf());
     for( let label of this.tableLabelsRows ){
       if( label.oid === id ) {
@@ -322,14 +305,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   // 테이블에서 선택된 row 에 해당하는 graph element 선택 연동
-  graphSelectElement(target:ILabel) {
+  selectFromTable(target:ILabel) {
     if( target === null ) return;
     // 기존꺼 unselect
-    if( this.cy.viewUtil !== undefined ) this.cy.viewUtil.removeHighlights();
+    if( this.cy.$api.view !== undefined ) this.cy.$api.view.removeHighlights();
     this.cy.elements(':selected').unselect();
     // 선택한거 select
-    let selector:string = `${target.type.toLowerCase()}[id='${target.oid}']`;
-    this.cy.elements(selector).select();
+    this.cy.elements().getElementById(target.oid).select();
 
     // 선택한거 테이블 내용 갱신
     this.selectedLabel = target;
@@ -339,20 +321,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   onSelectTableLabels({ selected }){
-    this.graphSelectElement(<ILabel> selected[0] );
+    this.selectFromTable(<ILabel> selected[0] );
   }
 
   /////////////////////////////////////////////////////////////////
   // Drop Label Controllers
   /////////////////////////////////////////////////////////////////
-
-  removeLabelType(oid:string) {
-    let label:ILabel = this.graphFindLabel(oid);
-    if( label.oid === '' ) return;
-    // confirm box 출력 (최종 확인뒤 라벨 삭제 api 호출)
-    console.log(`removeLabelType(oid=${oid}): are you sure?`);
-
-  }
 
   // confirm delete dialog: open
   openConfirmDeleteLabelDialog(label:ILabel) {
@@ -365,15 +339,45 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       // console.log('ConfirmDeleteLabelDialog was closed:', result);
       if( result === null ) return;
       // DROP label 위한 API 호출
-      // this.callApiDropLabel( result );
+      this._api.core_command_drop_label(result).subscribe(
+        dto => {
+          this._api.setResponses(<IResponseDto>dto);
+          if( dto.state == CONFIG.StateType.SUCCESS ) this.deleteLabelUpdate(dto.label);
+        },
+        err => {
+          this._api.setResponses(<IResponseDto>{
+            group: 'core.command.deleteLabel',
+            state: CONFIG.StateType.ERROR,
+            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+          });
+        }
+      );
     });
+  }
+
+  deleteLabelUpdate(target:ILabel){
+    this.deletedLabel = target;
+    console.log('deleteLabelUpdate:', target);
+
+    // canvas 에서 삭제
+    this.cy.elements().getElementById(target.oid).remove();
+    // table 에서 삭제하고 refresh
+    let idx = this.labels.findIndex(ele => ele.oid == target.oid);
+    if( idx >= 0 ){
+      this.labels.splice(idx, 1);
+      this.tableLabelsRows = [...this.labels];  //_.clone(this.labels);
+    }
+
+    this.tablePropertiesRows = [];
+    this.selectedLabel = <ILabel>{ group: 'labels', oid: '', type: '', name: '', owner: '', desc: ''
+                      , size: 0, size_not_empty: 0, is_dirty: true, properties: [] };
   }
 
   /////////////////////////////////////////////////////////////////
   // Create Label Controllers
   /////////////////////////////////////////////////////////////////
 
-  openCreateLabelInputDialog(): void {
+  openInputCreateLabelDialog(): void {
     let dialogRef = this.dialog.open( InputCreateLabelDialog, {
       width: '400px',
       data: this.tableLabelsRows
@@ -383,9 +387,49 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       // console.log('CreateLabelInputDialog was closed:', result );
       if( result === null ) return;
 
-      // this.callApiCreateLabel(result);
+      // CREATE label 위한 API 호출
+      this._api.core_command_create_label(result).subscribe(
+        dto => {
+          this._api.setResponses(<IResponseDto>dto);
+          if( dto.state == CONFIG.StateType.SUCCESS ) this.createLabelUpdate(dto.label);
+        },
+        err => {
+          this._api.setResponses(<IResponseDto>{
+            group: 'core.command.deleteLabel',
+            state: CONFIG.StateType.ERROR,
+            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+          });
+        }
+      );
     });
   }
 
+  createLabelUpdate(target:ILabel){
+    this.createdLabel = target;
+    console.log('createLabelUpdate:', target);
+
+    // table에 추가하고 refresh    
+    this.selectedLabel = target;
+    this.labels.push(<ILabel>target);
+    this.tableLabelsRows = [...this.labels];
+    
+    // graph에 추가 (node이면 그냥 추가, but edge는 추가 안함)
+    if( target.type === 'NODE' ){
+      if( this.cy.$api.view !== undefined ) this.cy.$api.view.removeHighlights();
+      this.cy.elements(':selected').unselect();
+      this.cy.center();
+      let ele = this.cy.add({
+        group: 'nodes',
+        data: { id: target.oid, labels: ['NODE'], name: target.name, size: 0, props: target.properties },
+        selectable: true, selected: true
+      });
+      // nodes 개수 증가
+      this.infos['nodes_size_total'] += 1;
+    }
+    else{
+      // edges 개수 증가
+      this.infos['edges_size_total'] += 1;
+    }
+  }
 
 }

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material';
 
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { map, filter, concatAll } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto } from '../models/agens-response-types';
+import { IClientDto, ISchemaDto, IResponseDto, ILabelDto } from '../models/agens-response-types';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty } from '../models/agens-data-types';
 
 import * as CONFIG from '../global.config';
@@ -50,13 +50,13 @@ export class AgensDataService {
     }
 
     this.lastResponse$.subscribe(
-      x => this._snackBar.open(x.message, x.state, { duration: 3000, })
+      x => this._snackBar.open(x.message, x.state, { duration: 4000, })
     );
   }
 
   openSnackBar() {
     this.getResponse().subscribe(
-      x => this._snackBar.open(x.message, x.state, { duration: 3000, })
+      x => this._snackBar.open(x.message, x.state, { duration: 4000, })
     );    
   }
 
@@ -182,6 +182,34 @@ export class AgensDataService {
             this.schema.edges$.complete();
           }
         });
+  }
+
+  core_command_drop_label(target:ILabel):Observable<ILabelDto> {
+    const url = `${this.api.core}/command`;
+
+    let params:HttpParams = new HttpParams();
+    params = params.append('type', CONFIG.RequestType.DROP);                   // DROP
+    if( target.type === 'NODE' ) params = params.append('command', 'vlabel');  // if NODE
+    else params = params.append('command', 'elabel');                          // else EDGE
+    params = params.append('target', target.name);                             // target
+    params = params.append('options', target.desc);                            // label.desc
+    
+    console.log( `core_command_drop_label => ${params.toString()}`);
+    return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
+  core_command_create_label(target:ILabel):Observable<ILabelDto> {
+    const url = `${this.api.core}/command`;
+
+    let params:HttpParams = new HttpParams();
+    params = params.append('type', CONFIG.RequestType.CREATE);                 // CREATE
+    if( target.type === 'NODE' ) params = params.append('command', 'vlabel');  // if NODE
+    else params = params.append('command', 'elabel');                          // else EDGE
+    params = params.append('target', target.name);                             // target
+    params = params.append('options', target.desc);                            // label.desc
+    
+    console.log( `core_command_create_label => ${params.toString()}`);
+    return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
   }
 
 }

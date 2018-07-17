@@ -1,4 +1,5 @@
 // import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
@@ -43,8 +44,8 @@ import { AgensUtilService } from './services/agens-util.service'
 // import { WindowRefService } from '../services/window-ref.service';
 
 // // Dialogs
-// import { ConfirmDeleteLabelDialog } from './main/dashboard/confirm-delete-label.dialog';
-// import { CreateLabelInputDialog } from './main/dashboard/create-label-input.dialog';
+import { ConfirmDeleteLabelDialog } from './main/dashboard/dialogs/confirm-delete-label.dialog';
+import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-label.dialog';
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
 // import { ProjectOpenDialog } from './main/graph/project-open-dialog';
@@ -60,8 +61,8 @@ import { AgensUtilService } from './services/agens-util.service'
     GraphComponent,
     HistoryComponent,
 
-    // ConfirmDeleteLabelDialog,
-    // CreateLabelInputDialog,
+    ConfirmDeleteLabelDialog,
+    InputCreateLabelDialog,
     // LabelStyleSettingDialog,
     // ImageExportDialog,
     // ProjectOpenDialog,
@@ -70,8 +71,10 @@ import { AgensUtilService } from './services/agens-util.service'
   ], 
   // directives, components, and pipes owned by this NgModule
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     BrowserAnimationsModule,
-    
+
     HttpClientModule,
 
     CdkTableModule,
@@ -101,8 +104,8 @@ import { AgensUtilService } from './services/agens-util.service'
   ], 
   // additional providers needed for this module
   entryComponents: [ 
-    // ConfirmDeleteLabelDialog,
-    // CreateLabelInputDialog,
+    ConfirmDeleteLabelDialog,
+    InputCreateLabelDialog,
     // LabelStyleSettingDialog,
     // ImageExportDialog,
     // ProjectOpenDialog,

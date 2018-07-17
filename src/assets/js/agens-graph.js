@@ -13,7 +13,7 @@
 //    .graph
 //      .defaultSetting, .defaultStyle, .demoData[], .layoutTypes[]
 //      .ready(), .loadData(), saveFile(), saveImage()
-//    .api
+//    .$api
 //      .view
 //      .unre
 //
@@ -172,7 +172,8 @@
           'label': function(e){
               if( !agens.caches.nodeLabel.has(e) ) 
                 agens.caches.nodeLabel.set(e, agens.styles.nodeLabel(e));
-              if( agens.graph.defaultSetting.hideNodeTitle ) return '';
+              if( !_.isNil( e._private.cy.scratch('_config').hideNodeTitle)
+                && e._private.cy.scratch('_config').hideNodeTitle ) return '';
               return agens.caches.nodeLabel.get(e);
             },
 
@@ -242,13 +243,14 @@
           'label':function(e){
             if( !agens.caches.edgeLabel.has(e) ) 
               agens.caches.edgeLabel.set(e, agens.styles.edgeLabel(e));
-            if( agens.graph.defaultSetting.hideEdgeTitle ) return '';
+            if( !_.isNil(e._private.cy.scratch('_config').hideEdgeTitle)
+              && e._private.cy.scratch('_config').hideEdgeTitle ) return '';
             return agens.caches.edgeLabel.get(e);
           },
 
           'text-rotation':'autorotate',
-          'text-margin-y': -10,
-          'color': '#c8c8c8',
+          'text-margin-y': -12,
+          'color': '#383838',
           'opacity': 1,
   //        'text-outline-width': 2,
   //        'text-outline-color': '#797979',
@@ -288,7 +290,7 @@
           'source-arrow-color': '#483d41',
           'line-color': '#483d41',
 
-          'width': 12,
+          'width': 10,
           'opacity': 1,
           'color': '#483d41',
           'text-margin-y': -15,
@@ -375,6 +377,8 @@
   };
 
   // Public Property : defaultSetting
+  // ==> cy 인스턴스 생성 후 cy.scratch('_config')로 저장됨
+  //     : 스타일 함수 등에서는 e._private.cy.scratch('_config') 로 액세스 가능
   agens.graph.defaultSetting = {
     container: document.getElementById('agens-graph'),
     // style: agens.graph.stylelist['dark'],
@@ -416,8 +420,6 @@
     pixelRatio: 'auto',
 
     // user-defined options:
-    hideNodeTitle: true,
-    hideEdgeTitle: true,
 
     /////////////////////////////////////////////////////////
     // NAMESPACE: agens.cy
@@ -428,20 +430,43 @@
       agens.cy = e.cy;
       agens.graph.ready(e.cy);
     },
+  };
 
+  // 사용자 설정
+  // ==> graphFactory(target, options) 의 options 입력으로 사용됨
+  agens.graph.customSetting = {
+    selectionType: 'single',    // 'single' or 'multiple'
+    boxSelectionEnabled: false, // if single then false, else true
+    useCxtmenu: true,           // whether to use Context menu or not
+    hideNodeTitle: true,        // hide nodes' title
+    hideEdgeTitle: true,        // hide edges' title
   };
 
   // Public Function : graphFactory()
-  agens.graph.graphFactory = function(target, selectionType, useCxtmenu){
-    agens.graph.defaultSetting.container = target;
-    agens.graph.defaultSetting.selectionType = selectionType;
-    // selectionType 이 single이면 multiSelection 못하게
-    if( selectionType === 'single' ) agens.graph.defaultSetting.boxSelectionEnabled = false;
-    else agens.graph.defaultSetting.boxSelectionEnabled = true;
-    // meta 그래프의 경우 CxtMenu 기능이 필요 없음
-    agens.graph.defaultSetting.useCxtmenu = useCxtmenu;
+  agens.graph.graphFactory = function(target, options){
+    let customSetting = _.clone( agens.graph.defaultSetting );
 
-    return cytoscape(agens.graph.defaultSetting);
+    customSetting.container = target;
+    if( options === undefined ){
+      customSetting = _.merge( customSetting, agens.graph.customSetting );
+    }
+    else{
+      // selectionType 이 single이면 multiSelection 못하게
+      if( !_.isNil( options['selectionType'] )){
+        customSetting['selectionType'] = options['selectionType'];
+        customSetting['boxSelectionEnabled'] = (options['selectionType'] !== 'single') ? true : false;
+      }
+      // meta 그래프의 경우 CxtMenu 기능이 필요 없음
+      if( !_.isNil( options['useCxtmenu'] )) customSetting['useCxtmenu'] = options['useCxtmenu'];
+      // data 그래프의 경우 성능향상을 위해 
+      if( !_.isNil( options['hideNodeTitle'] )) customSetting['hideNodeTitle'] = options['hideNodeTitle'];
+      if( !_.isNil( options['hideEdgeTitle'] )) customSetting['hideEdgeTitle'] = options['hideEdgeTitle'];
+    }
+
+    let cy = cytoscape(customSetting);
+    cy.scratch('_config', customSetting);
+
+    return cy;
   };
 
   // Public Function : ready()
@@ -497,7 +522,7 @@
         cy.$(':selected').unselect();
         cy.pivotNode = null;
         // user Function
-        if( window['angularComponentRef'] !== null && window['angularComponentRef'].cyCanvasCallback !== undefined )
+        if( !_.isNil(window['angularComponentRef'].cyCanvasCallback) )
           (window['angularComponentRef'].cyCanvasCallback)();
       }
 
@@ -506,21 +531,21 @@
         if( !e.target.isNode() && !e.target.isEdge() ) return;
 
         // user Function
-        if( window['angularComponentRef'] !== null && window['angularComponentRef'].cyElemCallback !== undefined )
+        if( !_.isNil(window['angularComponentRef'].cyElemCallback) )
           (window['angularComponentRef'].cyElemCallback)(e.target);
 
         // if NODE
         if( e.target.isNode() ){
           cy.pivotNode = e.target;
           // user Function
-          if( window['angularComponentRef'] !== null && window['angularComponentRef'].cyNodeCallback !== undefined )
+          if( !_.isNil(window['angularComponentRef'].cyNodeCallback) )
             (window['angularComponentRef'].cyNodeCallback)(e.target);
         }
 
         // if EDGE
         if( e.target.isEdge() ){
           // user Function
-          if( window['angularComponentRef'] !== null && window['angularComponentRef'].cyEdgeCallback !== undefined )
+          if( !_.isNil(window['angularComponentRef'].cyEdgeCallback) )
             (window['angularComponentRef'].cyEdgeCallback)(e.target);
         }          
       }
@@ -532,11 +557,11 @@
     // });
 
     cy.cyQtipMenuCallback = function( id, targetName ){
-      var cyTarget = cy.elements(`node[id='${id}']`);
+      let cyTarget = cy.elements(`node[id='${id}']`);
       if( cyTarget.size() == 0 ) return;
 
       // user Function
-      if( window['angularComponentRef'] !== null && window['angularComponentRef'].cyQtipMenuCallback !== undefined )
+      if( !_.isNil(window['angularComponentRef'].cyQtipMenuCallback) )
         (window['angularComponentRef'].cyQtipMenuCallback)(cyTarget, targetName);
     };
 
@@ -544,6 +569,39 @@
     // ==  cy utilities 등록
     // ==========================================
 
+    cy.$api.findById = function(id){
+      let eles = cy.elements().getElementById(id);
+      return eles.nonempty() ? result[0] : undefined;
+    };
+
+    // layouts = { *'euler', 'klay', 'dagre', 'cose-bilkent', 'concentric" }
+    cy.$api.changeLayout = function(layout='euler', selected=false){
+
+      let elements = cy.elements(':visible');
+      let selectedElements = cy.elements(':selected');
+      if( selected && selectedElements.length > 1 ) elements = selectedElements;
+        
+      let layoutOption = {
+        name: layout,
+        fit: true, padding: 30, boundingBox: undefined, 
+        nodeDimensionsIncludeLabels: true, randomize: true,
+        animate: false, animationDuration: 2800, maxSimulationTime: 2800, 
+        ready: function(){}, stop: function(){},
+        // for euler
+        springLength: edge => 120, springCoeff: edge => 0.0008,
+      };
+  
+      // adjust layout
+      let layoutHandler = elements.layout(layoutOption);
+      layoutHandler.on('layoutstart', function(){
+        // 최대 3초(3000ms) 안에는 멈추도록 설정
+        setTimeout(function(){
+          layoutHandler.stop();
+        }, 3000);
+      });
+      layoutHandler.run();
+    }
+  
     // on&off control: cy.edgehandles('enable') or cy.edgehandles('disable')
     cy.$api.edge = cy.edgehandles({
         preview: true,
@@ -577,17 +635,17 @@
     // 이웃노드 찾기 : labels에 포함된 label을 갖는 node는 제외
     cy.$api.findNeighbors = function( node, uniqLabels, maxHops, callback=undefined ){
       // empty collection
-      var connectedNodes = cy.collection();
+      let connectedNodes = cy.collection();
       // if limit recursive, stop searching
       if( maxHops <= 0 ) return connectedNodes;
 
       // 새로운 label타입의 edge에 대한 connectedNodes 찾기
       // 1) 새로운 label 타입의 edges (uniqLabels에 없는)
-      var connectedEdges = node.connectedEdges().filter(function(i, ele){
+      let connectedEdges = node.connectedEdges().filter(function(i, ele){
         return uniqLabels.indexOf(ele.data('labels')[0]) < 0;
       });
       // 2) edge에 연결된 node collection을 merge (중복제거)
-      for( var i=0; i<connectedEdges.size(); i+=1 ){
+      for( let i=0; i<connectedEdges.size(); i+=1 ){
         connectedNodes = connectedNodes.merge( connectedEdges[i].connectedNodes() );
       }
       // connectedNodes = connectedNodes.difference(node);                           // 자기 자신은 빼고
@@ -601,7 +659,7 @@
       // 4) append recursive results
       maxHops -= 1;
       connectedNodes.difference(node).forEach(elem => {
-        var collection = cy.$api.view.findNeighbors(elem, uniqLabels.slice(0), maxHops);
+        let collection = cy.$api.view.findNeighbors(elem, uniqLabels.slice(0), maxHops);
         connectedNodes = connectedNodes.merge( collection );
       });
       // 5) return connectedNodes
@@ -619,7 +677,7 @@
     // ==========================================
     
     // cxt menu for core
-    if( agens.graph.defaultSetting.hasOwnProperty('useCxtmenu') && agens.graph.defaultSetting.useCxtmenu )
+    if( !_.isNil(cy._private.options.useCxtmenu) && cy._private.options.useCxtmenu )
       cy.cxtmenu({
         menuRadius: 80,
         selector: 'core',
@@ -627,8 +685,8 @@
         commands: [{
             content: '<span style="display:inline-block; width:20px; font-size:10pt">Reverse select</span>',
             select: function(){
-              var selected = cy.elements(':selected');
-              var unselected = cy.elements(':unselected');
+              let selected = cy.elements(':selected');
+              let unselected = cy.elements(':unselected');
               cy.$api.view.removeHighlights();
               selected.unselect();
               unselected.select();
@@ -698,16 +756,16 @@
   agens.graph.savePositions = function(){
     agens.caches.reset('nodePosition');
     agens.cy.nodes().map(ele => {
-      var pos = ele.position();
+      let pos = ele.position();
       agens.caches.nodePosition.set( ele, {x: pos.x, y: pos.y} );
     })
   };
 
   // private Function
   agens.graph.makeid = function(){
-    var text = "_id_";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for( var i=0; i < 5; i++ )
+    let text = "_id_";
+    let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for( let i=0; i < 5; i++ )
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
   };
@@ -716,25 +774,25 @@
     if( agens.cy === null ) return;
 
     // image data
-    var pngContent = agens.cy.png({ maxWidth : '1600px', full : true, scale: 1.2 });
+    let pngContent = agens.cy.png({ maxWidth : '1600px', full : true, scale: 1.2 });
 
     // this is to remove the beginning of the pngContent: data:img/png;base64,
-    var b64data = pngContent.substr(pngContent.indexOf(",") + 1);
-    var blob = b64toBlob(b64data, "image/png");
+    let b64data = pngContent.substr(pngContent.indexOf(",") + 1);
+    let blob = b64toBlob(b64data, "image/png");
 
     // watermark 없으면 그냥 saveAs
     if( watermark === null || watermark === '' ) saveAs(blob, filename);
     // watermark 추가
     else {
-      var blobUrl = URL.createObjectURL(blob);
+      let blobUrl = URL.createObjectURL(blob);
       $('<img>', {
         src: blobUrl
       }).watermark({
         text: watermark, textSize: 40, textWidth: 800, textColor: 'white', opacity: 0.7, margin: 5,
         outputType: "png", outputWidth: 'auto', outputHeight: 'auto',
         done: function(imgURL){
-          var b64data2 = imgURL.substr(imgURL.indexOf(",") + 1);
-          var blob2 = b64toBlob(b64data2, "image/png")
+          let b64data2 = imgURL.substr(imgURL.indexOf(",") + 1);
+          let blob2 = b64toBlob(b64data2, "image/png")
           saveAs(blob2, filename);
           console.log( `image saved: "${filename}"`);
         }
@@ -747,19 +805,19 @@
     contentType = contentType || '';
     sliceSize = sliceSize || 512;
 
-    var byteCharacters = atob(b64Data);
-    var byteArrays = [];
-    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-        var slice = byteCharacters.slice(offset, offset + sliceSize);
-        var byteNumbers = new Array(slice.length);
-        for (var i = 0; i < slice.length; i++) {
+    let byteCharacters = atob(b64Data);
+    let byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        let slice = byteCharacters.slice(offset, offset + sliceSize);
+        let byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
             byteNumbers[i] = slice.charCodeAt(i);
         }
-        var byteArray = new Uint8Array(byteNumbers);
+        let byteArray = new Uint8Array(byteNumbers);
         byteArrays.push(byteArray);
     }
 
-    var blob = new Blob(byteArrays, {type: contentType});
+    let blob = new Blob(byteArrays, {type: contentType});
     return blob;
   };
 
