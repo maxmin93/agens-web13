@@ -1,3 +1,162 @@
-<p>
-  graph works!
-</p>
+<div id="top" class="content scrollbar">
+
+  <!-- editor -->
+  <div id="queryCard" class="card">
+      <div class="card__icon-group">
+          <a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()"><span>Run</span> <mat-icon>play_arrow</mat-icon></a>
+          <a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()"><span>Stop</span> <mat-icon>stop</mat-icon></a>
+
+          <a [ngClass]="{ 'disabled-btn': isLoading }" matTooltip="New project" matTooltipPosition="above" (click)="clearProject()"><mat-icon>add</mat-icon></a>
+          <a [ngClass]="{ 'disabled-btn': isLoading }" matTooltip="Open project" matTooltipPosition="above" (click)="openProjectOpenDialog()"><mat-icon>folder_open</mat-icon></a>
+          <a [ngClass]="{ 'disabled-btn': isLoading }" matTooltip="Save project" matTooltipPosition="above" (click)="openProjectSaveDialog()"><mat-icon>save</mat-icon></a>
+      </div>
+      <h2>Query <small>(cypher or ansi-sql)</small> </h2>
+      <!-- REQUEST : cypher query -->
+      <form>
+      <textarea placeholder="input Cypher Query.." 
+          id="agensQuery" #queryEditor type="text" 
+          (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
+      </form>
+
+      <mat-progress-bar mode="indeterminate" *ngIf="isLoading">Loading...</mat-progress-bar>
+      <div class="card__graphdata-foot">
+          <span class="card__graphdata-food-title">Result</span>
+          <form>
+              <textarea rows="2" id="agensMessage" #queryMessage type="text" [value]="resultMessage.text" readonly
+                  [style.color]="resultMessage.fontColor">
+              </textarea>
+          </form>
+      </div>
+
+  </div>
+
+  <!-- GRAPH -->
+  <div id="graphCard" class="card card__graphdata-graph ">
+      <div id="agens-graph-toolbar" class="card__icon-group">
+          <a [ngClass]="{ 'disabled-btn': isLoading }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
+              <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
+          <a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
+              <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
+                  
+          <a [ngClass]="{ 'disabled-btn': isLoading }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
+              <mat-icon>search</mat-icon></a>
+
+          <a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
+          <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
+              <div td-menu-header class="mat-subhead">
+                  <h4>Layout types</h4>
+              </div>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('grid')">GRID</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('random')">RANDOM</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('circle')">CIRCLE</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('concentric')">CONCENTRIC</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('cose')">COSE (nodes.size &lt; 400)</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('cose2')">COSE-BILKENT (very slow)</button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="graphChangeLayout('dagre')">DAGRE (hierachy)</button>
+          </mat-menu>
+
+          <a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
+              <mat-icon>palette</mat-icon></a>
+          <a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
+              <mat-icon>image</mat-icon></a>
+          <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+              <mat-icon>refresh</mat-icon></a>
+      </div>
+
+      <h2>GRAPH <small>Result</small></h2>
+
+      <div class="wrapped-box">
+          <div #progressBar style='visibility:hidden;'>
+            <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+          </div>     
+          <!-- graph element info Box -->
+          <ng-template [ngIf]="selectedElement">
+              <div class="card__graphdata-graph-info scrollbar" id="slide-toggle">
+                  <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                      [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
+                      <span>LOCATION LOCK</span></mat-slide-toggle>
+                  <h4><span class="span__info">Label</span>{{ selectedElement.data('labels') [0] }} [{{ selectedElement.id() }}]</h4>
+                  <p><span class="span__info">Name</span>{{ selectedElement.data('name') }}</p>
+                  <p><span class="span__info">Data</span></p>
+                  <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+              </div>
+          </ng-template>
+
+          <!-- Graph content -->
+          <div id="graph-agens" class="gra_content" #divCanvas 
+              [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
+          </div>
+
+          <!-- Graph.Meta : Labels content -->
+          <div class="card__graphdata-graph-label">
+              <mat-chip-list id="agens-graph-labels">
+                  <mat-chip *ngFor="let label of graphLabels" [selected]="true" style="z-index: 9"
+                      (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label['$$style'].color">
+                      <span *ngIf="label.type=='NODE'" class="nodeType"><i class="material-icons">location_on</i>{{label.name}} ({{label.size}})</span>
+                      <span *ngIf="label.type=='EDGE'" class="edgeType"><i class="material-icons">trending_up</i>{{label.name}} ({{label.size}})</span>
+                  </mat-chip>
+              </mat-chip-list>
+          </div>    
+      </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card card-graphdata-table">
+      <h2>Table <small>Result</small></h2>
+      <ngx-datatable #recordTable class='material' [columnMode]="'force'"
+          [limit]="10" [reorderable]="reorderable" [scrollbarH]="true"
+          [rows]='recordRows' [columns]='recordColumns'
+          [headerHeight]="38" [footerHeight]="38" [rowHeight]="auto"
+          (activate)="onActivateTableRow($event)">
+
+          <ngx-datatable-column name="Index" [width]="80" [canAutoResize]="false" [sortable]="false">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                  <span>{{ row.$$index }}</span>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <!-- <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="true" prop="{{col.name}}"> -->
+          <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false">
+              <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
+                  <span (click)="recordSort(col)">{{col.name}}</span>
+              </ng-template>
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                  <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0"
+                      (click)="showJsonFormat(col,row)">
+                      {{ row[col.name] | json }}
+                  </span>
+                  <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0"
+                      (click)="showJsonFormat(col,row)">
+                      {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
+                  </span>
+              </ng-template>
+          </ngx-datatable-column>            
+      </ngx-datatable>    
+  </div>
+  <!-- " *ngIf="isJsonCell" -->
+  <div id="tableCell" #tableCell class="card card-graphdata-json" style="visibility: hidden;">
+      <h2>CELL <small>VALUE</small></h2>
+      <mat-card-content class="scrollbar">
+          <!-- 
+              JSON Pretty formatter
+              https://www.npmjs.com/package/angular2-prettyjson
+          -->            
+          <div>
+              <a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above"><i class="fa fa-clone" aria-hidden="true"></i></a>
+              <h5><i class="fa fa-mouse-pointer" aria-hidden="true"></i> 
+                  clicked [ row, col ] = [ <span>{{selectedRowIndex}}, {{selectedColIndex}}</span> ]</h5>              
+          </div>
+          <pre id="cellValue" [innerHtml]="selectedCell | prettyjson:3"></pre>
+      </mat-card-content>    
+  </div>
+</div>
+

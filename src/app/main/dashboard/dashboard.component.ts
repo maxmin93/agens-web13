@@ -105,6 +105,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
   ngOnDestroy(){
     if( this.subscription ) this.subscription.unsubscribe();
+    // 내부-외부 함수 공유 해제
+    window['angularComponentRef'] = null;
   }
 
   ngAfterViewInit() {
@@ -118,7 +120,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       this.divCanvas.nativeElement, {
         selectionType: 'single',    // 'single' or 'multiple'
         boxSelectionEnabled: false, // if single then false, else true
-        useCxtmenu: true,          // whether to use Context menu or not
+        useCxtmenu: false,          // whether to use Context menu or not
         hideNodeTitle: false,       // hide nodes' title
         hideEdgeTitle: false,       // hide edges' title
       }

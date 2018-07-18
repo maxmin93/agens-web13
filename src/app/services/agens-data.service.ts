@@ -6,8 +6,9 @@ import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { map, filter, concatAll } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto, ILabelDto } from '../models/agens-response-types';
-import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty } from '../models/agens-data-types';
+import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto } from '../models/agens-response-types';
+import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IRecord, IColumn, IRow } from '../models/agens-data-types';
+import { ILogs, IProject } from '../models/agens-manager-types';
 
 import * as CONFIG from '../global.config';
 
@@ -30,12 +31,22 @@ export class AgensDataService {
 
   private client:IClientDto = null;      // ssid, user_name, user_ip, timestamp, valid
   private schema:any = {
-      info$: new Subject<ISchemaDto>(),
-      graph$: new Subject<IGraph>(),
-      labels$: new Subject<ILabel>(),
-      nodes$: new Subject<INode>(),
-      edges$: new Subject<IEdge>()
-    };
+    info$: new Subject<ISchemaDto>(),
+    graph$: new Subject<IGraph>(),
+    labels$: new Subject<ILabel>(),
+    nodes$: new Subject<INode>(),
+    edges$: new Subject<IEdge>()
+  };
+  private result:any = {
+    info$: new Subject<IResultDto>(),
+    graph$: new Subject<IGraph>(),
+    labels$: new Subject<ILabel>(),
+    nodes$: new Subject<INode>(),
+    edges$: new Subject<IEdge>(),
+    record$: new Subject<IRecord>(),
+    columns$: new Subject<IColumn>(),
+    rows$: new Subject<IRow>(),
+  };
   
   constructor (
     private _http: HttpClient,
@@ -57,7 +68,7 @@ export class AgensDataService {
   openSnackBar() {
     this.getResponse().subscribe(
       x => this._snackBar.open(x.message, x.state, { duration: 4000, })
-    );    
+    );
   }
 
   /////////////////////////////////////////////////
@@ -98,6 +109,9 @@ export class AgensDataService {
 
   getSchemaSubjects():any {
     return this.schema;
+  }
+  getResultSubjects():any {
+    return this.result;
   }
 
   /////////////////////////////////////////////////
@@ -184,6 +198,48 @@ export class AgensDataService {
         });
   }
 
+  core_query(sql:string){
+    const url = `${this.api.core}/query`;
+    // **NOTE: encodeURIComponent( sql ) 처리
+    // (SQL문의 '+','%','&','/' 등의 특수문자 변환)
+    let params:HttpParams = new HttpParams().set('sql', encodeURIComponent( sql ) );
+
+    return this._http.get<IResultDto>(url, {params: params, headers: this.createAuthorizationHeader()})
+      .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
+      .subscribe({
+        next: x => {
+          this.setResponses(<IResponseDto>x);
+          switch( x['group'] ){
+            case 'result':  this.result.info$.next(x); break;
+            case 'graph':   this.result.graph$.next(x); break;
+            case 'labels':  this.result.labels$.next(x); break;
+            case 'nodes':   this.result.nodes$.next(x); break;
+            case 'edges':   this.result.edges$.next(x); break;
+            case 'record':   this.result.record$.next(x); break;
+            case 'columns':  this.result.columns$.next(x); break;
+            case 'rows':   this.result.rows$.next(x); break;
+          }
+        },
+        error: err => {
+          this.setResponses(<IResponseDto>{
+            group: 'core.query',
+            state: CONFIG.StateType.ERROR,
+            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+          });
+        },
+        complete: () => {
+          this.result.info$.complete();
+          this.result.graph$.complete();
+          this.result.labels$.complete();
+          this.result.nodes$.complete();
+          this.result.edges$.complete();
+          this.result.record$.complete();
+          this.result.columns$.complete();
+          this.result.rows$.complete();
+        }
+      });
+  }
+
   core_command_drop_label(target:ILabel):Observable<ILabelDto> {
     const url = `${this.api.core}/command`;
 
@@ -210,6 +266,31 @@ export class AgensDataService {
     
     console.log( `core_command_create_label => ${params.toString()}`);
     return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
+  mngr_project_detail(id):Observable<IProject> {
+    const url = `${this.api.mngr}/projects/${id}`;
+    return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});
+  }
+
+  mngr_projects_list():Observable<IProject> {
+    const url = `${this.api.mngr}/projects`;
+    return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});
+  }
+
+  mngr_project_save(project:IProject):Observable<IProject> {
+    const url = `${this.api.mngr}/projects/save`;
+    return this._http.post<IProject>(url, JSON.stringify(project), { headers: this.createAuthorizationHeader() });
+  }
+
+  mngr_project_delete(id):Observable<IProject> {
+    const url = `${this.api.mngr}/projects/delete/${id}`;
+    return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});
+  }
+
+  mngr_history():Observable<ILogs> {
+    const url = `${this.api.mngr}/logs`;
+    return this._http.get<ILogs>(url, {headers: this.createAuthorizationHeader()});
   }
 
 }
