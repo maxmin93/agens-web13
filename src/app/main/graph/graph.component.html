@@ -18,6 +18,8 @@
           (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
       </form>
 
+      <app-query-state #queryState [dto]="resultDto"></app-query-state>
+      <!--
       <mat-progress-bar mode="indeterminate" *ngIf="isLoading">Loading...</mat-progress-bar>
       <div class="card__graphdata-foot">
           <span class="card__graphdata-food-title">Result</span>
@@ -27,7 +29,7 @@
               </textarea>
           </form>
       </div>
-
+      -->
   </div>
 
   <!-- GRAPH -->

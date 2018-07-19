@@ -45,7 +45,8 @@ import { AgensUtilService } from './services/agens-util.service'
 
 // // Dialogs
 import { ConfirmDeleteLabelDialog } from './main/dashboard/dialogs/confirm-delete-label.dialog';
-import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-label.dialog';
+import { InputCreateLabelDialog } from './main/dashboard/;
+import { QueryStateComponent } from './main/graph/components/query-state/query-state.component'dialogs/input-create-label.dialog';
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
 // import { ProjectOpenDialog } from './main/graph/project-open-dialog';
@@ -61,7 +62,8 @@ import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-la
     GraphComponent,
     HistoryComponent,
 
-    ConfirmDeleteLabelDialog,
+    ConfirmDeleteLabel,
+    QueryStateComponentDialog,
     InputCreateLabelDialog,
     // LabelStyleSettingDialog,
     // ImageExportDialog,

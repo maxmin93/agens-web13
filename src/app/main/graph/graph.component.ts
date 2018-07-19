@@ -10,16 +10,19 @@ import { PrettyJsonModule } from 'angular2-prettyjson';
 import { Angulartics2 } from 'angulartics2';
 
 import * as _ from 'lodash';
-import { Observable, Subscription } from 'rxjs';
+import { concat, Observable, Subscription } from 'rxjs';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
 import * as CONFIG from '../../global.config';
 
 import { IResultDto } from '../../models/agens-response-types';
-import { IGraph, ILabel, INode, IEdge, IRecord, IColumn } from '../../models/agens-data-types';
+import { IGraph, ILabel, INode, IEdge, IRecord, IColumn, IRow } from '../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import { IProject } from '../../models/agens-manager-types';
+
+// Components
+import { QueryStateComponent } from './components/query-state.component';
 
 // Dialogs
 import { SearchResultDialog } from './dialogs/search-result.dialog';
@@ -93,10 +96,12 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('tableCell') public tableCell: ElementRef;
 
-  @ViewChild('progressBar') progressBar: ElementRef;
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
-  @ViewChild('queryMessage', {read: ElementRef}) queryMessage: ElementRef;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
+
+  @ViewChild('queryState') queryState: QueryStateComponent;
+  // @ViewChild('progressBar') progressBar: ElementRef;
+  // @ViewChild('queryMessage', {read: ElementRef}) queryMessage: ElementRef;
 
   constructor(    
     private _angulartics2: Angulartics2,    
@@ -152,6 +157,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
     // CodeMirror : initial value
     this.editor.setValue( this.query );
+    this.editor.setSize('100%', '120px');
 
     //
     // ** NOTE: 이거 안하면 이 아래쪽에 Canvas 영역에서 마우스 포커스 miss-position 문제 발생!!
@@ -352,65 +358,53 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     this.clearResults();
     this.displayRunningTime();
 
-    const url = `${this._agens.api.CORE}/query`;
-    // **NOTE: encodeURIComponent( sql ) 처리
-    // (SQL문의 '+','%','&','/' 등의 특수문자 변환)
-    let params:HttpParams = new HttpParams().set('sql', encodeURIComponent( sql ) );
-    this.httpRequest = this._http.get<IResultDto>(url, {params: params, headers: this.createAuthorizationHeader()})
-      .subscribe(
-        data => {
+    let result = this._api.getResultSubjects();
+    result.info$.subscribe((x:IResultDto) => {
           // 메시지 출력 borderColor : 정상 #0099ff, 오류 #ea614a
-          if( data.state.valueOf() === 'FAIL' ){
-            this.resultMessage = { fontColor: '#ea614a', text: `[${data.state}] ${data.message}` };
+          if( x.state.valueOf() === 'FAIL' ){
+            this.resultMessage = { fontColor: '#ea614a', text: `[${x.state}] ${x.message}` };
             this.resultDto = null;
           }
           else{
-            this.resultMessage = { fontColor: '#0099ff', text: `[${data.state}] ${data.message}` };
+            this.resultMessage = { fontColor: '#0099ff', text: `[${x.state}] ${x.message}` };
             // 변수에 저장
-            this.resultDto = <IResultDto>data;
+            this.resultDto = <IResultDto>x;
           }
-          let textMessage:any = this._eleRef.nativeElement.querySelector('textarea#agensMessage');
+          let textMessage:any = this.queryMessage;
           textMessage.style.color = this.resultMessage.fontColor;
           textMessage.value = this.resultMessage.text;
 
-          this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});
-        },
-        (err:HttpErrorResponse) => {
-          this.isLoading = false;
-          if( this.elapsedTimeHandler !== null ){
-            clearInterval(this.elapsedTimeHandler);
-          }
+          // this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});
+    });
+    result.graph$.subscribe((x:IGraph) => {});
+    result.labels$.subscribe((x:ILabel) => {});
+    result.nodes$.subscribe((x:INode) => {});
+    result.edges$.subscribe((x:IEdge) => {});
+    result.record$.subscribe((x:IRecord) => {});
+    result.colmuns$.subscribe((x:IColumn) => {});
+    result.rows$.subscribe((x:IRow) => {});
 
-          console.log('HttpErrorResponse:',err);
-          if (!(err.error instanceof Error)) {
-            console.log(`<ERROR> query: state=${err.error.state}, message=${err.error.message}, _link=${err.error._link}`);
-            // 메시지 출력
-            this.resultMessage = { fontColor: '#ea614a', text: `[${err.error.state}] ${err.error.message}` };
+    concat( result.info$.asObservable(), result.graph$.asObservable(),
+          result.labels$.asObservable(), result.nodes$.asObservable(), result.edges$.asObservable() )
+    .subscribe({
+      next: data => {
+      },
+      error: (err) => {
+      },
+      complete: () => {
+        if( this.elapsedTimeHandler !== null ){
+          clearInterval(this.elapsedTimeHandler);
+        }
+      }
+    });
 
-            this._angulartics2.eventTrack.next({ action: 'error', properties: { category: 'graph', label: err.error.message }});
-          }
-        },
-        () => {
-          // 결과값 나눠먹기
-          if( this.resultDto !== null ){
-            if( this.resultDto.graph !== null ) this.showResultGraph(this.resultDto.db);
-            if( this.resultDto.record !== null ) this.showResultRecord(this.resultDto.record);
-          }
-
-          this.isLoading = false;
-          if( this.elapsedTimeHandler !== null ){
-            clearInterval(this.elapsedTimeHandler);
-          }
-
-          // callback function run
-          if( callback !== undefined ) callback();
-        });
+    this.subscription = this._api.core_query( sql );
   }
 
   // when button "STOP" click
   stopQuery(){
     // unsubscribe
-    if( this.httpRequest !== null ) this.httpRequest.unsubscribe();
+    if( this.subscription !== null ) this.subscription.unsubscribe();
     // stop timer
     if( this.elapsedTimeHandler !== null ){
       clearInterval(this.elapsedTimeHandler);
@@ -421,7 +415,6 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultMessage = { fontColor: '#ea614a', text: '[Cancel] User aborts query request.' };
       this.isLoading = false;
 
-      let textMessage = this._eleRef.nativeElement.querySelector('textarea#agensMessage');
       this._angulartics2.eventTrack.next({ action: 'stopQuery', properties: { category: 'graph', label: textMessage.value }});
     }
   }
@@ -473,29 +466,29 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     // -----------------------------------------------
 
     // clear
-    this.graphAgens.elements().remove();
+    this.cy.elements().remove();
 
     // make stats : { nodeLabelSize, edgeLabelSize }
     this.resultStats = this.makeResultStats(data);
     // label color injection : add $$color property ==> ILabelType, INode.data, IEdge.data
     this.randomStyleInjection(data, this.resultStats);
     // data import
-    this.graphAgens.add(data);
+    this.cy.add(data);
     // adjust MENU on nodes
-    this.adjustMenuOnNode( data.meta, this.graphAgens.nodes() );
+    this.adjustMenuOnNode( data.meta, this.cy.nodes() );
 
     // layout 자동 선택
     // run layout (default: cose) : edge가 없거나 node가 많은 경우엔 grid 적용
     let layoutName = 'cose';
-    let targetsRate = this.graphAgens.edges().targets().size() / data.nodes.length;
-    let sourcesRate = this.graphAgens.edges().sources().size() / data.nodes.length;
+    let targetsRate = this.cy.edges().targets().size() / data.nodes.length;
+    let sourcesRate = this.cy.edges().sources().size() / data.nodes.length;
     if( Math.abs(targetsRate-sourcesRate) > 0.6 && (targetsRate > 0.8 || sourcesRate > 0.8) ) layoutName = 'concentric';
     if( data.edges.length/data.nodes.length < 0.6 || data.edges.length <= 4 ) layoutName = 'grid';
     if( data.nodes.length > 400 ) layoutName = 'grid';
 
     console.log( `stats: nodes=${data.nodes.length} (${Math.floor(sourcesRate*100)/100}|${Math.floor(targetsRate*100)/100}), edges=${data.edges.length}` );
 
-    let layoutHandler = this.graphAgens.makeLayout(this._window.agens.graph.layoutTypes[layoutName]);
+    let layoutHandler = this.cy.makeLayout(this._window.agens.graph.layoutTypes[layoutName]);
     layoutHandler.pon('layoutstart').then(function(){
       // 최대 1.5초(1500ms) 안에는 멈추도록 설정
       setTimeout(function(){
@@ -556,22 +549,22 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   mergeExpandToGraph( data:IResultDto, expandId:string, boundingBox:any ){
 
     // add nodes
-    let expandNodes = this.graphAgens.collection( data.graph.nodes );
+    let expandNodes = this.cy.collection( data.graph.nodes );
     expandNodes.forEach(elem => {
       elem.data('$$expandid', expandId);
       elem.addClass('expand');
     });
-    this.graphAgens.add( expandNodes );
+    this.cy.add( expandNodes );
     // adjust menu on nodes
     this.adjustMenuOnNode( data.graph.meta, expandNodes );
 
     // add edges : node가 있어야 edge 생성 가능
-    let expandEdges = this.graphAgens.collection( data.graph.edges );
+    let expandEdges = this.cy.collection( data.graph.edges );
     expandEdges.forEach(elem => {
       elem.data('$$expandid', expandId);
       elem.addClass('expand');
     });
-    this.graphAgens.add( expandEdges );
+    this.cy.add( expandEdges );
 
     let expandLayout:any = {
       name: 'concentric',
@@ -609,9 +602,9 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   // return ==> resultStas { nodeLabelSize, edgeLabelSize }
   makeResultStats(data:IGraph): any {
     let stats:any = { nodeLabelSize: 0, edgeLabelSize: 0 };
-    for( let label of data.meta ){
-      if( label.type === CONFIG.ElemType.NODE ) stats.nodeLabelSize += 1;
-      else if( label.type === CONFIG.ElemType.EDGE ) stats.edgeLabelSize += 1;
+    for( let label of data.labels ){
+      if( label.type === 'NODE' ) stats.nodeLabelSize += 1;
+      else if( label.type === 'EDGE' ) stats.edgeLabelSize += 1;
     }
     return stats;
   }
@@ -621,10 +614,10 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   randomStyleInjection(data:IGraph, stats:any){
     // add $$color ==> ILabelType
     let labelIndex = 0;
-    for( let label of data.meta ){
-      if( label.type === CONFIG.ElemType.NODE ){
+    for( let label of data.labels ){
+      if( label.type === 'NODE' ){
         // ILabelType 에 $$style 삽입
-        label['$$style'] = { color: this.labelColors[labelIndex%MAX_COLOR_SIZE], size: '55px', label: null };
+        label['$$style'] = { color: this.labelColors[labelIndex%CONFIG.MAX_COLOR_SIZE], size: '55px', label: null };
         // INode 에 $$style 삽입 => IStyle { _self: { color: null, size: null }, _label: { color: ??, size: ?? }}
         data.nodes
             .filter((item) => { return (item.data.labels !== null ) && (item.data.labels[0] === label.name); })
@@ -632,9 +625,9 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
               item.data['$$style'] = { _self: { color: null, size: null, label: null }, _label: label['$$style'] };
             });
       }
-      else if( label.type === CONFIG.ElemType.EDGE ){
+      else if( label.type === 'EDGE' ){
         // ILabelType 에 $$color 삽입
-        label['$$style'] = { color: this.labelColors[labelIndex%MAX_COLOR_SIZE], size: '2px', label: '' };
+        label['$$style'] = { color: this.labelColors[labelIndex%CONFIG.MAX_COLOR_SIZE], size: '2px', label: '' };
         // IEdge 에 $$style 삽입 => IStyle { _self: { color: null, size: null }, _label: { color: ??, size: ?? }}
         data.edges
             .filter((item) => { return (item.data.labels !== null ) && (item.data.labels[0] === label.name); })
@@ -649,11 +642,11 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   clickGraphLabelChip( labelType:string, labelName:string ): void {
 
     // 전체 unselect
-    this.graphAgens.elements().unselect();
+    this.cy.elements().unselect();
 
     let elements:Array<any>;
-    if( labelType === 'EDGE' ) elements = this.graphAgens.edges();
-    else elements = this.graphAgens.nodes();
+    if( labelType === 'EDGE' ) elements = this.cy.edges();
+    else elements = this.cy.nodes();
 
     // label 에 해당하는 element 이면 select
     for( let elem of elements ){
@@ -665,14 +658,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
-    if( this._window.agens.graph === undefined || this.graphAgens === undefined ) return;
+    if( this._window.agens.graph === undefined || this.cy === undefined ) return;
 
     let selectedLayout = this._window.agens.graph.layoutTypes[layout];
     if( selectedLayout === undefined ) return;
 
     // 선택된 elements 들이 있으면 그것들을 대상으로 실행, 없으면 전체
-    let elements = this.graphAgens.elements(':selected');
-    if( elements.length <= 1) elements = this.graphAgens.elements(':visible');
+    let elements = this.cy.elements(':selected');
+    if( elements.length <= 1) elements = this.cy.elements(':visible');
 
     // show graphProgressBar
     let graphProgressBar:any = document.querySelector('div#graphProgressBar');
@@ -716,12 +709,12 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // graph의 userZoomingEnabled 설정 변경
     if( this.btnMouseWheelZoom.checked ){
-      this.graphAgens.userZoomingEnabled(true);
+      this.cy.userZoomingEnabled(true);
       this._eleRef.nativeElement.querySelector('a#btnMouseWheelZoom').style.backgroundColor = '#585858';
       this._eleRef.nativeElement.querySelector('#btnMouseWheelZoomIcon').style.color = '#eee';
     }
     else {
-      this.graphAgens.userZoomingEnabled(false);
+      this.cy.userZoomingEnabled(false);
       this._eleRef.nativeElement.querySelector('a#btnMouseWheelZoom').style.backgroundColor = '#eee';
       this._eleRef.nativeElement.querySelector('#btnMouseWheelZoomIcon').style.color = '#585858';
     }
@@ -746,10 +739,10 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   refreshCanvas(){
-    this.graphAgens.resize();
-    if( this.graphAgens.viewUtil !== undefined ) this.graphAgens.viewUtil.removeHighlights();
-    this.graphAgens.elements(':selected').unselect();
-    // this.graphAgens.fit( this.graphAgens.elements(), 50 );
+    this.cy.resize();
+    if( this.cy.viewUtil !== undefined ) this.cy.viewUtil.removeHighlights();
+    this.cy.elements(':selected').unselect();
+    // this.cy.fit( this.cy.elements(), 50 );
   }
 
   /////////////////////////////////////////////////////////////////
@@ -816,7 +809,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
   openProjectSaveDialog(){
 
-    if( this.graphAgens === null ) return;
+    if( this.cy === null ) return;
     let sql:string = this.makeupSql(<string> this.editor.getValue());
     if( sql.length < 5 ){
       this.openSnackBar('Query Editor is empty. Graph has to be with its query','WARNING');
@@ -824,7 +817,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     // graph 데이터에 Label용 meta 항목 추가 : this.graphLabels
-    let graphData = this.graphAgens.json();   // elements, 등등..
+    let graphData = this.cy.json();   // elements, 등등..
     // ///////////////////////////////////////////////
     // **NOTE: label 밑에 $$elements 가 포함되어 nodes나 edges 등의 내용이 중복되어 저장됨
     //         <== 개선필요!! (전체적인 json 포맷을 고려해야)
@@ -907,7 +900,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       if( graphData.hasOwnProperty('labels') ){
         this.graphLabels = [...graphData['labels']];
         // add MENU on nodes
-        this.adjustMenuOnNode( this.graphLabels, this.graphAgens.nodes() );
+        this.adjustMenuOnNode( this.graphLabels, this.cy.nodes() );
       }
     }
     return data;
@@ -918,7 +911,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   openSearchResultDialog(): void {
-    if( this.graphAgens.elements().length == 0 || this.graphLabels.length == 0 ) return;
+    if( this.cy.elements().length == 0 || this.graphLabels.length == 0 ) return;
 
     let inputData = {
       labels: this.graphLabels,
@@ -942,7 +935,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   openLabelStyleSettingDialog(): void {
-    if( this.graphAgens.elements().length == 0 || this.graphLabels.length == 0 ) return;
+    if( this.cy.elements().length == 0 || this.graphLabels.length == 0 ) return;
 
     let inputData = {
       labels: this.graphLabels,
@@ -972,8 +965,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // 2) graphAgens.elements() 중 해당 label 에 대한 $$style 변경
     let elements = [];
-    if( label.type.valueOf() === 'NODE' ) elements = this.graphAgens.nodes();
-    else elements = this.graphAgens.edges();
+    if( label.type.valueOf() === 'NODE' ) elements = this.cy.nodes();
+    else elements = this.cy.edges();
     for( let i=0; i<elements.length; i+= 1){
       if( elements[i].data('labels').indexOf(label.name) >= 0 ){
         elements[i].data('$$style', { _self: { color: null, size: null, label: null }, _label: label['$$style'] });
@@ -981,7 +974,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     // 3) apply
-    this.graphAgens.style().update();
+    this.cy.style().update();
 
     this._angulartics2.eventTrack.next({ action: 'changeStyle', properties: { category: 'graph', label: label.type+'.'+label.name }});
   }
@@ -992,11 +985,11 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
   openImageExportDialog(){
     // recordTable에 결과가 없어도 graph 에 출력할 내용물이 있으면 OK!
-    if( this.graphAgens.elements(':visible').length === 0 ) return;
+    if( this.cy.elements(':visible').length === 0 ) return;
 
     let dialogRef = this.dialog.open(ImageExportDialog, {
       width: 'auto', height: 'auto',
-      data: this.graphAgens
+      data: this.cy
     });
 
     dialogRef.afterClosed().subscribe(result => {
