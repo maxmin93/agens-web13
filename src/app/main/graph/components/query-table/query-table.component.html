@@ -1,0 +1,50 @@
+  <!-- TABLE -->
+  <div class="card card-graphdata-table">
+    <h2>Table <small>Result</small></h2>
+    <ngx-datatable #recordTable class='material' [columnMode]="'force'"
+        [limit]="10" [reorderable]="reorderable" [scrollbarH]="true"
+        [rows]='recordRows' [columns]='recordColumns'
+        [headerHeight]="38" [footerHeight]="38" [rowHeight]="auto"
+        (activate)="onActivateTableRow($event)">
+
+        <ngx-datatable-column name="Index" [width]="80" [canAutoResize]="false" [sortable]="false">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+                <span>{{ row.$$index }}</span>
+            </ng-template>
+        </ngx-datatable-column>
+
+        <!-- <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="true" prop="{{col.name}}"> -->
+        <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false">
+            <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
+                <span (click)="recordSort(col)">{{col.name}}</span>
+            </ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0"
+                    (click)="showJsonFormat(col,row)">
+                    {{ row[col.name] | json }}
+                </span>
+                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0"
+                    (click)="showJsonFormat(col,row)">
+                    {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
+                </span>
+            </ng-template>
+        </ngx-datatable-column>            
+    </ngx-datatable>    
+</div>
+<!-- " *ngIf="isJsonCell" -->
+<div id="tableCell" #tableCell class="card card-graphdata-json" style="visibility: hidden;">
+    <h2>CELL <small>VALUE</small></h2>
+    <mat-card-content class="scrollbar">
+        <!-- 
+            JSON Pretty formatter
+            https://www.npmjs.com/package/angular2-prettyjson
+        -->            
+        <div>
+            <a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above"><i class="fa fa-clone" aria-hidden="true"></i></a>
+            <h5><i class="fa fa-mouse-pointer" aria-hidden="true"></i> 
+                clicked [ row, col ] = [ <span>{{selectedRowIndex}}, {{selectedColIndex}}</span> ]</h5>              
+        </div>
+        <pre id="cellValue" [innerHtml]="selectedCell | prettyjson:3"></pre>
+    </mat-card-content>    
+</div>
+</div>

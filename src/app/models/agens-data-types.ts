@@ -98,6 +98,9 @@ export interface IRecord {
 
   cols_size: number;
   rows_size: number;
+
+  columns?: IColumn[];
+  rows?: IRow[];
 };
 
 export interface IColumn {

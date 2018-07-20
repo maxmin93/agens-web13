@@ -1,0 +1,10 @@
+<div #progressBar style='visibility:hidden;'>
+  <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+</div>
+<div class="card__graphdata-foot">
+  <span class="card__graphdata-food-title">Result</span>
+  <form>
+    <textarea rows="2" #queryState type="text" readonly [value]="messageText" [style.color]="messageColor">
+    </textarea>
+  </form>
+</div>

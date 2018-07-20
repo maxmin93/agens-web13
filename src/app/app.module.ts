@@ -45,8 +45,11 @@ import { AgensUtilService } from './services/agens-util.service'
 
 // // Dialogs
 import { ConfirmDeleteLabelDialog } from './main/dashboard/dialogs/confirm-delete-label.dialog';
-import { InputCreateLabelDialog } from './main/dashboard/;
-import { QueryStateComponent } from './main/graph/components/query-state/query-state.component'dialogs/input-create-label.dialog';
+import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-label.dialog';
+import { QueryResultComponent } from './main/graph/components/query-result/query-result.component';
+import { QueryGraphComponent } from './main/graph/components/query-graph/query-graph.component';
+import { QueryTableComponent } from './main/graph/components/query-table/query-table.component';
+
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
 // import { ProjectOpenDialog } from './main/graph/project-open-dialog';
@@ -62,9 +65,13 @@ import { QueryStateComponent } from './main/graph/components/query-state/query-s
     GraphComponent,
     HistoryComponent,
 
-    ConfirmDeleteLabel,
-    QueryStateComponentDialog,
+    ConfirmDeleteLabelDialog,
     InputCreateLabelDialog,
+
+    QueryResultComponent,
+    QueryGraphComponent,
+    QueryTableComponent,
+
     // LabelStyleSettingDialog,
     // ImageExportDialog,
     // ProjectOpenDialog,
@@ -108,6 +115,7 @@ import { QueryStateComponent } from './main/graph/components/query-state/query-s
   entryComponents: [ 
     ConfirmDeleteLabelDialog,
     InputCreateLabelDialog,
+    
     // LabelStyleSettingDialog,
     // ImageExportDialog,
     // ProjectOpenDialog,

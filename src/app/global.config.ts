@@ -15,7 +15,7 @@ export const MAX_COLOR_SIZE:number = 40;
 ///////////////////////////////////////////////////////////////
 
 export enum StateType { 
-  PENDING='PENDING', SUCCESS='SUCCESS', FAIL='FAIL', KILLED='KILLED', ERROR='ERROR', NONE='NONE' 
+  PENDING='PENDING', SUCCESS='SUCCESS', FAIL='FAIL', KILLED='KILLED', WARNING='WARNING', ERROR='ERROR', NONE='NONE' 
 };
 export enum RequestType { 
   CREATE='CREATE', DROP='DROP', QUERY='QUERY', KILL='KILL', NONE='NONE' 

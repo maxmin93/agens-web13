@@ -1,0 +1,78 @@
+  <!-- GRAPH -->
+  <div id="graphCard" class="card card__graphdata-graph ">
+    <div id="agens-graph-toolbar" class="card__icon-group">
+        <a [ngClass]="{ 'disabled-btn': isLoading }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
+            <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
+        <a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
+            <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
+                
+        <a [ngClass]="{ 'disabled-btn': isLoading }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
+            <mat-icon>search</mat-icon></a>
+
+        <a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
+        <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
+            <div td-menu-header class="mat-subhead">
+                <h4>Layout types</h4>
+            </div>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('grid')">GRID</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('random')">RANDOM</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('circle')">CIRCLE</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('concentric')">CONCENTRIC</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('cose')">COSE (nodes.size &lt; 400)</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('cose2')">COSE-BILKENT (very slow)</button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="graphChangeLayout('dagre')">DAGRE (hierachy)</button>
+        </mat-menu>
+
+        <a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
+            <mat-icon>palette</mat-icon></a>
+        <a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
+            <mat-icon>image</mat-icon></a>
+        <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+            <mat-icon>refresh</mat-icon></a>
+    </div>
+
+    <h2>GRAPH <small>Result</small></h2>
+
+    <div class="wrapped-box">
+        <div #progressBar style='visibility:hidden;'>
+          <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+        </div>     
+        <!-- graph element info Box -->
+        <ng-template [ngIf]="selectedElement">
+            <div class="card__graphdata-graph-info scrollbar" id="slide-toggle">
+                <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                    [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
+                    <span>LOCATION LOCK</span></mat-slide-toggle>
+                <h4><span class="span__info">Label</span>{{ selectedElement.data('labels') [0] }} [{{ selectedElement.id() }}]</h4>
+                <p><span class="span__info">Name</span>{{ selectedElement.data('name') }}</p>
+                <p><span class="span__info">Data</span></p>
+                <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+            </div>
+        </ng-template>
+
+        <!-- Graph content -->
+        <div id="graph-agens" class="gra_content" #divCanvas 
+            [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
+        </div>
+
+        <!-- Graph.Meta : Labels content -->
+        <div class="card__graphdata-graph-label">
+            <mat-chip-list id="agens-graph-labels">
+                <mat-chip *ngFor="let label of graphLabels" [selected]="true" style="z-index: 9"
+                    (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label['$$style'].color">
+                    <span *ngIf="label.type=='NODE'" class="nodeType"><i class="material-icons">location_on</i>{{label.name}} ({{label.size}})</span>
+                    <span *ngIf="label.type=='EDGE'" class="edgeType"><i class="material-icons">trending_up</i>{{label.name}} ({{label.size}})</span>
+                </mat-chip>
+            </mat-chip-list>
+        </div>    
+    </div>
+</div>
