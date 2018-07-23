@@ -17,6 +17,7 @@ import { AgensDataService } from '../../services/agens-data.service';
 import { IResponseDto } from '../../models/agens-response-types';
 import { ILogs } from '../../models/agens-manager-types';
 import * as CONFIG from '../../global.config';
+import { concatAll } from '../../../../node_modules/rxjs/operators';
 
 @Component({
   selector: 'app-history',
@@ -60,16 +61,26 @@ export class HistoryComponent implements AfterViewInit {
   /////////////////////////////////////////////////////////////////
   // Data Handlers
   /////////////////////////////////////////////////////////////////
-  
+
+  clear(){
+    this.logRows = [];
+    this.tmpRows = [];
+  }
+
+  reload(){
+    this.clear();
+    this.loadLogs();
+  }
+
   // call API: manager/logs  
   loadLogs(){
 
     this.toggleProgress(false);
 
-    this._api.mngr_history()
+    this._api.mngr_history().pipe( concatAll() )
     .subscribe(
         data => {
-          this.logRows.push( <ILogs>data );
+          this.tmpRows.push( <ILogs>data );
         },
         err => {
           this.toggleProgress(false);
@@ -84,7 +95,7 @@ export class HistoryComponent implements AfterViewInit {
         () => {
           this.toggleProgress(false);
           // cache our list
-          this.tmpRows = [...this.logRows];
+          this.logRows = [...this.tmpRows];
 
           // snackBar 메시지 출력
           this._api.setResponses(<IResponseDto>{
@@ -109,7 +120,6 @@ export class HistoryComponent implements AfterViewInit {
   onActivateTableLabels(event){
     // console.log('onActivateTableLabels: ', event);
   }
-
 
   updateFilter(event) {
     const val = event.target.value.toLowerCase();

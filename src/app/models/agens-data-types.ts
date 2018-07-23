@@ -35,12 +35,14 @@ export interface ILabel {
   owner: string;
   desc: string;
   size: number;
-  size_not_empty: number;
-  is_dirty: boolean;
   properties: Array<IProperty>;
   neighbors: Array<string>;
 
-  _style?: IStyle;            // styles (user property appended after API call)
+  scratch: {
+    size_not_empty?: number;
+    is_dirty?: boolean;
+    _style?: IStyle;          // styles (user property appended after API call)
+  };
 };
 
 export interface IElement {
@@ -58,6 +60,7 @@ export interface IElement {
   classes?: string;
 
   equalLabel: (label:string) => boolean;
+  getLabel: () => string;
   getPropertyId: () => string;
   getPropertyName: () => string;
   getProperty: (key:string) => any;
@@ -65,6 +68,8 @@ export interface IElement {
 };
 
 export interface INode extends IElement {
+  getNeighbors: () => string[];
+  setNeighbors: (labels:ILabel[]) => void;
 }
 
 export interface IEdge extends IElement {

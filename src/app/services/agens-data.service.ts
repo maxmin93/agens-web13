@@ -243,8 +243,7 @@ export class AgensDataService {
   // call API: expand from selected Node
   core_query_expand( sourceId: string, sourceLabel:string, targetLabel:string ){
     //
-    // ** NOTE: 확장 쿼리 (source 라벨은 필요 없음)
-    //     expandTo SQL:
+    // ** NOTE: 확장 쿼리
     //     ex) match (s:"customer")-[e]-(v:"order") where id(s) = '11.1' return e, v limit 5;
     // ** NOTE: 확장 노드 사이즈 = 20
     //     20개만 확장 (너무 많아도 곤란) <== 단지 어떤 데이터가 더 있는지 보고 싶은 용도임!

@@ -80,8 +80,8 @@ export class InputCreateLabelDialog implements OnInit {
   isDuplicated: boolean = false;
 
   newLabel: ILabel = { 
-      group: 'labels', type: '', oid: '', name: '', size: 0, size_not_empty: 0, desc: '',
-      neighbors: new Array<string>(), properties: new Array<IProperty>(), owner: '', is_dirty: true
+      group: 'labels', type: '', oid: '', name: '', size: 0, desc: '', owner: '',
+      neighbors: new Array<string>(), properties: new Array<IProperty>(), scratch: { size_not_empty: 0, is_dirty: true }
     };
 
   constructor(

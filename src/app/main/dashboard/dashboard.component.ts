@@ -24,6 +24,11 @@ import { ISchemaDto } from '../../models/agens-response-types';
 
 declare var agens: any;
 
+const EMPTY_LABEL: ILabel = { 
+  group: 'labels', oid: '', type: '', name: '', owner: '', desc: '', size: 0
+  , properties: [], neighbors: [], scratch: { size_not_empty: 0, is_dirty: true }
+};
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -53,11 +58,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // 선택 label
   selectedLabels: Array<ILabel> = new Array<ILabel>();
-  selectedLabel: ILabel = { 
-    group: 'labels', oid: '', type: '', name: '', owner: '', desc: ''
-    , size: 0, size_not_empty: 0, is_dirty: true
-    , properties: [], neighbors: [] 
-  };
+  selectedLabel: ILabel = EMPTY_LABEL;
   deletedLabel: ILabel = null;  // from ConfirmDeleteLabelDialog
   createdLabel: ILabel = null;  // from CreateLabelInputDialog
 
@@ -176,11 +177,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   clearTables(){
     this.selectedLabels = <ILabel[]>[];
-    this.selectedLabel = <ILabel>{ 
-      group: 'labels', oid: '', type: '', name: '', owner: '', desc: ''
-      , size: 0, size_not_empty: 0, is_dirty: true
-      , properties: [], neighbors: [] 
-    };
+    this.selectedLabel = EMPTY_LABEL;
     this.deletedLabel = <ILabel>null;
     this.createdLabel = <ILabel>null;
   
@@ -249,10 +246,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   showDatasource(x:ISchemaDto){
     this.infos = {
       uri: x.datasource.jdbc_url, name: x.datasource.name, owner: x.datasource.owner, desc: x.datasource.desc
-      , nodes_size_total: x.labels.filter(x => x.type == 'NODE').length
-      , edges_size_total: x.labels.filter(x => x.type == 'EDGE').length
-      , nodes_size_data:  x.labels.filter(x => x.type == 'NODE' && x.size > 0).length
-      , edges_size_data:  x.labels.filter(x => x.type == 'EDGE' && x.size > 0).length
+      , nodes_size_total: x.labels.filter(x => x.type == 'nodes').length
+      , edges_size_total: x.labels.filter(x => x.type == 'edges').length
+      , nodes_size_data:  x.labels.filter(x => x.type == 'nodes' && x.size > 0).length
+      , edges_size_data:  x.labels.filter(x => x.type == 'edges' && x.size > 0).length
     };
   }
 
@@ -302,8 +299,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         return label;
       }
     }
-    return <ILabel>{ group: 'labels', oid: '', type: '', name: '', owner: '', desc: ''
-                      , size: 0, size_not_empty: 0, is_dirty: true, properties: [] };
+    return EMPTY_LABEL;
   }
 
   // 테이블에서 선택된 row 에 해당하는 graph element 선택 연동
@@ -371,8 +367,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     }
 
     this.tablePropertiesRows = [];
-    this.selectedLabel = <ILabel>{ group: 'labels', oid: '', type: '', name: '', owner: '', desc: ''
-                      , size: 0, size_not_empty: 0, is_dirty: true, properties: [] };
+    this.selectedLabel = EMPTY_LABEL;
   }
 
   /////////////////////////////////////////////////////////////////

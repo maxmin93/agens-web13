@@ -162,8 +162,10 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // call API: db
-  runQuery( callback:()=>void = undefined ){
+  runQuery() {
 
+    this.queryResult.toggleTimer(true);
+/*
     let sql:string = this.makeupSql(<string> this.editor.getValue());
     if( sql.length < 5 ) return;
 
@@ -186,12 +188,15 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultGraph.labels.push( x );
     });
     result.nodes$.subscribe((x:INode) => {
-      this.resultGraph.nodes.push( x );
-      this.queryGraph.addNode( x );
+      let ele:Node = <Node>x;
+      ele.setNeighbors(this.resultGraph.labels);
+      this.resultGraph.nodes.push( ele );
+      this.queryGraph.addNode( ele );
     });
     result.edges$.subscribe((x:IEdge) => {
-      this.resultGraph.edges.push( x );
-      this.queryGraph.addEdge( x );
+      let ele:Edge = <Edge>x;
+      this.resultGraph.edges.push( ele );
+      this.queryGraph.addEdge( ele );
     });
     result.record$.subscribe((x:IRecord) => {
       this.resultRecord = x;
@@ -219,6 +224,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
 
     this.subscription = this._api.core_query( sql );
+*/    
   }
 
   // when button "STOP" click
@@ -228,38 +234,6 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.queryResult.abort();
   }
-
-  // call API: db
-  runExpandTo( sql:string, expandId:string, boundingBox:any ){
-
-    this.isLoading = true;
-    this.resultExpandTo = null;
-
-    const url = `${this._agens.api.CORE}/query`;
-    let params:HttpParams = new HttpParams();
-    params = params.append('sql', encodeURIComponent( sql ) );
-    params = params.append('options', 'loggingOff');
-
-    this.httpRequest = this._http.get<IResultDto>(url, {params: params, headers: this.createAuthorizationHeader()})
-      .subscribe(
-        data => {
-          // 메시지 출력 : 정상 #0099ff, 오류 #ea614a
-          if( data.state.valueOf() === 'SUCCESS' ){
-            // 기존 graph data에 추가
-            this.resultExpandTo = <IResultDto>data;
-          }
-        },
-        (err:HttpErrorResponse) => {
-          this.isLoading = false;
-        },
-        () => {
-          this.isLoading = false;
-          if( this.resultExpandTo !== null ) this.mergeExpandToGraph(this.resultExpandTo, expandId, boundingBox);
-        });
-  }
-
-
-
 
   /////////////////////////////////////////////////////////////////
   // Dailog Controllers
@@ -277,18 +251,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
 
-    // graph 데이터에 Label용 meta 항목 추가 : this.graphLabels
-    let graphData = this.cy.json();   // elements, 등등..
-    // ///////////////////////////////////////////////
-    // **NOTE: label 밑에 $$elements 가 포함되어 nodes나 edges 등의 내용이 중복되어 저장됨
-    //         <== 개선필요!! (전체적인 json 포맷을 고려해야)
-    // ///////////////////////////////////////////////
-    graphData['labels'] = [...this.graphLabels];
-
     // Stringify 변환
-    let graph_json:string = JSON.stringify( graphData );
+    let graph_json:string = JSON.stringify( this.resultGraph );
     if( graph_json.length < 5 ){
-      this.openSnackBar('Graph is empty. Blank graph cannot be saved','WARNING');
+      this._api.setResponses(<IResponseDto>{
+        group: 'project::save',
+        state: CONFIG.StateType.WARNING,
+        message: 'Graph is empty. Blank graph cannot be saved'
+      });
       return;
     }
 
@@ -346,24 +316,21 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     let graphData:any = null;
 
     // json data parse
-    try{
+    try {
       graphData = JSON.parse( data.graph_json );
-    }catch(ex){
+    } 
+    catch(ex) {
       console.log('graph_json parse error =>', ex);
-      this.openSnackBar('JSON parse error on loading project', 'ERROR');
+      this._api.setResponses(<IResponseDto>{
+        group: 'project::load',
+        state: CONFIG.StateType.ERROR,
+        message: 'JSON parse error on loading project'
+      });
     }
 
     // load graph
-    if( graphData !== null ){
-      // load graph data and rendering
-      agens.graph.loadData( graphData );
-      // load label's chips
-      if( graphData.hasOwnProperty('labels') ){
-        this.graphLabels = [...graphData['labels']];
-        // add MENU on nodes
-        this.adjustMenuOnNode( this.graphLabels, this.cy.nodes() );
-      }
-    }
+    // ...
+
     return data;
   }
 

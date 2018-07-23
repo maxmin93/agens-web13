@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 
 import { IGraph, ILabel, IElement, INode, IEdge, IProperty, IStyle } from './agens-data-types';
+import { all } from '../../../node_modules/@types/q';
 
 export class Label implements ILabel {
   readonly group: string = 'labels';      // group == 'labels'
@@ -16,7 +17,11 @@ export class Label implements ILabel {
   properties: Array<IProperty> = new Array<IProperty>();
   neighbors: Array<string> = new Array<string>();
 
-  _style?: IStyle;            // styles (user property appended after API call)
+  scratch: {
+    size_not_empty?: number;
+    is_dirty?: boolean;
+    _style?: IStyle;          // styles (user property appended after API call)
+  };
 
   constructor(oid:string, type:string){
     this.group = 'labels';
@@ -25,27 +30,27 @@ export class Label implements ILabel {
   }
 
   get color():string {
-    return (this._style) ? this._style.color : undefined;
+    return (this.scratch._style) ? this.scratch._style.color : undefined;
   }
   set color(val:string) {
-    if( this._style ) this._style.color = val;
-    else this._style = <IStyle>{ color: val, width: undefined, title: undefined };
+    if( this.scratch._style ) this.scratch._style.color = val;
+    else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined };
   }
 
   get width():string {
-    return (this._style) ? this._style.width : undefined;
+    return (this.scratch._style) ? this.scratch._style.width : undefined;
   }
   set width(val:string) {
-    if( this._style ) this._style.width = val;
-    else this._style = <IStyle>{ color: undefined, width: val, title: undefined };
+    if( this.scratch._style ) this.scratch._style.width = val;
+    else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined };
   }
 
   get title():string {
-    return (this._style) ? this._style.title : undefined;
+    return (this.scratch._style) ? this.scratch._style.title : undefined;
   }
   set title(val:string) {
-    if( this._style ) this._style.title = val;
-    else this._style = <IStyle>{ color: undefined, width: undefined, title: val };
+    if( this.scratch._style ) this.scratch._style.title = val;
+    else this.scratch._style = <IStyle>{ color: undefined, width: undefined, title: val };
   }
 };
 
@@ -98,6 +103,9 @@ export class Element implements IElement {
     return _.indexOf(this.data.labels, label) >= 0;
   }
 
+  getLabel():string {
+    return _.first(this.data.labels);
+  }
   getPropertyId():string {
     return this.data.props['id'];
   };
@@ -152,6 +160,18 @@ export class Node extends Element implements INode {
 
   constructor(id:string){
     super('nodes', id);
+  }
+
+  getNeighbors():string[] {
+    return this.scratch['_neighbors'];
+  }
+  setNeighbors(labels:ILabel[]) {
+    this.scratch['_neighbors'] = new Array<string>();
+    if( !labels ) return;
+    labels.forEach(val => {
+      if( val.type == 'nodes' && val.name == this.label )
+        this.scratch['_neighbors'] = this.scratch['_neighbors'].concat(val.neighbors);
+    });
   }
 }
 

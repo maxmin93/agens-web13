@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
@@ -11,6 +11,8 @@ import * as CONFIG from '../../../../global.config';
   styleUrls: ['./query-table.component.scss']
 })
 export class QueryTableComponent implements OnInit {
+
+  @Input() data:IRecord;
 
   recordColumns: Array<IColumn> = new Array();
   recordRows: Array<IRow> = new Array<IRow>();
@@ -35,7 +37,7 @@ export class QueryTableComponent implements OnInit {
   /////////////////////////////////////////////////////////////////
 
   // 결과들만 삭제 : runQuery 할 때 사용
-  clearResults(){
+  clear(){
     // 테이블 비우고
     this.recordRowsCount = 0;
     this.recordRows = [];
@@ -47,14 +49,14 @@ export class QueryTableComponent implements OnInit {
     this.selectedColIndex = -1;
   }
 
-  showResultRecord(record:IRecord){
-    this.recordColumns = record.meta;
-    this.recordRows = this.convertRowToAny(record.meta, record.rows);
-    this.recordRowsCount = this.recordRows.length;
+  setData(record:IRecord){
+    this.recordColumns = record.columns;
+    // this.recordRows = this.convertRowToAny(record.columns, record.rows);
+    // this.recordRowsCount = this.recordRows.length;
   }
 
   // rows를 변환 : Array<Array<any>> ==> Array<Map<string,any>>
-  convertRowToAny(columns:Array<IColumn>, rows:Array<Array<any>>):Array<any>{
+  convertRowToAny(columns:Array<IColumn>, rows:Array<IRow>):Array<any>{
     let tempArray: Array<any> = new Array<any>();
     for( let row of rows ){
       let temp:any = {};
@@ -73,21 +75,19 @@ export class QueryTableComponent implements OnInit {
   }
 
   // 늘상 보이는 것으로 변경
-  showJsonFormat(col:IColumn row:any) {
+  showJsonFormat(col:IColumn, row:any) {
     this.tableCell.nativeElement.style.visibility = 'visible';   // this.isJsonCell = true;
     this.selectedCell = row[col.name];
     this.selectedRowIndex = row.$$index;
     this.selectedColIndex = col.index+1;
     document.querySelector('#tableCell').scrollIntoView();
-
-    this._angulartics2.eventTrack.next({ action: 'showJson', properties: { category: 'graph', label: col.type+'.'+col.name }});
   }
 
   // 클립보드에 복사하기
   copyCellValue(){
-    let $temp = $("<input>");
-    $("body").append($temp);
-    $temp.val($("#cellValue").text()).select();
+    let $temp:any = document.querySelector("<input>");
+    (<any>document.querySelector("body")).append($temp);
+    $temp.val( (<any>document.querySelector("#cellValue")).text() ).select();
     document.execCommand("copy");
     // console.log('copyCellValue :', $("#cellValue").text());
     $temp.remove();

@@ -6,6 +6,11 @@ import { Subscription, timer } from 'rxjs';
 import { IResponseDto } from '../../../../models/agens-response-types';
 import * as CONFIG from '../../../../global.config';
 
+const COLOR_BLUE = 'rgb(0, 64, 255)';
+const COLOR_RED  = 'rgb(255, 64, 0)';
+const COLOR_GRAY = 'rgb(96, 96, 96)';
+const COLOR_GREEN ='rgb(0, 102, 26)';
+
 @Component({
   selector: 'app-query-result',
   templateUrl: './query-result.component.html',
@@ -13,19 +18,18 @@ import * as CONFIG from '../../../../global.config';
 })
 export class QueryResultComponent implements OnInit {
 
+  counter: number = 0;
   messageText: string = '...';
   messageColor: string = 'darkgray';        // error: '#ea614a'
 
   private _dto: IResponseDto;
+  private elapsedTimeSubscription: Subscription = undefined;
 
-  @Input() limitTime: number = 30;    // limitTime : sec
+  @Input() limitTime: number = 300;    // limitTime : sec
 
   @Output() overTime: EventEmitter<any> = new EventEmitter();
 
-  private elapsedTimeText: string = '';
-  private elapsedTimeSubscription: Subscription = undefined;
-
-  @ViewChild('progressBar') progressBar: ElementRef;
+  @ViewChild('resultProgressBar') progressBar: ElementRef;
   @ViewChild('queryState') queryState: ElementRef;
 
   constructor() { }
@@ -39,34 +43,25 @@ export class QueryResultComponent implements OnInit {
 
   ///////////////////////////////////////////////
 
-  get dto():IResponseDto {
-    return this._dto;
-  }
-
-  @Input()
-  set dto(dto: IResponseDto){
-    this._dto = dto;
-  }
-
-  ///////////////////////////////////////////////
-
   setMessage(state:CONFIG.StateType, message:string){
     switch( state ){
-      case CONFIG.StateType.SUCCESS: this.messageColor = 'rgb(0, 64, 255)'; break;
-      case CONFIG.StateType.FAIL: this.messageColor = 'rgb(255, 64, 0)'; break;
-      default: this.messageColor = 'rgb(96,96,96)';
+      case CONFIG.StateType.PENDING: this.messageColor = COLOR_GREEN; break;
+      case CONFIG.StateType.SUCCESS: this.messageColor = COLOR_BLUE; break;
+      case CONFIG.StateType.FAIL: this.messageColor = COLOR_RED; break;
+      default: this.messageColor = COLOR_GRAY;
     }
     this.messageText = message;    
   }
 
-  toggleTimer(){
-    if( this.elapsedTimeSubscription ){
-      this.toggleProgress(false);
-      this.stopTimer();
-    }
-    else {
+  toggleTimer(option:boolean=undefined){
+    if( option === undefined ) option = !this.elapsedTimeSubscription;
+    if( option ){
       this.toggleProgress(true);
       this.startTimer();
+    }
+    else {
+      this.toggleProgress(false);
+      this.stopTimer();
     }
   }
 
@@ -80,14 +75,41 @@ export class QueryResultComponent implements OnInit {
     }
   }
 
+  clear(){
+    this.counter = 0;
+    this.messageText = '...';
+    this.messageColor = COLOR_GRAY;
+  }
+
+  abort(){
+    this.toggleProgress(false);
+    this.stopTimer();
+
+    this.messageText = `User abort! (${this.elapsedTimeText()})`;
+    this.messageColor = COLOR_GRAY;
+  }
+
+  setData(dto:IResponseDto){
+    this._dto = dto;
+    this.setMessage(dto.state, dto.message);
+  }
+
   /////////////////////////////////////////////////////////
+
+  private elapsedTimeText(x:number=undefined){
+    if( !x ) x = this.counter;
+    let elapsedTimeText:string;
+    if( x < 60 ) elapsedTimeText = `${x} seconds ..`;
+    else elapsedTimeText = `${Math.floor(x/60)} minutes ${x%60} seconds ..`;
+
+    return elapsedTimeText;
+  }
 
   private startTimer(){
     this.elapsedTimeSubscription = timer(0, 1000).subscribe(
       (x:number) => {
-        if( x < 60 ) this.elapsedTimeText = `${x} seconds .. (until limit ${this.limitTime} sec)`;
-        else this.elapsedTimeText = `${Math.floor(x/60)} minutes ${x%60} seconds .. (until limit ${this.limitTime} sec)`;
-        this.setMessage(CONFIG.StateType.PENDING, this.elapsedTimeText);
+        this.counter = x;
+        this.setMessage(CONFIG.StateType.PENDING, this.elapsedTimeText(x));
 
         if( x >= this.limitTime ){
           this.overTime.emit(x);
@@ -97,7 +119,7 @@ export class QueryResultComponent implements OnInit {
       (err) => {},
       () => {
         // unsubscribe() 시킨다고 complete 가 실행되지 않음
-        console.log( 'Timer observer is completed!' );
+        console.log( 'elapsedTimer observer is completed!' );
       }
     );
   }
