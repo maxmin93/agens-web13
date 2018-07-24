@@ -91,7 +91,7 @@ export class LabelStyleSettingDialog implements OnInit {
     this.selectedLabel = this.labels[0];
     this.onChangeLabel(this.selectedLabel);
 
-    this.labelNameCtl = new FormControl(this.selectedLabel.oid, []);
+    this.labelNameCtl = new FormControl(this.selectedLabel.id, []);
 
     let selectedTitle = this.selectedLabel['$$style']['label'];
     if( selectedTitle === null ) selectedTitle = '';
@@ -125,7 +125,7 @@ export class LabelStyleSettingDialog implements OnInit {
   }
 
   onChangeLabelName(event){
-    let target = this.labels.filter(function(val){ return val.oid === event.value; })[0];
+    let target = this.labels.filter(function(val){ return val.id === event.value; })[0];
     this.onChangeLabel(target);
 
     let selectedTitle = this.selectedLabel['$$style']['label'];

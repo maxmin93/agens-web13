@@ -45,7 +45,7 @@
     <div class="wrapped-box">
         <div #progressBar style='visibility:hidden;'>
           <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
-        </div>     
+        </div>
         <!-- graph element info Box -->
         <ng-template [ngIf]="selectedElement">
             <div class="card__graphdata-graph-info scrollbar" id="slide-toggle">
@@ -67,10 +67,10 @@
         <!-- Graph.Meta : Labels content -->
         <div class="card__graphdata-graph-label">
             <mat-chip-list id="agens-graph-labels">
-                <mat-chip *ngFor="let label of graphLabels" [selected]="true" style="z-index: 9"
-                    (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label['$$style'].color">
-                    <span *ngIf="label.type=='NODE'" class="nodeType"><i class="material-icons">location_on</i>{{label.name}} ({{label.size}})</span>
-                    <span *ngIf="label.type=='EDGE'" class="edgeType"><i class="material-icons">trending_up</i>{{label.name}} ({{label.size}})</span>
+                <mat-chip *ngFor="let label of labels" [selected]="true" style="z-index: 9"
+                    (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
+                    <span *ngIf="label.type=='nodes'" class="nodeType"><i class="material-icons">location_on</i>{{label.name}} ({{label.size}})</span>
+                    <span *ngIf="label.type=='edges'" class="edgeType"><i class="material-icons">trending_up</i>{{label.name}} ({{label.size}})</span>
                 </mat-chip>
             </mat-chip-list>
         </div>    

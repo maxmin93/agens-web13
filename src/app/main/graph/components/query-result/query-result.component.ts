@@ -54,12 +54,12 @@ export class QueryResultComponent implements OnInit {
   }
 
   toggleTimer(option:boolean=undefined){
-    if( option === undefined ) option = !this.elapsedTimeSubscription;
-    if( option ){
+    if( !option ) option = !this.elapsedTimeSubscription;
+    if( option && !this.elapsedTimeSubscription ){
       this.toggleProgress(true);
       this.startTimer();
     }
-    else {
+    else if( !option && this.elapsedTimeSubscription ){
       this.toggleProgress(false);
       this.stopTimer();
     }
@@ -90,6 +90,8 @@ export class QueryResultComponent implements OnInit {
   }
 
   setData(dto:IResponseDto){
+    this.toggleTimer(false);
+
     this._dto = dto;
     this.setMessage(dto.state, dto.message);
   }

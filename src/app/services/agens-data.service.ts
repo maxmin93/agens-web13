@@ -210,7 +210,8 @@ export class AgensDataService {
         next: x => {
           this.setResponses(<IResponseDto>x);
           switch( x['group'] ){
-            case 'result':  this.result.info$.next(x); break;
+            case 'result':  console.log( 'core_query receiving..', x);
+                            this.result.info$.next(x); break;
             case 'graph':   this.result.graph$.next(x); break;
             case 'labels':  this.result.labels$.next(x); break;
             case 'nodes':   this.result.nodes$.next(x); break;
@@ -228,6 +229,7 @@ export class AgensDataService {
           });
         },
         complete: () => {
+          console.log( 'core_query receive completed!');
           this.result.info$.complete();
           this.result.graph$.complete();
           this.result.labels$.complete();

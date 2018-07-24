@@ -29,7 +29,7 @@ export interface IGraph {
 export interface ILabel {
   group: string;        // group == 'labels'
 
-  oid: string;
+  id: string;
   type: string;         // type = { nodes, edges }
   name: string;
   owner: string;

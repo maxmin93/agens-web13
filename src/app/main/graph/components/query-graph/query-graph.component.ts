@@ -5,6 +5,8 @@ import { MatDialog, MatButtonToggle } from '@angular/material';
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IElement, INode, IEdge } from '../../../../models/agens-data-types';
+import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
+
 import * as CONFIG from '../../../../global.config';
 
 declare var agens: any;
@@ -16,16 +18,11 @@ declare var agens: any;
 })
 export class QueryGraphComponent implements OnInit {
 
-  @Input() data: IGraph = undefined;
-
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
 
   selectedElement: any = undefined;  
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
-
-  // pallets : Node 와 Edge 라벨별 color 셋
-  labelColors: any[] = [];
 
   // material elements
   @ViewChild('btnMouseWheelZoom') public btnMouseWheelZoom: MatButtonToggle;
@@ -59,19 +56,14 @@ export class QueryGraphComponent implements OnInit {
 
   ngAfterViewInit() {
     // Cytoscape 생성
-    if( !this.cy ) {
-      this.cy = agens.graph.graphFactory(
-        this.divCanvas.nativeElement, {
-          selectionType: 'additive',    // 'single' or 'additive'
-          boxSelectionEnabled: true, // if single then false, else true
-          useCxtmenu: true,          // whether to use Context menu or not
-          hideNodeTitle: true,       // hide nodes' title
-          hideEdgeTitle: true,       // hide edges' title
-        });
-    }
-
-    // pallets 생성 : luminosity='dark'
-    this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);
+    this.cy = agens.graph.graphFactory(
+      this.divCanvas.nativeElement, {
+        selectionType: 'additive',    // 'single' or 'additive'
+        boxSelectionEnabled: true, // if single then false, else true
+        useCxtmenu: true,          // whether to use Context menu or not
+        hideNodeTitle: true,       // hide nodes' title
+        hideEdgeTitle: true,       // hide edges' title
+      });
   }
 
   /////////////////////////////////////////////////////////////////
@@ -137,12 +129,25 @@ export class QueryGraphComponent implements OnInit {
     this.toggleHighlightNeighbors(false);
   }
 
+  addLabel( label:ILabel ){
+    this.labels.push( label );
+  }
   addNode( ele:INode ){
-
+    this.cy.add( ele );
+  }
+  addEdge( ele:IEdge ){
+    this.cy.add( ele );
+  }
+  refresh(){
+    // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
+    // this.cy.elements(':selected').unselect();
+    // refresh style
+    this.cy.style(agens.graph.stylelist['dark']).update();
+    if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
   }
 
-  addEdge( ele:IEdge ){
-
+  resize(){
+    this.cy.resize();
   }
 
   // graph 데이터
@@ -184,13 +189,6 @@ export class QueryGraphComponent implements OnInit {
   toggleHighlightNeighbors(checked?:boolean): void{
   }
 
-  refresh(){
-    this.cy.resize();
-    if( this.cy.$api.view !== undefined ) this.cy.$api.view.removeHighlights();
-    this.cy.elements(':selected').unselect();
-    // this.cy.fit( this.cy.elements(), 50 );
-  }
-
   /////////////////////////////////////////////////////////////////
   // Search in Result Dialog
   /////////////////////////////////////////////////////////////////
@@ -228,7 +226,7 @@ export class QueryGraphComponent implements OnInit {
   private changeLabelStyle(styleChange:any){
 
     // 1) ILabelType.$$style 변경,
-    let label:ILabel = this.labels.filter(function(val){ return styleChange.target === val.oid; })[0];
+    let label:ILabel = this.labels.filter(function(val){ return styleChange.target === val.id; })[0];
     label['$$style'] = { color: styleChange.color, size: styleChange.size+'px', label: styleChange.title };
 
     // 2) graphAgens.elements() 중 해당 label 에 대한 $$style 변경

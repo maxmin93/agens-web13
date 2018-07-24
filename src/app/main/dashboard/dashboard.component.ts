@@ -25,7 +25,7 @@ import { ISchemaDto } from '../../models/agens-response-types';
 declare var agens: any;
 
 const EMPTY_LABEL: ILabel = { 
-  group: 'labels', oid: '', type: '', name: '', owner: '', desc: '', size: 0
+  group: 'labels', id: '', type: '', name: '', owner: '', desc: '', size: 0
   , properties: [], neighbors: [], scratch: { size_not_empty: 0, is_dirty: true }
 };
 
@@ -66,7 +66,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   tableLabelsRows: Array<ILabel> = new Array<ILabel>();
   tableLabelsColumns: Array<any> = [
     { name: 'TYPE', prop: 'type' },
-    { name: 'OID', prop: 'oid' },
+    { name: 'ID', prop: 'id' },
     { name: 'NAME', prop: 'name' },
     { name: 'SIZE', prop: 'size' },
   ];
@@ -197,11 +197,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         // console.log( 'this.schema.info$.subscribe:', x );        
         this.datasource = x.datasource;
         this.labels = x.labels;
-        // 화면 출력 : ngAfterViewInit emitter 이후 실행
-        Promise.resolve(null).then(() => {
-          this.showDatasource(x);
-          this.showTable(x.labels);
-        });
       }
     });
     this.data.graph$.subscribe( (x:IGraph) => {
@@ -234,6 +229,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       .subscribe({
         complete: () => {
           this.showGraph();
+          // 화면 출력 : ngAfterViewInit emitter 이후 실행
+          Promise.resolve(null).then(() => {
+            this.showDatasource();
+            this.showTable();
+          });
           
           this.toggleProgress(false);
           console.log( 'callCoreSchema done!' );
@@ -243,21 +243,21 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.subscription = this._api.core_schema();  // call API
   }
 
-  showDatasource(x:ISchemaDto){
+  showDatasource(){
     this.infos = {
-      uri: x.datasource.jdbc_url, name: x.datasource.name, owner: x.datasource.owner, desc: x.datasource.desc
-      , nodes_size_total: x.labels.filter(x => x.type == 'nodes').length
-      , edges_size_total: x.labels.filter(x => x.type == 'edges').length
-      , nodes_size_data:  x.labels.filter(x => x.type == 'nodes' && x.size > 0).length
-      , edges_size_data:  x.labels.filter(x => x.type == 'edges' && x.size > 0).length
+      uri: this.datasource.jdbc_url, name: this.datasource.name, owner: this.datasource.owner, desc: this.datasource.desc
+      , nodes_size_total: this.labels.filter(x => x.type == 'nodes').length
+      , edges_size_total: this.labels.filter(x => x.type == 'edges').length
+      , nodes_size_data:  this.labels.filter(x => x.type == 'nodes' && x.size > 0).length
+      , edges_size_data:  this.labels.filter(x => x.type == 'edges' && x.size > 0).length
     };
   }
 
-  showTable(labels:Array<ILabel>){
-    this.tableLabelsRows = [...labels];
+  showTable(){
+    this.tableLabelsRows = [...this.labels];
 
     // graph에 select 처리
-    if( labels.length > 0 ){
+    if( this.labels.length > 0 ){
       this.selectedLabel = this.tableLabelsRows[0];
       this.selectFromTable(this.selectedLabel);
     }    
@@ -278,12 +278,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           , width: (50 + Math.floor(Math.log10(ele.data.size+1))*10) +'px'
           , title: null
       };
-    else
+    else if( ele.group == 'edges' )
       ele.scratch._style = {
           color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
           , width: (2 + Math.floor(Math.log10(ele.data.size+1))*2) +'px'
           , title: null
-      };      
+      };
     this.colorIndex += 1;
   }
 
@@ -291,7 +291,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   selectFromGraph(id:string):ILabel {
     // console.log( 'clicked id=', id.valueOf());
     for( let label of this.tableLabelsRows ){
-      if( label.oid === id ) {
+      if( label.id === id ) {
         this.selectedLabel = label;         // 라벨 정보창으로
         this.tablePropertiesRows = label.properties;  // 라벨 속성 테이블로
 
@@ -309,7 +309,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     if( this.cy.$api.view !== undefined ) this.cy.$api.view.removeHighlights();
     this.cy.elements(':selected').unselect();
     // 선택한거 select
-    this.cy.elements().getElementById(target.oid).select();
+    this.cy.elements().getElementById(target.id).select();
 
     // 선택한거 테이블 내용 갱신
     this.selectedLabel = target;
@@ -358,9 +358,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     console.log('deleteLabelUpdate:', target);
 
     // canvas 에서 삭제
-    this.cy.elements().getElementById(target.oid).remove();
+    this.cy.elements().getElementById(target.id).remove();
     // table 에서 삭제하고 refresh
-    let idx = this.labels.findIndex(ele => ele.oid == target.oid);
+    let idx = this.labels.findIndex(ele => ele.id == target.id);
     if( idx >= 0 ){
       this.labels.splice(idx, 1);
       this.tableLabelsRows = [...this.labels];  //_.clone(this.labels);
@@ -411,13 +411,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.tableLabelsRows = [...this.labels];
     
     // graph에 추가 (node이면 그냥 추가, but edge는 추가 안함)
-    if( target.type === 'NODE' ){
+    if( target.type === 'nodes' ){
       if( this.cy.$api.view !== undefined ) this.cy.$api.view.removeHighlights();
       this.cy.elements(':selected').unselect();
       this.cy.center();
       let ele = this.cy.add({
         group: 'nodes',
-        data: { id: target.oid, labels: ['NODE'], name: target.name, size: 0, props: target.properties },
+        data: { id: target.id, labels: ['NODE'], name: target.name, size: 0, props: target.properties },
         selectable: true, selected: true
       });
       // nodes 개수 증가

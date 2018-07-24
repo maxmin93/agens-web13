@@ -17,7 +17,7 @@ import { AgensUtilService } from '../../services/agens-util.service';
 import * as CONFIG from '../../global.config';
 
 import { IResultDto, IResponseDto } from '../../models/agens-response-types';
-import { IGraph, ILabel, INode, IEdge, IRecord, IColumn, IRow } from '../../models/agens-data-types';
+import { IGraph, ILabel, INode, IEdge, IStyle, IRecord, IColumn, IRow } from '../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import { IProject } from '../../models/agens-manager-types';
 
@@ -33,7 +33,6 @@ import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 import { LabelStyleSettingDialog } from './dialogs/label-style-setting.dialog';
 import { ImageExportDialog } from './dialogs/image-export.dialog';
 
-declare var $: any;
 declare var CodeMirror: any;
 declare var agens: any;
 
@@ -47,11 +46,13 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   private subscription: Subscription = undefined;
   public project: any = undefined;
 
+  // controll whether make buttons to able or disable
+  isLoading: boolean = false;
   // CodeMirror Handler
   editor: any = undefined;
   // CodeMirror Editor : initial value
   query:string =
-`
+`match path=(a:customer)-[]->(b:"order")-[]->(c:product) return path, a, b, c limit 5;
  `;
 
   // core/query API 결과
@@ -63,10 +64,13 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   private resultExpandDto: IResultDto = undefined;
   private resultExpandGraph: IGraph = undefined;
 
+  // pallets : Node 와 Edge 라벨별 color 셋
+  labelColors: any[] = [];
+  colorIndex: number = -1;
+
   initWindowHeight:number = 0;
 
   currProject: IProject = undefined;
-
 
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
 
@@ -112,9 +116,11 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     // keyup event
     this.editor.on('keyup', function(cm, e){      
       // console.log('this.editor is keyup:', e.keyCode );
-      if( e.keyCode == 13 ) this.cy.resize();
-    });
+      if( e.keyCode == 13 ) agens.cy.resize();
+    });      
 
+    // pallets 생성 : luminosity='dark'
+    this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);    
   }
 
 
@@ -165,7 +171,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   runQuery() {
 
     this.queryResult.toggleTimer(true);
-/*
+    this.isLoading = true;
+
     let sql:string = this.makeupSql(<string> this.editor.getValue());
     if( sql.length < 5 ) return;
 
@@ -178,6 +185,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.queryResult.setData(<IResponseDto>x);
       // this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});
     });
+
     result.graph$.subscribe((x:IGraph) => {
       this.resultGraph = x;
       this.resultGraph.labels = new Array<ILabel>();
@@ -185,25 +193,41 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultGraph.edges = new Array<IEdge>();
     });
     result.labels$.subscribe((x:ILabel) => {
+      x.scratch['_style'] = <IStyle>{ width: undefined, title: undefined
+          , color: this.labelColors[ (this.colorIndex++)%CONFIG.MAX_COLOR_SIZE ] };
       this.resultGraph.labels.push( x );
+      this.queryGraph.addLabel( x );
     });
-    result.nodes$.subscribe((x:INode) => {
-      let ele:Node = <Node>x;
-      ele.setNeighbors(this.resultGraph.labels);
-      this.resultGraph.nodes.push( ele );
-      this.queryGraph.addNode( ele );
+    result.nodes$.subscribe((x:INode) => {    
+      // setNeighbors from this.resultGraph.labels;
+      x.scratch['_neighbors'] = new Array<string>();
+      this.resultGraph.labels
+        .filter(val => val.type == 'nodes' && val.name == x.data.labels[0])
+        .map(label => {
+          x.scratch['_neighbors'] += label.neighbors;
+          x.scratch['_style'] = label.scratch['_style'];
+        });
+
+      this.resultGraph.nodes.push( x );
+      this.queryGraph.addNode( x );
     });
     result.edges$.subscribe((x:IEdge) => {
-      let ele:Edge = <Edge>x;
-      this.resultGraph.edges.push( ele );
-      this.queryGraph.addEdge( ele );
+      this.resultGraph.labels
+        .filter(val => val.type == 'edges' && val.name == x.data.labels[0])
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+        });
+
+      this.resultGraph.edges.push( x );
+      this.queryGraph.addEdge( x );
     });
+
     result.record$.subscribe((x:IRecord) => {
       this.resultRecord = x;
       this.resultRecord.columns = new Array<IColumn>();
       this.resultRecord.rows = new Array<IRow>();
     });
-    result.colmuns$.subscribe((x:IColumn) => {
+    result.columns$.subscribe((x:IColumn) => {
       this.resultRecord.columns.push( x );
     });
     result.rows$.subscribe((x:IRow) => {
@@ -211,27 +235,30 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
 
     concat( result.info$.asObservable(), result.graph$.asObservable(),
-          result.labels$.asObservable(), result.nodes$.asObservable(), result.edges$.asObservable() )
+          result.labels$.asObservable(), result.nodes$.asObservable() ) //, result.edges$.asObservable() )
     .subscribe({
       next: data => {
       },
       error: (err) => {
       },
       complete: () => {
+        this.isLoading = false;
+        // this.queryGraph.labels = [...this.resultGraph.labels];
         this.queryGraph.refresh();
-        this.queryTable.setData( this.resultRecord );
+        // this.queryTable.setData( this.resultRecord );
       }
     });
 
     this.subscription = this._api.core_query( sql );
-*/    
   }
 
   // when button "STOP" click
   stopQuery(){
     // query unsubscribe
-    if( this.subscription ) this.subscription.unsubscribe();
-
+    if( this.subscription ){
+      this.subscription.unsubscribe();
+    }
+    this.isLoading = false;
     this.queryResult.abort();
   }
 

@@ -18,14 +18,15 @@
           (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
       </form>
 
+      <!-- RESULT : progress-bar & message -->
       <app-query-result #queryResult></app-query-result>
   </div>
 
   <!-- GRAPH -->
-  <app-query-graph #queryGraph [data]="resultGraph"></app-query-graph>
+  <app-query-graph #queryGraph></app-query-graph>
 
   <!-- TABLE -->
-  <app-query-table #queryTable [data]="resultRecord"></app-query-table>
+  <app-query-table #queryTable></app-query-table>
 
 </div>
 

@@ -104,43 +104,33 @@
 
   agens.styles = {
     nodeLabel: function(e){
-      if( e.scratch('_style') !== undefined ){
-        if( e.scratch('_style').title !== null )
-          return e.data('props').hasOwnProperty(e.scratch('_style').title) ? 
-                  e.data('props')[e.scratch('_style').title] : '';
-      }
+      if( e.scratch('_style') && e.scratch('_style').title )
+        return e.data('props').hasOwnProperty(e.scratch('_style').title) ? e.data('props')[e.scratch('_style').title] : '';
       return e.data('name');
     },
     nodeColor: function(e){
-      if( e.scratch('_style') !== undefined ){
-        if( e.scratch('_style').color !== null ) return e.scratch('_style').color;
-      }
+      if( e.scratch('_style') && e.scratch('_style').color ) 
+        return e.scratch('_style').color;
       return '#68bdf6';
     },
     nodeWidth: function(e){
-      if( e.scratch('_style') !== undefined ){
-        if( e.scratch('_style').width !== null ) return e.scratch('_style').width;
-      }
+      if( e.scratch('_style') && e.scratch('_style').width ) 
+        return e.scratch('_style').width;
       return '55px';
     },
     edgeLabel: function(e){
-      if( e.scratch('_style') !== undefined ){
-        if( e.scratch('_style').title !== null )
-          return e.data('props').hasOwnProperty(e.scratch('_style').title) ? 
-                  e.data('props')[e.scratch('_style').title] : '';
-      }
+      if( e.scratch('_style') && e.scratch('_style').title )
+        return e.data('props').hasOwnProperty(e.scratch('_style').title) ? e.data('props')[e.scratch('_style').title] : '';
       return e.data('name');
     },
     edgeColor: function(e){
-      if( e.scratch('_style') !== undefined ){
-        if( e.scratch('_style').color !== null ) return e.scratch('_style').color;
-      }
+      if( e.scratch('_style') && e.scratch('_style').color ) 
+        return e.scratch('_style').color;
       return '#a5abb6';
     },
     edgeWidth: function(e){
-      if( e.scratch('_style') !== undefined ){
-        if( e.scratch('_style').width !== null ) return e.scratch('_style').width;
-      }
+      if( e.scratch('_style') && e.scratch('_style').width ) 
+        return e.scratch('_style').width;
       return '2px';
     }
   };

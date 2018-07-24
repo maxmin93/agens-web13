@@ -6,7 +6,7 @@ import { all } from '../../../node_modules/@types/q';
 export class Label implements ILabel {
   readonly group: string = 'labels';      // group == 'labels'
 
-  oid: string;
+  id: string;
   type: string;       // type = { nodes, edges }
   name: string = '';
   owner: string = '';
@@ -23,9 +23,9 @@ export class Label implements ILabel {
     _style?: IStyle;          // styles (user property appended after API call)
   };
 
-  constructor(oid:string, type:string){
+  constructor(id:string, type:string){
     this.group = 'labels';
-    this.oid = oid;
+    this.id = id;
     this.type = type;
   }
 

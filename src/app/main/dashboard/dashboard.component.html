@@ -29,11 +29,12 @@
         <div id="div-canvas" #divCanvas class="card-dashboard-meta-graph-canvas"></div>
         <div class="card-dashboard-meta-info">
             <ul>
-                <li><span class="span-info">TYPE: </span>{{selectedLabel.type}}</li>
-                <li><span class="span-info">NAME: </span><strong>{{selectedLabel.name}}</strong></li>
-                <li><span class="span-info">OWNER: </span>{{selectedLabel.owner}}</li>
-                <li><span class="span-info">SIZE: </span>{{selectedLabel.size | number}}</li>
-                <li><span class="span-info">DESC: </span>{{selectedLabel.desc}}</li>
+                <li><span class="span-info">type: </span>{{selectedLabel.type}}</li>
+                <li><span class="span-info">id: </span>{{selectedLabel.id}}</li>
+                <li><span class="span-info">name: </span><strong>{{selectedLabel.name}}</strong></li>
+                <li><span class="span-info">owner: </span>{{selectedLabel.owner}}</li>
+                <li><span class="span-info">size: </span>{{selectedLabel.size | number}}</li>
+                <li><span class="span-info">desc: </span>"{{selectedLabel.desc}}"</li>
             </ul>
             <a (click)="openInputCreateLabelDialog()"><span>Create Label</span></a>
         </div>
@@ -50,7 +51,7 @@
                 (select)="onSelectTableLabels($event)"
                 >
                 <ngx-datatable-column name="TYPE"></ngx-datatable-column>
-                <ngx-datatable-column name="OID"></ngx-datatable-column>
+                <ngx-datatable-column name="ID"></ngx-datatable-column>
                 <ngx-datatable-column name="NAME"></ngx-datatable-column>
                 <ngx-datatable-column name="SIZE">
                     <ng-template let-row="row" ngx-datatable-cell-template>

@@ -8,6 +8,11 @@ import { MatSelectModule } from '@angular/material/select';
 import * as CONFIG from '../../../global.config';
 import { ILabel, IProperty } from '../../../models/agens-data-types';
 
+const EMPTY_LABEL: ILabel = { 
+  group: 'labels', id: '', type: '', name: '', owner: '', desc: '', size: 0
+  , properties: [], neighbors: [], scratch: { size_not_empty: 0, is_dirty: true }
+};
+
 @Component({
   selector: 'app-input-create-label-dialog',
   template: `
@@ -79,10 +84,7 @@ export class InputCreateLabelDialog implements OnInit {
 
   isDuplicated: boolean = false;
 
-  newLabel: ILabel = { 
-      group: 'labels', type: '', oid: '', name: '', size: 0, desc: '', owner: '',
-      neighbors: new Array<string>(), properties: new Array<IProperty>(), scratch: { size_not_empty: 0, is_dirty: true }
-    };
+  newLabel: ILabel = EMPTY_LABEL;
 
   constructor(
     public dialogRef: MatDialogRef<InputCreateLabelDialog>,

@@ -49,9 +49,9 @@
               "node_modules/klayjs/klay.js",
               "node_modules/cytoscape-klay/cytoscape-klay.js",
               "node_modules/cytoscape-panzoom/cytoscape-panzoom.js",
-              "node_modules/cytoscape-qtip2/cytoscape-qtip.js",
               "node_modules/cytoscape-undo-redo/cytoscape-undo-redo.js",
               "node_modules/cytoscape-view-utilities/cytoscape-view-utilities.js",
+
               "src/assets/js/cytoscape-markov-cluster.js",
               "src/assets/js/agens-graph.js"
             ]
