@@ -1,7 +1,7 @@
 .card-dashboard {                
         
   .card-dashboard-admin-info {                
-
+        width: "50%";
           .card-dashboard-admin-info-list {                        
                   display: flex; 
                   
@@ -60,12 +60,12 @@
   }
   
   .card-dashboard-meta-graph { 
-          width: 100%;                 
+          width: 50%;                 
           height: auto;
           min-height: 410px;    
 
           .card-dashboard-meta-graph-canvas { 
-                  height: 310px; 
+                  height: 600px; 
           }
 
           .card-dashboard-meta-info {

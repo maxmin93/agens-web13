@@ -4,6 +4,7 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 
 // materials
 import { MatDialog, MatSnackBar, MatButtonToggle, MatInput } from '@angular/material';
+import { MatTabGroup } from '@angular/material/tabs';
 
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 import { PrettyJsonModule } from 'angular2-prettyjson';
@@ -32,6 +33,8 @@ import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 import { LabelStyleSettingDialog } from './dialogs/label-style-setting.dialog';
 import { ImageExportDialog } from './dialogs/image-export.dialog';
+import { StatisticsComponent } from './components/statistics/statistics.component';
+import { MetaGraphComponent } from './components/meta-graph/meta-graph.component';
 
 declare var CodeMirror: any;
 declare var agens: any;
@@ -73,10 +76,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   currProject: IProject = undefined;
 
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
-
   @ViewChild('queryResult') queryResult: QueryResultComponent;
+
+  @ViewChild('resultTapGroup') tapGroup: MatTabGroup;
+
+  @ViewChild('metaGraph') metaGraph: MetaGraphComponent;
   @ViewChild('queryGraph') queryGraph: QueryGraphComponent;
   @ViewChild('queryTable') queryTable: QueryTableComponent;
+  @ViewChild('statistics') statistics: StatisticsComponent;
 
   constructor(    
     private _angulartics2: Angulartics2,    
@@ -108,7 +115,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
     // CodeMirror : initial value
     this.editor.setValue( this.query );
-    this.editor.setSize('100%', '120px');
+    this.editor.setSize('100%', '60px');
 
     //
     // ** NOTE: 이거 안하면 이 아래쪽에 Canvas 영역에서 마우스 포커스 miss-position 문제 발생!!
@@ -123,7 +130,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);    
   }
 
-
+  tabChanged($event){
+    console.log( 'tabChanged:', $event.index );
+    switch( $event.index ){
+      case 0: this.metaGraph.resize(); break;
+      case 1: this.queryGraph.resize(); break;
+      case 3: this.statistics.resize(); break;
+    }
+  }
 
   /////////////////////////////////////////////////////////////////
   // Editor Controllers

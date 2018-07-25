@@ -49,6 +49,8 @@ import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-la
 import { QueryResultComponent } from './main/graph/components/query-result/query-result.component';
 import { QueryGraphComponent } from './main/graph/components/query-graph/query-graph.component';
 import { QueryTableComponent } from './main/graph/components/query-table/query-table.component';
+import { MetaGraphComponent } from './main/graph/components/meta-graph/meta-graph.component';
+import { StatisticsComponent } from './main/graph/components/statistics/statistics.component';
 
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
@@ -69,8 +71,10 @@ import { QueryTableComponent } from './main/graph/components/query-table/query-t
     InputCreateLabelDialog,
 
     QueryResultComponent,
+    MetaGraphComponent,
     QueryGraphComponent,
     QueryTableComponent,
+    StatisticsComponent,
 
     // LabelStyleSettingDialog,
     // ImageExportDialog,

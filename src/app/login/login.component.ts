@@ -19,7 +19,7 @@ import * as CONFIG from '../global.config';
 })
 export class LoginComponent implements OnInit {
 
-  private waitTime: number = 3000;
+  private waitTime: number = 2000;
   private returnUrl: string;
 
   constructor(

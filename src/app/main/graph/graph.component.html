@@ -22,11 +22,23 @@
       <app-query-result #queryResult></app-query-result>
   </div>
 
-  <!-- GRAPH -->
-  <app-query-graph #queryGraph></app-query-graph>
-
-  <!-- TABLE -->
-  <app-query-table #queryTable></app-query-table>
-
+  <mat-tab-group #resultTapGroup [selectedIndex]="1" (selectedTabChange)="tabChanged($event)">
+    <mat-tab label="Meta"> 
+        <!-- META(0) -->
+        <app-meta-graph #metaGraph></app-meta-graph>
+    </mat-tab>
+    <mat-tab label="Graph">
+        <!-- GRAPH(1) -->
+        <app-query-graph #queryGraph></app-query-graph>
+    </mat-tab>
+    <mat-tab label="Table" [disabled]="false"> 
+        <!-- TABLE(2) -->
+        <app-query-table #queryTable></app-query-table>
+    </mat-tab>
+    <mat-tab label="Statistic" [disabled]="false">
+        <!-- STATIC(3) -->
+        <app-statistics #statistics></app-statistics>
+    </mat-tab>
+    </mat-tab-group>
 </div>
 

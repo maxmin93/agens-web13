@@ -44,9 +44,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   labelColors: any[] = [];
 
   // call API
-  data: any;
+  schema: any;
   subscription: Subscription;
-  datasource: IDatasource;
+  datasource: IDatasource = undefined;
   graph: IGraph;
   labels: Array<ILabel>;
 
@@ -80,7 +80,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   
   // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
   @ViewChild('tableLabels') tableLabels: DatatableComponent;
-  @ViewChild('tableProperties') tableProperties: DatatableComponent;
+  // @ViewChild('tableProperties') tableProperties: DatatableComponent;
     
   @ViewChild('progressBar') progressBar: ElementRef;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
@@ -190,33 +190,33 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   callCoreSchema(){
 
     this.toggleProgress(true);
-    this.data = this._api.getSchemaSubjects();
+    this.schema = this._api.getSchemaSubjects();
 
-    this.data.info$.subscribe({
+    this.schema.info$.subscribe({
       next: (x:ISchemaDto) => {
         // console.log( 'this.schema.info$.subscribe:', x );        
         this.datasource = x.datasource;
         this.labels = x.labels;
       }
     });
-    this.data.graph$.subscribe( (x:IGraph) => {
+    this.schema.graph$.subscribe( (x:IGraph) => {
       // console.log( 'this.schema.graph$.subscribe:', x );
       this.graph = x;
       this.graph.labels = new Array<ILabel>();
       this.graph.nodes = new Array<INode>();
       this.graph.edges = new Array<IEdge>();
     });
-    this.data.labels$.subscribe( (x:ILabel) => {
+    this.schema.labels$.subscribe( (x:ILabel) => {
       // console.log( 'this.schema.labels$.subscribe:', x );
       this.graph.labels.push(x);
     });
-    this.data.nodes$.subscribe( (x:INode) => {
+    this.schema.nodes$.subscribe( (x:INode) => {
       // console.log( 'this.schema.nodes$.subscribe:', x );
       this.injectElementStyle( x );
       this.graph.nodes.push(x);
       this.cy.add(x);
     });
-    this.data.edges$.subscribe( (x:IEdge) => {
+    this.schema.edges$.subscribe( (x:IEdge) => {
       // console.log( 'this.schema.edges$.subscribe:', x );
       this.injectElementStyle( x );
       this.graph.edges.push(x);
@@ -224,8 +224,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     });
 
     // 작업 직렬화 : complete 시 post 작업 수행
-    concat( this.data.info$.asObservable(), this.data.graph$.asObservable()
-        , this.data.labels$.asObservable(), this.data.nodes$.asObservable(), this.data.edges$.asObservable() )
+    concat( this.schema.info$.asObservable(), this.schema.graph$.asObservable()
+        , this.schema.labels$.asObservable(), this.schema.nodes$.asObservable(), this.schema.edges$.asObservable() )
       .subscribe({
         complete: () => {
           this.showGraph();
@@ -275,15 +275,15 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     if( ele.group == 'nodes' )
       ele.scratch._style = {
           color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
-          , width: (50 + Math.floor(Math.log10(ele.data.size+1))*10) +'px'
+          , width: (50 + Math.floor(Math.log10(ele.data['size']+1))*10) +'px'
           , title: null
-      };
+        };
     else if( ele.group == 'edges' )
       ele.scratch._style = {
           color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
-          , width: (2 + Math.floor(Math.log10(ele.data.size+1))*2) +'px'
+          , width: (2 + Math.floor(Math.log10(ele.data['size']+1))*2) +'px'
           , title: null
-      };
+        };
     this.colorIndex += 1;
   }
 
@@ -364,6 +364,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     if( idx >= 0 ){
       this.labels.splice(idx, 1);
       this.tableLabelsRows = [...this.labels];  //_.clone(this.labels);
+      // label 개수 감소
+      if( target.type == 'nodes' ) this.infos['nodes_size_total'] -= 1;
+      else this.infos['edges_size_total'] -= 1;
     }
 
     this.tablePropertiesRows = [];
@@ -417,7 +420,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       this.cy.center();
       let ele = this.cy.add({
         group: 'nodes',
-        data: { id: target.id, labels: ['NODE'], name: target.name, size: 0, props: target.properties },
+        schema: { id: target.id, labels: ['NODE'], name: target.name, size: 0, props: target.properties },
         selectable: true, selected: true
       });
       // nodes 개수 증가

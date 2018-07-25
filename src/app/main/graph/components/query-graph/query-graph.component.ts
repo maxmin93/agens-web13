@@ -4,7 +4,7 @@ import { MatDialog, MatButtonToggle } from '@angular/material';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
-import { IGraph, ILabel, IElement, INode, IEdge } from '../../../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 
 import * as CONFIG from '../../../../global.config';
@@ -141,8 +141,7 @@ export class QueryGraphComponent implements OnInit {
   refresh(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
-    // refresh style
-    this.cy.style(agens.graph.stylelist['dark']).update();
+    this.cy.style().update();
     if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
   }
 
@@ -227,11 +226,11 @@ export class QueryGraphComponent implements OnInit {
 
     // 1) ILabelType.$$style 변경,
     let label:ILabel = this.labels.filter(function(val){ return styleChange.target === val.id; })[0];
-    label['$$style'] = { color: styleChange.color, size: styleChange.size+'px', label: styleChange.title };
+    label.scratch['_style'] = <IStyle>{ color: styleChange.color, width: styleChange.size+'px', title: styleChange.title };
 
     // 2) graphAgens.elements() 중 해당 label 에 대한 $$style 변경
     let elements = [];
-    if( label.type.valueOf() === 'NODE' ) elements = this.cy.nodes();
+    if( label.type == 'nodes' ) elements = this.cy.nodes();
     else elements = this.cy.edges();
     for( let i=0; i<elements.length; i+= 1){
       if( elements[i].data('labels').indexOf(label.name) >= 0 ){
