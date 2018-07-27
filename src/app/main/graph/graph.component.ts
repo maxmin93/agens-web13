@@ -74,6 +74,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   initWindowHeight:number = 0;
 
   currProject: IProject = undefined;
+  currentTabIndex: number = -1;
 
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
   @ViewChild('queryResult') queryResult: QueryResultComponent;
@@ -131,11 +132,21 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   tabChanged($event){
-    console.log( 'tabChanged:', $event.index );
-    switch( $event.index ){
-      case 0: this.metaGraph.resize(); break;
-      case 1: this.queryGraph.resize(); break;
-      case 3: this.statistics.resize(); break;
+    this.currentTabIndex = $event.index;
+  }
+
+  tabAnimationDone(){
+    console.log( `tabChangedDone: index = ${this.currentTabIndex}` );
+    switch( this.currentTabIndex ){
+      case 0: 
+          Promise.resolve(null).then(() => this.metaGraph.resize() ); 
+          break;
+      case 1: 
+          Promise.resolve(null).then(() => this.queryGraph.resize() ); 
+          break;
+      case 3: 
+          Promise.resolve(null).then(() => this.statistics.resize() ); 
+          break;
     }
   }
 

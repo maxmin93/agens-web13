@@ -1,5 +1,7 @@
 <div id="top" class="card-dashboard content scrollbar">
 
+<mat-grid-list cols="2" rowHeight="1:1">
+<mat-grid-tile>
     <div class="card card-dashboard-admin-info">
         <h2>Datasource</h2>
         <div class="card-dashboard-admin-info-list">
@@ -21,40 +23,40 @@
                 </div>                  
             </div>
         </div>
-        
+
         <div #progressBar style='visibility:hidden;'>
             <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
 
         <div class="card card-dashboard-meta-table-label">       
-                <h2>Labels List</h2>
-                <ngx-datatable #tableLabels class="material"
-                    [columnMode]="'force'" [limit]="5"
-                    [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
-                    [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
-                    [selected]="selectedLabels" [selectionType]="'single'"
-                    (select)="onSelectTableLabels($event)"
-                    >
-                    <ngx-datatable-column name="TYPE"></ngx-datatable-column>
-                    <ngx-datatable-column name="ID"></ngx-datatable-column>
-                    <ngx-datatable-column name="NAME"></ngx-datatable-column>
-                    <ngx-datatable-column name="SIZE">
-                        <ng-template let-row="row" ngx-datatable-cell-template>
-                            <span>{{row.size | number}}</span>
-                        </ng-template>
-                    </ngx-datatable-column>
-                    <ngx-datatable-column name="Remove" [sortable]="false">
-                        <ng-template let-row="row" ngx-datatable-cell-template>
-                            <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
-                                <mat-icon>delete</mat-icon>
-                            </a>
-                        </ng-template>
-                    </ngx-datatable-column>            
-                </ngx-datatable>
-            </div>
-    
-    </div>
-
+            <h2>Labels List</h2>
+            <ngx-datatable #tableLabels class="material"
+                [columnMode]="'force'" [limit]="5"
+                [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
+                [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
+                [selected]="selectedLabels" [selectionType]="'single'"
+                (select)="onSelectTableLabels($event)"
+                >
+                <ngx-datatable-column name="TYPE"></ngx-datatable-column>
+                <ngx-datatable-column name="ID"></ngx-datatable-column>
+                <ngx-datatable-column name="NAME"></ngx-datatable-column>
+                <ngx-datatable-column name="SIZE">
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                        <span>{{row.size | number}}</span>
+                    </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="Remove" [sortable]="false">
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                        <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
+                            <mat-icon>delete</mat-icon>
+                        </a>
+                    </ng-template>
+                </ngx-datatable-column>            
+            </ngx-datatable>
+        </div>    
+    </div>    
+</mat-grid-tile>
+<mat-grid-tile>
     <div class="card card-dashboard-meta-graph">
         <h2>Schema Graph</h2>
         <div id="div-canvas" #divCanvas class="card-dashboard-meta-graph-canvas"></div>
@@ -69,19 +71,8 @@
             </ul>
             <a (click)="openInputCreateLabelDialog()"><span>Create Label</span></a>
         </div>
-    </div>     
-
-    <div class="wrapped-box-flex card-dashboard-meta-table">
-<!--
-        <div class="card card-dashboard-meta-table-label">
-            <h2>Properties of Label</h2>
-            <ngx-datatable #tableProperties class="material" 
-                [columnMode]="'force'" [limit]="5"
-                [rows]='tablePropertiesRows' [columns]='tablePropertiesColumns'                
-                [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'">
-            </ngx-datatable>            
-        </div>
--->        
-    </div>
+    </div>             
+</mat-grid-tile>
+</mat-grid-list>
 
 </div>

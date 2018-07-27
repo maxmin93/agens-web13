@@ -58,6 +58,7 @@ export class MetaGraphComponent implements OnInit {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
+        container: document.getElementById('meta-canvas'),
         selectionType: 'additive',    // 'single' or 'additive'
         boxSelectionEnabled: true, // if single then false, else true
         useCxtmenu: true,          // whether to use Context menu or not
@@ -137,10 +138,12 @@ export class MetaGraphComponent implements OnInit {
     this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
   }
-
   resize(){
     this.cy.resize();
   }
 
-
+  refreshCanvas(){
+    this.refresh();
+    this.resize();
+  }
 }

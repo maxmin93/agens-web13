@@ -58,12 +58,15 @@ export class StatisticsComponent implements OnInit {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
+        container: document.getElementById('statistics-canvas'),
         selectionType: 'additive',    // 'single' or 'additive'
         boxSelectionEnabled: true, // if single then false, else true
         useCxtmenu: true,          // whether to use Context menu or not
         hideNodeTitle: true,       // hide nodes' title
         hideEdgeTitle: true,       // hide edges' title
       });
+
+    console.log( 'Statistics.ngAfterViewInit');
   }
 
   /////////////////////////////////////////////////////////////////
@@ -142,5 +145,8 @@ export class StatisticsComponent implements OnInit {
     this.cy.resize();
   }
 
-
+  refreshCanvas(){
+    this.refresh();
+    this.resize();
+  }
 }

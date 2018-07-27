@@ -5,7 +5,7 @@
             <mat-icon>refresh</mat-icon></a>
     </div>
 
-    <h2>GRAPH <small>Result</small></h2>
+    <h2>META <small>Graph</small></h2>
 
     <div class="wrapped-box">
         <div #progressBar style='visibility:hidden;'>
@@ -25,7 +25,7 @@
         </ng-template>
 
         <!-- Graph content -->
-        <div id="graph-agens" class="gra_content" #divCanvas 
+        <div id="meta-canvas" class="gra_content" #divCanvas style="z-index: 8888"
             [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
         </div>
 

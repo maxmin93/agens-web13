@@ -370,17 +370,16 @@
   // ==> cy 인스턴스 생성 후 cy.scratch('_config')로 저장됨
   //     : 스타일 함수 등에서는 e._private.cy.scratch('_config') 로 액세스 가능
   agens.graph.defaultSetting = {
-    container: document.getElementById('agens-graph'),
-    // style: agens.graph.stylelist['dark'],
-    elements: { nodes: [], edges: [] },   // agens.graph.demoData[0],
+    elements: { nodes: [], edges: [] },
+    style: undefined,       // agens.graph.stylelist['dark'],
     layout: { name: 'euler',
         fit: true, padding: 30, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: true, animationDuration: 2800, maxSimulationTime: 2800, 
         ready: function(){}, stop: function(){},
-        // for euler
-        springLength: edge => 120, springCoeff: edge => 0.0008,
+        springLength: edge => 120, springCoeff: edge => 0.0008,        // for euler
       },
+
     // initial viewport state:
     zoom: 1,
     pan: { x: 0, y: 0 },
@@ -425,6 +424,7 @@
   // 사용자 설정
   // ==> graphFactory(target, options) 의 options 입력으로 사용됨
   agens.graph.customSetting = {
+    container: document.getElementById('agens-graph'),
     selectionType: 'single',    // 'single' or 'multiple'
     boxSelectionEnabled: false, // if single then false, else true
     useCxtmenu: true,           // whether to use Context menu or not
@@ -507,6 +507,8 @@
     cy.on('tap', function(e){
       // 바탕화면 탭 이벤트
       if( e.target === cy ){
+        console.log( 'click tap', cy.scratch('_config') );
+
         // cancel selected and highlights
         if( cy.$api.view !== undefined ) cy.$api.view.removeHighlights();
         cy.$(':selected').unselect();
@@ -519,7 +521,7 @@
       // 노드 또는 에지에 대한 클릭 이벤트
       else{
         if( !e.target.isNode() && !e.target.isEdge() ) return;
-
+        
         // user Function
         if( !_.isNil(window['angularComponentRef'].cyElemCallback) )
           (window['angularComponentRef'].cyElemCallback)(e.target);
@@ -547,12 +549,12 @@
     // });
 
     cy.cyQtipMenuCallback = function( id, targetName ){
-      let cyTarget = cy.elements(`node[id='${id}']`);
-      if( cyTarget.size() == 0 ) return;
+      let targets = cy.getElementById(id);
+      if( targets.size() == 0 ) return;
 
       // user Function
       if( !_.isNil(window['angularComponentRef'].cyQtipMenuCallback) )
-        (window['angularComponentRef'].cyQtipMenuCallback)(cyTarget, targetName);
+        (window['angularComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
     };
 
     // ==========================================

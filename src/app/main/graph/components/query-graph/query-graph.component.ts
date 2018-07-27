@@ -58,6 +58,7 @@ export class QueryGraphComponent implements OnInit {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
+        container: document.getElementById('graph-canvas'),
         selectionType: 'additive',    // 'single' or 'additive'
         boxSelectionEnabled: true, // if single then false, else true
         useCxtmenu: true,          // whether to use Context menu or not
@@ -82,6 +83,8 @@ export class QueryGraphComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
+    console.log( 'query-graph.ele.click', target);
+
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
 
@@ -141,7 +144,7 @@ export class QueryGraphComponent implements OnInit {
   refresh(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
-    this.cy.style().update();
+    this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
   }
 

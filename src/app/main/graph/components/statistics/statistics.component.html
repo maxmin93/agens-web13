@@ -1,7 +1,47 @@
 <mat-grid-list cols="2" rowHeight="2:1">
   <mat-grid-tile [rowspan]="2">
-    <!-- Graph content -->
-    <div id="graph-agens" class="gra_content" #divCanvas></div>
+    <div id="graphCard" class="card card__graphdata-graph ">
+        <div id="agens-graph-toolbar" class="card__icon-group">
+            <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                <mat-icon>refresh</mat-icon></a>
+        </div>
+    
+        <h2>CUBE <small>Graph</small></h2>
+    
+        <div class="wrapped-box">
+            <div #progressBar style='visibility:hidden;'>
+              <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+            </div>
+            <!-- graph element info Box -->
+            <ng-template [ngIf]="selectedElement">
+                <div class="card__graphdata-graph-info scrollbar" id="slide-toggle">
+                    <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                        [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
+                        <span>LOCATION LOCK</span></mat-slide-toggle>
+                    <h4><span class="span__info">Label</span>{{ selectedElement.data('labels') [0] }} [{{ selectedElement.id() }}]</h4>
+                    <p><span class="span__info">Name</span>{{ selectedElement.data('name') }}</p>
+                    <p><span class="span__info">Data</span></p>
+                    <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+                </div>
+            </ng-template>
+    
+            <!-- Graph content -->
+            <div id="statistics-canvas" class="gra_content" #divCanvas style="z-index: 8888"
+                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
+            </div>
+    
+            <!-- Graph.Meta : Labels content -->
+            <div class="card__graphdata-graph-label">
+                <mat-chip-list id="agens-graph-labels">
+                    <mat-chip *ngFor="let label of labels" [selected]="true" style="z-index: 9"
+                        (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
+                        <span *ngIf="label.type=='nodes'" class="nodeType"><i class="material-icons">location_on</i>{{label.name}} ({{label.size}})</span>
+                        <span *ngIf="label.type=='edges'" class="edgeType"><i class="material-icons">trending_up</i>{{label.name}} ({{label.size}})</span>
+                    </mat-chip>
+                </mat-chip-list>
+            </div>    
+        </div>
+    </div>    
   </mat-grid-tile>
   <mat-grid-tile>
     <h4>chart</h4>
