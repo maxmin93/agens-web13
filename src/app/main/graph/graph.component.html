@@ -1,45 +1,48 @@
-<div id="top" class="content scrollbar">
+<div id="top" class="content">
 
   <!-- editor -->
-  <div id="queryCard" class="card">
-      <div class="card__icon-group">
-          <a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()"><span>Run</span> <mat-icon>play_arrow</mat-icon></a>
-          <a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()"><span>Stop</span> <mat-icon>stop</mat-icon></a>
+    <div id="queryCard">
+        <div class="row-center">
+            <h4>QUERY <strong>EDITOR</strong><small>(CYPHER OR ANSI-SQL)</small></h4>
+            <ul class="row">
+                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</button></li>
+                <li><button mat-button [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</button></li>
+                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</button></li>
+                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</button></li>
+                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</button></li>
+            </ul>
+        </div>
+        
+        <p></p>
+        <!-- REQUEST : cypher query -->
+        <form class="border padding">
+            <textarea placeholder="input Cypher Query.." 
+            id="agensQuery" #queryEditor type="text" name="query"
+            (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
+        </form>
 
-          <a [ngClass]="{ 'disabled-btn': isLoading }" matTooltip="New project" matTooltipPosition="above" (click)="clearProject()"><mat-icon>add</mat-icon></a>
-          <a [ngClass]="{ 'disabled-btn': isLoading }" matTooltip="Open project" matTooltipPosition="above" (click)="openProjectOpenDialog()"><mat-icon>folder_open</mat-icon></a>
-          <a [ngClass]="{ 'disabled-btn': isLoading }" matTooltip="Save project" matTooltipPosition="above" (click)="openProjectSaveDialog()"><mat-icon>save</mat-icon></a>
-      </div>
-      <h2>Query <small>(cypher or ansi-sql)</small> </h2>
-      <!-- REQUEST : cypher query -->
-      <form>
-      <textarea placeholder="input Cypher Query.." 
-          id="agensQuery" #queryEditor type="text" 
-          (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
-      </form>
+        <!-- RESULT : progress-bar & message -->
+        <app-query-result #queryResult></app-query-result>
+    </div>
 
-      <!-- RESULT : progress-bar & message -->
-      <app-query-result #queryResult></app-query-result>
-  </div>
-
-  <mat-tab-group #resultTapGroup [selectedIndex]="1" 
-        (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
-    <mat-tab label="Meta"> 
-        <!-- META(0) -->
-        <app-meta-graph #metaGraph></app-meta-graph>
-    </mat-tab>
-    <mat-tab label="Graph">
-        <!-- GRAPH(1) -->
-        <app-query-graph #queryGraph></app-query-graph>
-    </mat-tab>
-    <mat-tab label="Table" [disabled]="false"> 
-        <!-- TABLE(2) -->
-        <app-query-table #queryTable></app-query-table>
-    </mat-tab>
-    <mat-tab label="Statistic" [disabled]="false">
-        <!-- STATIC(3) -->
-        <app-statistics #statistics></app-statistics>
-    </mat-tab>
+    <mat-tab-group #resultTapGroup [selectedIndex]="1" 
+        (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()" class="m-30">
+        <mat-tab label="Meta"> 
+            <!-- META(0) -->
+            <app-meta-graph #metaGraph></app-meta-graph>
+        </mat-tab>
+        <mat-tab label="Graph">
+            <!-- GRAPH(1) -->
+            <app-query-graph #queryGraph></app-query-graph>
+        </mat-tab>
+        <mat-tab label="Table" [disabled]="false"> 
+            <!-- TABLE(2) -->
+            <app-query-table #queryTable></app-query-table>
+        </mat-tab>
+        <mat-tab label="Statistic" [disabled]="false">
+            <!-- STATIC(3) -->
+            <app-statistics #statistics></app-statistics>
+        </mat-tab>
     </mat-tab-group>
 </div>
 

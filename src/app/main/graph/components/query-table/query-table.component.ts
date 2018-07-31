@@ -8,7 +8,7 @@ import * as CONFIG from '../../../../global.config';
 @Component({
   selector: 'app-query-table',
   templateUrl: './query-table.component.html',
-  styleUrls: ['./query-table.component.scss']
+  styleUrls: ['./query-table.component.scss','../../graph.component.scss']
 })
 export class QueryTableComponent implements OnInit {
 

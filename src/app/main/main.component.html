@@ -1,23 +1,28 @@
 <!-- menu toolbar -->
 <mat-toolbar id="appToolbar">
    
-    <h1 class="header__title">{{ productTitle }}</h1>
-    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-    <!-- <h1 class="header__title">AgensBrowser</h1> -->
-    <mat-button-toggle-group #menuGroup="matButtonToggleGroup">
-        <mat-button-toggle value="main" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']" matTooltip="Meta graph" matTooltipPosition="above">
-            <mat-icon mat-list-icon>dashboard</mat-icon>
+    <h1>
+        <!-- {{ productTitle }} -->
+        <mat-icon>bubble_chart</mat-icon> AGENSBROWSER <small>WEB 1.3</small>
+    </h1>
+    <span class="example-spacer"></span>
+    <mat-button-toggle-group>
+        <mat-button-toggle value="main" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
+            <a>DASHBOARD</a>
         </mat-button-toggle>
-        <mat-button-toggle value="graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']" matTooltip="Graph query" matTooltipPosition="above">
-            <mat-icon>pie_chart</mat-icon>
+        <mat-button-toggle value="graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']">
+            <a>GRAPH</a>
         </mat-button-toggle>
-        <mat-button-toggle value="history" disabled="{{ currentMenu=='history' }}" [routerLink]="['/history']" matTooltip="Query histories" matTooltipPosition="above">
-            <mat-icon>history</mat-icon>
+        <mat-button-toggle value="history" disabled="{{ currentMenu=='history' }}" [routerLink]="['/history']">
+            <a>HISTORY</a>
         </mat-button-toggle>
-
-        <a matTooltip="show help documents" matTooltipPosition="above" href="http://bitnine.net/documentation/" target="_new">
-            <mat-icon>help</mat-icon>
-        </a>
+        <mat-button-toggle value="show help-documents" matTooltipPosition="above" > 
+            <a href="http://bitnine.net/documentation/" target="_new">DOCUMENTS</a>
+        </mat-button-toggle>
+        <mat-button-toggle>
+            <a matTooltip="Homepage" matTooltipPosition="above" href="http://bitnine.net/" target="_new"><mat-icon>home</mat-icon></a>
+        </mat-button-toggle>
+        
     </mat-button-toggle-group>
     <!-- <button id="button-logout" mat-button (click)="logout()">logout</button> -->
 

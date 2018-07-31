@@ -1,44 +1,13 @@
-/*
-.toolbar-fullscreen {display: none;}
-.toolbar-filler {flex: 1 1 auto}
-mat-toolbar a {width: 100px;}
-*/
-
 mat-toolbar { 
-  background-color: #2a475d; 
-  border-bottom: 1px solid #ccc; 
-  
-  h1 { 
-      letter-spacing: .065rem;
-      color: #eee; 
-      font-size: 17px; 
-      font-weight: 700; 
-      font-family: "Noto Sans", "Noto Sans CJK KR", sans-serif
-  }
+   background: #222e44; 
 
-  mat-button-toggle-group {
-      box-shadow: none; 
-      display: initial;
-
-      mat-button-toggle { 
-          margin: 0 4px;
-          padding: 2px 4px; 
-          outline: none; 
-          border-radius: .125rem;  
-          transition: all .5s ease;
-          mat-icon {                
-              margin-bottom: 3px;
-          }
+   h1 { 
+      font-size: 1.125rem; 
+      color: #f9f9f9;
+      
+      small { 
+         font-size: .75rem; 
+         font-weight: 400; 
       }
-
-      a { 
-          height: 31px; 
-          display: inline-block; 
-          margin: 4px 4px 0;
-          padding: 2px 4px; 
-          outline: none; 
-          vertical-align: middle; 
-          color: #aaa; 
-      }
-  }
+   }
 }

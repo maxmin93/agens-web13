@@ -14,7 +14,7 @@ declare var agens: any;
 @Component({
   selector: 'app-statistics',
   templateUrl: './statistics.component.html',
-  styleUrls: ['./statistics.component.scss']
+  styleUrls: ['./statistics.component.scss','../../graph.component.scss']
 })
 export class StatisticsComponent implements OnInit {
 

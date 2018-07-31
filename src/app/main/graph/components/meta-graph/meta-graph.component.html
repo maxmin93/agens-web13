@@ -1,36 +1,38 @@
 <!-- GRAPH -->
-<div id="graphCard" class="card card__graphdata-graph ">
-    <div id="agens-graph-toolbar" class="card__icon-group">
-        <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-            <mat-icon>refresh</mat-icon></a>
-    </div>
-
-    <h2>META <small>Graph</small></h2>
-
-    <div class="wrapped-box">
+<div id="graphCard">    
+    <div class="col">
         <div #progressBar style='visibility:hidden;'>
           <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
         <!-- graph element info Box -->
         <ng-template [ngIf]="selectedElement">
-            <div class="card__graphdata-graph-info scrollbar" id="slide-toggle">
+            <div id="slide-toggle">
                 <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
                     [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
                     <span>LOCATION LOCK</span></mat-slide-toggle>
-                <h4><span class="span__info">Label</span>{{ selectedElement.data('labels') [0] }} [{{ selectedElement.id() }}]</h4>
-                <p><span class="span__info">Name</span>{{ selectedElement.data('name') }}</p>
-                <p><span class="span__info">Data</span></p>
+                <h4><span>Label</span>{{ selectedElement.data('labels') [0] }} [{{ selectedElement.id() }}]</h4>
+                <p><span>Name</span>{{ selectedElement.data('name') }}</p>
+                <p><span>Data</span></p>
                 <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
             </div>
         </ng-template>
 
         <!-- Graph content -->
-        <div id="meta-canvas" class="gra_content" #divCanvas style="z-index: 8888"
-            [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
+        <div class="row">
+            <div id="meta-canvas" class="graph-canvas col-strech" #divCanvas
+                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
+            </div>
+            <div id="agens-graph-toolbar" class="col-side-icon">
+                <ul>
+                    <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                            <mat-icon>refresh</mat-icon></a></li>
+                </ul>
+            </div>
         </div>
+        
 
         <!-- Graph.Meta : Labels content -->
-        <div class="card__graphdata-graph-label">
+        <div>
             <mat-chip-list id="agens-graph-labels">
                 <mat-chip *ngFor="let label of labels" [selected]="true" style="z-index: 9"
                     (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">

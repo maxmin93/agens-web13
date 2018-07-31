@@ -1,19 +1,23 @@
-<div id="top" class="content scrollbar">
-  <div class="card"> 
-      <div class="card__icon-group">
+<div id="top" class="content col">
+  <div> 
+      <div class="row-center">
+        <h4>HISTORY <strong>QUERY LOGS</strong></h4>
+  
+        <div class="row-center">
           <a matTooltip="Refresh" matTooltipPosition="above" (click)="reload()"><mat-icon>refresh</mat-icon></a>
+          <span class="search">
+            <mat-icon>search</mat-icon>
+            <input
+              type='text'            
+              placeholder='Type to filter the userIP column...'
+              (keyup)='updateFilter($event)'/>
+          </span>
+        </div>
       </div>
 
-      <h2>History <small>"Query Logs"</small></h2>
-    
-      <div class="div__search wrapped-box-flex">
-        <span><i class="fa fa-search" aria-hidden="true"></i><input
-          type='text'            
-          placeholder='Type to filter the userIP column...'
-          (keyup)='updateFilter($event)'
-        /></span>
-      </div>
-      <div class="datatable-box-padding wrapped-box-flex">
+      <p></p>
+
+      <div>
         <div #progressBar style='visibility:hidden;'>
           <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
@@ -21,22 +25,20 @@
         <!-- (activate)="onActivateTableLabels($event)" -->
         <ngx-datatable #logsTable class="material" [columnMode]="'flex'"
                 [rows]="logRows" [reorderable]="reorderable" [limit]="10"
-                [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
+                [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
                 >
 
           <ngx-datatable-row-detail [rowHeight]="auto" #queryRow (toggle)="onRowDetailToggle($event)" >
             <ng-template let-row="row" ngx-datatable-row-detail-template>
               <div>
-                <div>
-                  <span class="span__row-detail-content"><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row[row._selectedColumn] }}</span>
-                </div>
+                <span class="expand-cell">{{ row[row._selectedColumn] }}</span>
               </div>
             </ng-template>
           </ngx-datatable-row-detail>
 
           <ngx-datatable-column name="ID" [flexGrow]="1">
             <ng-template let-row="row" ngx-datatable-cell-template>
-              <strong>{{row.id}}</strong>
+              <span>{{row.id}}</span>
             </ng-template>
           </ngx-datatable-column>
 
@@ -48,7 +50,7 @@
 
           <ngx-datatable-column name="Query" [flexGrow]="4">
             <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-              <button *ngIf="row.query" mat-icon-button matTooltip="Expand/Collapse Row"
+              <button *ngIf="row.query" mat-icon-button matTooltip="Expand/Collapse Row" 
                   (click)="toggleLogExpandRow(row, 'query')">
                 <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
               </button>          
@@ -64,7 +66,7 @@
 
           <ngx-datatable-column name="Message" [flexGrow]="3">
             <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-              <button *ngIf="row.message" mat-icon-button matTooltip="Expand/Collapse Row"
+              <button *ngIf="row.message" mat-icon-button matTooltip="Expand/Collapse Row" 
                   (click)="toggleLogExpandRow(row, 'message')">
                 <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
               </button>          

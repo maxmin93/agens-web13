@@ -16,22 +16,17 @@ const EMPTY_LABEL: ILabel = {
 @Component({
   selector: 'app-input-create-label-dialog',
   template: `
-    <h2 mat-dialog-title>
-      New Label Input<br/>
-      <small>Type informations for new Label</small>
-    </h2>
-    <div mat-dialog-content>
-      
-      <form class="example-form" novalidate [formGroup]="labelForm">
-      <div class="example-container">
-
-        <mat-form-field class="example-full-width">
+    <h4>NEW-LABEL <strong>INPUT</strong></h4>
+    <p class="subtext">Create type informations for New-Label.</p>
+    <div mat-dialog-content>      
+      <form novalidate [formGroup]="labelForm" class="margin">
+        <mat-form-field class="block">
           <mat-select name="labelType" [formControl]="labelTypeCtl" placeholder="Label Type" required>
             <mat-option *ngFor="let type of labelTypes" [value]="type">{{ type }}</mat-option>
           </mat-select>
         </mat-form-field>
         
-        <mat-form-field class="example-full-width">
+        <mat-form-field class="block">
           <input matInput name="labelName" [formControl]="labelNameCtl" placeholder="Name" required>
           <button mat-button *ngIf="labelNameCtl.value" matSuffix mat-icon-button aria-label="Clear" 
                 (click)="labelNameCtl.setValue('')">
@@ -48,7 +43,7 @@ const EMPTY_LABEL: ILabel = {
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field class="example-full-width">
+        <mat-form-field class="block">
           <input matInput [formControl]="labelDescCtl" placeholder="DESC">
           <button mat-button *ngIf="labelDescCtl.value" matSuffix mat-icon-button aria-label="Clear" 
                   (click)="labelDescCtl.setValue('')">
@@ -58,14 +53,13 @@ const EMPTY_LABEL: ILabel = {
             Desc is <strong>too long</strong>. (max={{MAX_LABEL_DESC_SIZE}})
           </mat-error>
         </mat-form-field>
-
-      </div>
       </form>
     </div>
     <div mat-dialog-actions>
+      <button mat-button (click)="onCancel()" tabindex="-1" class="btn">CANCEL</button>  
       <button mat-button type="submit" class="btn btn-default" 
-            [disabled]="!labelForm.valid" (click)="onSubmit()" tabindex="2">Submit</button>
-      <button mat-button (click)="onCancel()" tabindex="-1" class="btn">Cancel</button>
+          [disabled]="!labelForm.valid" (click)="onSubmit()" tabindex="2">SUBMIT</button>
+      
     </div>  
     `,
   styles: [`

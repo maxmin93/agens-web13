@@ -14,7 +14,7 @@ declare var agens: any;
 @Component({
   selector: 'app-query-graph',
   templateUrl: './query-graph.component.html',
-  styleUrls: ['./query-graph.component.scss']
+  styleUrls: ['./query-graph.component.scss','../../graph.component.scss']
 })
 export class QueryGraphComponent implements OnInit {
 

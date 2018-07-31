@@ -1,39 +1,33 @@
-<div id="top" class="card-dashboard content scrollbar">
+<div id="top" class="content row">
 
-<mat-grid-list cols="2" rowHeight="1:1">
-<mat-grid-tile>
-    <div class="card card-dashboard-admin-info">
-        <h2>Datasource</h2>
-        <div class="card-dashboard-admin-info-list">
-            <div class="card-dashboard-admin-info-list-box">
-                <div class="card-dashboard-admin-info-list-content">
-                    <div class="card-dash-text">
-                        <p><span>URI</span><b>{{infos.uri}}</b></p>
-                        <p><span>Name</span><b>{{infos.name}} (owner: '{{infos.owner}}')</b></p>
-                        <p><span>Desc</span><b>{{infos.desc}}</b></p>
-                    </div>
-                    <!--
-                    <div class="card-dash-number">
-                        <p><span>Total NodeTypes</span><b>{{ infos.nodes_size_total }} ({{ infos.nodes_size_data }})</b></p>
-                        <p><span>Total EdgeTypes</span><b>{{ infos.edges_size_total }} ({{ infos.edges_size_data }})</b></p>
-                    </div>
-                    -->
-                </div>
-                <div class="card-dashboard-admin-info-list-content">
-                </div>                  
+    <div class="col-side">
+        <div>
+            <h4>DATA <strong>SOURCE</strong></h4>
+            <p class="subtext">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
+            <ul class="list">
+                <li><span>URL</span>{{infos.uri}}</li>
+                <li><span>NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
+                <li><span>DESC</span>{{infos.desc}}</li>
+            </ul>
+            <!--
+            <div class="card-dash-number">
+                <p><span>Total NodeTypes</span><b>{{ infos.nodes_size_total }} ({{ infos.nodes_size_data }})</b></p>
+                <p><span>Total EdgeTypes</span><b>{{ infos.edges_size_total }} ({{ infos.edges_size_data }})</b></p>
             </div>
+            -->
         </div>
 
         <div #progressBar style='visibility:hidden;'>
             <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
 
-        <div class="card card-dashboard-meta-table-label">       
-            <h2>Labels List</h2>
+        <div class="m-30">       
+            <h4>LABEL <strong>LIST</strong></h4>
+            <p></p>
             <ngx-datatable #tableLabels class="material"
-                [columnMode]="'force'" [limit]="5"
+                [columnMode]="'force'" [limit]="7"
                 [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
-                [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
+                [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
                 [selected]="selectedLabels" [selectionType]="'single'"
                 (select)="onSelectTableLabels($event)"
                 >
@@ -48,31 +42,43 @@
                 <ngx-datatable-column name="Remove" [sortable]="false">
                     <ng-template let-row="row" ngx-datatable-cell-template>
                         <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
-                            <mat-icon>delete</mat-icon>
+                            Remove
                         </a>
                     </ng-template>
                 </ngx-datatable-column>            
             </ngx-datatable>
-        </div>    
-    </div>    
-</mat-grid-tile>
-<mat-grid-tile>
-    <div class="card card-dashboard-meta-graph">
-        <h2>Schema Graph</h2>
-        <div id="div-canvas" #divCanvas class="card-dashboard-meta-graph-canvas"></div>
-        <div class="card-dashboard-meta-info">
-            <ul>
-                <li><span class="span-info">type: </span>{{selectedLabel.type}}</li>
-                <li><span class="span-info">id: </span>{{selectedLabel.id}}</li>
-                <li><span class="span-info">name: </span><strong>{{selectedLabel.name}}</strong></li>
-                <li><span class="span-info">owner: </span>{{selectedLabel.owner}}</li>
-                <li><span class="span-info">size: </span>{{selectedLabel.size | number}}</li>
-                <li><span class="span-info">desc: </span>"{{selectedLabel.desc}}"</li>
-            </ul>
-            <a (click)="openInputCreateLabelDialog()"><span>Create Label</span></a>
-        </div>
-    </div>             
-</mat-grid-tile>
-</mat-grid-list>
+        </div> 
+    </div>
+
+    <div class="col-strech">
+        <div class="meta-graph">
+            <h4>SCHEMA <strong>GRAPH</strong></h4>
+            <p></p>
+            <div class="row">
+                <div id="div-canvas" #divCanvas class="graph-canvas col-strech">
+                    
+                </div>
+                <ul class="col-side-icon">
+                    <li><a matTooltip="Create" matTooltipPosition="left" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
+                    <li><a matTooltip="Edit" matTooltipPosition="left"><mat-icon>edit</mat-icon></a></li>
+                    <li><a matTooltip="Expand" matTooltipPosition="left"><mat-icon>control_camera</mat-icon></a></li>
+                    <li><a matTooltip="Delete" matTooltipPosition="left"><mat-icon>delete_outline</mat-icon></a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <ul class="row list">
+                    <li><small>TYPE </small> <strong>{{selectedLabel.type}}</strong></li>
+                    <li><small>ID </small> <strong>{{selectedLabel.id}}</strong></li>
+                    <li><small>NAME </small> <strong>{{selectedLabel.name}}</strong></li>
+                    <li><small>OWNER </small> <strong>{{selectedLabel.owner}}</strong></li>
+                    <li><small>SIZE </small> <strong>{{selectedLabel.size | number}}</strong></li>
+                </ul>
+                <ul class="row list list-unique">
+                    <li><small>DESCRIPTION </small> "{{selectedLabel.desc}}"</li>
+                </ul>
+            </div>
+        </div>      
+    </div>          
 
 </div>

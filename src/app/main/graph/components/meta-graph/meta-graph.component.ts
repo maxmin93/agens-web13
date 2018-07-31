@@ -15,7 +15,7 @@ declare var agens: any;
 @Component({
   selector: 'app-meta-graph',
   templateUrl: './meta-graph.component.html',
-  styleUrls: ['./meta-graph.component.scss']
+  styleUrls: ['./meta-graph.component.scss','../../graph.component.scss']
 })
 export class MetaGraphComponent implements OnInit {
 

@@ -13,471 +13,338 @@
 @import "~cytoscape-panzoom/cytoscape.js-panzoom.css";
 @import "~qtip2/dist/jquery.qtip.min.css";
 
-@font-face { font-family: "Noto Sans"; src: url("resources/fonts/NotoSansKR-Regular.otf"); }
-@font-face { font-family: "Noto Sans Bold"; src: url("resources/fonts/NotoSansKR-Bold.otf"); }
-@font-face { font-family: "Noto Sans Mono"; src: url("resources/fonts/NotoSansMonoCJKkr-Regular.otf"); }
-@font-face { font-family: "Noto Sans Mono Bold"; src: url("resources/fonts/NotoSansMonoCJKkr-Bold.otf"); }
+@font-face { font-family: "Noto Sans"; src: url("resources/fonts/NotoSans-Regular.ttf")format("opentype"); } 
+@font-face { font-family: "Noto Sans Bold"; src: url("resources/fonts/NotoSans-Bold.ttf")format("opentype"); }
+// @font-face { font-family: "Noto Sans"; src: url("resources/fonts/NotoSansKR-Regular.otf")format("opentype"); } 
+// @font-face { font-family: "Noto Sans Bold"; src: url("resources/fonts/NotoSansKR-Bold.otf")format("opentype"); }
+@font-face { font-family: "Noto Sans Mono"; src: url("resources/fonts/NotoSansMonoCJKkr-Regular.otf")format("opentype"); }
+@font-face { font-family: "Noto Sans Mono Bold"; src: url("resources/fonts/NotoSansMonoCJKkr-Bold.otf")format("opentype"); }
+@font-face { font-family: "RobotoMono"; src: url("resources/fonts/RobotoMono-Regular.ttf")format("opentype"); }
+@font-face { font-family: "RobotoMono Bold"; src: url("resources/fonts/RobotoMono-Bold.ttf")format("opentype"); }
 
-:lang(ko) {
-  font-family: "Noto Sans", "Noto Sans Bold", sans-serif;
+*, ::before, ::after { 
+  box-sizing: border-box; 
 }
 
-html, body, material-app, .my-content {
+html, body, material-app  {
   width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
+  height: 100vh;
+  font-size: 16px;   
+  -webkit-font-smoothing: antialiased;
 }
 
-body { 
-  font-family: "Noto Sans", "Noto Sans Bold", sans-serif; 
-  background-color: #e9effb;  
+h1, h2, h3, h4, h5, h6 {   
+  font-weight: 400; 
 }
+
+h1, h2, h3, h4, h5, h6, 
+ul, html, body, material-app, input, textarea, .mat-menu-item { 
+  margin: 0; 
+  padding: 0; 
+  font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
+}
+
+ul { list-style: none; }
 
 // Custom style for loading elements without height
-.will-load {
-    min-height: 80px;
+
+.will-load { min-height: 80px; }
+
+
+/* 최초 기본 콘텐츠의 사이즈로써 
+header값이 변경될 경우 px의 header 높이값과 동일하게 변경해야한다. */
+
+.content { 
+  padding: 1.875rem; 
 }
 
-// Href line height wasn't right for mat-icon-button
+/* flex 기본 설정값으로 col-side는 side의 너비값을 줄 경우, 
+반대쪽 div 에 col 주입한다. */
 
-h1, h2, h3, h4, h5, h6, p, a, ul, li { 
-  margin: 0; padding: 0; 
+.row { display: flex; }
+.col { display: flex; flex-direction: column; }
+
+.row-center { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
 }
 
-ul { 
-  list-style: none; 
+.col-strech { 
+  width: 100%; 
+  flex: 1 
 }
+
+// 빈 공란
+
+.example-spacer { flex: 1 1 auto; }
+ 
+
+/* 그래프 내에 있는 아이콘집합 
+(기본설정 그래프의 오른쪽이며 위치변경시 border값 수정필요) */
+
+.col-side-icon {
+  background: #f5f5f5; 
+  width: 50px; 
+  border: 1px solid #ddd; 
+  border-left: 0; 
+
+  li {
+    height: 50px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    border-bottom: 1px solid #ddd;     
+
+    :hover {
+      color: #848484; 
+    }
+  }
+}
+
+
+/* margin 값으로  margin 값을 추가하고자 할 때, 
+클래스명은 "m-value" */
+
+.m-30 { margin-top: 1.875rem; }
+
+
+/* button 관련 정리로 
+추후 theme을 가진 button도 추가예정 */
 
 a { 
-  text-decoration: none; cursor: pointer; 
+  display: inline-flex; 
+  text-decoration: none; 
+  color: inherit; 
+  cursor: pointer; 
 }
 
-.content {
-  height: calc(100% - 64px);   
-  padding: 26px 24px;      
-  box-sizing: border-box; 
-  overflow-y: auto;    
-
-  .card {
-    background-color: #fff; 
-    margin-bottom: 1.2rem;
-    border: 1px solid #ccc; 
-
-    h2 {    
-      background-color: #fff; 
-      padding: 10px 18px;
-      border-bottom: 1px solid #ccc;       
-      font-size: 14px; 
-      text-transform: uppercase; 
-      color: #585858; 
-      letter-spacing: .055rem; 
-    }
-
-    .card__icon-group {       
-      float: right;   
-      background-color: #eee; 
-
-      a { 
-        display: inline-block; 
-        padding: 10px 12px 6px 12px; 
-        border-left: 1px solid #ccc; 
-        font-size: .815rem; 
-        float: left;
-        transition: all .3s ease-in-out;     
-        
-        &:hover { 
-          background-color: #bbb; 
-          mat-icon { 
-            color: #eee; 
-          }
-          span { 
-            background: none; 
-          }
-        }
-        
-        span { 
-          background-color: #aaa;                    
-          margin-top: 3px; 
-          margin-right: 2px; 
-          padding: 0 5px; 
-          float: left;
-          border-radius: .225rem; 
-          line-height: 14px; 
-          font-size: .5rem; 
-          color: #fff;  
-          transition: all .3s ease-in-out;
-        }
-
-        mat-icon {
-          width: 19px; 
-          height: 19px; 
-          font-size: 1.256rem; 
-          color: #585858;
-        } 
-      }
-    }
-  }
-
-  .wrapped-box-flex { 
-    width: 100%;    
-    display: flex; 
-    justify-content: space-between;             
-    box-sizing: border-box;
-  }
-
-  .wrapped-box { 
-    position: relative; 
-    overflow: hidden; 
-  }
+mat-icon { 
+  color: #afc1c1; 
 }
 
-////////////////////////// button 
-
-.btn {
-  padding: 6px 16px !important; 
-  border-radius: .225rem !important; 
-  border: 1px solid #aaa !important;
-  box-sizing: border-box !important; 
+.mat-button, .mat-fab, .mat-flat-button, 
+.mat-icon-button, .mat-mini-fab, 
+.mat-raised-button, .mat-stroked-button {
   font-size: 12px; 
-  font-weight: 600; 
-  color: #565656 !important; 
-  text-transform: uppercase; 
-  letter-spacing: .065rem;
-  line-height: 18px !important;  
+  font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
 }
 
-.disabled-btn { 
-  pointer-events: none; 
-  cursor: default;
-  background-color: rgba(0,0,0,.12) ;   
-  mat-icon { 
-    color: rgba(0,0,0,.38) !important; 
-  }
-  span { 
-    background: none !important; 
-    color: rgba(0,0,0,.38) !important; 
-  }
+.mat-button-toggle { color: #798694; }
+
+.mat-button-toggle-group, 
+.mat-button-toggle-standalone,
+.ngx-datatable.material {
+  box-shadow: none !important; 
+  font-size: .8125rem; 
 }
 
-///////////////////////// form 
-
-.mat-select-value {  
-  font-size: .815rem;   
+.mat-button-toggle-disabled,
+.mat-button-toggle-disabled.mat-button-toggle-checked { 
+  background: transparent; 
+  color: #f9f9f9;
 }
 
-.mat-input-element { 
-  font-size: .855rem !important; 
+/* 기본 설정 datatable css 수정 
+datatable의 세팅값은 각 태그에 존재함*/
+
+.expand-cell { color: #585858; }
+
+.datatable-header-cell { 
+  background: #f5f5f5; 
+  border-bottom: 0; 
 }
 
+.ngx-datatable .datatable-body .datatable-scroll { width: 100% !important; }
+.ngx-datatable.material .datatable-header { border-bottom: 0; }
+.ngx-datatable.material .datatable-footer { margin-top: -4px; }
+.ngx-datatable.material .empty-row { line-height: 28px; }
 
-///////////////////////// scrollbar 
-
-.scrollbar { 
-
-  &::-webkit-scrollbar-track { 
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-    background-color: #F5F5F5; 
-    margin-top: -1px;
-  } 
-  &::-webkit-scrollbar { 
-    width: 5px;
-    background-color: lightgray;
-  }
-  &::-webkit-scrollbar-thumb {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-    background-color: #2a475d;
-  }
-}
-
-.cdk-global-scrollblock { 
-  overflow: hidden; 
-}
-
-///////////////////////// circle box
-
-.span__info { 
-  background-color: #83878d; 
-  min-width: 40px; 
-  display: inline-block; 
-  margin-right: 6px; 
-  padding: 2px 10px; 
-  border-radius: 1rem; 
-  font-size: 11px; 
-  font-weight: 600; 
-  font-family: "Montserrat", sans-serif; 
-  text-align: center; 
-  text-transform: uppercase; 
-  color: #fff;
-}
-
-///////////////////////// menubox
-
-.mat-menu-content { 
-  width: 230px; 
-  border: 1px solid #ccc; 
-  padding: 0 !important; 
-
-  .mat-subhead { 
-    background-color: rgba(1,1,1,0.1) !important;
-    padding: 14px 16px !important; 
-    border-bottom: 1px solid #ccc; 
-    color: #585858;
-    
-    h4 { 
-      font-size: .95rem;
-      text-transform: uppercase; 
-      letter-spacing: .06rem; 
-      color: #585858; 
-    }
-  }
-
-  button.mat-menu-item { 
-    height: auto; 
-    border-top: 1px solid #eee; 
-    line-height: 2.5rem; 
-    font-size:.815rem; 
-    color: #585858; 
-  }
-}
-
-
-///////////////////////// codemirror 
-
-
-.CodeMirror { height: 100%; }
-
-
-///////////////////////// toolbar
-
-mat-toolbar-row { 
-  justify-content: space-between; 
-  .mat-button-toggle-label-content { 
-    padding: 0; 
-  }
-}
-
-///////////////////////// search 
-
-.div__search { 
-  justify-content: flex-end !important; 
-  padding: 1.2rem 1rem; 
+.datatable-body-cell-label {
   display: flex; 
+  align-items: center; 
+}
 
-  span { 
-      display: flex; 
-      flex-direction: row; 
-      flex-basis: 350px; 
-      
-      i { 
-          background-color: #eee; 
-          display: inline-block; 
-          padding: 0 .7rem; 
-          border: 1px solid #ccc;
-          border-right: none; 
-          border-radius: .225rem 0 0 .225rem; 
-          line-height: 32px; 
-          color: #585858;  
-      }
+.ngx-datatable.material .datatable-body .datatable-body-row .datatable-body-cell {
+  display: flex; 
+  align-items: center; 
+  padding: .8rem 1.2rem; 
+  border-top: 1px solid #f5f5f5; 
+  font-size: .8125rem; 
+  color: #585858;
+}
 
-      input { 
-          flex-basis: 400px;  
-          display: inline-block; 
-          margin-right: 28px; 
-          padding: .5rem .8rem;
-          border: 1px solid #ccc; 
-          border-radius: 0 .225rem .225rem 0; 
-          outline: none; 
-          font-size: .855rem; 
-          color: #585858; 
-      }
+// datatable active 되었을 때 애니메이션 
+.ngx-datatable.material.single-selection .datatable-body-row.active, 
+.ngx-datatable.material.single-selection .datatable-body-row.active .datatable-row-group, 
+.ngx-datatable.material.multi-selection .datatable-body-row.active, 
+.ngx-datatable.material.multi-selection .datatable-body-row.active .datatable-row-group, 
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active, 
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active .datatable-row-group {
+  background: #f1f9f9; 
+}
+
+// datatable hover 되었을 때의 애니메이션 
+.ngx-datatable.material.single-selection .datatable-body-row.active:hover, 
+.ngx-datatable.material.single-selection .datatable-body-row.active:hover .datatable-row-group, 
+.ngx-datatable.material.multi-selection .datatable-body-row.active:hover, 
+.ngx-datatable.material.multi-selection .datatable-body-row.active:hover .datatable-row-group, 
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover, 
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group {
+  background: #f1f9f9; 
+  cursor: pointer;
+}
+
+.ngx-datatable.material:not(.cell-selection) .datatable-body-row:hover, 
+.ngx-datatable.material:not(.cell-selection) .datatable-body-row:hover .datatable-row-group {
+  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); 
+  cursor: pointer;
+}
+
+//
+.ngx-datatable.material .datatable-body .datatable-row-detail { 
+  background: #f8f9f9; 
+  padding: .4rem 1.25rem; 
+  border: 1px dashed #eee; 
+}
+
+/* 기본 graph canvas의 창 값으로
+좌우 정렬일 경우, 각 html에는 좌측의 사이즈를 
+해당 scss파일에서 설정가능 */
+
+div.graph-canvas { 
+  max-width: 100%; 
+  border: 1px solid #ddd; 
+  position: relative;
+  z-index: 10;
+
+  // zoom 버튼 위치수정 
+  div.cy-panzoom { 
+    top: 1.25rem; 
+    left: 1.25rem; 
+  }
+  // 이값으로 인해 canvas의 좌우폭이 조절됨
+  > div:nth-child(2), > div:nth-child(3) {
+    width: 100% !important; 
   }
 }
 
-///////////////////////// canvas property
-
-canvas { z-index: -1 !important; } 
-
-.cy-panzoom { 
-  position: relative !important; 
-  top: 50px; 
-  left: 16px; 
-  z-index: 500; 
+mat-chip-list {
+  position: absolute; 
+  bottom: 1.25rem; 
+  left: 1.875rem; 
 }
 
-///////////////////////// scroll button 
 
-div#webUI {
-    a { background-color: #3f51b5; 
-        padding: 8px; 
-        border-radius: 3px; 
-        box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12); 
-        line-height: 14px; 
-        display: inline-block; 
-        position: fixed; 
-        bottom: 14px; 
-        right: 37px; 
-        color: white; 
-        z-index: 1000;
-    }
-}
+/* 각 페이지의 기본 input 값 설정 
+*/
 
-/////////////////////////table 
+form, input { 
+  width: 100%; 
+  font-size: .875rem; 
 
-.ngx-datatable.material { 
-  box-shadow: none; 
-  font-size: .815rem; 
-  align-content: center; 
+  &.padding { padding: 1.25rem; }
+  &.border { border: 1px dashed #ddd; }
+  &.margin { margin-top: 1.5625rem}
 
-  .datatable-header { 
-    .datatable-header-cell {
-      font-weight: 700 !important; 
-      color: #383838; 
-    }
-  }
-
-  .datatable-body {
-    .datatable-body-row { 
-      width: 100% !important; 
-      border-bottom: 1px solid #eee; 
-  
-      .datatable-body-cell{
-        padding: .05rem 1.2rem !important; 
-        line-height: 2.05rem; 
-        color: #585858; 
-        display: flex; 
-        align-items: center; 
-  
-        .datatable-body-cell-label {  
-          line-height: 39px; 
-          font-size: .765rem; 
-          overflow: hidden; 
-          text-overflow: ellipsis; 
-  
-          a {       
-            position: relative; 
-  
-            mat-icon { 
-              width: 19px; 
-              height: 19px; 
-              font-size: 19px; 
-              display: block; 
-              
-            }
-          }
-
-          .mat-button-wrapper { 
-            display: inline; 
-            line-height: 10px;             
-    
-            i { 
-                background-color: #ccc;
-                display: inline-flex; 
-                border-radius: 50%; 
-            }
-          }
-        }
-      }
-    }
-
-    .datatable-row-detail { 
-      background-color: #dedede !important; 
-      border-top: 1px solid #ccc; 
-      border-bottom: 1px solid #ccc;             
-      letter-spacing: .03rem; 
-      font-size: .815rem;   
-      color: #484848;             
-  
-      .span__row-detail-content {
-          padding-left: 1rem; 
-          font-size: .715rem;
-  
-          i { margin-right: 8px; }
-      }
-    }
-
-    .empty-row { 
-      background-color: #83878d;
-      height: auto; 
-      display: inline-block; 
-      margin: 12px 18px; 
-      padding: .4rem 1.2rem; 
-      border-radius: 1rem; 
-      font-family: "Montserrat", sans-serif;
-      font-weight: 400; 
-      font-size: 12px; 
-      color: white;
-    }
-  }  
-
-  .datatable-footer { 
-    .page-count {       
-      height: 28px;      
-      line-height:  28px; 
-      font-family: "Montserrat", sans-serif;
-      font-weight: 700; 
-      font-size: 12px;
-      color:#585858; 
-    }
+  textarea {
+    width: 100%; 
+    height: 22px; 
+    line-height: 24px; 
+    border: none;
+    outline: none; 
+    resize: none; 
   }
 }
 
-.datatable-box-padding { 
-  padding: 0 44px; 
-  margin-bottom: 24px; 
+span.search {
+  position: relative; 
 
-  ngx-datatable {
-      flex-grow: 1; 
-      border-top: 1px solid #ccc; 
+  input {
+    width: 300px; 
+    padding: .4rem 1.25rem;  
+    border: 1px solid #ddd; 
+    border-radius: 1rem; 
+    outline: none; 
+    font-size: .75rem; 
+    color: #8a8d92; 
+  }
+  mat-icon { 
+    font-size: 22px; 
+    color: #ea1347; 
+    top: 5px; 
+    right: 10px; 
+    position: absolute; 
   }
 }
 
-
-////////////////////////////// dialog
-
-.ui-dialog { z-index: 1001 !important ;}
-
-.mat-dialog-title { 
-  margin-bottom: 26px; 
-  padding-left: 12px; 
-  padding-top: 4px; 
-  border-left: 4px solid #616b88; 
-  line-height: 22px; 
-
-  small { 
-    font-size: 12px; 
-  }
+.mat-form-field.block {
+  display: block; 
 }
 
-.mat-dialog-actions { 
-  justify-content: flex-end; 
+/* tab 관련 스타일 변경 
+*/
 
-  &:last-child {
-    margin: 0 !important; 
-    padding: 0; 
-  }
+.mat-tab-group.mat-primary .mat-ink-bar, 
+.mat-tab-nav-bar.mat-primary .mat-ink-bar {
+  background: #1bc9e4; 
 }
 
-.mat-dialog-content { 
-
-  .example-form {
-    min-width: 150px;
-    max-width: 360px;
-    width: 100%;
-  }
-
-  .example-container {
-    display: flex;
-    flex-direction: column;
-
-    .example-full-width {
-      width: 100%;
-    }
-
-    h6 { 
-      font-size: .765rem; 
-      color: #898989;
-      font-weight: 400;       
-    }
-  }  
+.mat-tab-body-wrapper { 
+  margin-top: 15px; 
 }
+
+/* CodeMirror
+*/
+
+.CodeMirror { 
+  font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
+  font-size: 13px; 
+  font-weight: 400; 
+}
+
+.CodeMirror pre { 
+  padding: 0 1.25rem; 
+}
+
+.CodeMirror-gutter-wrapper {
+  left: -36px !important; 
+}
+
+/* Drop menu  
+*/
+.mat-subhead { 
+  padding: 1rem; 
+  display: inline-block;
+}
+
+.mat-menu-item {
+  font-size: .75rem; 
+}
+
+// 텍스트 타이틀 옆에 붙는 before
+.expand-cell::before, 
+.empty-row::before, 
+.mat-subhead::before {
+  content:'';
+  background: #1bc9e4; 
+  width: 8px; 
+  height: 8px; 
+  display: inline-block; 
+  border-radius: 50%; 
+  margin-right: .75rem; 
+}
+
+// dialog 관련 css 수정 
+
+.mat-form-field-appearance-legacy .mat-form-field-underline {
+  background: #ddd; 
+}
+.mat-dialog-actions { flex-direction: row-reverse; }
+
+p.subtext { 
+  font-size: .75rem; 
+  color: #aeb1b4; 
+}
+
+// label 관련 css 수정

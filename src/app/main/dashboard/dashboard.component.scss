@@ -1,151 +1,59 @@
-.card-dashboard {                
+// 좌측 side의 사이즈
+.col-side:nth-child(1) { 
+        width: 35%; 
+        min-width: 36.5625rem;
+        max-width: 43.75rem; 
+        margin-right: 1.875rem; 
+}
+
+// graph를 감싸고 있는 div의 높이값 >> 높이값이 없으면 graph div 없어짐
+.meta-graph { 
+        min-height: 25.625rem;    
+        .graph-canvas { 
+                height: 40rem; 
+        }
+}       
+
+ul.list li { 
+        max-width: 700px; 
+        overflow: hidden; 
+        white-space: nowrap; 
+        text-overflow: ellipsis; 
+        margin-top: 1.25rem;
+        padding: 1rem; 
+        border-bottom: 1px solid #ddd; 
+        font-size: .875rem; 
+        flex: 1; 
+        color: #4d4d4d; 
+        span { 
+                background: #1bc9e4; 
+                min-width: 60px; 
+                display: inline-block;
+                margin-right: 1.25rem; 
+                padding: .25rem; 
+                border-radius: 1rem;
+                text-align: center;  
+                font-size: .75rem; 
+                color: #fff; 
+        }
+
+        strong { 
+                display: inline-block; 
+                margin-left: 1rem; 
+                font-size: .85rem;
+                font-weight: 400; 
+        }
         
-  .card-dashboard-admin-info {                
-        width: "50%";
-          .card-dashboard-admin-info-list {                        
-                  display: flex; 
-                  
-                  .card-dashboard-admin-info-list-box { 
-                          flex-grow: 1;                                
-                          padding: .6rem .8rem .2rem;                          
-                          
-                          .card-dashboard-admin-info-list-content { 
-                                  display: flex; 
-                                  flex-wrap: wrap;
-                                  flex-direction: row; 
-
-                                  p {                                        
-                                          display: flex; 
-                                          flex-direction: row;                                                 
-                                          align-items: center;                                         
-                                          flex-grow: 1; 
-                                          margin: 0 4px 8px;
-                                          padding-right: .5rem;
-                                          border: 1px solid #ccc;                                                
-                                          color: #484848;                                                                              
-                                          
-                                          span { 
-                                                  background-color: #ddd; 
-                                                  height: 100%;                                                 
-                                                  min-width: 125px;                                                 
-                                                  display: flex;
-                                                  justify-content: center; 
-                                                  align-items: center; 
-                                                  padding: .5rem 1rem; 
-                                                  box-sizing: border-box; 
-                                                  border-right: 1px solid #ccc;                                                         
-                                                  letter-spacing: 0.02rem; 
-                                                  font-weight: 700;
-                                                  font-size: .7rem; 
-                                                  margin-right: 1rem; 
-
-                                          } 
-  
-                                          b { 
-                                                  min-width: 200px; 
-                                                  padding: .2rem 0;                                                       
-                                                  font-weight: 400; 
-                                                  font-size: .815rem; 
-                                          }
-                                  }
-                                  .card-dash-text { 
-                                          flex-grow: 2;                                                 
-                                  } 
-                                  .card-dash-number { 
-                                          flex-grow: 1;                                                  
-                                  }
-                          }
-                  }                        
-          }
-  }
-  
-  .card-dashboard-meta-graph { 
-          width: 100%;                 
-          height: auto;
-          min-height: 410px;    
-
-          .card-dashboard-meta-graph-canvas { 
-                  height: 560px; 
-          }
-
-          .card-dashboard-meta-info {
-                  background-color: #fff;  
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center; 
-                  padding: 12px 24px;                 
-                  border-top: 1px solid #ccc; 
-          
-                  ul { 
-                          display: inline-block; 
-          
-                          li { 
-                                  display: inline-block; 
-                                  margin-right: 8px;
-                                  font-size: 14px; 
-                                  color: #585858;                
-                                  
-                          }
-                  }
-          
-                  a {     
-                          min-width: 135px;
-                          padding: 7px 19px; 
-                          border-radius: .225rem; 
-                          border: 1px solid #aaa;
-                          box-sizing: border-box; 
-                          font-size: 12px; 
-                          font-weight: 600; 
-                          color: #565656; 
-                          text-transform: uppercase; 
-                          letter-spacing: .065rem; 
-                          cursor: pointer; 
-  
-                          span { 
-                                  position: relative; 
-                                  right: 0; 
-                                  transition: .5s; 
-  
-                                  &::after { 
-                                          content: '\00bb';
-                                          font-size: 16px;
-                                          position: absolute; 
-                                          opacity: 0; 
-                                          top: -6px; 
-                                          right: -20px; 
-                                          transition: .5s;
-                                  }
-                          }
-  
-                          &:hover { 
-                                  span {
-                                          right: 5px; 
-                                          &::after { 
-                                                  opacity: 1; 
-                                                  right: -15px; 
-                                          }
-                                  }
-                          }
-                  }
-          }                    
-  }       
-  
-  .card-dashboard-meta-table {
-          
-          .card-dashboard-meta-table-label{                         
-                  width: 60%;
-
-                  &:last-child { 
-                          margin-left: 1%; 
-                          width: 39%; 
-                  }
-          }
-  }     
+        small { 
+                color: #aeb1b4; 
+        }
 }
 
-
-:host /deep/ { 
-  .datatable-body-cell-label {  
-          line-height: 34px !important; 
-  }
+ul.list-unique li {
+        background: #f5f5f5;
+        max-width: 100%; 
 }
+     
+
+
+// :host /deep/ { }

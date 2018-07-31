@@ -1,6 +1,5 @@
-  <!-- TABLE -->
-  <div class="card card-graphdata-table">
-    <h2>Table <small>Result</small></h2>
+
+  <div>
     <ngx-datatable #recordTable class='material' [columnMode]="'force'"
         [limit]="10" [reorderable]="reorderable" [scrollbarH]="true"
         [rows]='recordRows' [columns]='recordColumns'
@@ -32,8 +31,8 @@
     </ngx-datatable>    
 </div>
 <!-- " *ngIf="isJsonCell" -->
-<div id="tableCell" #tableCell class="card card-graphdata-json" style="visibility: hidden;">
-    <h2>CELL <small>VALUE</small></h2>
+<div id="tableCell" #tableCell class="json" style="visibility: hidden;">
+    <h4>CELL <small>VALUE</small></h4>
     <mat-card-content class="scrollbar">
         <!-- 
             JSON Pretty formatter

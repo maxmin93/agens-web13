@@ -6,20 +6,20 @@ import { Subscription, timer } from 'rxjs';
 import { IResponseDto } from '../../../../models/agens-response-types';
 import * as CONFIG from '../../../../global.config';
 
-const COLOR_BLUE = 'rgb(0, 64, 255)';
-const COLOR_RED  = 'rgb(255, 64, 0)';
+const COLOR_BLUE = 'rgb(27, 201, 228)';
+const COLOR_RED  = 'rgb(230, 36, 84)';
 const COLOR_GRAY = 'rgb(96, 96, 96)';
-const COLOR_GREEN ='rgb(0, 102, 26)';
+const COLOR_GREEN ='rgb(21, 211, 178)';
 
 @Component({
   selector: 'app-query-result',
   templateUrl: './query-result.component.html',
-  styleUrls: ['./query-result.component.scss']
+  styleUrls: ['./query-result.component.scss','../../graph.component.scss']
 })
 export class QueryResultComponent implements OnInit {
 
   counter: number = 0;
-  messageText: string = '...';
+  messageText: string = 'No data';
   messageColor: string = 'darkgray';        // error: '#ea614a'
 
   private _dto: IResponseDto;
