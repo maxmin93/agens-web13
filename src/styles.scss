@@ -22,15 +22,23 @@
 @font-face { font-family: "RobotoMono"; src: url("resources/fonts/RobotoMono-Regular.ttf")format("opentype"); }
 @font-face { font-family: "RobotoMono Bold"; src: url("resources/fonts/RobotoMono-Bold.ttf")format("opentype"); }
 
+
+
+
 *, ::before, ::after { 
   box-sizing: border-box; 
 }
 
 html, body, material-app  {
+  
   width: 100%;
   height: 100vh;
   font-size: 16px;   
   -webkit-font-smoothing: antialiased;
+
+  @media ( max-width: 1440px ) { font-size: 14.5px; }
+  @media ( max-width: 1280px ) { font-size: 11.5px; }
+
 }
 
 h1, h2, h3, h4, h5, h6 {   
@@ -126,8 +134,10 @@ mat-icon {
 .mat-button, .mat-fab, .mat-flat-button, 
 .mat-icon-button, .mat-mini-fab, 
 .mat-raised-button, .mat-stroked-button {
-  font-size: 12px; 
+  font-size: .75rem; 
   font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
+  padding: 0 1rem !important; 
+  min-width: 88rem; 
 }
 
 .mat-button-toggle { color: #798694; }
@@ -261,7 +271,7 @@ span.search {
   position: relative; 
 
   input {
-    width: 300px; 
+    width: 18.75rem; 
     padding: .4rem 1.25rem;  
     border: 1px solid #ddd; 
     border-radius: 1rem; 
@@ -270,10 +280,10 @@ span.search {
     color: #8a8d92; 
   }
   mat-icon { 
-    font-size: 22px; 
+    font-size: 1.375rem; 
     color: #ea1347; 
-    top: 5px; 
-    right: 10px; 
+    top: .3125rem; 
+    right: .625rem; 
     position: absolute; 
   }
 }
@@ -294,6 +304,17 @@ span.search {
   margin-top: 15px; 
 }
 
+.mat-tab-label { 
+  height: 3rem !important; 
+  padding: 0 1.5rem !important; 
+  min-width: 10rem !important; 
+  font-size: .875rem !important; 
+}
+
+.mat-ink-bar { 
+  left: 10rem !important; 
+  width: 10rem !important; 
+}
 /* CodeMirror
 */
 
@@ -347,4 +368,4 @@ p.subtext {
   color: #aeb1b4; 
 }
 
-// label 관련 css 수정
+
