@@ -17,7 +17,7 @@ import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
 import * as CONFIG from '../../global.config';
 
-import { IResultDto, IResponseDto } from '../../models/agens-response-types';
+import { IResultDto, IResponseDto, IGraphDto } from '../../models/agens-response-types';
 import { IGraph, ILabel, INode, IEdge, IStyle, IRecord, IColumn, IRow } from '../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import { IProject } from '../../models/agens-manager-types';
@@ -47,6 +47,7 @@ declare var agens: any;
 export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private subscription: Subscription = undefined;
+  private subscription_graph: Subscription = undefined;
   public project: any = undefined;
 
   // controll whether make buttons to able or disable
@@ -62,6 +63,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   private resultDto: IResultDto = undefined;
   private resultGraph: IGraph = undefined;
   private resultRecord: IRecord = undefined;
+  private resultMeta: IGraph = undefined;
 
   // expandTo 를 위한 query API 결과
   private resultExpandDto: IResultDto = undefined;
@@ -84,7 +86,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('metaGraph') metaGraph: MetaGraphComponent;
   @ViewChild('queryGraph') queryGraph: QueryGraphComponent;
   @ViewChild('queryTable') queryTable: QueryTableComponent;
-  @ViewChild('statistics') statistics: StatisticsComponent;
+  @ViewChild('statistics') statGraph: StatisticsComponent;
 
   constructor(    
     private _angulartics2: Angulartics2,    
@@ -145,7 +147,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
           Promise.resolve(null).then(() => this.queryGraph.resize() ); 
           break;
       case 3: 
-          Promise.resolve(null).then(() => this.statistics.resize() ); 
+          Promise.resolve(null).then(() => this.statGraph.resize() ); 
           break;
     }
   }
@@ -160,6 +162,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     this.resultDto = undefined;
     this.resultGraph = undefined;
     this.resultRecord = undefined;
+    this.resultMeta = undefined;
 
     // 에디터 비우고
     this.editor.setValue('');
@@ -172,6 +175,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     this.queryResult.clear();
     this.queryGraph.clear();
     this.queryTable.clear();
+    this.metaGraph.clear();
   }
 
   /////////////////////////////////////////////////////////////////
@@ -208,6 +212,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     result.info$.subscribe((x:IResultDto) => {
       this.resultDto = <IResultDto>x;
       this.queryResult.setData(<IResponseDto>x);
+
       // this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});
     });
 
@@ -227,9 +232,9 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       // setNeighbors from this.resultGraph.labels;
       x.scratch['_neighbors'] = new Array<string>();
       this.resultGraph.labels
-        .filter(val => val.type == 'nodes' && val.name == x.data.labels[0])
+        .filter(val => val.type == 'nodes' && val.name == x.data.label)
         .map(label => {
-          x.scratch['_neighbors'] += label.neighbors;
+          x.scratch['_neighbors'] += label.targets;
           x.scratch['_style'] = label.scratch['_style'];
         });
 
@@ -238,7 +243,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
     result.edges$.subscribe((x:IEdge) => {
       this.resultGraph.labels
-        .filter(val => val.type == 'edges' && val.name == x.data.labels[0])
+        .filter(val => val.type == 'edges' && val.name == x.data.label)
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
         });
@@ -260,7 +265,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
 
     concat( result.info$.asObservable(), result.graph$.asObservable(),
-          result.labels$.asObservable(), result.nodes$.asObservable() ) //, result.edges$.asObservable() )
+          result.labels$.asObservable(), result.nodes$.asObservable(), result.edges$.asObservable() )
     .subscribe({
       next: data => {
       },
@@ -271,6 +276,9 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
         // this.queryGraph.labels = [...this.resultGraph.labels];
         this.queryGraph.refresh();
         // this.queryTable.setData( this.resultRecord );
+  
+        if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
+          this.runGraphSchema( this.resultDto.gid );
       }
     });
 
@@ -285,6 +293,74 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     this.isLoading = false;
     this.queryResult.abort();
+  }
+
+  runGraphSchema(gid: number){
+    let tgraph = this._api.getTgraphSubjects();
+    tgraph.info$.subscribe((x:IGraphDto) => {
+      console.log("call graphSchema:", x);
+    });
+
+    tgraph.graph$.subscribe((x:IGraph) => {
+      console.log("[1] tgraph.graph$.subscribe");
+      this.resultMeta = x;
+      this.resultMeta.labels = new Array<ILabel>();
+      this.resultMeta.nodes = new Array<INode>();
+      this.resultMeta.edges = new Array<IEdge>();
+    });
+    tgraph.labels$.subscribe((x:ILabel) => {
+      console.log("[2] tgraph.labels$.subscribe");
+      x.scratch['_style'] = <IStyle>{ width: undefined, title: undefined
+          , color: this.labelColors[ (this.colorIndex++)%CONFIG.MAX_COLOR_SIZE ] };
+      this.resultMeta.labels.push( x );
+      this.metaGraph.addLabel( x );
+      this.statGraph.addLabel( x );
+    });
+    tgraph.nodes$.subscribe((x:INode) => {    
+      console.log("[3] tgraph.nodes$.subscribe");
+      // setNeighbors from this.resultGraph.labels;
+      x.scratch['_neighbors'] = new Array<string>();
+      this.resultMeta.labels
+        .filter(val => val.type == 'nodes' && val.name == x.data.label)
+        .map(label => {
+          x.scratch['_neighbors'] += label.targets;
+          x.scratch['_style'] = label.scratch['_style'];
+        });
+
+      this.resultMeta.nodes.push( x );
+      this.metaGraph.addNode( x );
+      this.statGraph.addNode( x );
+    });
+    tgraph.edges$.subscribe((x:IEdge) => {
+      console.log("[4] tgraph.edges$.subscribe");
+      this.resultGraph.labels
+        .filter(val => val.type == 'edges' && val.name == x.data.label)
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+        });
+
+      this.resultMeta.edges.push( x );
+      this.metaGraph.addEdge( x );
+      this.statGraph.addEdge( x );
+    });
+
+    concat( tgraph.info$.asObservable(), tgraph.graph$.asObservable(),
+        tgraph.labels$.asObservable(), tgraph.nodes$.asObservable(), tgraph.edges$.asObservable() )
+    .subscribe({
+      next: data => {
+      },
+      error: (err) => {
+      },
+      complete: () => {
+        console.log("graphSchema call completed!!");
+        setTimeout(()=>{
+          this.metaGraph.refresh();
+          this.statGraph.refresh();
+        }, 100);
+      }
+    });
+
+    this.subscription_graph = this._api.grph_schema( gid );    
   }
 
   /////////////////////////////////////////////////////////////////

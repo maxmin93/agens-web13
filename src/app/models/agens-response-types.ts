@@ -51,4 +51,11 @@ export interface IResultDto extends IResponseDto {
   request: IRequestDto;
   hasGraph: boolean;
   hasRecord: boolean;
+  gid?: number;
 };
+
+export interface IGraphDto extends IResponseDto {
+  // group == 'graph_dto'
+
+  gid: number;
+}

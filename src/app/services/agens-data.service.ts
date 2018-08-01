@@ -6,7 +6,7 @@ import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { map, filter, concatAll } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto } from '../models/agens-response-types';
+import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto } from '../models/agens-response-types';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IRecord, IColumn, IRow } from '../models/agens-data-types';
 import { ILogs, IProject } from '../models/agens-manager-types';
 
@@ -20,7 +20,8 @@ export class AgensDataService {
   private api: any = {
     core: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_CORE_API}`,
     mngr: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_MNGR_API}`,
-    auth: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_AUTH_API}`
+    auth: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_AUTH_API}`,
+    grph: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_GRPH_API}`,
   };
 
   private lastResponse$ = new Subject<IResponseDto>();
@@ -47,6 +48,13 @@ export class AgensDataService {
     columns$: new Subject<IColumn>(),
     rows$: new Subject<IRow>(),
   };
+  private tgraph:any = {
+    info$: new Subject<IGraphDto>(),
+    graph$: new Subject<IGraph>(),
+    labels$: new Subject<ILabel>(),
+    nodes$: new Subject<INode>(),
+    edges$: new Subject<IEdge>()
+  };
   
   constructor (
     private _http: HttpClient,
@@ -57,6 +65,7 @@ export class AgensDataService {
         core: 'http://127.0.0.1:8085/'+CONFIG.AGENS_CORE_API,
         mngr: 'http://127.0.0.1:8085/'+CONFIG.AGENS_MNGR_API,
         auth: 'http://127.0.0.1:8085/'+CONFIG.AGENS_AUTH_API,
+        grph: 'http://127.0.0.1:8085/'+CONFIG.AGENS_GRPH_API
       };
     }
 
@@ -112,6 +121,9 @@ export class AgensDataService {
   }
   getResultSubjects():any {
     return this.result;
+  }
+  getTgraphSubjects():any {
+    return this.tgraph;
   }
 
   /////////////////////////////////////////////////
@@ -316,4 +328,37 @@ export class AgensDataService {
     return this._http.get<ILogs>(url, {headers: this.createAuthorizationHeader()});
   }
 
+  ////////////////////////////////////////////////
+
+  grph_schema(gid:number):Subscription {
+    const url = `${this.api.grph}/schema?gid=${gid}`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
+        .subscribe({
+          next: x => {
+            this.setResponses(<IResponseDto>x);
+            switch( x['group'] ){
+              case 'graph_dto':  this.tgraph.info$.next(x); break;
+              case 'graph':   this.tgraph.graph$.next(x); break;
+              case 'labels':  this.tgraph.labels$.next(x); break;
+              case 'nodes':   this.tgraph.nodes$.next(x); break;
+              case 'edges':   this.tgraph.edges$.next(x); break;
+            }
+          },
+          error: err => {
+            this.setResponses(<IResponseDto>{
+              group: 'grph.schema',
+              state: CONFIG.StateType.ERROR,
+              message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+            });
+          },
+          complete: () => {
+            this.tgraph.info$.complete();
+            this.tgraph.graph$.complete();
+            this.tgraph.labels$.complete();
+            this.tgraph.nodes$.complete();
+            this.tgraph.edges$.complete();
+          }
+        });
+  }  
 }

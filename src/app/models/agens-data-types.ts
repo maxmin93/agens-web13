@@ -36,7 +36,8 @@ export interface ILabel {
   desc: string;
   size: number;
   properties: Array<IProperty>;
-  neighbors: Array<string>;
+  sources: Array<string>;   // source_neighbors
+  targets: Array<string>;   // target_neighbors
 
   scratch: {
     size_not_empty?: number;
@@ -50,7 +51,7 @@ export interface IElement {
   data: {
     id: string;
     parent?: string;
-    labels: Array<string>;
+    label: string;
     props: Map<string,any>;
     size: number;
   };
@@ -59,8 +60,6 @@ export interface IElement {
   };
   classes?: string;
 
-  equalLabel: (label:string) => boolean;
-  getLabel: () => string;
   getPropertyId: () => string;
   getPropertyName: () => string;
   getProperty: (key:string) => any;
@@ -76,7 +75,7 @@ export interface IEdge extends IElement {
   data: {
     id: string;
     parent?: string;
-    labels: Array<string>;
+    label: string;
     props: Map<string,any>;
     size: number;
     source: string;           // only EDGE
