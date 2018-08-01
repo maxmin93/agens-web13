@@ -15,14 +15,25 @@
                     <!-- graph element info Box -->
                     <nav>
                         <ng-template [ngIf]="selectedElement">
-                            <div id="slide-toggle" class="slide"> 
-                                <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
-                                    [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
-                                    <span>LOCATION LOCK</span></mat-slide-toggle>
-                                <h4><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</h4>
-                                <p><span>Name</span>{{ selectedElement.data('name') }}</p>
-                                <p><span>Data</span></p>
-                                <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+                            <div id="slide-toggle" class="slide">
+                                <ul class="list">
+                                    <li>
+                                        <h4>SELECT <strong>DATA-INFO</strong></h4>
+                                        <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                                            [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
+                                            <small>LOCATION LOCK</small></mat-slide-toggle>
+                                    </li>
+                                    <li>
+                                        <span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]
+                                    </li>
+                                    <li>
+                                        <span>Name</span>{{ selectedElement.data('name') }}
+                                    </li>
+                                    <li>
+                                        <span>Data</span>
+                                        <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+                                    </li>
+                                </ul>
                             </div>
                         </ng-template>
                     </nav>

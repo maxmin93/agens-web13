@@ -9,49 +9,11 @@
 .meta-graph { 
         min-height: 25.625rem;    
         .graph-canvas { 
-                height: 40rem; 
+                flex: 1; 
         }
 }       
 
-ul.list li { 
-        max-width: 700px; 
-        overflow: hidden; 
-        white-space: nowrap; 
-        text-overflow: ellipsis; 
-        margin-top: 1.25rem;
-        padding: 1rem; 
-        border-bottom: 1px solid #ddd; 
-        font-size: .875rem; 
-        flex: 1; 
-        color: #4d4d4d; 
-        span { 
-                background: #1bc9e4; 
-                min-width: 60px; 
-                display: inline-block;
-                margin-right: 1.25rem; 
-                padding: .25rem; 
-                border-radius: 1rem;
-                text-align: center;  
-                font-size: .75rem; 
-                color: #fff; 
-        }
 
-        strong { 
-                display: inline-block; 
-                margin-left: 1rem; 
-                font-size: .85rem;
-                font-weight: 400; 
-        }
-        
-        small { 
-                color: #aeb1b4; 
-        }
-}
-
-ul.list-unique li {
-        background: #f5f5f5;
-        max-width: 100%; 
-}
      
 
 
