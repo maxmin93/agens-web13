@@ -96,14 +96,13 @@ export class QueryGraphComponent implements OnInit {
 
   // Neighbor Label 로의 확장
   cyQtipMenuCallback( target:any, targetLabel:string ){
-    let expandId = target.data('labels')[0]+'_'+target.data('id');
+    let expandId = target.data('label')+'_'+target.data('id');
     target.scratch('_expandid', expandId);
 
     let position = target.position();
     let boundingBox = { x1: position.x - 40, x2: position.x + 40, y1: position.y - 40, y2: position.y + 40 };
 
     // this.runExpandTo( target, targetLabel );
-    // this._angulartics2.eventTrack.next({ action: 'expandTo', properties: { category: 'graph', label: `${target.data('labels')[0]}-->${targetName}` }});
   }
   
   /////////////////////////////////////////////////////////////////
@@ -146,11 +145,13 @@ export class QueryGraphComponent implements OnInit {
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
-    this.cy.resize();
   }
-
   resize(){
     this.cy.resize();
+  }
+  refreshCanvas(){
+    this.refresh();
+    this.resize();
   }
 
   // graph 데이터
@@ -237,7 +238,7 @@ export class QueryGraphComponent implements OnInit {
     if( label.type == 'nodes' ) elements = this.cy.nodes();
     else elements = this.cy.edges();
     for( let i=0; i<elements.length; i+= 1){
-      if( elements[i].data('labels').indexOf(label.name) >= 0 ){
+      if( elements[i].data('label') == label.name ){
         elements[i].data('$$style', { _self: { color: null, size: null, label: null }, _label: label['$$style'] });
       }
     }

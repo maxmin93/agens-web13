@@ -11,7 +11,7 @@
                 <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
                     [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
                     <span>LOCATION LOCK</span></mat-slide-toggle>
-                <h4><span>Label</span>{{ selectedElement.data('labels') [0] }} [{{ selectedElement.id() }}]</h4>
+                <h4><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</h4>
                 <p><span>Name</span>{{ selectedElement.data('name') }}</p>
                 <p><span>Data</span></p>
                 <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>

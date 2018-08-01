@@ -230,7 +230,7 @@ export class SearchResultDialog implements OnInit {
 
     let searchKey = (<IProperty> this.targetPropertyCtl.value).key;
     this.searchResult = agens.cy.elements().filter((i, elem) => {
-        return elem.data('labels')[0] === (<ILabel> this.targetLabelCtl.value).name;
+        return elem.data('label') === (<ILabel> this.targetLabelCtl.value).name;
       });
     if( this.labelProperties.length > 0 ){
       this.searchResult = this.searchResult.filter((i, elem) => {

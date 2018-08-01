@@ -213,7 +213,6 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultDto = <IResultDto>x;
       this.queryResult.setData(<IResponseDto>x);
 
-      if( x.hasOwnProperty('gid') ) this.runGraphSchema( x.gid );
       // this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});
     });
 
@@ -277,6 +276,9 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
         // this.queryGraph.labels = [...this.resultGraph.labels];
         this.queryGraph.refresh();
         // this.queryTable.setData( this.resultRecord );
+  
+        if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
+          this.runGraphSchema( this.resultDto.gid );
       }
     });
 
@@ -300,12 +302,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     });
 
     tgraph.graph$.subscribe((x:IGraph) => {
+      console.log("[1] tgraph.graph$.subscribe");
       this.resultMeta = x;
       this.resultMeta.labels = new Array<ILabel>();
       this.resultMeta.nodes = new Array<INode>();
       this.resultMeta.edges = new Array<IEdge>();
     });
     tgraph.labels$.subscribe((x:ILabel) => {
+      console.log("[2] tgraph.labels$.subscribe");
       x.scratch['_style'] = <IStyle>{ width: undefined, title: undefined
           , color: this.labelColors[ (this.colorIndex++)%CONFIG.MAX_COLOR_SIZE ] };
       this.resultMeta.labels.push( x );
@@ -313,6 +317,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.statGraph.addLabel( x );
     });
     tgraph.nodes$.subscribe((x:INode) => {    
+      console.log("[3] tgraph.nodes$.subscribe");
       // setNeighbors from this.resultGraph.labels;
       x.scratch['_neighbors'] = new Array<string>();
       this.resultMeta.labels
@@ -327,6 +332,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.statGraph.addNode( x );
     });
     tgraph.edges$.subscribe((x:IEdge) => {
+      console.log("[4] tgraph.edges$.subscribe");
       this.resultGraph.labels
         .filter(val => val.type == 'edges' && val.name == x.data.label)
         .map(label => {
@@ -346,9 +352,11 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       error: (err) => {
       },
       complete: () => {
-        this.metaGraph.refresh();
-        this.statGraph.refresh();
         console.log("graphSchema call completed!!");
+        setTimeout(()=>{
+          this.metaGraph.refresh();
+          this.statGraph.refresh();
+        }, 100);
       }
     });
 
