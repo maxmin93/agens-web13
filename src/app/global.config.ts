@@ -5,6 +5,7 @@ export const DEV_MODE: boolean = true;  // false if integration version
 export const AGENS_CORE_API: string = 'api/core';
 export const AGENS_MNGR_API: string = 'api/manager';
 export const AGENS_AUTH_API: string = 'api/auth';
+export const AGENS_GRPH_API: string = 'api/graph';
 
 export const USER_KEY: string = 'agens-ssid';
 

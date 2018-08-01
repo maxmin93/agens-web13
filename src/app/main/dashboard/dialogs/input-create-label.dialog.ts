@@ -10,7 +10,7 @@ import { ILabel, IProperty } from '../../../models/agens-data-types';
 
 const EMPTY_LABEL: ILabel = { 
   group: 'labels', id: '', type: '', name: '', owner: '', desc: '', size: 0
-  , properties: [], neighbors: [], scratch: { size_not_empty: 0, is_dirty: true }
+  , properties: [], sources: [], targets: [], scratch: { size_not_empty: 0, is_dirty: true }
 };
 
 @Component({

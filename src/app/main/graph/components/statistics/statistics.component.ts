@@ -139,6 +139,7 @@ export class StatisticsComponent implements OnInit {
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
+    this.cy.resize();
   }
 
   resize(){

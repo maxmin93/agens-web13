@@ -146,6 +146,7 @@ export class QueryGraphComponent implements OnInit {
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
+    this.cy.resize();
   }
 
   resize(){

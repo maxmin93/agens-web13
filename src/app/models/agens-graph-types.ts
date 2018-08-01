@@ -15,7 +15,8 @@ export class Label implements ILabel {
   size_not_empty: number = 0;
   is_dirty: boolean = true;
   properties: Array<IProperty> = new Array<IProperty>();
-  neighbors: Array<string> = new Array<string>();
+  sources: Array<string> = new Array<string>();   // source_neighbors
+  targets: Array<string> = new Array<string>();   // target_neighbors
 
   scratch: {
     size_not_empty?: number;
@@ -60,7 +61,7 @@ export class Element implements IElement {
   data: {
     id: string;
     parent?: string;
-    labels: Array<string>;
+    label: string;
     props: Map<string,any>;
     size: number;
   };
@@ -77,7 +78,7 @@ export class Element implements IElement {
     }
     this.group = group;
     this.data.id = id;
-    this.data.labels = new Array<string>();
+    this.data.label = "";
     this.data.props = new Map<string,any>();
     this.data.size = 0;
   }
@@ -94,18 +95,12 @@ export class Element implements IElement {
   };
 
   get label():string {
-    return _.first(this.data.labels);
+    return this.data.label;
   };
   set label(name:string) {
-    this.data.labels.unshift(name);   // push at first of array
+    this.data.label = name;
   };
-  equalLabel(label:string):boolean {
-    return _.indexOf(this.data.labels, label) >= 0;
-  }
 
-  getLabel():string {
-    return _.first(this.data.labels);
-  }
   getPropertyId():string {
     return this.data.props['id'];
   };
@@ -170,7 +165,7 @@ export class Node extends Element implements INode {
     if( !labels ) return;
     labels.forEach(val => {
       if( val.type == 'nodes' && val.name == this.label )
-        this.scratch['_neighbors'] = this.scratch['_neighbors'].concat(val.neighbors);
+        this.scratch['_neighbors'] = this.scratch['_neighbors'].concat(val.targets);
     });
   }
 }
@@ -180,7 +175,7 @@ export class Edge extends Element implements IEdge {
 
   data: {
     id: string;
-    labels: Array<string>;
+    label: string;
     props: Map<string,any>;
     size: number;
     source: string;           // only EDGE
