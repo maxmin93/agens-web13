@@ -511,33 +511,58 @@
         if( cy.$api.view !== undefined ) cy.$api.view.removeHighlights();
         cy.$(':selected').unselect();
         cy.pivotNode = null;
-        // user Function
-        if( !_.isNil(window['angularComponentRef'].cyCanvasCallback) )
+
+        // mapping user Functions
+        if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyCanvasCallback )
           (window['angularComponentRef'].cyCanvasCallback)();
+        if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyCanvasCallback )
+          (window['metaGraphComponentRef'].cyCanvasCallback)();
+        if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyCanvasCallback )
+          (window['dataGraphComponentRef'].cyCanvasCallback)();
+        if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyCanvasCallback )
+          (window['statGraphComponentRef'].cyCanvasCallback)();
       }
 
       // 노드 또는 에지에 대한 클릭 이벤트
       else{
         if( !e.target.isNode() && !e.target.isEdge() ) return;
         
-        // user Function
-        if( !_.isNil(window['angularComponentRef'].cyElemCallback) )
+        // mapping user Functions
+        if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyElemCallback )
           (window['angularComponentRef'].cyElemCallback)(e.target);
+        if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyElemCallback )
+          (window['metaGraphComponentRef'].cyElemCallback)(e.target);
+        if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyElemCallback )
+          (window['dataGraphComponentRef'].cyElemCallback)(e.target);
+        if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyElemCallback )
+          (window['statGraphComponentRef'].cyElemCallback)(e.target);
 
         // if NODE
         if( e.target.isNode() ){
           cy.pivotNode = e.target;
-          // user Function
-          if( !_.isNil(window['angularComponentRef'].cyNodeCallback) )
+          // mapping user Functions
+          if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyNodeCallback )
             (window['angularComponentRef'].cyNodeCallback)(e.target);
+          if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyNodeCallback )
+            (window['metaGraphComponentRef'].cyNodeCallback)(e.target);
+          if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyNodeCallback )
+            (window['dataGraphComponentRef'].cyNodeCallback)(e.target);
+          if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyNodeCallback )
+            (window['statGraphComponentRef'].cyNodeCallback)(e.target);
         }
 
         // if EDGE
         if( e.target.isEdge() ){
-          // user Function
-          if( !_.isNil(window['angularComponentRef'].cyEdgeCallback) )
+          // mapping user Functions
+          if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyEdgeCallback )
             (window['angularComponentRef'].cyEdgeCallback)(e.target);
-        }          
+          if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyEdgeCallback )
+            (window['metaGraphComponentRef'].cyEdgeCallback)(e.target);
+          if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyEdgeCallback )
+            (window['dataGraphComponentRef'].cyEdgeCallback)(e.target);
+          if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyEdgeCallback )
+            (window['statGraphComponentRef'].cyEdgeCallback)(e.target);
+        }
       }
 
     });
@@ -550,9 +575,15 @@
       let targets = cy.getElementById(id);
       if( targets.size() == 0 ) return;
 
-      // user Function
-      if( !_.isNil(window['angularComponentRef'].cyQtipMenuCallback) )
+      // mapping user Functions
+      if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyQtipMenuCallback )
         (window['angularComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+      if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyQtipMenuCallback )
+        (window['metaGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+      if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyQtipMenuCallback )
+        (window['dataGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+      if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyQtipMenuCallback )
+        (window['statGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
     };
 
     // ==========================================

@@ -14,7 +14,7 @@
                     </div>
                     <!-- graph element info Box -->
                     <nav>
-                        <ng-template [ngIf]="selectedElement">
+                        <ng-container *ngIf="selectedElement">
                             <div id="slide-toggle" class="slide">
                                 <ul class="list">
                                     <li>
@@ -34,8 +34,9 @@
                                         <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
                                     </li>
                                 </ul>
+
                             </div>
-                        </ng-template>
+                        </ng-container>
                     </nav>
                     <!-- Graph.Meta : Labels content -->
                     <mat-chip-list id="agens-graph-labels">

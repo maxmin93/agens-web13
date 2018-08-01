@@ -9,7 +9,8 @@
 .meta-graph { 
         min-height: 25.625rem;    
         .graph-canvas { 
-                flex: 1; 
+                height: 69vh; 
+                @media ( max-width: 1280px ) { height: 68vh; }
         }
 }       
 
