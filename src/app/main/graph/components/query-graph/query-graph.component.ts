@@ -61,11 +61,11 @@ export class QueryGraphComponent implements OnInit {
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
         container: document.getElementById('graph-canvas'),
-        selectionType: 'additive',    // 'single' or 'additive'
-        boxSelectionEnabled: true, // if single then false, else true
-        useCxtmenu: true,          // whether to use Context menu or not
-        hideNodeTitle: true,       // hide nodes' title
-        hideEdgeTitle: true,       // hide edges' title
+        selectionType: 'additive',  // 'single' or 'additive'
+        boxSelectionEnabled: true,  // if single then false, else true
+        useCxtmenu: true,           // whether to use Context menu or not
+        hideNodeTitle: true,        // hide nodes' title
+        hideEdgeTitle: true,        // hide edges' title
       });
   }
 
@@ -146,7 +146,7 @@ export class QueryGraphComponent implements OnInit {
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.$api.changeLayout('euler');
+    if( this.isVisible ) this.cy.$api.changeLayout('cose');
   }
   resize(){
     this.cy.resize();
@@ -180,7 +180,7 @@ export class QueryGraphComponent implements OnInit {
 
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
-    this.cy.$api.changeLayout(layout);
+    if( this.isVisible ) this.cy.$api.changeLayout(layout);
   }
 
   /////////////////////////////////////////////////////////////////

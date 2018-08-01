@@ -20,6 +20,7 @@ declare var agens: any;
 export class MetaGraphComponent implements OnInit {
 
   isVisible: boolean = false;
+  isFirstOnData: boolean = false;
 
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
@@ -37,7 +38,6 @@ export class MetaGraphComponent implements OnInit {
     private _util: AgensUtilService,
   ) { 
   }
-
 
   ngOnInit() {
     // prepare to call this.function from external javascript
@@ -61,11 +61,11 @@ export class MetaGraphComponent implements OnInit {
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
         container: document.getElementById('meta-canvas'),
-        selectionType: 'additive',    // 'single' or 'additive'
-        boxSelectionEnabled: true, // if single then false, else true
-        useCxtmenu: true,          // whether to use Context menu or not
-        hideNodeTitle: true,       // hide nodes' title
-        hideEdgeTitle: true,       // hide edges' title
+        selectionType: 'single',    // 'single' or 'additive'
+        boxSelectionEnabled: false, // if single then false, else true
+        useCxtmenu: true,           // whether to use Context menu or not
+        hideNodeTitle: true,        // hide nodes' title
+        hideEdgeTitle: true,        // hide edges' title
       });
   }
 
@@ -133,19 +133,21 @@ export class MetaGraphComponent implements OnInit {
   addEdge( ele:IEdge ){
     this.cy.add( ele );
   }
+
   refresh(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    // if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
+    this.cy.$api.changeLayout('dagre');
   }
   resize(){
     this.cy.resize();
+    this.cy.fit( agens.cy.elements(), 50);
   }
-
   refreshCanvas(){
     this.refresh();
     this.resize();
   }
+
 }

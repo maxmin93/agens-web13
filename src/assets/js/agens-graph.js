@@ -581,10 +581,10 @@
   agens.graph.defaultSetting = {
     elements: { nodes: [], edges: [] },
     style: undefined,       // agens.graph.stylelist['dark'],
-    layout: { name: 'euler',
-        fit: true, padding: 30, boundingBox: undefined, 
+    layout: { name: 'cose',
+        fit: true, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
-        animate: 'end', animationDuration: 800, maxSimulationTime: 2800,
+        animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){}, stop: function(){}
       },
 
@@ -804,7 +804,7 @@
     };
 
     // layouts = { *'euler', 'klay', 'dagre', 'cose-bilkent', 'concentric" }
-    cy.$api.changeLayout = function(layout='euler', selected=false){
+    cy.$api.changeLayout = function(layout='cose', selected=false){
       console.log( 'cy.$api.changeLayout:', layout);
       let elements = cy.elements(':visible');
       let selectedElements = cy.elements(':selected');
@@ -812,9 +812,9 @@
         
       let layoutOption = {
         name: layout,
-        fit: true, padding: 30, boundingBox: undefined, 
+        fit: true, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
-        animate: 'end', animationDuration: 800, maxSimulationTime: 2800,
+        animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){}, stop: function(){}
       };
   

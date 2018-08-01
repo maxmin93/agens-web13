@@ -267,8 +267,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   showGraph(){
-    this.cy.$api.changeLayout('dagre');
     this.cy.style(agens.graph.stylelist['dark']).update();
+    this.cy.$api.changeLayout('dagre');
   }
 
   ////////////////////////////////////////////////////////

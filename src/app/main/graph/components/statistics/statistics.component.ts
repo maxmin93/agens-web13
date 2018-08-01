@@ -37,7 +37,6 @@ export class StatisticsComponent implements OnInit {
   ) { 
   }
 
-
   ngOnInit() {
     // prepare to call this.function from external javascript
     window['statGraphComponentRef'] = {
@@ -60,11 +59,11 @@ export class StatisticsComponent implements OnInit {
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
         container: document.getElementById('statistics-canvas'),
-        selectionType: 'additive',    // 'single' or 'additive'
-        boxSelectionEnabled: true, // if single then false, else true
-        useCxtmenu: true,          // whether to use Context menu or not
-        hideNodeTitle: true,       // hide nodes' title
-        hideEdgeTitle: true,       // hide edges' title
+        selectionType: 'single',    // 'single' or 'additive'
+        boxSelectionEnabled: false, // if single then false, else true
+        useCxtmenu: true,           // whether to use Context menu or not
+        hideNodeTitle: true,        // hide nodes' title
+        hideEdgeTitle: true,        // hide edges' title
       });
   }
 
@@ -133,20 +132,21 @@ export class StatisticsComponent implements OnInit {
   addEdge( ele:IEdge ){
     this.cy.add( ele );
   }
+
   refresh(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    // if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
+    this.cy.$api.changeLayout('dagre');
   }
-
   resize(){
     this.cy.resize();
+    this.cy.fit( agens.cy.elements(), 50);
   }
-
   refreshCanvas(){
     this.refresh();
     this.resize();
   }
+
 }

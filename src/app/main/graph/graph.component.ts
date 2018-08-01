@@ -326,10 +326,10 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       complete: () => {
         this.isLoading = false;
         // **NOTE: layout 실행시 stack overflow 가 간헐적으로 발생. 안전 차원에서 일단 담아둠
-        setTimeout(()=>{
+        // setTimeout(()=>{
           this.queryGraph.refresh();
           // this.queryTable.setData( this.resultRecord );
-        }, 100);
+        // }, 100);
         // **NOTE: 이어서 schema graph 호출 (gid)
         if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
           this.runGraphSchema( this.resultDto.gid );

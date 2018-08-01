@@ -56,21 +56,21 @@
                             <h4 class="mat-subhead">LAYOUT <strong>TYPE</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('grid')">GRID</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('random')">RANDOM</button>
+                            <button mat-menu-item (click)="graphChangeLayout('grid')">grid</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('circle')">CIRCLE</button>
-                        <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('concentric')">CONCENTRIC</button>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphChangeLayout('cola')">COLA</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('cose')">COSE (nodes.size &lt; 400)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose2')">COSE-BILKENT (very slow)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">COSE-BILKENT (very slow)</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('dagre')">DAGRE (hierachy)</button>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphChangeLayout('klay')">KLAY</button>
                     </mat-menu>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
