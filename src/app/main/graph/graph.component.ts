@@ -11,7 +11,7 @@ import { PrettyJsonModule } from 'angular2-prettyjson';
 import { Angulartics2 } from 'angulartics2';
 
 import * as _ from 'lodash';
-import { concat, Observable, Subscription } from 'rxjs';
+import { concat, Observable, Subscription, Subject, forkJoin } from 'rxjs';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
@@ -46,8 +46,8 @@ declare var agens: any;
 })
 export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
-  private subscription: Subscription = undefined;
-  private subscription_graph: Subscription = undefined;
+  private subscription_data: Subscription = undefined;
+  private subscription_meta: Subscription = undefined;
   public project: any = undefined;
 
   // controll whether make buttons to able or disable
@@ -99,7 +99,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy(){
-    if( this.subscription ) this.subscription.unsubscribe();
+    if( !!this.subscription_data ) this.subscription_data.unsubscribe();
+    if( !!this.subscription_meta ) this.subscription_meta.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -168,6 +169,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // when button "NEW" click
   clearProject(){
+    this.clearResults();
+
     // 결과값 지우고
     this.resultDto = undefined;
     this.resultGraph = undefined;
@@ -186,6 +189,43 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     this.queryGraph.clear();
     this.queryTable.clear();
     this.metaGraph.clear();
+    this.statGraph.clear();
+
+    this.clearSubscriptions();
+  }
+
+  clearSubscriptions(){
+    if( !!this.subscription_data ){ 
+      this.subscription_data.unsubscribe(); 
+      this.subscription_data = undefined;
+    }
+    if( !!this.subscription_meta ){
+      this.subscription_meta.unsubscribe();
+      this.subscription_meta = undefined;
+    } 
+  }
+
+  createResultSubjects(){
+    return {
+      info$: new Subject<IResultDto>(),
+      graph$: new Subject<IGraph>(),
+      labels$: new Subject<ILabel>(),
+      nodes$: new Subject<INode>(),
+      edges$: new Subject<IEdge>(),
+      record$: new Subject<IRecord>(),
+      columns$: new Subject<IColumn>(),
+      rows$: new Subject<IRow>(),
+    };
+  }
+
+  createTgraphSubjects(){
+    return {
+      info$: new Subject<IGraphDto>(),
+      graph$: new Subject<IGraph>(),
+      labels$: new Subject<ILabel>(),
+      nodes$: new Subject<INode>(),
+      edges$: new Subject<IEdge>()
+    };
   }
 
   /////////////////////////////////////////////////////////////////
@@ -218,8 +258,10 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     // 이전 결과들 비우고
     this.clearResults();
 
-    let result = this._api.getResultSubjects();
+    // let result = this._api.getResultSubjects();
+    let result = this.createResultSubjects();
     result.info$.subscribe((x:IResultDto) => {
+      console.log( 'call core_query:', x);
       this.resultDto = <IResultDto>x;
       this.queryResult.setData(<IResponseDto>x);
 
@@ -274,8 +316,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultRecord.rows.push( x );
     });
 
-    concat( result.info$.asObservable(), result.graph$.asObservable(),
-          result.labels$.asObservable(), result.nodes$.asObservable(), result.edges$.asObservable() )
+    forkJoin( [result.info$.asObservable(), result.graph$.asObservable(),
+          result.labels$.asObservable(), result.nodes$.asObservable(), result.edges$.asObservable()] )
     .subscribe({
       next: data => {
       },
@@ -283,43 +325,42 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       },
       complete: () => {
         this.isLoading = false;
-        // this.queryGraph.labels = [...this.resultGraph.labels];
-        this.queryGraph.refresh();
-        // this.queryTable.setData( this.resultRecord );
-  
+        // **NOTE: layout 실행시 stack overflow 가 간헐적으로 발생. 안전 차원에서 일단 담아둠
+        setTimeout(()=>{
+          this.queryGraph.refresh();
+          // this.queryTable.setData( this.resultRecord );
+        }, 100);
+        // **NOTE: 이어서 schema graph 호출 (gid)
         if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
           this.runGraphSchema( this.resultDto.gid );
       }
     });
 
-    this.subscription = this._api.core_query( sql );
+    this.subscription_data = this._api.core_query( result, sql );
   }
 
   // when button "STOP" click
   stopQuery(){
-    // query unsubscribe
-    if( this.subscription ){
-      this.subscription.unsubscribe();
-    }
+    this.clearSubscriptions();
+
     this.isLoading = false;
     this.queryResult.abort();
   }
 
   runGraphSchema(gid: number){
-    let tgraph = this._api.getTgraphSubjects();
+    // let tgraph = this._api.getTgraphSubjects();
+    let tgraph = this.createTgraphSubjects();
     tgraph.info$.subscribe((x:IGraphDto) => {
-      console.log("call graphSchema:", x);
+      console.log("call graph_schema:", x);
     });
 
     tgraph.graph$.subscribe((x:IGraph) => {
-      console.log("[1] tgraph.graph$.subscribe");
       this.resultMeta = x;
       this.resultMeta.labels = new Array<ILabel>();
       this.resultMeta.nodes = new Array<INode>();
       this.resultMeta.edges = new Array<IEdge>();
     });
     tgraph.labels$.subscribe((x:ILabel) => {
-      console.log("[2] tgraph.labels$.subscribe");
       x.scratch['_style'] = <IStyle>{ width: undefined, title: undefined
           , color: this.labelColors[ (this.colorIndex++)%CONFIG.MAX_COLOR_SIZE ] };
       this.resultMeta.labels.push( x );
@@ -327,7 +368,6 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.statGraph.addLabel( x );
     });
     tgraph.nodes$.subscribe((x:INode) => {    
-      console.log("[3] tgraph.nodes$.subscribe");
       // setNeighbors from this.resultGraph.labels;
       x.scratch['_neighbors'] = new Array<string>();
       this.resultMeta.labels
@@ -342,7 +382,6 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.statGraph.addNode( x );
     });
     tgraph.edges$.subscribe((x:IEdge) => {
-      console.log("[4] tgraph.edges$.subscribe");
       this.resultGraph.labels
         .filter(val => val.type == 'edges' && val.name == x.data.label)
         .map(label => {
@@ -354,15 +393,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.statGraph.addEdge( x );
     });
 
-    concat( tgraph.info$.asObservable(), tgraph.graph$.asObservable(),
-        tgraph.labels$.asObservable(), tgraph.nodes$.asObservable(), tgraph.edges$.asObservable() )
+    forkJoin( [tgraph.info$.asObservable(), tgraph.graph$.asObservable(),
+        tgraph.labels$.asObservable(), tgraph.nodes$.asObservable(), tgraph.edges$.asObservable()] )
     .subscribe({
       next: data => {
       },
       error: (err) => {
       },
       complete: () => {
-        console.log("graphSchema call completed!!");
         setTimeout(()=>{
           this.metaGraph.refresh();
           this.statGraph.refresh();
@@ -370,7 +408,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     });
 
-    this.subscription_graph = this._api.grph_schema( gid );    
+    this.subscription_meta = this._api.grph_schema( tgraph, gid );
   }
 
   /////////////////////////////////////////////////////////////////

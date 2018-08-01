@@ -53,7 +53,7 @@ export class MetaGraphComponent implements OnInit {
 
   ngOnDestroy(){
     // 내부-외부 함수 공유 해제
-    window['metaGraphComponentRef'] = null;
+    window['metaGraphComponentRef'] = undefined;
   }
 
   ngAfterViewInit() {
