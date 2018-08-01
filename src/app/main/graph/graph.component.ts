@@ -141,12 +141,22 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     console.log( `tabChangedDone: index = ${this.currentTabIndex}` );
     switch( this.currentTabIndex ){
       case 0: 
+          this.metaGraph.isVisible = true;
+          this.queryGraph.isVisible = false;
+          this.statGraph.isVisible = false;
           Promise.resolve(null).then(() => this.metaGraph.resize() ); 
           break;
+      case -1:
       case 1: 
+          this.metaGraph.isVisible = false;
+          this.queryGraph.isVisible = true;
+          this.statGraph.isVisible = false;
           Promise.resolve(null).then(() => this.queryGraph.resize() ); 
           break;
       case 3: 
+          this.metaGraph.isVisible = false;
+          this.queryGraph.isVisible = false;
+          this.statGraph.isVisible = true;
           Promise.resolve(null).then(() => this.statGraph.resize() ); 
           break;
     }

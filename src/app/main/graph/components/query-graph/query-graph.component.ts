@@ -18,6 +18,8 @@ declare var agens: any;
 })
 export class QueryGraphComponent implements OnInit {
 
+  isVisible: boolean = false;
+
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
 
@@ -39,19 +41,19 @@ export class QueryGraphComponent implements OnInit {
 
   ngOnInit() {
     // prepare to call this.function from external javascript
-    window['angularComponentRef'] = {
+    window['dataGraphComponentRef'] = {
       zone: this._ngZone,
-      cyCanvasCallback: () => this.cyCanvasCallback(),
-      cyElemCallback: (target) => this.cyElemCallback(target),
-      cyNodeCallback: (target) => this.cyNodeCallback(target),
-      cyQtipMenuCallback: (target, value) => this.cyQtipMenuCallback(target, value),
+      cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
+      cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
+      cyNodeCallback: (target) =>{ if(this.isVisible) this.cyNodeCallback(target) },
+      cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
       component: this
     };
   }
 
   ngOnDestroy(){
     // 내부-외부 함수 공유 해제
-    window['angularComponentRef'] = null;
+    window['dataGraphComponentRef'] = null;
   }
 
   ngAfterViewInit() {
@@ -83,7 +85,7 @@ export class QueryGraphComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log( 'query-graph.ele.click', target);
+    console.log("data-graph.elem-click:", target);
 
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;

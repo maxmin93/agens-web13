@@ -14,7 +14,7 @@
                     </div>
                     <!-- graph element info Box -->
                     <nav>
-                        <ng-template [ngIf]="selectedElement">
+                        <ng-container *ngIf="!!selectedElement">
                             <div id="slide-toggle" class="slide"> 
                                 <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
                                     [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
@@ -24,7 +24,7 @@
                                 <p><span>Data</span></p>
                                 <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
                             </div>
-                        </ng-template>
+                        </ng-container>
                     </nav>
                     <!-- Graph.Meta : Labels content -->
                     <mat-chip-list id="agens-graph-labels">
