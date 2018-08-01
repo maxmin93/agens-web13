@@ -366,6 +366,215 @@
     ]
   };
 
+  // Public Property : Layout Options
+  agens.graph.layoutTypes = {
+    'grid': {
+      name: 'grid',
+      fit: true,                          // whether to fit the viewport to the graph
+      padding: 50,                        // padding used on fit
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
+      avoidOverlapPadding: 10,            // extra spacing around nodes when avoidOverlap: true
+      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
+      condense: false,                    // uses all available space on false, uses minimal space on true
+      rows: undefined,                    // force num of rows in the grid
+      cols: undefined,                    // force num of columns in the grid
+      position: function( node ){},       // returns { row, col } for element
+      sort: undefined,                    // a sorting function to order the nodes; e.g. function(a, b){ return a.data('weight') - b.data('weight') }
+      animate: false,                     // whether to transition the node positions
+      animationDuration: 500,             // duration of animation in ms if enabled
+      animationEasing: undefined,         // easing of animation if enabled
+    },
+    'random': {
+      name: 'random',
+      fit: true,                          // whether to fit to viewport
+      padding: 50,                        // fit padding
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      animate: false,                     // whether to transition the node positions
+      animationDuration: 500,             // duration of animation in ms if enabled
+      animationEasing: undefined,         // easing of animation if enabled
+    },
+    'breadthfirst': {
+      name: 'breadthfirst',
+      fit: true,                          // whether to fit the viewport to the graph
+      directed: false,                    // whether the tree is directed downwards (or edges can point in any direction if false)
+      padding: 50,                        // padding on fit
+      circle: false,                      // put depths in concentric circles if true, put depths top down if false
+      spacingFactor: 1.75,                // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
+      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+      roots: undefined,                   // the roots of the trees
+      maximalAdjustments: 0,              // how many times to try to position the nodes in a maximal way (i.e. no backtracking)
+      animate: false,                     // whether to transition the node positions
+      animationDuration: 500,             // duration of animation in ms if enabled
+      animationEasing: undefined,         // easing of animation if enabled
+    },
+    'circle': {
+      name: 'circle',
+      fit: true,                          // whether to fit the viewport to the graph
+      padding: 50,                        // the padding on fit
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox and radius if not enough space
+      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
+      radius: undefined,                  // the radius of the circle
+      startAngle: 3 / 2 * Math.PI,        // where nodes start in radians
+      sweep: undefined,                   // how many radians should be between the first and last node (defaults to full circle)
+      clockwise: true,                    // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
+      sort: undefined,                    // a sorting function to order the nodes; e.g. function(a, b){ return a.data('weight') - b.data('weight') }
+      animate: false,                     // whether to transition the node positions
+      animationDuration: 500,             // duration of animation in ms if enabled
+      animationEasing: undefined,         // easing of animation if enabled
+    },
+    'concentric': {
+      name: 'concentric',
+      fit: true,                          // whether to fit the viewport to the graph
+      padding: 50,                        // the padding on fit
+      startAngle: 3 / 2 * Math.PI,        // where nodes start in radians
+      sweep: undefined,                   // how many radians should be between the first and last node (defaults to full circle)
+      clockwise: true,                    // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
+      equidistant: false,                 // whether levels have an equal radial distance betwen them, may cause bounding box overflow
+      minNodeSpacing: 10,                 // min spacing between outside of nodes (used for radius adjustment)
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
+      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+      height: undefined,                  // height of layout area (overrides container height)
+      width: undefined,                   // width of layout area (overrides container width)
+      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
+      concentric: function( node ){ return node.degree(); },  // returns numeric value for each node, placing higher nodes in levels towards the centre
+      levelWidth: function( nodes ){ return nodes.maxDegree() / 4; }, // the variation of concentric values in each level
+      animate: false,                     // whether to transition the node positions
+      animationDuration: 500,             // duration of animation in ms if enabled
+      animationEasing: undefined,         // easing of animation if enabled
+    },      
+    // ** NOTE: 제외시킴 (2018-01-19)
+    // ** 애니메이션이 너무 오래 걸려서 제외 (애니메이션 꺼도 오래걸림)
+    'cola': {
+      name: 'cola',
+      animate: false,                      // whether to show the layout as it's running
+      refresh: 1,                         // number of ticks per frame; higher is faster but more jerky
+      maxSimulationTime: 1500,            // max length in ms to run the layout
+      ungrabifyWhileSimulating: false,    // so you can't drag nodes during layout
+      fit: true,                          // on every layout reposition of nodes, fit the viewport
+      padding: 50,                        // padding around the simulation
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      // positioning options
+      randomize: true,                    // use random node positions at beginning of layout
+      avoidOverlap: true,                 // if true, prevents overlap of node bounding boxes
+      handleDisconnected: true,           // if true, avoids disconnected components from overlapping
+      nodeSpacing: function (node) { return 10; }, // extra spacing around nodes
+      flow: undefined,                    // use DAG/tree flow layout if specified, e.g. { axis: 'y', minSeparation: 30 }
+      alignment: undefined,               // relative alignment constraints on nodes, e.g. function( node ){ return { x: 0, y: 1 } }
+      // different methods of specifying edge length
+      // each can be a constant numerical value or a function like `function( edge ){ return 2; }`
+      edgeLength: undefined,              // sets edge length directly in simulation
+      edgeSymDiffLength: undefined,       // symmetric diff edge length in simulation
+      edgeJaccardLength: undefined,       // jaccard edge length in simulation
+      // iterations of cola algorithm; uses default values on undefined
+      unconstrIter: undefined,            // unconstrained initial layout iterations
+      userConstIter: undefined,           // initial layout iterations with user-specified constraints
+      allConstIter: undefined,            // initial layout iterations with all constraints including non-overlap
+      // infinite layout options
+      infinite: false                     // overrides all other options for a forces-all-the-time mode
+    },
+    'cose': {
+      name: 'cose',
+      animate: true,                      // Whether to animate while running the layout
+      // The layout animates only after this many milliseconds
+      animationThreshold: 250,            // (prevents flashing on fast runs)
+      // Number of iterations between consecutive screen positions update
+      refresh: 20,                        // (0 -> only updated on the end)
+      fit: true,                          // Whether to fit the network view after when done
+      padding: 50,                        // Padding on fit
+      boundingBox: undefined,             // Constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+      randomize: true,                    // Randomize the initial positions of the nodes (true) or use existing positions (false)
+      componentSpacing: 50,               // Extra spacing between components in non-compound graphs
+      nodeRepulsion: function( node ){ return 400000; },  // Node repulsion (non overlapping) multiplier
+      nodeOverlap: 10,                    // Node repulsion (overlapping) multiplier
+      idealEdgeLength: function( edge ){ return 10; },    // Ideal edge (non nested) length
+      edgeElasticity: function( edge ){ return 100; },    // Divisor to compute edge forces
+      nestingFactor: 5,                   // Nesting factor (multiplier) to compute ideal edge length for nested edges
+      gravity: 80,                        // Gravity force (constant)
+      numIter: 800,                       // Maximum number of iterations to perform
+      initialTemp: 200,                   // Initial temperature (maximum node displacement)
+      coolingFactor: 0.95,                // Cooling factor (how the temperature is reduced between consecutive iterations
+      minTemp: 1.0,                       // Lower temperature threshold (below this point the layout will end)
+      weaver: false                       // Pass a reference to weaver to use threads for calculations
+    },
+    'cose2': {
+      name: 'cose-bilkent',
+      nodeDimensionsIncludeLabels: false, // Whether to include labels in node dimensions. Useful for avoiding label overlap
+      refresh: 30,                        // number of ticks per frame; higher is faster but more jerky
+      fit: true,                          // Whether to fit the network view after when done
+      padding: 50,                        // Padding on fit
+      randomize: true,                    // Whether to enable incremental mode
+      nodeRepulsion: 4500,                // Node repulsion (non overlapping) multiplier
+      idealEdgeLength: 50,                // Ideal (intra-graph) edge length
+      edgeElasticity: 0.45,               // Divisor to compute edge forces
+      nestingFactor: 0.1,                 // Nesting factor (multiplier) to compute ideal edge length for inter-graph edges
+      gravity: 0.25,                      // Gravity force (constant)
+      numIter: 2500,                      // Maximum number of iterations to perform
+      tile: true,                         // Whether to tile disconnected nodes
+      animate: 'end',                     // Type of layout animation. The option set is {'during', 'end', false}
+      tilingPaddingVertical: 10,          // Amount of vertical space to put between degree zero nodes during tiling (can also be a function)
+      tilingPaddingHorizontal: 10,        // Amount of horizontal space to put between degree zero nodes during tiling (can also be a function)
+      gravityRangeCompound: 1.5,          // Gravity range (constant) for compounds
+      gravityCompound: 1.0,               // Gravity force (constant) for compounds
+      gravityRange: 3.8,                  // Gravity range (constant)
+      initialEnergyOnIncremental: 0.5     // Initial cooling factor for incremental layout
+    },
+    'dagre': {
+      name: 'dagre',
+      fit: true,                          // whether to fit to viewport
+      padding: 50,                        // fit padding
+      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
+      animate: true,                      // whether to transition the node positions
+      animationDuration: 500,             // duration of animation in ms if enabled
+      animationEasing: undefined,         // easing of animation if enabled
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      // dagre algo options, uses default value on undefined
+      nodeSep: undefined,                 // the separation between adjacent nodes in the same rank
+      edgeSep: undefined,                 // the separation between adjacent edges in the same rank
+      rankSep: undefined,                 // the separation between adjacent nodes in the same rank
+      rankDir: undefined,                 // 'TB' for top to bottom flow, 'LR' for left to right
+      minLen: function( edge ){ return 1; },      // number of ranks to keep between the source and target of the edge
+      edgeWeight: function( edge ){ return 1; },  // higher weight edges are generally made shorter and straighter than lower weight edges
+    },
+    'arbor': {
+      name: 'arbor',
+      animate: true,                      // whether to show the layout as it's running
+      maxSimulationTime: 1500,            // max length in ms to run the layout
+      fit: true,                          // on every layout reposition of nodes, fit the viewport
+      padding: 50,                        // padding around the simulation
+      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+      ungrabifyWhileSimulating: false,    // so you can't drag nodes during layout
+      // forces used by arbor (use arbor default on undefined)
+      repulsion: undefined,
+      stiffness: undefined,
+      friction: undefined,
+      gravity: true,
+      fps: undefined,
+      precision: undefined,
+      // static numbers or functions that dynamically return what these
+      // values should be for each element
+      // e.g. nodeMass: function(n){ return n.data('weight') }
+      nodeMass: undefined,
+      edgeLength: undefined,
+      stepSize: 0.1,                      // smoothing of arbor bounding box
+      // function that returns true if the system is stable to indicate
+      // that the layout can be stopped
+      stableEnergy: function (energy) {
+          var e = energy;
+          return (e.max <= 0.5) || (e.mean <= 0.3);
+      },
+      // infinite layout options
+      infinite: false                     // overrides all other options for a forces-all-the-time mode
+    }
+  };
+      
   // Public Property : defaultSetting
   // ==> cy 인스턴스 생성 후 cy.scratch('_config')로 저장됨
   //     : 스타일 함수 등에서는 e._private.cy.scratch('_config') 로 액세스 가능
@@ -375,9 +584,8 @@
     layout: { name: 'euler',
         fit: true, padding: 30, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
-        animate: true, animationDuration: 2800, maxSimulationTime: 2800, 
-        ready: function(){}, stop: function(){},
-        springLength: edge => 120, springCoeff: edge => 0.0008,        // for euler
+        animate: 'end', animationDuration: 800, maxSimulationTime: 2800,
+        ready: function(){}, stop: function(){}
       },
 
     // initial viewport state:
@@ -597,7 +805,7 @@
 
     // layouts = { *'euler', 'klay', 'dagre', 'cose-bilkent', 'concentric" }
     cy.$api.changeLayout = function(layout='euler', selected=false){
-
+      console.log( 'cy.$api.changeLayout:', layout);
       let elements = cy.elements(':visible');
       let selectedElements = cy.elements(':selected');
       if( selected && selectedElements.length > 1 ) elements = selectedElements;
@@ -605,21 +813,19 @@
       let layoutOption = {
         name: layout,
         fit: true, padding: 30, boundingBox: undefined, 
-        nodeDimensionsIncludeLabels: true, randomize: true,
-        animate: false, animationDuration: 2800, maxSimulationTime: 2800, 
-        ready: function(){}, stop: function(){},
-        // for euler
-        springLength: edge => 120, springCoeff: edge => 0.0008,
+        nodeDimensionsIncludeLabels: true, randomize: false,
+        animate: 'end', animationDuration: 800, maxSimulationTime: 2800,
+        ready: function(){}, stop: function(){}
       };
   
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);
-      layoutHandler.on('layoutstart', function(){
-        // 최대 3초(3000ms) 안에는 멈추도록 설정
-        setTimeout(function(){
-          layoutHandler.stop();
-        }, 3000);
-      });
+      // layoutHandler.on('layoutstart', function(){
+      //   // 최대 3초(3000ms) 안에는 멈추도록 설정
+      //   setTimeout(function(){
+      //     layoutHandler.stop();
+      //   }, 3000);
+      // });
       layoutHandler.run();
     }
   

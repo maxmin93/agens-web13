@@ -31,30 +31,6 @@ export class AgensDataService {
   private currentMenu$ = new BehaviorSubject<string>("login");
 
   private client:IClientDto = null;      // ssid, user_name, user_ip, timestamp, valid
-  private schema:any = {
-    info$: new Subject<ISchemaDto>(),
-    graph$: new Subject<IGraph>(),
-    labels$: new Subject<ILabel>(),
-    nodes$: new Subject<INode>(),
-    edges$: new Subject<IEdge>()
-  };
-  private result:any = {
-    info$: new Subject<IResultDto>(),
-    graph$: new Subject<IGraph>(),
-    labels$: new Subject<ILabel>(),
-    nodes$: new Subject<INode>(),
-    edges$: new Subject<IEdge>(),
-    record$: new Subject<IRecord>(),
-    columns$: new Subject<IColumn>(),
-    rows$: new Subject<IRow>(),
-  };
-  private tgraph:any = {
-    info$: new Subject<IGraphDto>(),
-    graph$: new Subject<IGraph>(),
-    labels$: new Subject<ILabel>(),
-    nodes$: new Subject<INode>(),
-    edges$: new Subject<IEdge>()
-  };
   
   constructor (
     private _http: HttpClient,
@@ -116,15 +92,15 @@ export class AgensDataService {
 
   /////////////////////////////////////////////////
 
-  getSchemaSubjects():any {
-    return this.schema;
-  }
-  getResultSubjects():any {
-    return this.result;
-  }
-  getTgraphSubjects():any {
-    return this.tgraph;
-  }
+  // getSchemaSubjects():any {
+  //   return this.schema;
+  // }
+  // getResultSubjects():any {
+  //   return this.result;
+  // }
+  // getTgraphSubjects():any {
+  //   return this.tgraph;
+  // }
 
   /////////////////////////////////////////////////
 
@@ -178,7 +154,7 @@ export class AgensDataService {
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
   }
 
-  core_schema():Subscription {
+  core_schema(schema:any):Subscription {
     const url = `${this.api.core}/schema`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
@@ -186,11 +162,11 @@ export class AgensDataService {
           next: x => {
             this.setResponses(<IResponseDto>x);
             switch( x['group'] ){
-              case 'schema':  this.schema.info$.next(x); break;
-              case 'graph':   this.schema.graph$.next(x); break;
-              case 'labels':  this.schema.labels$.next(x); break;
-              case 'nodes':   this.schema.nodes$.next(x); break;
-              case 'edges':   this.schema.edges$.next(x); break;
+              case 'schema':  schema.info$.next(x); break;
+              case 'graph':   schema.graph$.next(x); break;
+              case 'labels':  schema.labels$.next(x); break;
+              case 'nodes':   schema.nodes$.next(x); break;
+              case 'edges':   schema.edges$.next(x); break;
             }
           },
           error: err => {
@@ -201,16 +177,16 @@ export class AgensDataService {
             });
           },
           complete: () => {
-            this.schema.info$.complete();
-            this.schema.graph$.complete();
-            this.schema.labels$.complete();
-            this.schema.nodes$.complete();
-            this.schema.edges$.complete();
+            schema.info$.complete();
+            schema.graph$.complete();
+            schema.labels$.complete();
+            schema.nodes$.complete();
+            schema.edges$.complete();
           }
         });
   }
 
-  core_query(sql:string){
+  core_query(result:any, sql:string){
     const url = `${this.api.core}/query`;
     // **NOTE: encodeURIComponent( sql ) 처리
     // (SQL문의 '+','%','&','/' 등의 특수문자 변환)
@@ -222,15 +198,14 @@ export class AgensDataService {
         next: x => {
           this.setResponses(<IResponseDto>x);
           switch( x['group'] ){
-            case 'result':  console.log( 'core_query receiving..', x);
-                            this.result.info$.next(x); break;
-            case 'graph':   this.result.graph$.next(x); break;
-            case 'labels':  this.result.labels$.next(x); break;
-            case 'nodes':   this.result.nodes$.next(x); break;
-            case 'edges':   this.result.edges$.next(x); break;
-            case 'record':   this.result.record$.next(x); break;
-            case 'columns':  this.result.columns$.next(x); break;
-            case 'rows':   this.result.rows$.next(x); break;
+            case 'result':  result.info$.next(x); break;
+            case 'graph':   result.graph$.next(x); break;
+            case 'labels':  result.labels$.next(x); break;
+            case 'nodes':   result.nodes$.next(x); break;
+            case 'edges':   result.edges$.next(x); break;
+            case 'record':  result.record$.next(x); break;
+            case 'columns': result.columns$.next(x); break;
+            case 'rows':    result.rows$.next(x); break;
           }
         },
         error: err => {
@@ -241,15 +216,14 @@ export class AgensDataService {
           });
         },
         complete: () => {
-          console.log( 'core_query receive completed!');
-          this.result.info$.complete();
-          this.result.graph$.complete();
-          this.result.labels$.complete();
-          this.result.nodes$.complete();
-          this.result.edges$.complete();
-          this.result.record$.complete();
-          this.result.columns$.complete();
-          this.result.rows$.complete();
+          result.info$.complete();
+          result.graph$.complete();
+          result.labels$.complete();
+          result.nodes$.complete();
+          result.edges$.complete();
+          result.record$.complete();
+          result.columns$.complete();
+          result.rows$.complete();
         }
       });
   }
@@ -330,7 +304,7 @@ export class AgensDataService {
 
   ////////////////////////////////////////////////
 
-  grph_schema(gid:number):Subscription {
+  grph_schema(tgraph:any, gid:number):Subscription {
     const url = `${this.api.grph}/schema?gid=${gid}`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
@@ -338,11 +312,11 @@ export class AgensDataService {
           next: x => {
             this.setResponses(<IResponseDto>x);
             switch( x['group'] ){
-              case 'graph_dto':  this.tgraph.info$.next(x); break;
-              case 'graph':   this.tgraph.graph$.next(x); break;
-              case 'labels':  this.tgraph.labels$.next(x); break;
-              case 'nodes':   this.tgraph.nodes$.next(x); break;
-              case 'edges':   this.tgraph.edges$.next(x); break;
+              case 'graph_dto': tgraph.info$.next(x); break;
+              case 'graph':     tgraph.graph$.next(x); break;
+              case 'labels':    tgraph.labels$.next(x); break;
+              case 'nodes':     tgraph.nodes$.next(x); break;
+              case 'edges':     tgraph.edges$.next(x); break;
             }
           },
           error: err => {
@@ -353,11 +327,11 @@ export class AgensDataService {
             });
           },
           complete: () => {
-            this.tgraph.info$.complete();
-            this.tgraph.graph$.complete();
-            this.tgraph.labels$.complete();
-            this.tgraph.nodes$.complete();
-            this.tgraph.edges$.complete();
+            tgraph.info$.complete();
+            tgraph.graph$.complete();
+            tgraph.labels$.complete();
+            tgraph.nodes$.complete();
+            tgraph.edges$.complete();
           }
         });
   }  

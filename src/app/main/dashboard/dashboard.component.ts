@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
 
-import { Observable, of, from, Subscription, concat } from 'rxjs';
+import { Observable, of, from, Subject, Subscription, concat, forkJoin } from 'rxjs';
 
 import { Angulartics2 } from 'angulartics2';
 import * as _ from 'lodash';
@@ -44,7 +44,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   labelColors: any[] = [];
 
   // call API
-  schema: any;
   subscription: Subscription;
   datasource: IDatasource = undefined;
   graph: IGraph;
@@ -107,7 +106,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(){
     if( this.subscription ) this.subscription.unsubscribe();
     // 내부-외부 함수 공유 해제
-    window['angularComponentRef'] = null;
+    window['angularComponentRef'] = undefined;
   }
 
   ngAfterViewInit() {
@@ -187,45 +186,51 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   //////////////////////////////////////////////
 
+  createSubjects():any {
+    return {
+      info$: new Subject<ISchemaDto>(),
+      graph$: new Subject<IGraph>(),
+      labels$: new Subject<ILabel>(),
+      nodes$: new Subject<INode>(),
+      edges$: new Subject<IEdge>()
+    };  
+  }
+
   callCoreSchema(){
 
     this.toggleProgress(true);
-    this.schema = this._api.getSchemaSubjects();
 
-    this.schema.info$.subscribe({
+    // this.schema = this._api.getSchemaSubjects();
+    let schema = this.createSubjects();
+    schema.info$.subscribe({
       next: (x:ISchemaDto) => {
-        // console.log( 'this.schema.info$.subscribe:', x );        
         this.datasource = x.datasource;
         this.labels = x.labels;
       }
     });
-    this.schema.graph$.subscribe( (x:IGraph) => {
-      // console.log( 'this.schema.graph$.subscribe:', x );
+    schema.graph$.subscribe( (x:IGraph) => {
       this.graph = x;
       this.graph.labels = new Array<ILabel>();
       this.graph.nodes = new Array<INode>();
       this.graph.edges = new Array<IEdge>();
     });
-    this.schema.labels$.subscribe( (x:ILabel) => {
-      // console.log( 'this.schema.labels$.subscribe:', x );
+    schema.labels$.subscribe( (x:ILabel) => {
       this.graph.labels.push(x);
     });
-    this.schema.nodes$.subscribe( (x:INode) => {
-      // console.log( 'this.schema.nodes$.subscribe:', x );
+    schema.nodes$.subscribe( (x:INode) => {
       this.injectElementStyle( x );
       this.graph.nodes.push(x);
       this.cy.add(x);
     });
-    this.schema.edges$.subscribe( (x:IEdge) => {
-      // console.log( 'this.schema.edges$.subscribe:', x );
+    schema.edges$.subscribe( (x:IEdge) => {
       this.injectElementStyle( x );
       this.graph.edges.push(x);
       this.cy.add(x);
     });
 
     // 작업 직렬화 : complete 시 post 작업 수행
-    concat( this.schema.info$.asObservable(), this.schema.graph$.asObservable()
-        , this.schema.labels$.asObservable(), this.schema.nodes$.asObservable(), this.schema.edges$.asObservable() )
+    forkJoin( schema.info$.asObservable(), schema.graph$.asObservable()
+        , schema.labels$.asObservable(), schema.nodes$.asObservable(), schema.edges$.asObservable() )
       .subscribe({
         complete: () => {
           this.showGraph();
@@ -233,14 +238,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           Promise.resolve(null).then(() => {
             this.showDatasource();
             this.showTable();
-          });
-          
+          });         
           this.toggleProgress(false);
-          console.log( 'callCoreSchema done!' );
         }
       });
 
-    this.subscription = this._api.core_schema();  // call API
+    this.subscription = this._api.core_schema(schema);  // call API
   }
 
   showDatasource(){

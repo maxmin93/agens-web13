@@ -52,7 +52,7 @@ export class StatisticsComponent implements OnInit {
 
   ngOnDestroy(){
     // 내부-외부 함수 공유 해제
-    window['statGraphComponentRef'] = null;
+    window['statGraphComponentRef'] = undefined;
   }
 
   ngAfterViewInit() {
@@ -66,8 +66,6 @@ export class StatisticsComponent implements OnInit {
         hideNodeTitle: true,       // hide nodes' title
         hideEdgeTitle: true,       // hide edges' title
       });
-
-    console.log( 'Statistics.ngAfterViewInit');
   }
 
   /////////////////////////////////////////////////////////////////

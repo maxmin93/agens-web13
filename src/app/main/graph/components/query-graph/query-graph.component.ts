@@ -53,7 +53,7 @@ export class QueryGraphComponent implements OnInit {
 
   ngOnDestroy(){
     // 내부-외부 함수 공유 해제
-    window['dataGraphComponentRef'] = null;
+    window['dataGraphComponentRef'] = undefined;
   }
 
   ngAfterViewInit() {
@@ -146,7 +146,7 @@ export class QueryGraphComponent implements OnInit {
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
-    if( this.cy.$api.changeLayout ) this.cy.$api.changeLayout();
+    this.cy.$api.changeLayout('euler');
   }
   resize(){
     this.cy.resize();
@@ -180,6 +180,7 @@ export class QueryGraphComponent implements OnInit {
 
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
+    this.cy.$api.changeLayout(layout);
   }
 
   /////////////////////////////////////////////////////////////////
