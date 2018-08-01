@@ -78,9 +78,12 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
   align-items: center; 
 }
 
-.col-strech { 
+.row-side { margin-right: 1.875rem; }
+.col-side { margin-bottom: 1.875rem; }
+.strech { 
   width: 100%; 
-  flex: 1 
+  flex: 1; 
+  position: relative;
 }
 
 // 빈 공란
@@ -150,8 +153,9 @@ mat-icon {
 }
 
 .mat-button-toggle-disabled,
-.mat-button-toggle-disabled.mat-button-toggle-checked { 
-  background: transparent; 
+.mat-button-toggle-disabled.mat-button-toggle-checked, 
+.mat-button-toggle.mat-button-toggle-checked { 
+  background: #222e44 !important; 
   color: #f9f9f9;
 }
 
@@ -224,14 +228,15 @@ datatable의 세팅값은 각 태그에 존재함*/
 
 div.graph-canvas { 
   max-width: 100%; 
+  flex: 1; 
   border: 1px solid #ddd; 
   position: relative;
   z-index: 10;
 
   // zoom 버튼 위치수정 
   div.cy-panzoom { 
-    top: 1.25rem; 
-    left: 1.25rem; 
+    top: 0.9375rem; 
+    left: 0.9375rem; 
   }
   // 이값으로 인해 canvas의 좌우폭이 조절됨
   > div:nth-child(2), > div:nth-child(3) {
@@ -242,7 +247,8 @@ div.graph-canvas {
 mat-chip-list {
   position: absolute; 
   bottom: 1.25rem; 
-  left: 1.875rem; 
+  left: 1.25rem; 
+  z-index: 32;
 }
 
 
@@ -301,7 +307,7 @@ span.search {
 }
 
 .mat-tab-body-wrapper { 
-  margin-top: 15px; 
+  margin-top: 1.55rem; 
 }
 
 .mat-tab-label { 
@@ -311,10 +317,10 @@ span.search {
   font-size: .875rem !important; 
 }
 
-.mat-ink-bar { 
-  left: 10rem !important; 
-  width: 10rem !important; 
-}
+// .mat-ink-bar { 
+//   left: 10rem !important; 
+//   width: 10rem !important; 
+// }
 /* CodeMirror
 */
 
@@ -324,24 +330,18 @@ span.search {
   font-weight: 400; 
 }
 
-.CodeMirror pre { 
-  padding: 0 1.25rem; 
-}
-
-.CodeMirror-gutter-wrapper {
-  left: -36px !important; 
-}
+.CodeMirror pre { padding: 0 1.25rem; }
+.CodeMirror-gutter-wrapper { left: -36px !important; }
 
 /* Drop menu  
 */
+
 .mat-subhead { 
   padding: 1rem; 
   display: inline-block;
 }
 
-.mat-menu-item {
-  font-size: .75rem; 
-}
+.mat-menu-item { font-size: .75rem; }
 
 // 텍스트 타이틀 옆에 붙는 before
 .expand-cell::before, 
@@ -358,9 +358,7 @@ span.search {
 
 // dialog 관련 css 수정 
 
-.mat-form-field-appearance-legacy .mat-form-field-underline {
-  background: #ddd; 
-}
+.mat-form-field-appearance-legacy .mat-form-field-underline { background: #ddd; }
 .mat-dialog-actions { flex-direction: row-reverse; }
 
 p.subtext { 
@@ -368,4 +366,21 @@ p.subtext {
   color: #aeb1b4; 
 }
 
+// sidenav css 
 
+.slide { 
+  background: #fff; 
+  width: 18.75rem; 
+  height: calc(100% - 2.5rem); 
+  margin: auto; 
+  padding: 1.25rem; 
+  border: 1px solid #ddd; 
+  top: 0; 
+  bottom: 0; 
+  right: 1.25rem; 
+  position: absolute; 
+  overflow-y: auto; 
+  z-index: 22;
+}
+
+// 폰트사이즈

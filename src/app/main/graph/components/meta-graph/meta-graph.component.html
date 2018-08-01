@@ -4,24 +4,36 @@
         <div #progressBar style='visibility:hidden;'>
           <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
-        <!-- graph element info Box -->
-        <ng-template [ngIf]="selectedElement">
-            <div id="slide-toggle">
-                <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
-                    [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
-                    <span>LOCATION LOCK</span></mat-slide-toggle>
-                <h4><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</h4>
-                <p><span>Name</span>{{ selectedElement.data('name') }}</p>
-                <p><span>Data</span></p>
-                <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
-            </div>
-        </ng-template>
 
         <!-- Graph content -->
         <div class="row">
-            <div id="meta-canvas" class="graph-canvas col-strech" #divCanvas
-                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
+            <div class="strech">
+                <div id="meta-canvas" class="graph-canvas strech" #divCanvas
+                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"></div>
+                <nav>
+                    <ng-template [ngIf]="selectedElement">
+                        <div id="slide-toggle" class="slide">
+                            <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                                [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
+                                <span>LOCATION LOCK</span></mat-slide-toggle>
+                            <h4><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</h4>
+                            <p><span>Name</span>{{ selectedElement.data('name') }}</p>
+                            <p><span>Data</span></p>
+                            <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+                        </div>
+                    </ng-template>
+                </nav>
+                <!-- Graph.Meta : Labels content -->
+                <mat-chip-list id="agens-graph-labels">
+                    <mat-chip *ngFor="let label of labels" [selected]="true"
+                        (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
+                        <span *ngIf="label.type=='nodes'" class="nodeType">{{label.name}} ({{label.size}})</span>
+                        <span *ngIf="label.type=='edges'" class="edgeType">{{label.name}} ({{label.size}})</span>
+                    </mat-chip>
+                </mat-chip-list>
             </div>
+            
+            <!-- Graph.Meta : toolbar -->
             <div id="agens-graph-toolbar" class="col-side-icon">
                 <ul>
                     <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
@@ -30,16 +42,5 @@
             </div>
         </div>
         
-
-        <!-- Graph.Meta : Labels content -->
-        <div>
-            <mat-chip-list id="agens-graph-labels">
-                <mat-chip *ngFor="let label of labels" [selected]="true" style="z-index: 9"
-                    (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
-                    <span *ngIf="label.type=='nodes'" class="nodeType"><i class="material-icons">location_on</i>{{label.name}} ({{label.size}})</span>
-                    <span *ngIf="label.type=='edges'" class="edgeType"><i class="material-icons">trending_up</i>{{label.name}} ({{label.size}})</span>
-                </mat-chip>
-            </mat-chip-list>
-        </div>    
     </div>
 </div>

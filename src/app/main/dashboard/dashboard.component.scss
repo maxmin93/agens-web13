@@ -1,9 +1,8 @@
 // 좌측 side의 사이즈
-.col-side:nth-child(1) { 
+.row-side { 
         width: 35%; 
         min-width: 36.5625rem;
         max-width: 43.75rem; 
-        margin-right: 1.875rem; 
 }
 
 // graph를 감싸고 있는 div의 높이값 >> 높이값이 없으면 graph div 없어짐
