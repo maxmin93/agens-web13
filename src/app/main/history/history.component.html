@@ -1,8 +1,6 @@
 <div id="top" class="content col">
-  <div> 
       <div class="row-center">
-        <h4>HISTORY <strong>QUERY LOGS</strong></h4>
-  
+        <h4>HISTORY <strong>QUERY LOGS</strong></h4>  
         <div class="row-center">
           <a matTooltip="Refresh" matTooltipPosition="above" (click)="reload()"><mat-icon>refresh</mat-icon></a>
           <span class="search">
@@ -14,17 +12,14 @@
           </span>
         </div>
       </div>
-
-      <p></p>
-
-      <div>
+      <div class="col m-20">
         <div #progressBar style='visibility:hidden;'>
           <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
         
         <!-- (activate)="onActivateTableLabels($event)" -->
         <ngx-datatable #logsTable class="material" [columnMode]="'flex'"
-                [rows]="logRows" [reorderable]="reorderable" [limit]="10"
+                [rows]="logRows" [reorderable]="reorderable" [limit]="9"
                 [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
                 >
 
@@ -50,7 +45,7 @@
 
           <ngx-datatable-column name="Query" [flexGrow]="4">
             <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-              <button *ngIf="row.query" mat-icon-button matTooltip="Expand/Collapse Row" 
+              <button disableRipple *ngIf="row.query" mat-icon-button matTooltip="Expand/Collapse Row" 
                   (click)="toggleLogExpandRow(row, 'query')">
                 <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
               </button>          
@@ -66,7 +61,7 @@
 
           <ngx-datatable-column name="Message" [flexGrow]="3">
             <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-              <button *ngIf="row.message" mat-icon-button matTooltip="Expand/Collapse Row" 
+              <button disableRipple *ngIf="row.message" mat-icon-button matTooltip="Expand/Collapse Row" 
                   (click)="toggleLogExpandRow(row, 'message')">
                 <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
               </button>          
@@ -89,5 +84,4 @@
         </ngx-datatable>
                 
       </div>
-  </div>
 </div>

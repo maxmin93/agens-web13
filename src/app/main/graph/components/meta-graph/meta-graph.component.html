@@ -1,46 +1,52 @@
 <!-- GRAPH -->
-<div id="graphCard">    
-    <div class="col">
-        <div #progressBar style='visibility:hidden;'>
-          <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
-        </div>
+<div id="graphCard" class="col strech">    
+    <div #progressBar style='visibility:hidden;'>
+        <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+    </div>
 
-        <!-- Graph content -->
-        <div class="row">
-            <div class="strech">
-                <div id="meta-canvas" class="graph-canvas strech" #divCanvas
-                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"></div>
-                <nav>
-                    <ng-container *ngIf="!!selectedElement">
-                        <div id="slide-toggle" class="slide">
-                            <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
-                                [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" >
-                                <span>LOCATION LOCK</span></mat-slide-toggle>
-                            <h4><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</h4>
-                            <p><span>Name</span>{{ selectedElement.data('name') }}</p>
-                            <p><span>Data</span></p>
-                            <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
-                        </div>
-                    </ng-container>
-                </nav>
-                <!-- Graph.Meta : Labels content -->
-                <mat-chip-list id="agens-graph-labels">
-                    <mat-chip *ngFor="let label of labels" [selected]="true"
-                        (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
-                        <span *ngIf="label.type=='nodes'" class="nodeType">{{label.name}} ({{label.size}})</span>
-                        <span *ngIf="label.type=='edges'" class="edgeType">{{label.name}} ({{label.size}})</span>
-                    </mat-chip>
-                </mat-chip-list>
-            </div>
-            
-            <!-- Graph.Meta : toolbar -->
-            <div id="agens-graph-toolbar" class="col-side-icon">
-                <ul>
-                    <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                            <mat-icon>refresh</mat-icon></a></li>
-                </ul>
-            </div>
+    <!-- Graph content -->
+    <div class="row strech">
+        <div class="strech">
+            <div id="meta-canvas" class="graph-canvas strech" #divCanvas
+            [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"></div>
+            <nav>
+                <ng-container *ngIf="!!selectedElement">
+                    <div id="slide-toggle" class="slide">
+                        <ul class="list list-sm col strech">
+                            <li class="row-center">
+                                <h4>DATA <strong>INFO</strong></h4>
+                                <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                                [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
+                                </mat-slide-toggle>
+                            </li>
+                            <li><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
+                            <li><span>Name</span>{{ selectedElement.data('name') }}</li>
+                            <li class="col strech">
+                                <span>Data</span>
+                                <div class="json strech m-10"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
+                            </li>
+                        </ul>
+                    </div>
+                </ng-container>
+            </nav>
+            <!-- Graph.Meta : Labels content -->
+            <mat-chip-list id="agens-graph-labels">
+                <mat-chip *ngFor="let label of labels" [selected]="true"
+                    (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
+                    <span *ngIf="label.type=='nodes'" class="nodeType">{{label.name}} ({{label.size}})</span>
+                    <span *ngIf="label.type=='edges'" class="edgeType">{{label.name}} ({{label.size}})</span>
+                </mat-chip>
+            </mat-chip-list>
         </div>
         
+        <!-- Graph.Meta : toolbar -->
+        <div id="agens-graph-toolbar" class="col-side-icon">
+            <ul>
+                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                        <mat-icon>refresh</mat-icon></a></li>
+            </ul>
+        </div>
     </div>
+        
+    
 </div>

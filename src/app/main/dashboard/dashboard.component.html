@@ -1,63 +1,59 @@
-<div id="top" class="content row">
-
-    <div class="row-side">
-        <div>
-            <h4>DATA <strong>SOURCE</strong></h4>
-            <p class="subtext">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
-            <ul class="list">
-                <li><span>URL</span>{{infos.uri}}</li>
-                <li><span>NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
-                <li><span>DESC</span>{{infos.desc}}</li>
-            </ul>
-            <!--
-            <div class="card-dash-number">
-                <p><span>Total NodeTypes</span><b>{{ infos.nodes_size_total }} ({{ infos.nodes_size_data }})</b></p>
-                <p><span>Total EdgeTypes</span><b>{{ infos.edges_size_total }} ({{ infos.edges_size_data }})</b></p>
-            </div>
-            -->
-        </div>
-
-        <div #progressBar style='visibility:hidden;'>
-            <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
-        </div>
-
-        <div class="m-30">       
-            <h4>LABEL <strong>LIST</strong></h4>
-            <p></p>
-            <ngx-datatable #tableLabels class="material"
-                [columnMode]="'force'" [limit]="7"
-                [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
-                [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
-                [selected]="selectedLabels" [selectionType]="'single'"
-                (select)="onSelectTableLabels($event)"
-                >
-                <ngx-datatable-column name="TYPE"></ngx-datatable-column>
-                <ngx-datatable-column name="ID"></ngx-datatable-column>
-                <ngx-datatable-column name="NAME"></ngx-datatable-column>
-                <ngx-datatable-column name="SIZE">
-                    <ng-template let-row="row" ngx-datatable-cell-template>
-                        <span>{{row.size | number}}</span>
-                    </ng-template>
-                </ngx-datatable-column>
-                <ngx-datatable-column name="Remove" [sortable]="false">
-                    <ng-template let-row="row" ngx-datatable-cell-template>
-                        <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
-                            Remove
-                        </a>
-                    </ng-template>
-                </ngx-datatable-column>            
-            </ngx-datatable>
-        </div> 
-    </div>
-
-    <div class="strech">
-        <div class="meta-graph">
-            <h4>SCHEMA <strong>GRAPH</strong></h4>
-            <p></p>
-            <div class="row">
-                <div id="div-canvas" #divCanvas class="graph-canvas strech">
-                    
+<div id="top" class="content col">
+    <div class="row strech">
+        <div class="row-side col">
+            <div>
+                <h4>DATA <strong>SOURCE</strong></h4>
+                <p class="subtext">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
+                <ul class="list">
+                    <li><span> URL</span>{{infos.uri}}</li>
+                    <li><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
+                    <li><span> DESC</span>{{infos.desc}}</li>
+                </ul>
+                <!--
+                <div class="card-dash-number">
+                    <p><span>Total NodeTypes</span><b>{{ infos.nodes_size_total }} ({{ infos.nodes_size_data }})</b></p>
+                    <p><span>Total EdgeTypes</span><b>{{ infos.edges_size_total }} ({{ infos.edges_size_data }})</b></p>
                 </div>
+                -->
+            </div>
+    
+            <div #progressBar style='visibility:hidden;'>
+                <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+            </div>
+    
+            <div class="m-30 col strech">       
+                <h4>LABEL <strong>LIST</strong></h4>
+                
+                <ngx-datatable #tableLabels class="material m-20"
+                    [columnMode]="'force'" [limit]="8"
+                    [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
+                    [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
+                    [selected]="selectedLabels" [selectionType]="'single'"
+                    (select)="onSelectTableLabels($event)"
+                    >
+                    <ngx-datatable-column name="TYPE"></ngx-datatable-column>
+                    <ngx-datatable-column name="ID"></ngx-datatable-column>
+                    <ngx-datatable-column name="NAME"></ngx-datatable-column>
+                    <ngx-datatable-column name="SIZE">
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                            <span>{{row.size | number}}</span>
+                        </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column name="Remove" [sortable]="false">
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                            <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
+                                Remove
+                            </a>
+                        </ng-template>
+                    </ngx-datatable-column>            
+                </ngx-datatable>
+            </div> 
+        </div>
+    
+        <div class="col strech">            
+            <h4>SCHEMA <strong>GRAPH</strong></h4>
+            <div class="row strech m-20">
+                <div id="div-canvas" #divCanvas class="graph-canvas strech"></div>
                 <ul class="col-side-icon">
                     <li><a matTooltip="Create" matTooltipPosition="left" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
                     <li><a matTooltip="Edit" matTooltipPosition="left"><mat-icon>edit</mat-icon></a></li>
@@ -65,20 +61,19 @@
                     <li><a matTooltip="Delete" matTooltipPosition="left"><mat-icon>delete_outline</mat-icon></a></li>
                 </ul>
             </div>
-            
             <div>
                 <ul class="row list">
-                    <li><span>TYPE </span> {{selectedLabel.type}}</li>
-                    <li><span>ID </span> {{selectedLabel.id}}</li>
-                    <li><span>NAME </span> {{selectedLabel.name}}</li>
-                    <li><span>OWNER </span> {{selectedLabel.owner}}</li>
-                    <li><span>SIZE </span> {{selectedLabel.size | number}}</li>
+                    <li class="strech"><span>TYPE </span> {{selectedLabel.type}}</li>
+                    <li class="strech"><span>ID </span> {{selectedLabel.id}}</li>
+                    <li class="strech"><span>NAME </span> {{selectedLabel.name}}</li>
+                    <li class="strech"><span>OWNER </span> {{selectedLabel.owner}}</li>
+                    <li class="strech"><span>SIZE </span> {{selectedLabel.size | number}}</li>
                 </ul>
-                <ul class="row list list-unique">
+                <ul class="col strech list list-unique">
                     <li><small>DESCRIPTION </small> "{{selectedLabel.desc}}"</li>
                 </ul>
             </div>
-        </div>      
-    </div>          
-
+                
+        </div>  
+    </div>
 </div>

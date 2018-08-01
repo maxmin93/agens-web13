@@ -6,7 +6,7 @@ import { Subscription, timer } from 'rxjs';
 import { IResponseDto } from '../../../../models/agens-response-types';
 import * as CONFIG from '../../../../global.config';
 
-const COLOR_BLUE = 'rgb(27, 201, 228)';
+const COLOR_BLUE = 'rgb(136, 139, 143)';
 const COLOR_RED  = 'rgb(230, 36, 84)';
 const COLOR_GRAY = 'rgb(96, 96, 96)';
 const COLOR_GREEN ='rgb(21, 211, 178)';
@@ -19,7 +19,7 @@ const COLOR_GREEN ='rgb(21, 211, 178)';
 export class QueryResultComponent implements OnInit {
 
   counter: number = 0;
-  messageText: string = 'No data';
+  messageText: string = ' ';
   messageColor: string = 'darkgray';        // error: '#ea614a'
 
   private _dto: IResponseDto;

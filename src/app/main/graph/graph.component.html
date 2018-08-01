@@ -1,15 +1,15 @@
-<div id="top" class="content">
+<div id="top" class="content col">
 
   <!-- editor -->
     <div id="queryCard">
         <div class="row-center">
-            <h4>QUERY <strong>EDITOR</strong><small>(CYPHER OR ANSI-SQL)</small></h4>
-            <ul class="row">
-                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</button></li>
-                <li><button mat-button [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</button></li>
-                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</button></li>
-                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</button></li>
-                <li><button mat-button [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</button></li>
+            <h4>QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small></h4>
+            <ul class="row list-icon">
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</a></li>
+                <li><a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</a></li>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a></li>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</a></li>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a></li>
             </ul>
         </div>
         
@@ -26,7 +26,7 @@
     </div>
 
     <mat-tab-group #resultTapGroup [selectedIndex]="1" 
-        (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()" class="m-30">
+        (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()" class="m-20 strech">
         <mat-tab label="Meta"> 
             <!-- META(0) -->
             <app-meta-graph #metaGraph></app-meta-graph>

@@ -43,10 +43,11 @@ html, body, material-app  {
 
 h1, h2, h3, h4, h5, h6 {   
   font-weight: 400; 
+  color: #242424
 }
 
 h1, h2, h3, h4, h5, h6, 
-ul, html, body, material-app, input, textarea, .mat-menu-item { 
+ul, html, body, material-app, input, textarea, .mat-menu-item, pre { 
   margin: 0; 
   padding: 0; 
   font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
@@ -63,6 +64,7 @@ ul { list-style: none; }
 header값이 변경될 경우 px의 header 높이값과 동일하게 변경해야한다. */
 
 .content { 
+  height: calc(100% - 64px);
   padding: 1.875rem; 
 }
 
@@ -82,6 +84,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 .col-side { margin-bottom: 1.875rem; }
 .strech { 
   width: 100%; 
+  height: 100%; 
   flex: 1; 
   position: relative;
 }
@@ -118,6 +121,8 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 클래스명은 "m-value" */
 
 .m-30 { margin-top: 1.875rem; }
+.m-20 { margin-top: 1.25rem; }
+.m-10 { margin-top: .625rem; }
 
 
 /* button 관련 정리로 
@@ -171,7 +176,6 @@ datatable의 세팅값은 각 태그에 존재함*/
 
 .ngx-datatable .datatable-body .datatable-scroll { width: 100% !important; }
 .ngx-datatable.material .datatable-header { border-bottom: 0; }
-.ngx-datatable.material .datatable-footer { margin-top: -4px; }
 .ngx-datatable.material .empty-row { line-height: 28px; }
 
 .datatable-body-cell-label {
@@ -228,7 +232,6 @@ datatable의 세팅값은 각 태그에 존재함*/
 
 div.graph-canvas { 
   max-width: 100%; 
-  flex: 1; 
   border: 1px solid #ddd; 
   position: relative;
   z-index: 10;
@@ -237,11 +240,17 @@ div.graph-canvas {
   div.cy-panzoom { 
     top: 0.9375rem; 
     left: 0.9375rem; 
+
+    + div {
+      width: 100% !important; 
+      height: 100% !important; 
+    } 
   }
   // 이값으로 인해 canvas의 좌우폭이 조절됨
-  > div:nth-child(2), > div:nth-child(3) {
-    width: 100% !important; 
-  }
+  // > div:nth-child(3) {
+  //   width: 100% !important; 
+  //   height: 100% !important; 
+  // }
 }
 
 mat-chip-list {
@@ -266,10 +275,12 @@ form, input {
 
   textarea {
     width: 100%; 
-    height: 22px; 
-    line-height: 24px; 
+    // height: 22px; 
+    min-height: 22px; 
+    // line-height: 24px; 
+    overflow: hidden;
     border: none;
-    outline: none; 
+    outline: none;  
     resize: none; 
   }
 }
@@ -309,6 +320,7 @@ span.search {
 
 .mat-tab-body-wrapper { 
   margin-top: 1.55rem; 
+  flex: 1; 
 }
 
 /* CodeMirror
@@ -316,7 +328,7 @@ span.search {
 
 .CodeMirror { 
   font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
-  font-size: 13px; 
+  font-size: .875rem;
   font-weight: 400; 
 }
 
@@ -336,7 +348,8 @@ span.search {
 // 텍스트 타이틀 옆에 붙는 before
 .expand-cell::before, 
 .empty-row::before, 
-.mat-subhead::before {
+.mat-subhead::before, 
+.slide h4::before,  {
   content:'';
   background: #1bc9e4; 
   width: 8px; 
@@ -360,7 +373,7 @@ p.subtext {
 
 .slide { 
   background: #fff; 
-  width: 18.75rem; 
+  width: 21.875rem; 
   height: calc(100% - 2.5rem); 
   margin: auto; 
   padding: 1.25rem; 
@@ -369,36 +382,141 @@ p.subtext {
   bottom: 0; 
   right: 1.25rem; 
   position: absolute; 
-  overflow-y: auto; 
   z-index: 22;
 }
 
 // list 
 
-ul.list li { 
-  max-width: 700px; 
-  overflow: hidden; 
-  white-space: nowrap; 
-  text-overflow: ellipsis; 
-  margin-top: 1.25rem;
-  padding: .625rem; 
-  border-bottom: 1px solid #ddd; 
+ul {
   font-size: .875rem; 
-  flex: 1; 
   color: #4d4d4d; 
 
-  > span {  
-    min-width: 60px; 
-    display: inline-block;
-    margin-right: 1.25rem; 
-    padding: .25rem; 
-    text-align: center;  
-    font-size: .75rem; 
-    color: #979a9c; 
-  }  
+    &.list li { 
+    max-width: 700px; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
+    margin-top: 1.25rem;
+    padding: .625rem; 
+    border-bottom: 1px solid #ddd; 
+
+    > span {  
+      min-width: 60px; 
+      margin-right: 1.25rem; 
+      padding: .25rem; 
+      font-size: .75rem; 
+      color: #979a9c; 
+    }  
+    
+  }
+
+  &.list-unique li {
+    background: #f5f5f5;
+    max-width: 100%; 
+  }
+
+  &.list.list-sm li {
+    margin-top: 0; 
+    padding: .625rem 0; 
+  }
+
+  &.list-icon a {
+    margin: 0 1.875rem;
+    font-size: 90%; 
+    color: #848484; 
+    &:hover { 
+      color: rgba(0,0,0,.87);
+    }
+  }
 }
 
-ul.list-unique li {
-  background: #f5f5f5;
-  max-width: 100%; 
+// table
+
+.ngx-datatable.material { 
+  display: flex; 
+  flex-direction: column; 
+
+  div.visible { 
+    display: flex; 
+    flex-direction: column; 
+
+    .datatable-header { 
+      overflow: initial; 
+    }
+
+    .datatable-body {  
+      flex: 1; 
+      overflow-x: hidden; 
+      overflow-y: auto; 
+    }
+  }
+}
+
+// json 
+
+.json { 
+  overflow-y: auto; 
+}
+
+pre {
+  white-space: pre-wrap; 
+  line-height: 1.5rem; 
+  font-size: .825rem; 
+
+  .string::before, .number::before, .boolean::before, .null::before {
+    display: inline-block; 
+    margin-right: 4px; 
+    padding: 1px 4px; 
+    border-radius: .225rem;
+    line-height: 1rem;  
+    font-size: .515rem; 
+    color: white; 
+  }
+  .string { 
+    color: #15d3b2;
+    &::before { 
+        content:'string';
+        background-color: #15d3b2; 
+    }
+  }
+  .number { 
+      color: #1bc9e4; 
+      &::before { 
+          content:'number';
+          background-color: #1bc9e4; 
+      }
+  }
+  .boolean { 
+      color: #e62454; 
+      &::before { 
+          content:'boolean';
+          background-color: #e62454; 
+      }
+  }
+  .null { 
+      color: #2e3c56; 
+      &::before { 
+          content:'null';
+          background-color: #2e3c56; 
+      }
+  }
+  .key {
+      color: #4d4d4d;        
+  }
+}
+
+.cdk-global-overlay-wrapper { 
+  width: 100%; 
+}
+
+// spinner 
+
+.mat-progress-bar.mat-accent .mat-progress-bar-fill::after, 
+.mat-progress-bar.mat-accent .mat-progress-bar-fill::before, 
+ { 
+  background: #1bc9e4 !important;
+}
+.mat-progress-bar.mat-accent .mat-progress-bar-background, 
+.mat-progress-bar.mat-accent .mat-progress-bar-buffer { 
+  background: #1bc9e483 !important; 
 }

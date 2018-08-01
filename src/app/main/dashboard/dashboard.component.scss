@@ -5,17 +5,4 @@
         max-width: 43.75rem; 
 }
 
-// graph를 감싸고 있는 div의 높이값 >> 높이값이 없으면 graph div 없어짐
-.meta-graph { 
-        min-height: 25.625rem;    
-        .graph-canvas { 
-                height: 69vh; 
-                @media ( max-width: 1280px ) { height: 68vh; }
-        }
-}       
-
-
-     
-
-
 // :host /deep/ { }
