@@ -45,7 +45,6 @@ export class QueryGraphComponent implements OnInit {
       zone: this._ngZone,
       cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
       cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
-      cyNodeCallback: (target) =>{ if(this.isVisible) this.cyNodeCallback(target) },
       cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
       component: this
     };
@@ -76,11 +75,6 @@ export class QueryGraphComponent implements OnInit {
   // graph canvas 클릭 콜백 함수
   cyCanvasCallback():void {
     this.selectedElement = undefined;
-  }
-
-  // graph elements 중 node 클릭 콜백 함수
-  cyNodeCallback(target:any):void {
-
   }
 
   // graph elements 클릭 콜백 함수

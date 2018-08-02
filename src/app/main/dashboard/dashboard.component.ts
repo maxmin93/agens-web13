@@ -99,7 +99,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       zone: this._ngZone,
       cyCanvasCallback: () => this.cyCanvasCallback(),
       cyElemCallback: (target) => this.cyElemCallback(target),
-      cyNodeCallback: (target) => this.cyNodeCallback(target),
+      cyQtipMenuCallback: (target, value) => this.cyQtipMenuCallback(target, value),
       component: this
     };
   }
@@ -141,14 +141,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   cyCanvasCallback():void {
   }
 
-  // graph elements 중 node 클릭 콜백 함수
-  cyNodeCallback(target:any):void {
-  }
-
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
     this.cy.elements(':selected').unselect();
     this.selectFromGraph(target.id());
+  }
+
+  // Qtip 메뉴 선택 콜백 함수
+  cyQtipMenuCallback(target:any, value:any):void {
   }
 
   //////////////////////////////////////////////
