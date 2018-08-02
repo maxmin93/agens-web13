@@ -3,8 +3,8 @@
         <div class="row-side col">
             <div>
                 <h4>DATA <strong>SOURCE</strong></h4>
-                <p class="subtext">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
-                <ul class="list">
+                <p class="sub-title">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
+                <ul class="list textover border noborder">
                     <li><span> URL</span>{{infos.uri}}</li>
                     <li><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
                     <li><span> DESC</span>{{infos.desc}}</li>
@@ -21,7 +21,7 @@
                 <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
             </div>
     
-            <div class="m-30 col strech">       
+            <div class="m-10 col strech">       
                 <h4>LABEL <strong>LIST</strong></h4>
                 
                 <ngx-datatable #tableLabels class="material m-20"
@@ -52,11 +52,23 @@
     
         <div class="col strech">            
             <h4>SCHEMA <strong>GRAPH</strong></h4>
-            <div class="row strech m-20">
-                <div id="div-canvas" #divCanvas class="graph-canvas strech"></div>
-                <div class="col-side-icon border">
-                    <div class="scrollbind">
-                        <ul>
+            <div class="col">
+                <ul class="row list m-20 theme">
+                    <li class="strech side-margin"><span>TYPE </span> {{selectedLabel.type}}</li>
+                    <li class="strech side-margin"><span>ID </span> {{selectedLabel.id}}</li>
+                    <li class="strech side-margin"><span>NAME </span> {{selectedLabel.name}}</li>
+                    <li class="strech side-margin"><span>OWNER </span> {{selectedLabel.owner}}</li>
+                    <li class="strech side-margin"><span>SIZE </span> {{selectedLabel.size | number}}</li>
+                </ul>
+                <ul class="list">
+                    <li class="theme"><span>DESCRIPTION </span> "{{selectedLabel.desc}}"</li>
+                </ul>
+            </div>
+            <div class="row strech">
+                <div id="div-canvas" #divCanvas class="graph-canvas strech border"></div>
+                <div class="viewbox">
+                    <div class="scroll-hide">
+                        <ul class="list icon border border-left-no">
                             <li><a matTooltip="Create" matTooltipPosition="left" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
                             <li><a matTooltip="Edit" matTooltipPosition="left"><mat-icon>edit</mat-icon></a></li>
                             <li><a matTooltip="Expand" matTooltipPosition="left"><mat-icon>control_camera</mat-icon></a></li>
@@ -66,18 +78,7 @@
                 </div>
                 
             </div>
-            <div>
-                <ul class="row list">
-                    <li class="strech"><span>TYPE </span> {{selectedLabel.type}}</li>
-                    <li class="strech"><span>ID </span> {{selectedLabel.id}}</li>
-                    <li class="strech"><span>NAME </span> {{selectedLabel.name}}</li>
-                    <li class="strech"><span>OWNER </span> {{selectedLabel.owner}}</li>
-                    <li class="strech"><span>SIZE </span> {{selectedLabel.size | number}}</li>
-                </ul>
-                <ul class="col strech list list-unique">
-                    <li><small>DESCRIPTION </small> "{{selectedLabel.desc}}"</li>
-                </ul>
-            </div>
+            
                 
         </div>  
     </div>

@@ -4,7 +4,7 @@
     <div id="queryCard">
         <div class="row-center">
             <h4>QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small></h4>
-            <ul class="row list-icon">
+            <ul class="row icon list inline">
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</a></li>
                 <li><a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</a></li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a></li>
@@ -15,7 +15,7 @@
         
         <p></p>
         <!-- REQUEST : cypher query -->
-        <form class="border padding">
+        <form class="border m-20 p-20 border-dashed">
             <textarea placeholder="input Cypher Query.." 
             id="agensQuery" #queryEditor type="text" name="query"
             (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>

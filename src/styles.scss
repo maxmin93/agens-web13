@@ -22,15 +22,11 @@
 @font-face { font-family: "RobotoMono"; src: url("resources/fonts/RobotoMono-Regular.ttf")format("opentype"); }
 @font-face { font-family: "RobotoMono Bold"; src: url("resources/fonts/RobotoMono-Bold.ttf")format("opentype"); }
 
-
-
-
 *, ::before, ::after { 
   box-sizing: border-box; 
 }
 
-html, body, material-app  {
-  
+html, body, material-app  {  
   width: 100%;
   height: 100vh;
   font-size: 16px;   
@@ -43,7 +39,7 @@ html, body, material-app  {
 
 h1, h2, h3, h4, h5, h6 {   
   font-weight: 400; 
-  color: #242424
+  color: #242424;
 }
 
 h1, h2, h3, h4, h5, h6, 
@@ -51,9 +47,8 @@ ul, html, body, material-app, input, textarea, .mat-menu-item, pre {
   margin: 0; 
   padding: 0; 
   font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
+  list-style: none;
 }
-
-ul { list-style: none; }
 
 // Custom style for loading elements without height
 
@@ -82,6 +77,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 .row-side { margin-right: 1.875rem; }
 .col-side { margin-bottom: 1.875rem; }
+
 .strech { 
   width: 100%; 
   height: 100%; 
@@ -90,55 +86,35 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 }
 
 // 빈 공란 
-
 .example-spacer { flex: 1 1 auto; }
+
+//  color 테마값
+
+mat-icon { color: #afc1c1; }
+.theme { background: #f5f5f5; }
+.mat-button-toggle { color: #798694; }
+.expand-cell { color: #585858; }
  
-
-/* 그래프 내에 있는 아이콘집합 
-(기본설정 그래프의 오른쪽이며 위치변경시 border값 수정필요) */
-
-.col-side-icon {
-  background: #f5f5f5; 
-  width: 50px;   
-  border: 1px solid #ddd; 
-  border-left: 0; 
-  overflow: hidden;
-
-  &.border li {
-    border-bottom: 1px solid #ddd; 
-  }
-
-  .scrollbind {
-    width: 80px; 
-    height: 100%; 
-    overflow-y: scroll; 
-    
-    ul { 
-      width: 50px; 
-      height: 100%; 
-  
-      li {
-        min-height: 50px; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-    
-        :hover {
-          color: #848484; 
-        }
-      }
-    }
-  }
-}
-
-
 /* margin 값으로  margin 값을 추가하고자 할 때, 
 클래스명은 "m-value" */
 
 .m-30 { margin-top: 1.875rem; }
+.m-24 { margin-top: 1.5625rem;}
 .m-20 { margin-top: 1.25rem; }
 .m-10 { margin-top: .625rem; }
 
+.p-20 { padding: 1.25rem; }
+
+.border { border: 1px solid #ddd; }
+.border-left-no { border-left: none; }
+
+ul.border {
+  &.noborder { border: none }
+  &.border-dashed { border-style: dashed; }
+  > li { border-bottom: 1px solid #ddd; }
+}
+
+.mat-menu-item, .sub-title { font-size: .75rem; color: #aeb1b4; } 
 
 /* button 관련 정리로 
 추후 theme을 가진 button도 추가예정 */
@@ -150,10 +126,6 @@ a {
   cursor: pointer; 
 }
 
-mat-icon { 
-  color: #afc1c1; 
-}
-
 .mat-button, .mat-fab, .mat-flat-button, 
 .mat-icon-button, .mat-mini-fab, 
 .mat-raised-button, .mat-stroked-button {
@@ -162,8 +134,6 @@ mat-icon {
   padding: 0 1rem !important; 
   min-width: 88rem; 
 }
-
-.mat-button-toggle { color: #798694; }
 
 .mat-button-toggle-group, 
 .mat-button-toggle-standalone,
@@ -182,7 +152,23 @@ mat-icon {
 /* 기본 설정 datatable css 수정 
 datatable의 세팅값은 각 태그에 존재함*/
 
-.expand-cell { color: #585858; }
+.ngx-datatable.material { 
+  display: flex; 
+  flex-direction: column; 
+
+  div.visible { 
+    display: flex; 
+    flex-direction: column; 
+
+    .datatable-header { overflow: initial; }
+
+    .datatable-body {  
+      flex: 1; 
+      overflow-x: hidden; 
+      overflow-y: auto; 
+    }
+  }
+}
 
 .datatable-header-cell { 
   background: #f5f5f5; 
@@ -213,17 +199,14 @@ datatable의 세팅값은 각 태그에 존재함*/
 .ngx-datatable.material.multi-selection .datatable-body-row.active, 
 .ngx-datatable.material.multi-selection .datatable-body-row.active .datatable-row-group, 
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active, 
-.ngx-datatable.material.multi-click-selection .datatable-body-row.active .datatable-row-group {
-  background: #f1f9f9; 
-}
-
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active .datatable-row-group, 
 // datatable hover 되었을 때의 애니메이션 
 .ngx-datatable.material.single-selection .datatable-body-row.active:hover, 
 .ngx-datatable.material.single-selection .datatable-body-row.active:hover .datatable-row-group, 
 .ngx-datatable.material.multi-selection .datatable-body-row.active:hover, 
 .ngx-datatable.material.multi-selection .datatable-body-row.active:hover .datatable-row-group, 
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover, 
-.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group {
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group  {
   background: #f1f9f9; 
   cursor: pointer;
 }
@@ -234,7 +217,6 @@ datatable의 세팅값은 각 태그에 존재함*/
   cursor: pointer;
 }
 
-//
 .ngx-datatable.material .datatable-body .datatable-row-detail { 
   background: #f8f9f9; 
   padding: .4rem 1.25rem; 
@@ -247,7 +229,6 @@ datatable의 세팅값은 각 태그에 존재함*/
 
 div.graph-canvas { 
   max-width: 100%; 
-  border: 1px solid #ddd; 
   position: relative;
   z-index: 10;
 
@@ -255,17 +236,12 @@ div.graph-canvas {
   div.cy-panzoom { 
     top: 0.9375rem; 
     left: 0.9375rem; 
-
+    // canvas 반응형높이값을위해 설정
     + div {
       width: 100% !important; 
       height: 100% !important; 
     } 
   }
-  // 이값으로 인해 canvas의 좌우폭이 조절됨
-  // > div:nth-child(3) {
-  //   width: 100% !important; 
-  //   height: 100% !important; 
-  // }
 }
 
 mat-chip-list {
@@ -275,7 +251,6 @@ mat-chip-list {
   z-index: 32;
 }
 
-
 /* 각 페이지의 기본 input 값 설정 
 */
 
@@ -283,10 +258,6 @@ form, input {
   width: 100%; 
   font-size: .875rem; 
   outline: none; 
-
-  &.padding { padding: 1.25rem; }
-  &.border { border: 1px dashed #ddd; }
-  &.margin { margin-top: 1.5625rem}
 
   textarea {
     width: 100%; 
@@ -300,18 +271,18 @@ form, input {
   }
 }
 
-span.search {
+.search {
   position: relative; 
 
   input {
     width: 18.75rem; 
     padding: .4rem 1.25rem;  
-    border: 1px solid #ddd; 
     border-radius: 1rem; 
     outline: none; 
     font-size: .75rem; 
-    color: #8a8d92; 
+    color: #848484; 
   }
+
   mat-icon { 
     font-size: 1.375rem; 
     color: #ea1347; 
@@ -321,12 +292,9 @@ span.search {
   }
 }
 
-.mat-form-field.block {
-  display: block; 
-}
+.mat-form-field.block { display: block; }
 
-/* tab 관련 스타일 변경 
-*/
+/* tab 관련 스타일 변경 */
 
 .mat-tab-group.mat-primary .mat-ink-bar, 
 .mat-tab-nav-bar.mat-primary .mat-ink-bar {
@@ -350,15 +318,11 @@ span.search {
 .CodeMirror pre { padding: 0 1.25rem; }
 .CodeMirror-gutter-wrapper { left: -36px !important; }
 
-/* Drop menu  
-*/
-
+// Dropdown menu  
 .mat-subhead { 
-  padding: 1rem; 
   display: inline-block;
+  padding: 1rem; 
 }
-
-.mat-menu-item { font-size: .75rem; }
 
 // 텍스트 타이틀 옆에 붙는 before
 .expand-cell::before, 
@@ -375,108 +339,101 @@ span.search {
 }
 
 // dialog 관련 css 수정 
-
-.mat-form-field-appearance-legacy .mat-form-field-underline { background: #ddd; }
+// .mat-form-field-appearance-legacy .mat-form-field-underline { background: #ddd; }
 .mat-dialog-actions { flex-direction: row-reverse; }
 
-p.subtext { 
-  font-size: .75rem; 
-  color: #aeb1b4; 
-}
-
 // sidenav css 
-
 .slide { 
   background: #fff; 
   width: 21.875rem; 
   height: calc(100% - 2.5rem); 
   margin: auto; 
   padding: 1.25rem; 
-  border: 1px solid #ddd; 
   top: 0; 
-  bottom: 0; 
   right: 1.25rem; 
+  bottom: 0; 
   position: absolute; 
   z-index: 22;
+}
+
+/* slide 숨기는 component 
+사이즈를 조정할 수 있다*/ 
+
+.viewbox {
+  width: 50px;   
+  border-left: 0; 
+  overflow: hidden;
+
+  .scroll-hide {
+    width: 80px; 
+    height: 100%; 
+    overflow-y: scroll; 
+    
+    ul { 
+      width: 50px; 
+      height: inherit;  
+    }
+  }
 }
 
 // list 
 
 ul.list {
+  width: 100%;
   font-size: .875rem; 
   color: #4d4d4d; 
 
-
-
-    &.list > li { 
-    max-width: 700px; 
-    overflow: hidden; 
-    white-space: nowrap; 
-    text-overflow: ellipsis; 
-    margin-top: 1.25rem;
+  li {
+    margin: 1.25rem 0; 
     padding: .625rem; 
 
-    > span {  
+    > span { 
+      display: inline-block;
       min-width: 60px; 
       margin-right: 1.25rem; 
       padding: .25rem; 
       font-size: .75rem; 
-      color: #979a9c; 
-    }  
-  }
-
-  &.list.border > li { 
-    border-bottom: 1px solid #ddd; 
-  }
-
-  &.list.unique li {
-    background: #f5f5f5;
-    max-width: 100%; 
-  }
-
-  &.list.sm li {
-    margin-top: 0; 
-    padding: .625rem 0;
-    flex: 1; 
-  }
-
-  &.list.icon a {
-    margin: 0 1.875rem;
-    font-size: 90%; 
-    color: #848484; 
-    &:hover { 
-      color: rgba(0,0,0,.87);
+      color: #979a9c;
     }
   }
-}
 
-// table
+  &.inline { width: initial; }
 
-.ngx-datatable.material { 
-  display: flex; 
-  flex-direction: column; 
+  &.textover > li {
+    max-width: 43.75rem; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
+  }
 
-  div.visible { 
-    display: flex; 
-    flex-direction: column; 
+  li.side-margin { padding: .625rem; margin: 0}
 
-    .datatable-header { 
-      overflow: initial; 
+  &.icon {
+
+    &.row > li {
+      margin: 0 1.875rem; 
+      padding: 0; 
+      a{
+        min-height: 0; 
+      }
     }
 
-    .datatable-body {  
-      flex: 1; 
-      overflow-x: hidden; 
-      overflow-y: auto; 
+    > li { 
+      margin: 0; 
+      padding: 0; 
+      font-size: 90%; 
+      a { 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 50px; 
+      }
     }
   }
 }
 
 // json 
-
-.json { 
-  overflow-y: auto; 
-}
+.json { overflow-y: auto; }
 
 pre {
   white-space: pre-wrap; 
@@ -491,6 +448,9 @@ pre {
     line-height: 1rem;  
     font-size: .515rem; 
     color: white; 
+  }
+  .key {
+    color: #4d4d4d;        
   }
   .string { 
     color: #15d3b2;
@@ -519,9 +479,6 @@ pre {
           content:'null';
           background-color: #2e3c56; 
       }
-  }
-  .key {
-      color: #4d4d4d;        
   }
 }
 
