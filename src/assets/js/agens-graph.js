@@ -30,20 +30,8 @@
 
   agens.caches = {
     nodePosition: new WeakMap(),
-    nodeLabel: new WeakMap(),
-    nodeColor: new WeakMap(),
-    nodeWidth: new WeakMap(),
-    edgeLabel: new WeakMap(),
-    edgeColor: new WeakMap(),
-    edgeWidth: new WeakMap(),
     reset: function(option){
       if( option === undefined || option === 'nodePosition' ) this.nodePosition = new WeakMap();
-      if( option === undefined || option === 'nodeLabel' ) this.nodeLabel = new WeakMap();
-      if( option === undefined || option === 'nodeColor' ) this.nodeColor = new WeakMap();
-      if( option === undefined || option === 'nodeWidth' ) this.nodeWidth = new WeakMap();
-      if( option === undefined || option === 'edgeLabel' ) this.edgeLabel = new WeakMap();
-      if( option === undefined || option === 'edgeColor' ) this.edgeColor = new WeakMap();
-      if( option === undefined || option === 'edgeWidth' ) this.edgeWidth = new WeakMap();
     },
     rollback: function(option){
       if( option === undefined || option === 'nodePosition' ){
@@ -53,47 +41,6 @@
           } 
         });
         agens.cy.fit( agens.cy.elements(), 30);
-      }
-      if( option === undefined || option === 'nodeLabel' ){
-        agens.cy.nodes().map( ele => {
-          if( agens.caches.nodeLabel.has(ele) )
-            ele.style('label', agens.graph.defaultSetting.hideNodeTitle 
-                        ? '' : agens.caches.nodeLabel.get(ele));
-        });
-      }
-      if( option === undefined || option === 'nodeColor' ){
-        agens.cy.nodes().map( ele => {
-          if( agens.caches.nodeColor.has(ele) )
-            ele.style('background-color', agens.caches.nodeColor.get(ele));
-        });
-      }
-      if( option === undefined || option === 'nodeWidth' ){
-        agens.cy.nodes().map( ele => {
-          if( agens.caches.nodeWidth.has(ele) )
-            ele.style('width', agens.caches.nodeWidth.get(ele));
-            ele.style('height', agens.caches.nodeWidth.get(ele));
-        });
-      }
-      if( option === undefined || option === 'edgeLabel' ){
-        agens.cy.edges().map( ele => {
-          if( agens.caches.edgeLabel.has(ele) )
-            ele.style('label', agens.graph.defaultSetting.hideEdgeTitle
-                        ? '' : agens.caches.edgeLabel.get(ele) );
-        });
-      }
-      if( option === undefined || option === 'edgeColor' ){
-        agens.cy.edges().map( ele => {
-          if( agens.caches.edgeColor.has(ele) )
-            ele.style('line-color', agens.caches.edgeColor.get(ele) );
-            ele.style('source-arrow-color', agens.caches.edgeColor.get(ele) );
-            ele.style('target-arrow-color', agens.caches.edgeColor.get(ele) );            
-        });
-      }
-      if( option === undefined || option === 'edgeWidth' ){
-        agens.cy.edges().map( ele => {
-          if( agens.caches.edgeWidth.has(ele) )
-            ele.style('width', agens.caches.edgeWidth.get(ele) );
-        });
       }
     }
   };
@@ -105,8 +52,9 @@
   agens.styles = {
     nodeLabel: function(e){
       if( e.scratch('_style') && e.scratch('_style').title )
-        return e.data('props').hasOwnProperty(e.scratch('_style').title) ? e.data('props')[e.scratch('_style').title] : '';
-      return e.data('name');
+        if( e.data('props').hasOwnProperty(e.scratch('_style').title) ) 
+          return e.data('props')[e.scratch('_style').title];
+      return '';
     },
     nodeColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -120,8 +68,9 @@
     },
     edgeLabel: function(e){
       if( e.scratch('_style') && e.scratch('_style').title )
-        return e.data('props').hasOwnProperty(e.scratch('_style').title) ? e.data('props')[e.scratch('_style').title] : '';
-      return e.data('name');
+        if( e.data('props').hasOwnProperty(e.scratch('_style').title) )
+          return e.data('props')[e.scratch('_style').title];
+      return '';
     },
     edgeColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -155,60 +104,42 @@
           "selection-box-opacity": 0.25,
           "selection-box-border-color": "#aaa",
           "selection-box-border-width": 1,
-          // "panning-cursor": "grabbing",
         }}, {
         selector: 'node',
         css: {
           'label': function(e){
-              if( !agens.caches.nodeLabel.has(e) ) 
-                agens.caches.nodeLabel.set(e, agens.styles.nodeLabel(e));
-              if( !_.isNil( e._private.cy.scratch('_config').hideNodeTitle)
-                && e._private.cy.scratch('_config').hideNodeTitle ) return '';
-              return agens.caches.nodeLabel.get(e);
-            },
-
+              if( e._private.cy.scratch('_config').hideNodeTitle ) return '';
+              return agens.styles.nodeLabel(e);
+              },
+          'background-color': function(e){ return agens.styles.nodeColor(e); },
+          'width':  function(e){ return agens.styles.nodeWidth(e); },
+          'height': function(e){ return agens.styles.nodeWidth(e); },
+  
           'text-wrap':'wrap',
           'text-max-width':'75px',
           'text-halign': 'center',    // text-halign: left, center, right
-          'text-valign': 'center',       // text-valign: top, center, bottom
+          'text-valign': 'center',    // text-valign: top, center, bottom
           'color': 'white',
           'font-weight': 400,
           'font-size': 12,
           'text-opacity': 1,
-          // 'background-color': '#68bdf6',
-          'background-color': function(e){
-            if( !agens.caches.nodeColor.has(e) ) 
-              agens.caches.nodeColor.set(e, agens.styles.nodeColor(e));
-            return agens.caches.nodeColor.get(e);
-          },
-
-          // 'shape': 'eclipse',
-          'width': function(e){
-            if( !agens.caches.nodeWidth.has(e) ) 
-              agens.caches.nodeWidth.set(e, agens.styles.nodeWidth(e));
-            return agens.caches.nodeWidth.get(e);
-          },
-          'height': function(e){
-            if( !agens.caches.nodeWidth.has(e) ) 
-              agens.caches.nodeWidth.set(e, agens.styles.nodeWidth(e));
-            return agens.caches.nodeWidth.get(e);
-          },
-
           'border-width':'3',
           'border-color':'#5fa9dc'
         }},{
-          selector: 'node:selected',                /// 선택한 노드의 변화 (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)
-          css: {
-            'background-color': 'white',
-            'color':'#68bdf6',
-            'target-arrow-color': '#a5abb6',
-            'source-arrow-color': '#a5abb6',
-            'line-color': '#a5abb6',
-            'border-style':'dashed',
-            'border-color': '#68bdf6',
-            'border-width':'3',
-            'color':'#68bdf6'
-          }}, {
+        /// 선택한 노드의 변화 
+        /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
+        selector: 'node:selected',
+        css: {
+          'background-color': 'white',
+          'color':'#68bdf6',
+          'target-arrow-color': '#a5abb6',
+          'source-arrow-color': '#a5abb6',
+          'line-color': '#a5abb6',
+          'border-style':'dashed',
+          'border-color': '#68bdf6',
+          'border-width':'3',
+          'color':'#68bdf6'
+        }}, {
         selector: 'node:locked',
         css: {
           'background-color': '#d64937',
@@ -217,108 +148,80 @@
           'border-color': '#d64937',
           'border-width': 3,
           'opacity': 1
-         }}, {
-          selector: 'node.expand',                /// 기존과 다른 엣지버전의 변화
-          css: {
-            'opacity': 0.6,
-            'color':'black',
-            'background-color': 'darkorange',
-            'width': '40px',
-            'height': '40px',
-            'border-color':'orange',
-            'border-width': 2,
-          }}, {
+        }}, {
+        selector: 'node.expand',
+        css: {
+          'opacity': 0.6,
+          'color':'black',
+          'background-color': 'darkorange',
+          'width': '40px',
+          'height': '40px',
+          'border-color':'orange',
+          'border-width': 2,
+        }}, {
         selector: 'edge',
         css: {
-          'label':function(e){
-            if( !agens.caches.edgeLabel.has(e) ) 
-              agens.caches.edgeLabel.set(e, agens.styles.edgeLabel(e));
-            if( !_.isNil(e._private.cy.scratch('_config').hideEdgeTitle)
-              && e._private.cy.scratch('_config').hideEdgeTitle ) return '';
-            return agens.caches.edgeLabel.get(e);
-          },
+          'opacity': 1,
+          'label': function(e){
+            if( e._private.cy.scratch('_config').hideEdgeTitle ) return '';
+            return agens.styles.edgeLabel(e);
+            },
+          'line-color': function(e){ return agens.styles.edgeColor(e); },
+          'target-arrow-color': function(e){ return agens.styles.edgeColor(e); },
+          'source-arrow-color': function(e){ return agens.styles.edgeColor(e); },
+          'width':  function(e){ return agens.styles.edgeWidth(e); },
 
           'text-rotation':'autorotate',
           'text-margin-y': -12,
-          'color': '#383838',
-          'opacity': 1,
-  //        'text-outline-width': 2,
-  //        'text-outline-color': '#797979',
-          // 'line-color': '#a5abb6',
-          'line-color': function(e){
-            if( !agens.caches.edgeColor.has(e) ) 
-              agens.caches.edgeColor.set(e, agens.styles.edgeColor(e));
-            return agens.caches.edgeColor.get(e);
-          },
-
           'line-style': 'solid',            // line-style: solid, dotted, dashed
-          'width': function(e){
-            if( !agens.caches.edgeWidth.has(e) ) 
-              agens.caches.edgeWidth.set(e, agens.styles.edgeWidth(e));
-            return agens.caches.edgeWidth.get(e);
-          },
-
           'curve-style': 'bezier',
+          'font-size': 12,
           'target-arrow-shape': 'triangle',
-          'target-arrow-color': function(e){
-            if( !agens.caches.edgeColor.has(e) ) 
-              agens.caches.edgeColor.set(e, agens.styles.edgeColor(e));
-            return agens.caches.edgeColor.get(e);
-          },
-          'source-arrow-shape': 'none',
-          'source-arrow-color': function(e){
-            if( !agens.caches.edgeColor.has(e) ) 
-              agens.caches.edgeColor.set(e, agens.styles.edgeColor(e));
-            return agens.caches.edgeColor.get(e);
-          },
-          'font-size': 12
+          'source-arrow-shape': 'none'
         }}, {
-        selector: 'edge:selected',             /// 엣지만 클릭했을 경우 변화
+        /// 엣지만 클릭했을 경우 변화
+        selector: 'edge:selected',             
         css: {
-          'background-color': '#ffffff',
-          'target-arrow-color': '#483d41',
-          'source-arrow-color': '#483d41',
-          'line-color': '#483d41',
-
-          'width': 10,
           'opacity': 1,
-          'color': '#483d41',
+          'width': 10,
+          'line-style': 'dashed',            // line-style: solid, dotted, dashed
+          'line-color': '#83878d',
+          'target-arrow-color': '#83878d',
+          'source-arrow-color': '#83878d',
           'text-margin-y': -15,
           'text-outline-width': 2,
           'text-outline-color': 'white',
         }}, {
-        selector: 'edge:locked',              /// 엣지를 잠궜을 때 변화
+        /// 엣지를 잠궜을 때 변화
+        selector: 'edge:locked',              
         css: {
-          // 'width': 4,
           'opacity': 1,
           'line-color': '#433f40',
           'target-arrow-color': '#433f40',
           'source-arrow-color': '#433f40'
         }}, {
-        selector: 'edge.expand',             /// 기존과 다른 엣지버전의 변화
+        /// 기존과 다른 엣지버전의 변화
+        selector: 'edge.expand',             
         css: {
-          // 'width': 3,
-          'border-style':'double',
           'opacity': 0.6,
+          'line-style':'dotted',
           'line-color': 'orange',
           'target-arrow-color': 'orange',
           'source-arrow-color': 'orange',
         }}, {
-        selector: 'node.highlighted',      // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
+        // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
+        selector: 'node.highlighted',      
         css: {
-          'background-color': '#fff',
+          'background-color': '#ffffff',
           'width':'65px',
           'height':'65px',
           'color':'#5fa9dc',
-          'target-arrow-color': '#a5abb6',
-          'source-arrow-color': '#a5abb6',
           'line-color': '#a5abb6',
           'border-style':'solid',
           'border-color': '#5fa9dc',
           'border-width': 4,
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s',
-
         }},{
         selector: 'edge.highlighted',
         css: {
@@ -339,24 +242,27 @@
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s'
         }},{
-        selector: '.edgehandles-hover',   /// 엣지 드래그한 후 선택한 노드의 변화
+        /// 엣지 드래그한 후 선택한 노드의 변화
+        selector: '.edgehandles-hover',
         css: {
           'background-color': '#d80001'
         }},{
-        selector: '.edgehandles-source',    /// 선택된 노드의 드래그시 변화
+        /// 선택된 노드의 드래그시 변화  
+        selector: '.edgehandles-source',
         css: {
           'border-width': 10,
           'border-color': '#d80001',
           'background-color':'#d80001',
           'text-outline-color': '#d80001',
         }},{
-        selector: '.edgehandles-target',   /// 엣지연결할 타겟의 노드변화
+        /// 엣지연결할 타겟의 노드변화          
+        selector: '.edgehandles-target',   
         css: {
-          // 'border-width': 2,
           'border-color': 'white',
           'text-outline-color': '#d80001',
         }},{
-        selector: '.edgehandles-preview, .edgehandles-ghost-edge', /// 선택된 노드에 연결될 엣지의 예상변화
+        /// 선택된 노드에 연결될 엣지의 예상변화
+        selector: '.edgehandles-preview, .edgehandles-ghost-edge', 
         css: {
           'line-color': '#d80001',
           'target-arrow-color': '#d80001',
@@ -364,215 +270,6 @@
         }
       }
     ]
-  };
-
-  // Public Property : Layout Options
-  agens.graph.layoutTypes = {
-    'grid': {
-      name: 'grid',
-      fit: true,                          // whether to fit the viewport to the graph
-      padding: 50,                        // padding used on fit
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
-      avoidOverlapPadding: 10,            // extra spacing around nodes when avoidOverlap: true
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      condense: false,                    // uses all available space on false, uses minimal space on true
-      rows: undefined,                    // force num of rows in the grid
-      cols: undefined,                    // force num of columns in the grid
-      position: function( node ){},       // returns { row, col } for element
-      sort: undefined,                    // a sorting function to order the nodes; e.g. function(a, b){ return a.data('weight') - b.data('weight') }
-      animate: false,                     // whether to transition the node positions
-      animationDuration: 500,             // duration of animation in ms if enabled
-      animationEasing: undefined,         // easing of animation if enabled
-    },
-    'random': {
-      name: 'random',
-      fit: true,                          // whether to fit to viewport
-      padding: 50,                        // fit padding
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      animate: false,                     // whether to transition the node positions
-      animationDuration: 500,             // duration of animation in ms if enabled
-      animationEasing: undefined,         // easing of animation if enabled
-    },
-    'breadthfirst': {
-      name: 'breadthfirst',
-      fit: true,                          // whether to fit the viewport to the graph
-      directed: false,                    // whether the tree is directed downwards (or edges can point in any direction if false)
-      padding: 50,                        // padding on fit
-      circle: false,                      // put depths in concentric circles if true, put depths top down if false
-      spacingFactor: 1.75,                // positive spacing factor, larger => more space between nodes (N.B. n/a if causes overlap)
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      roots: undefined,                   // the roots of the trees
-      maximalAdjustments: 0,              // how many times to try to position the nodes in a maximal way (i.e. no backtracking)
-      animate: false,                     // whether to transition the node positions
-      animationDuration: 500,             // duration of animation in ms if enabled
-      animationEasing: undefined,         // easing of animation if enabled
-    },
-    'circle': {
-      name: 'circle',
-      fit: true,                          // whether to fit the viewport to the graph
-      padding: 50,                        // the padding on fit
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox and radius if not enough space
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      radius: undefined,                  // the radius of the circle
-      startAngle: 3 / 2 * Math.PI,        // where nodes start in radians
-      sweep: undefined,                   // how many radians should be between the first and last node (defaults to full circle)
-      clockwise: true,                    // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
-      sort: undefined,                    // a sorting function to order the nodes; e.g. function(a, b){ return a.data('weight') - b.data('weight') }
-      animate: false,                     // whether to transition the node positions
-      animationDuration: 500,             // duration of animation in ms if enabled
-      animationEasing: undefined,         // easing of animation if enabled
-    },
-    'concentric': {
-      name: 'concentric',
-      fit: true,                          // whether to fit the viewport to the graph
-      padding: 50,                        // the padding on fit
-      startAngle: 3 / 2 * Math.PI,        // where nodes start in radians
-      sweep: undefined,                   // how many radians should be between the first and last node (defaults to full circle)
-      clockwise: true,                    // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
-      equidistant: false,                 // whether levels have an equal radial distance betwen them, may cause bounding box overflow
-      minNodeSpacing: 10,                 // min spacing between outside of nodes (used for radius adjustment)
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      height: undefined,                  // height of layout area (overrides container height)
-      width: undefined,                   // width of layout area (overrides container width)
-      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      concentric: function( node ){ return node.degree(); },  // returns numeric value for each node, placing higher nodes in levels towards the centre
-      levelWidth: function( nodes ){ return nodes.maxDegree() / 4; }, // the variation of concentric values in each level
-      animate: false,                     // whether to transition the node positions
-      animationDuration: 500,             // duration of animation in ms if enabled
-      animationEasing: undefined,         // easing of animation if enabled
-    },      
-    // ** NOTE: 제외시킴 (2018-01-19)
-    // ** 애니메이션이 너무 오래 걸려서 제외 (애니메이션 꺼도 오래걸림)
-    'cola': {
-      name: 'cola',
-      animate: false,                      // whether to show the layout as it's running
-      refresh: 1,                         // number of ticks per frame; higher is faster but more jerky
-      maxSimulationTime: 1500,            // max length in ms to run the layout
-      ungrabifyWhileSimulating: false,    // so you can't drag nodes during layout
-      fit: true,                          // on every layout reposition of nodes, fit the viewport
-      padding: 50,                        // padding around the simulation
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      // positioning options
-      randomize: true,                    // use random node positions at beginning of layout
-      avoidOverlap: true,                 // if true, prevents overlap of node bounding boxes
-      handleDisconnected: true,           // if true, avoids disconnected components from overlapping
-      nodeSpacing: function (node) { return 10; }, // extra spacing around nodes
-      flow: undefined,                    // use DAG/tree flow layout if specified, e.g. { axis: 'y', minSeparation: 30 }
-      alignment: undefined,               // relative alignment constraints on nodes, e.g. function( node ){ return { x: 0, y: 1 } }
-      // different methods of specifying edge length
-      // each can be a constant numerical value or a function like `function( edge ){ return 2; }`
-      edgeLength: undefined,              // sets edge length directly in simulation
-      edgeSymDiffLength: undefined,       // symmetric diff edge length in simulation
-      edgeJaccardLength: undefined,       // jaccard edge length in simulation
-      // iterations of cola algorithm; uses default values on undefined
-      unconstrIter: undefined,            // unconstrained initial layout iterations
-      userConstIter: undefined,           // initial layout iterations with user-specified constraints
-      allConstIter: undefined,            // initial layout iterations with all constraints including non-overlap
-      // infinite layout options
-      infinite: false                     // overrides all other options for a forces-all-the-time mode
-    },
-    'cose': {
-      name: 'cose',
-      animate: true,                      // Whether to animate while running the layout
-      // The layout animates only after this many milliseconds
-      animationThreshold: 250,            // (prevents flashing on fast runs)
-      // Number of iterations between consecutive screen positions update
-      refresh: 20,                        // (0 -> only updated on the end)
-      fit: true,                          // Whether to fit the network view after when done
-      padding: 50,                        // Padding on fit
-      boundingBox: undefined,             // Constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      randomize: true,                    // Randomize the initial positions of the nodes (true) or use existing positions (false)
-      componentSpacing: 50,               // Extra spacing between components in non-compound graphs
-      nodeRepulsion: function( node ){ return 400000; },  // Node repulsion (non overlapping) multiplier
-      nodeOverlap: 10,                    // Node repulsion (overlapping) multiplier
-      idealEdgeLength: function( edge ){ return 10; },    // Ideal edge (non nested) length
-      edgeElasticity: function( edge ){ return 100; },    // Divisor to compute edge forces
-      nestingFactor: 5,                   // Nesting factor (multiplier) to compute ideal edge length for nested edges
-      gravity: 80,                        // Gravity force (constant)
-      numIter: 800,                       // Maximum number of iterations to perform
-      initialTemp: 200,                   // Initial temperature (maximum node displacement)
-      coolingFactor: 0.95,                // Cooling factor (how the temperature is reduced between consecutive iterations
-      minTemp: 1.0,                       // Lower temperature threshold (below this point the layout will end)
-      weaver: false                       // Pass a reference to weaver to use threads for calculations
-    },
-    'cose2': {
-      name: 'cose-bilkent',
-      nodeDimensionsIncludeLabels: false, // Whether to include labels in node dimensions. Useful for avoiding label overlap
-      refresh: 30,                        // number of ticks per frame; higher is faster but more jerky
-      fit: true,                          // Whether to fit the network view after when done
-      padding: 50,                        // Padding on fit
-      randomize: true,                    // Whether to enable incremental mode
-      nodeRepulsion: 4500,                // Node repulsion (non overlapping) multiplier
-      idealEdgeLength: 50,                // Ideal (intra-graph) edge length
-      edgeElasticity: 0.45,               // Divisor to compute edge forces
-      nestingFactor: 0.1,                 // Nesting factor (multiplier) to compute ideal edge length for inter-graph edges
-      gravity: 0.25,                      // Gravity force (constant)
-      numIter: 2500,                      // Maximum number of iterations to perform
-      tile: true,                         // Whether to tile disconnected nodes
-      animate: 'end',                     // Type of layout animation. The option set is {'during', 'end', false}
-      tilingPaddingVertical: 10,          // Amount of vertical space to put between degree zero nodes during tiling (can also be a function)
-      tilingPaddingHorizontal: 10,        // Amount of horizontal space to put between degree zero nodes during tiling (can also be a function)
-      gravityRangeCompound: 1.5,          // Gravity range (constant) for compounds
-      gravityCompound: 1.0,               // Gravity force (constant) for compounds
-      gravityRange: 3.8,                  // Gravity range (constant)
-      initialEnergyOnIncremental: 0.5     // Initial cooling factor for incremental layout
-    },
-    'dagre': {
-      name: 'dagre',
-      fit: true,                          // whether to fit to viewport
-      padding: 50,                        // fit padding
-      spacingFactor: undefined,           // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      animate: true,                      // whether to transition the node positions
-      animationDuration: 500,             // duration of animation in ms if enabled
-      animationEasing: undefined,         // easing of animation if enabled
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      // dagre algo options, uses default value on undefined
-      nodeSep: undefined,                 // the separation between adjacent nodes in the same rank
-      edgeSep: undefined,                 // the separation between adjacent edges in the same rank
-      rankSep: undefined,                 // the separation between adjacent nodes in the same rank
-      rankDir: undefined,                 // 'TB' for top to bottom flow, 'LR' for left to right
-      minLen: function( edge ){ return 1; },      // number of ranks to keep between the source and target of the edge
-      edgeWeight: function( edge ){ return 1; },  // higher weight edges are generally made shorter and straighter than lower weight edges
-    },
-    'arbor': {
-      name: 'arbor',
-      animate: true,                      // whether to show the layout as it's running
-      maxSimulationTime: 1500,            // max length in ms to run the layout
-      fit: true,                          // on every layout reposition of nodes, fit the viewport
-      padding: 50,                        // padding around the simulation
-      boundingBox: undefined,             // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      ungrabifyWhileSimulating: false,    // so you can't drag nodes during layout
-      // forces used by arbor (use arbor default on undefined)
-      repulsion: undefined,
-      stiffness: undefined,
-      friction: undefined,
-      gravity: true,
-      fps: undefined,
-      precision: undefined,
-      // static numbers or functions that dynamically return what these
-      // values should be for each element
-      // e.g. nodeMass: function(n){ return n.data('weight') }
-      nodeMass: undefined,
-      edgeLength: undefined,
-      stepSize: 0.1,                      // smoothing of arbor bounding box
-      // function that returns true if the system is stable to indicate
-      // that the layout can be stopped
-      stableEnergy: function (energy) {
-          var e = energy;
-          return (e.max <= 0.5) || (e.mean <= 0.3);
-      },
-      // infinite layout options
-      infinite: false                     // overrides all other options for a forces-all-the-time mode
-    }
   };
       
   // Public Property : defaultSetting
@@ -730,10 +427,8 @@
         if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyCanvasCallback )
           (window['statGraphComponentRef'].cyCanvasCallback)();
       }
-
       // 노드 또는 에지에 대한 클릭 이벤트
-      else{
-        if( !e.target.isNode() && !e.target.isEdge() ) return;
+      else if( e.target.isNode() || e.target.isEdge() ){
         
         // mapping user Functions
         if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyElemCallback )
@@ -744,33 +439,8 @@
           (window['dataGraphComponentRef'].cyElemCallback)(e.target);
         if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyElemCallback )
           (window['statGraphComponentRef'].cyElemCallback)(e.target);
-
-        // if NODE
-        if( e.target.isNode() ){
-          cy.pivotNode = e.target;
-          // mapping user Functions
-          if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyNodeCallback )
-            (window['angularComponentRef'].cyNodeCallback)(e.target);
-          if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyNodeCallback )
-            (window['metaGraphComponentRef'].cyNodeCallback)(e.target);
-          if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyNodeCallback )
-            (window['dataGraphComponentRef'].cyNodeCallback)(e.target);
-          if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyNodeCallback )
-            (window['statGraphComponentRef'].cyNodeCallback)(e.target);
-        }
-
-        // if EDGE
-        if( e.target.isEdge() ){
-          // mapping user Functions
-          if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyEdgeCallback )
-            (window['angularComponentRef'].cyEdgeCallback)(e.target);
-          if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyEdgeCallback )
-            (window['metaGraphComponentRef'].cyEdgeCallback)(e.target);
-          if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyEdgeCallback )
-            (window['dataGraphComponentRef'].cyEdgeCallback)(e.target);
-          if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyEdgeCallback )
-            (window['statGraphComponentRef'].cyEdgeCallback)(e.target);
-        }
+        // NODE : if( e.target.isNode() ){}
+        // EDGE : if( e.target.isEdge() ){}
       }
 
     });
@@ -779,19 +449,24 @@
     // cy.on('mouseover', 'node', function(e){
     // });
 
-    cy.cyQtipMenuCallback = function( id, targetName ){
+    // 마우스가 찍힌 위치를 저장 (해당 위치에 노드 등을 생성할 때 사용)
+    cy.on('cxttapstart', function(e){
+      cy.scratch('_cxtPosition', e.cyPosition);
+    });
+
+    cy.cyQtipMenuCallback = function( id, targetMenu ){
       let targets = cy.getElementById(id);
       if( targets.size() == 0 ) return;
 
       // mapping user Functions
       if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyQtipMenuCallback )
-        (window['angularComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+        (window['angularComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
       if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyQtipMenuCallback )
-        (window['metaGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+        (window['metaGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
       if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyQtipMenuCallback )
-        (window['dataGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+        (window['dataGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
       if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyQtipMenuCallback )
-        (window['statGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetName);
+        (window['statGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
     };
 
     // ==========================================
@@ -803,7 +478,8 @@
       return eles.nonempty() ? result[0] : undefined;
     };
 
-    // layouts = { *'euler', 'klay', 'dagre', 'cose-bilkent', 'concentric" }
+    // layouts = { bread-first, circle, cose, cola, 'klay', 'dagre', 'cose-bilkent', 'concentric" }
+    // **NOTE: euler 는 속도가 빠르지만 간혹 stack overflow 문제를 일으켜 제외
     cy.$api.changeLayout = function(layout='cose', selected=false){
       console.log( 'cy.$api.changeLayout:', layout);
       let elements = cy.elements(':visible');

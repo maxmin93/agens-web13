@@ -18,7 +18,7 @@ import { AgensUtilService } from '../../services/agens-util.service';
 import * as CONFIG from '../../global.config';
 
 import { IResultDto, IResponseDto, IGraphDto } from '../../models/agens-response-types';
-import { IGraph, ILabel, INode, IEdge, IStyle, IRecord, IColumn, IRow } from '../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IRecord, IColumn, IRow } from '../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import { IProject } from '../../models/agens-manager-types';
 
@@ -246,6 +246,17 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     return newLines.join(' ');
   }
 
+  injectMetaElementStyle( ele:IElement ){
+    this.resultGraph.labels.map(label => {
+      if( label.type == ele.group && label.name == ele.data.label)
+        if( !!label.scratch._style ) ele.scratch._style = label.scratch._style;
+    });
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Editor Controllers
+  /////////////////////////////////////////////////////////////////
+
   // call API: db
   runQuery() {
 
@@ -275,8 +286,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultGraph.edges = new Array<IEdge>();
     });
     result.labels$.subscribe((x:ILabel) => {
-      x.scratch['_style'] = <IStyle>{ width: undefined, title: undefined
-          , color: this.labelColors[ (this.colorIndex++)%CONFIG.MAX_COLOR_SIZE ] };
+      x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
+          , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };      
       this.resultGraph.labels.push( x );
       this.queryGraph.addLabel( x );
     });
@@ -361,8 +372,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
       this.resultMeta.edges = new Array<IEdge>();
     });
     tgraph.labels$.subscribe((x:ILabel) => {
-      x.scratch['_style'] = <IStyle>{ width: undefined, title: undefined
-          , color: this.labelColors[ (this.colorIndex++)%CONFIG.MAX_COLOR_SIZE ] };
+      x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
+          , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };
       this.resultMeta.labels.push( x );
       this.metaGraph.addLabel( x );
       this.statGraph.addLabel( x );
@@ -370,24 +381,22 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     tgraph.nodes$.subscribe((x:INode) => {    
       // setNeighbors from this.resultGraph.labels;
       x.scratch['_neighbors'] = new Array<string>();
-      this.resultMeta.labels
-        .filter(val => val.type == 'nodes' && val.name == x.data.label)
+      this.resultGraph.labels
+        .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
         .map(label => {
           x.scratch['_neighbors'] += label.targets;
           x.scratch['_style'] = label.scratch['_style'];
         });
-
       this.resultMeta.nodes.push( x );
       this.metaGraph.addNode( x );
       this.statGraph.addNode( x );
     });
     tgraph.edges$.subscribe((x:IEdge) => {
       this.resultGraph.labels
-        .filter(val => val.type == 'edges' && val.name == x.data.label)
+        .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
         });
-
       this.resultMeta.edges.push( x );
       this.metaGraph.addEdge( x );
       this.statGraph.addEdge( x );

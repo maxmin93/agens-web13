@@ -45,7 +45,6 @@ export class MetaGraphComponent implements OnInit {
       zone: this._ngZone,
       cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
       cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
-      cyNodeCallback: (target) =>{ if(this.isVisible) this.cyNodeCallback(target) },
       cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
       component: this
     };
@@ -63,9 +62,9 @@ export class MetaGraphComponent implements OnInit {
         container: document.getElementById('meta-canvas'),
         selectionType: 'single',    // 'single' or 'additive'
         boxSelectionEnabled: false, // if single then false, else true
-        useCxtmenu: true,           // whether to use Context menu or not
-        hideNodeTitle: true,        // hide nodes' title
-        hideEdgeTitle: true,        // hide edges' title
+        useCxtmenu: false,           // whether to use Context menu or not
+        hideNodeTitle: false,        // hide nodes' title
+        hideEdgeTitle: false,        // hide edges' title
       });
   }
 
@@ -78,14 +77,10 @@ export class MetaGraphComponent implements OnInit {
     this.selectedElement = undefined;
   }
 
-  // graph elements 중 node 클릭 콜백 함수
-  cyNodeCallback(target:any):void {
-
-  }
-
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("meta-graph.elem-click:", target);
+    console.log("meta-graph.elem-click:", target.data, target.scratch('_style'));
+    console.log("meta-graph.elem-click:", target.size(), target[0], target[0].scratch('_style'));
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
   }  

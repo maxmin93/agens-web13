@@ -43,7 +43,6 @@ export class StatisticsComponent implements OnInit {
       zone: this._ngZone,
       cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
       cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
-      cyNodeCallback: (target) =>{ if(this.isVisible) this.cyNodeCallback(target) },
       cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
       component: this
     };
@@ -62,8 +61,8 @@ export class StatisticsComponent implements OnInit {
         selectionType: 'single',    // 'single' or 'additive'
         boxSelectionEnabled: false, // if single then false, else true
         useCxtmenu: true,           // whether to use Context menu or not
-        hideNodeTitle: true,        // hide nodes' title
-        hideEdgeTitle: true,        // hide edges' title
+        hideNodeTitle: false,        // hide nodes' title
+        hideEdgeTitle: false,        // hide edges' title
       });
   }
 
@@ -74,11 +73,6 @@ export class StatisticsComponent implements OnInit {
   // graph canvas 클릭 콜백 함수
   cyCanvasCallback():void {
     this.selectedElement = undefined;
-  }
-
-  // graph elements 중 node 클릭 콜백 함수
-  cyNodeCallback(target:any):void {
-
   }
 
   // graph elements 클릭 콜백 함수
