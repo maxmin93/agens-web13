@@ -90,7 +90,8 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 //  color 테마값
 
-mat-icon { color: #afc1c1; }
+mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; }
+.material-icons { font-size: 1.5rem !important; }
 .theme { background: #f5f5f5; }
 .mat-button-toggle { color: #798694; }
 .expand-cell { color: #585858; }
@@ -104,9 +105,11 @@ mat-icon { color: #afc1c1; }
 .m-10 { margin-top: .625rem; }
 
 .p-20 { padding: 1.25rem; }
+.p-10 { padding: .625rem; }
 
 .border { border: 1px solid #ddd; }
 .border-left-no { border-left: none; }
+.border-top-no { border-top: none; }
 
 ul.border {
   &.noborder { border: none }
@@ -301,6 +304,8 @@ form, input {
   background: #1bc9e4; 
 }
 
+.mat-tab-body-content { overflow: hidden !important }
+
 .mat-tab-body-wrapper { 
   margin-top: 1.55rem; 
   flex: 1; 
@@ -360,7 +365,7 @@ form, input {
 사이즈를 조정할 수 있다*/ 
 
 .viewbox {
-  width: 50px;   
+  width: 3.125rem;   
   border-left: 0; 
   overflow: hidden;
 
@@ -370,7 +375,7 @@ form, input {
     overflow-y: scroll; 
     
     ul { 
-      width: 50px; 
+      width: 3.125rem;
       height: inherit;  
     }
   }
@@ -419,9 +424,12 @@ ul.list {
     &.row > li {
       margin: 0 1.875rem; 
       padding: 0; 
-      a{
-        min-height: 0; 
-      }
+      a{ min-height: 0; }
+    }
+
+    &.palette > li {
+      margin: 0 .625rem;
+      padding: 0; 
     }
 
     > li { 
@@ -432,7 +440,7 @@ ul.list {
         display: flex; 
         justify-content: center; 
         align-items: center; 
-        min-height: 50px; 
+        min-height: 3.125rem; 
       }
     }
   }
