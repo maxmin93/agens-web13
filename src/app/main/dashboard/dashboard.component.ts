@@ -279,13 +279,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       ele.scratch._style = {
           color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
           , width: (50 + Math.floor(Math.log10(ele.data['size']+1))*10) +'px'
-          , title: null
+          , title: 'name'
         };
     else if( ele.group == 'edges' )
       ele.scratch._style = {
           color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
           , width: (2 + Math.floor(Math.log10(ele.data['size']+1))*2) +'px'
-          , title: null
+          , title: 'name'
         };
     this.colorIndex += 1;
   }

@@ -57,7 +57,6 @@ export class StatisticsComponent implements OnInit {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
-        container: document.getElementById('statistics-canvas'),
         selectionType: 'single',    // 'single' or 'additive'
         boxSelectionEnabled: false, // if single then false, else true
         useCxtmenu: true,           // whether to use Context menu or not
