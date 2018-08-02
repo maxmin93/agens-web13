@@ -59,7 +59,6 @@ export class MetaGraphComponent implements OnInit {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
-        container: document.getElementById('meta-canvas'),
         selectionType: 'single',    // 'single' or 'additive'
         boxSelectionEnabled: false, // if single then false, else true
         useCxtmenu: false,           // whether to use Context menu or not
@@ -79,8 +78,6 @@ export class MetaGraphComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("meta-graph.elem-click:", target.data, target.scratch('_style'));
-    console.log("meta-graph.elem-click:", target.size(), target[0], target[0].scratch('_style'));
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
   }  

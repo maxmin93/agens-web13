@@ -19,6 +19,12 @@ declare var agens: any;
 export class QueryGraphComponent implements OnInit {
 
   isVisible: boolean = false;
+  isLoading: boolean = false;
+
+  btnStatus: any = { 
+    mouseWheel: false,      // 마우스휠 사용여부
+    searchPath: false,      // 경로검색 사용여부 
+  };
 
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
@@ -32,7 +38,8 @@ export class QueryGraphComponent implements OnInit {
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
   constructor(
-    private _ngZone: NgZone,    
+    private _ngZone: NgZone,
+    private _elf: ElementRef,
     private dialog: MatDialog,
     private _api: AgensDataService,
     private _util: AgensUtilService,
@@ -59,7 +66,6 @@ export class QueryGraphComponent implements OnInit {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
-        container: document.getElementById('graph-canvas'),
         selectionType: 'additive',  // 'single' or 'additive'
         boxSelectionEnabled: true,  // if single then false, else true
         useCxtmenu: true,           // whether to use Context menu or not
@@ -182,9 +188,17 @@ export class QueryGraphComponent implements OnInit {
   /////////////////////////////////////////////////////////////////
 
   selectedLockToggle(target:any){
+    if( target.locked() ) target.unlock();
+    else target.lock();
   }
 
   toggleMouseWheelZoom(checked?:boolean): void{
+    if( checked === undefined ) this.btnMouseWheelZoom.checked = !this.btnMouseWheelZoom.checked;
+    else this.btnMouseWheelZoom.checked = checked;
+
+    // graph의 userZoomingEnabled 설정 변경
+    this.cy.userZoomingEnabled( this.btnMouseWheelZoom.checked ); 
+    this.btnStatus.mouseWheel = this.btnMouseWheelZoom.checked;
   }
 
   toggleHighlightNeighbors(checked?:boolean): void{
@@ -347,4 +361,18 @@ export class QueryGraphComponent implements OnInit {
     });
   }
   
+  /////////////////////////////////////////////////////////////////
+  // graph Toolbar button controlls
+  /////////////////////////////////////////////////////////////////
+
+  searchPath(){
+    this.btnStatus.searchPath = !this.btnStatus.searchPath;
+    // off 모드이면 나가기
+    if( !this.btnStatus.searchPath ){
+      return;
+    }
+
+    // 첫번째 클릭 node는 start node, 두번째 클릭 node는 end node 로 지정
+    // 
+  }
 }
