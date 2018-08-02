@@ -1,10 +1,18 @@
 .palette {
+   width: initial; 
+   z-index: 42;
 
    li a { 
       background: #afc1c1;
       width: 20px; 
       display: block; 
       border-radius: 1rem; 
+      cursor:pointer; 
+      transition: all .3s ease-in-out; 
+      &:hover {
+         transform: scale(1.1);
+         box-shadow: 0 0 5px rgba(0,0,0,0.68);
+      }
    }
 
    &.palette-color li {

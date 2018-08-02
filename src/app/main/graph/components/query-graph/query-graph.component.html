@@ -36,7 +36,7 @@
                                 <li class="col strech">
                                     <span>Start Node</span>
                                     <span>End Node</span>
-                                </li>
+                            </li>
                         </ul>
                     </div>
                 </ng-container>
@@ -51,7 +51,7 @@
             </mat-chip-list>
         </div>
         <!-- Graph.Meta : toolbar -->
-        <div id="agens-graph-toolbar" class="viewbox border">
+        <div id="agens-graph-toolbar" class="viewbox border theme">
             <div class="scroll-hide">
             <ul class="list icon border noborder">
                 <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.mouseWheel, 'is-inactive': !btnStatus.mouseWheel }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
