@@ -29,7 +29,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.slim.min.js",
+              "node_modules/jquery/dist/jquery.min.js",
               "node_modules/lodash/lodash.min.js",
               "node_modules/codemirror/lib/codemirror.js",
               "node_modules/codemirror/mode/cypher/cypher.js",
@@ -44,8 +44,8 @@
               "node_modules/cytoscape-undo-redo/cytoscape-undo-redo.js",
               "node_modules/cytoscape-view-utilities/cytoscape-view-utilities.js",
               "node_modules/cytoscape-edgehandles/cytoscape-edgehandles.js",
-              "node_modules/qtip2/dist/jquery.qtip.min.js",
-              "node_modules/cytoscape-qtip2/cytoscape-qtip.js",
+              "src/assets/js/jquery.qtip.min.js",
+              "node_modules/cytoscape-qtip/cytoscape-qtip.js",
               
               "node_modules/webcola/WebCola/cola.min.js",
               "node_modules/cytoscape-cola/cytoscape-cola.js",

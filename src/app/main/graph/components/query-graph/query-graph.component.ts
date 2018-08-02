@@ -147,9 +147,11 @@ export class QueryGraphComponent implements OnInit {
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.isVisible ) this.cy.$api.changeLayout('cose');
+    agens.cy = this.cy;
   }
   resize(){
     this.cy.resize();
+    this.cy.fit( this.cy.elements(), 50);
   }
   refreshCanvas(){
     this.refresh();
