@@ -12,7 +12,7 @@
             <nav>
                 <ng-container *ngIf="!!selectedElement">
                     <div id="slide-toggle" class="slide">
-                        <ul class="list list-sm col strech">
+                        <ul class="list list-sm border col strech">
                             <li class="row-center">
                                 <h4>DATA <strong>INFO</strong></h4>
                                 <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
@@ -39,50 +39,52 @@
             </mat-chip-list>
         </div>
         <!-- Graph.Meta : toolbar -->
-        <div id="agens-graph-toolbar" class="col-side-icon">
-            <ul>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
-                        <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
-                </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
-                        <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
-                </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
-                        <mat-icon>search</mat-icon></a>
-                </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
-                    <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
-                        <div td-menu-header>
-                            <h4 class="mat-subhead">LAYOUT <strong>TYPE</strong></h4>
-                        </div>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('grid')">grid</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('concentric')">CONCENTRIC</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cola')">COLA</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose')">COSE (nodes.size &lt; 400)</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">COSE-BILKENT (very slow)</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('dagre')">DAGRE (hierachy)</button>
-                        <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('klay')">KLAY</button>
-                    </mat-menu>
-                </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
-                        <mat-icon>palette</mat-icon></a>
-                </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
-                        <mat-icon>image</mat-icon></a>
-                </li>
-                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                        <mat-icon>refresh</mat-icon></a>
-                </li>
-            </ul>
+        <div id="agens-graph-toolbar" class="col-side-icon border">
+            <div class="scrollbind">
+                <ul>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
+                            <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
+                    </li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
+                            <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
+                    </li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
+                            <mat-icon>search</mat-icon></a>
+                    </li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
+                        <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
+                            <div td-menu-header>
+                                <h4 class="mat-subhead">LAYOUT <strong>TYPE</strong></h4>
+                            </div>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('grid')">grid</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('concentric')">CONCENTRIC</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('cola')">COLA</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('cose')">COSE (nodes.size &lt; 400)</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">COSE-BILKENT (very slow)</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('dagre')">DAGRE (hierachy)</button>
+                            <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="graphChangeLayout('klay')">KLAY</button>
+                        </mat-menu>
+                    </li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
+                            <mat-icon>palette</mat-icon></a>
+                    </li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
+                            <mat-icon>image</mat-icon></a>
+                    </li>
+                    <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                            <mat-icon>refresh</mat-icon></a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

@@ -54,12 +54,17 @@
             <h4>SCHEMA <strong>GRAPH</strong></h4>
             <div class="row strech m-20">
                 <div id="div-canvas" #divCanvas class="graph-canvas strech"></div>
-                <ul class="col-side-icon">
-                    <li><a matTooltip="Create" matTooltipPosition="left" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
-                    <li><a matTooltip="Edit" matTooltipPosition="left"><mat-icon>edit</mat-icon></a></li>
-                    <li><a matTooltip="Expand" matTooltipPosition="left"><mat-icon>control_camera</mat-icon></a></li>
-                    <li><a matTooltip="Delete" matTooltipPosition="left"><mat-icon>delete_outline</mat-icon></a></li>
-                </ul>
+                <div class="col-side-icon border">
+                    <div class="scrollbind">
+                        <ul>
+                            <li><a matTooltip="Create" matTooltipPosition="left" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
+                            <li><a matTooltip="Edit" matTooltipPosition="left"><mat-icon>edit</mat-icon></a></li>
+                            <li><a matTooltip="Expand" matTooltipPosition="left"><mat-icon>control_camera</mat-icon></a></li>
+                            <li><a matTooltip="Delete" matTooltipPosition="left"><mat-icon>delete_outline</mat-icon></a></li>
+                        </ul>
+                    </div>
+                </div>
+                
             </div>
             <div>
                 <ul class="row list">

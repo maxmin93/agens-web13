@@ -89,7 +89,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
   position: relative;
 }
 
-// 빈 공란
+// 빈 공란 
 
 .example-spacer { flex: 1 1 auto; }
  
@@ -99,19 +99,34 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 .col-side-icon {
   background: #f5f5f5; 
-  width: 50px; 
+  width: 50px;   
   border: 1px solid #ddd; 
   border-left: 0; 
+  overflow: hidden;
 
-  li {
-    height: 50px; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    border-bottom: 1px solid #ddd;     
+  &.border li {
+    border-bottom: 1px solid #ddd; 
+  }
 
-    :hover {
-      color: #848484; 
+  .scrollbind {
+    width: 80px; 
+    height: 100%; 
+    overflow-y: scroll; 
+    
+    ul { 
+      width: 50px; 
+      height: 100%; 
+  
+      li {
+        min-height: 50px; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+    
+        :hover {
+          color: #848484; 
+        }
+      }
     }
   }
 }
@@ -387,18 +402,19 @@ p.subtext {
 
 // list 
 
-ul {
+ul.list {
   font-size: .875rem; 
   color: #4d4d4d; 
 
-    &.list li { 
+
+
+    &.list > li { 
     max-width: 700px; 
     overflow: hidden; 
     white-space: nowrap; 
     text-overflow: ellipsis; 
     margin-top: 1.25rem;
     padding: .625rem; 
-    border-bottom: 1px solid #ddd; 
 
     > span {  
       min-width: 60px; 
@@ -407,20 +423,24 @@ ul {
       font-size: .75rem; 
       color: #979a9c; 
     }  
-    
   }
 
-  &.list-unique li {
+  &.list.border > li { 
+    border-bottom: 1px solid #ddd; 
+  }
+
+  &.list.unique li {
     background: #f5f5f5;
     max-width: 100%; 
   }
 
-  &.list.list-sm li {
+  &.list.sm li {
     margin-top: 0; 
-    padding: .625rem 0; 
+    padding: .625rem 0;
+    flex: 1; 
   }
 
-  &.list-icon a {
+  &.list.icon a {
     margin: 0 1.875rem;
     font-size: 90%; 
     color: #848484; 
