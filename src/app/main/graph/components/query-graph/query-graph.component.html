@@ -11,20 +11,32 @@
             <!-- graph element info Box -->
             <nav>
                 <ng-container *ngIf="!!selectedElement">
-                    <div id="slide-toggle" class="slide">
-                        <ul class="list list-sm border col strech">
-                            <li class="row-center">
-                                <h4>DATA <strong>INFO</strong></h4>
-                                <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
-                                [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
-                                </mat-slide-toggle>
-                            </li>
-                            <li><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
-                            <li><span>Name</span>{{ selectedElement.data('name') }}</li>
-                            <li class="col strech">
+                    <div id="slide-toggle" class="slide border col">
+                        <div class="row-center">
+                            <h4>DATA <strong>INFO</strong></h4>
+                            <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+                            [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
+                            </mat-slide-toggle>
+                        </div>
+                        <ul class="list col strech border noborder m-10">
+                            <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
+                            <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                            <li class="col strech side-margin">
                                 <span>Data</span>
                                 <div class="json strech m-10"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
                             </li>
+                        </ul>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="btnStatus.searchPath">
+                    <div id="slide-toggle" class="slide">
+                        <ul class="list list-sm col strech">
+                            <li class="row-center">
+                                <h4>Search <strong>Path</strong></h4>
+                                <li class="col strech">
+                                    <span>Start Node</span>
+                                    <span>End Node</span>
+                                </li>
                         </ul>
                     </div>
                 </ng-container>
@@ -42,7 +54,7 @@
         <div id="agens-graph-toolbar" class="viewbox border">
             <div class="scroll-hide">
             <ul class="list icon border noborder">
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.mouseWheel, 'is-inactive': !btnStatus.mouseWheel }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
                         <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
@@ -57,7 +69,9 @@
                             <h4 class="mat-subhead">LAYOUT <strong>TYPE</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('grid')">grid</button>
+                            <button mat-menu-item (click)="graphChangeLayout('random')">RANDOM</button>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphChangeLayout('grid')">GRID</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
                         <mat-divider></mat-divider>
@@ -74,11 +88,39 @@
                             <button mat-menu-item (click)="graphChangeLayout('klay')">KLAY</button>
                     </mat-menu>
                 </li>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="centralityMenu" matTooltip="Centrality" matTooltipPosition="above">
+                    <mat-icon>surround_sound</mat-icon></a>
+                    <mat-menu #centralityMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
+                        <div td-menu-header>
+                            <h4 class="mat-subhead">Centrality <strong>methods</strong></h4>
+                        </div>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphCentrality('degree')">Degree</button>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphCentrality('pagerank')">PageRank</button>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphCentrality('closeness')">Closeness</button>
+                        <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphCentrality('betweenness')">Betweenness</button>
+                    </mat-menu>
+                </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
                         <mat-icon>palette</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
                         <mat-icon>image</mat-icon></a>
+                </li>
+                <li><a (click)="showClusters()" matTooltip="show Clusters" matTooltipPosition="above">
+                    <mat-icon>view_quilt</mat-icon></a>
+                </li>
+                <li><a (click)="searchPath()" matTooltip="search Path" matTooltipPosition="above">
+                    <mat-icon>timeline</mat-icon></a>
+                </li>
+                <li><a (click)="frindCircle()" matTooltip="find Circle" matTooltipPosition="above">
+                    <mat-icon>youtube_searched_for</mat-icon></a>
+                </li>
+                <li><a (click)="playTimeline()" matTooltip="play Timeline" matTooltipPosition="above">
+                    <mat-icon>fast_forward</mat-icon></a>
                 </li>
                 <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
                         <mat-icon>refresh</mat-icon></a>

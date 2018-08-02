@@ -406,7 +406,13 @@ ul.list {
     text-overflow: ellipsis; 
   }
 
-  li.side-margin { padding: .625rem; margin: 0}
+  li.side-margin { 
+    padding: .625rem; 
+    margin: 0;
+    &.col {
+      padding-right: 0; 
+    }
+  }
 
   &.icon {
 

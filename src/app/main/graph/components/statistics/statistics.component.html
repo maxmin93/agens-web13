@@ -8,7 +8,7 @@
     <div class="row strech">
         <div class="row row-side strech">
             <div class="strech">
-                <div id="statistics-canvas" #divCanvas class="graph-canvas strech" 
+                <div id="statistics-canvas" #divCanvas class="graph-canvas strech border" 
                     [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
                 </div>
                 <!-- graph element info Box -->
@@ -42,18 +42,23 @@
                 </mat-chip-list>
             </div>            
             <!-- Graph.Meta : toolbar -->
-            <div id="agens-graph-toolbar" class="col-side-icon">
-                <ul>
-                    <li>
-                        <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above"><mat-icon>refresh</mat-icon></a>
-                    </li>
-                </ul>
+            <div id="agens-graph-toolbar" class="viewbox border border-left-no">
+                <div class="slide-hide">
+                    <ul class="list icon border noborder">
+                        <li>
+                            <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above"><mat-icon>refresh</mat-icon></a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            
         </div> 
         <div class="col strech">
-            <div class="col-side strech static">CHART</div>
-            <div class="strech static">GRAPH</div>
+            <div class="col-side strech border p-20">
+                <h5><strong>CHART</strong> GRAPH</h5>
+            </div>
+            <div class="strech border p-20">
+                <h5><strong>LINE</strong> GRAPH </h5>
+            </div>
         </div>
     </div>
     
