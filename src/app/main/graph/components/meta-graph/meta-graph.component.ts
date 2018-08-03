@@ -132,10 +132,11 @@ export class MetaGraphComponent implements OnInit {
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.$api.changeLayout('dagre');
+    agens.cy = this.cy;
   }
   resize(){
     this.cy.resize();
-    this.cy.fit( agens.cy.elements(), 50);
+    this.cy.fit( this.cy.elements(), 50);
   }
   refreshCanvas(){
     this.refresh();

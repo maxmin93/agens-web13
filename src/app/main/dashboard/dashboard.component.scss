@@ -6,3 +6,8 @@
 }
 
 // :host /deep/ { }
+
+/* you can set the disabled style how you like on the text/icon */
+.cxtmenu-disabled {
+  opacity: 0.333;
+}

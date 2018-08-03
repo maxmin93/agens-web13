@@ -22,6 +22,7 @@ import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import * as CONFIG from '../../global.config';
 import { ISchemaDto } from '../../models/agens-response-types';
 
+declare var $: any;
 declare var agens: any;
 
 const EMPTY_LABEL: ILabel = { 
@@ -38,7 +39,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // cytoscape 객체
   private cy:any = null;
-
+  
   // pallets : Node 와 Edge 라벨별 color 셋
   colorIndex: number = 0;
   labelColors: any[] = [];
@@ -101,7 +102,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       cyElemCallback: (target) => this.cyElemCallback(target),
       cyQtipMenuCallback: (target, value) => this.cyQtipMenuCallback(target, value),
       component: this
-    };
+    };    
   }
   ngOnDestroy(){
     if( this.subscription ) this.subscription.unsubscribe();
@@ -113,18 +114,29 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this._api.changeMenu('main');
 
     // Cytoscape 생성 & 초기화
-    agens.graph.defaultSetting.hideNodeTitle = false;
-    agens.graph.defaultSetting.hideEdgeTitle = false;
-
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
         selectionType: 'single',    // 'single' or 'multiple'
         boxSelectionEnabled: false, // if single then false, else true
-        useCxtmenu: false,          // whether to use Context menu or not
+        userCxtmenu: true,          // whether to use Context menu or not
         hideNodeTitle: false,       // hide nodes' title
         hideEdgeTitle: false,       // hide edges' title
       }
     );
+    // Cytoscape 바탕화면 qTip menu
+    this.cy.qtip({
+      content: function(e){ 
+        let html:string = `<div class="hide-me"><h4><strong>Menu</strong></h4><hr/><ul>`;
+        html += `<li><a href="javascript:void(0)" onclick="agens.cy.$api.cyQtipMenuCallback('core','addNode')">create new NODE</a></li>`;
+        html += `</ul></div>`;
+        return html;
+      },
+      show: { event: 'cxttap', cyBgOnly: true },    // cxttap: mouse right button click event
+      hide: { event: 'click unfocus' },
+      position: { target: 'mouse', adjust: { mouse: false } },
+      style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
+      events: { visible: function(event, api) { $('.qtip').click(function(){ $('.qtip').hide(); }); } }
+    });
 
     // pallets 생성 : luminosity='dark'
     this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);
@@ -149,6 +161,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // Qtip 메뉴 선택 콜백 함수
   cyQtipMenuCallback(target:any, value:any):void {
+    console.log( 'cyQtipMenuCallback:', target, value);
   }
 
   //////////////////////////////////////////////
@@ -184,6 +197,23 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.tablePropertiesRows = new Array<IProperty>();  
   }
 
+  refresh(){
+    // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
+    // this.cy.elements(':selected').unselect();
+    // refresh style
+    this.cy.style(agens.graph.stylelist['dark']).update();
+    this.cy.$api.changeLayout('dagre');
+    agens.cy = this.cy;
+  }
+  resize(){
+    this.cy.resize();
+    this.cy.fit( this.cy.elements(), 50);
+  }
+  refreshCanvas(){
+    this.refresh();
+    this.resize();
+  }
+    
   //////////////////////////////////////////////
 
   createSubjects():any {

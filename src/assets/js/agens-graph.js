@@ -332,7 +332,6 @@
     container: document.getElementById('agens-graph'),
     selectionType: 'single',    // 'single' or 'multiple'
     boxSelectionEnabled: false, // if single then false, else true
-    useCxtmenu: true,           // whether to use Context menu or not
     hideNodeTitle: true,        // hide nodes' title
     hideEdgeTitle: true,        // hide edges' title
   };
@@ -341,7 +340,6 @@
   agens.graph.graphFactory = function(target, options){
     let customSetting = _.clone( agens.graph.defaultSetting );
 
-    customSetting.container = target;
     if( options === undefined ){
       customSetting = _.merge( customSetting, agens.graph.customSetting );
     }
@@ -351,12 +349,11 @@
         customSetting['selectionType'] = options['selectionType'];
         customSetting['boxSelectionEnabled'] = (options['selectionType'] !== 'single') ? true : false;
       }
-      // meta 그래프의 경우 CxtMenu 기능이 필요 없음
-      if( !_.isNil( options['useCxtmenu'] )) customSetting['useCxtmenu'] = options['useCxtmenu'];
       // data 그래프의 경우 성능향상을 위해 
       if( !_.isNil( options['hideNodeTitle'] )) customSetting['hideNodeTitle'] = options['hideNodeTitle'];
       if( !_.isNil( options['hideEdgeTitle'] )) customSetting['hideEdgeTitle'] = options['hideEdgeTitle'];
     }
+    customSetting.container = target;
 
     let cy = cytoscape(customSetting);
     cy.scratch('_config', customSetting);
@@ -406,7 +403,7 @@
 
     // 마우스가 찍힌 위치를 저장 (해당 위치에 노드 등을 생성할 때 사용)
     cy.on('cxttapstart', function(e){
-      cy.cyPosition = e.cyPosition;
+      cy.scratch('_cxtPosition', e.cyPosition);
     });
 
     cy.on('tap', function(e){
@@ -449,29 +446,21 @@
     // cy.on('mouseover', 'node', function(e){
     // });
 
-    // 마우스가 찍힌 위치를 저장 (해당 위치에 노드 등을 생성할 때 사용)
-    cy.on('cxttapstart', function(e){
-      cy.scratch('_cxtPosition', e.cyPosition);
-    });
-
-    cy.cyQtipMenuCallback = function( id, targetMenu ){
-      let targets = cy.getElementById(id);
-      if( targets.size() == 0 ) return;
-
-      // mapping user Functions
-      if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyQtipMenuCallback )
-        (window['angularComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
-      if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyQtipMenuCallback )
-        (window['metaGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
-      if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyQtipMenuCallback )
-        (window['dataGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
-      if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyQtipMenuCallback )
-        (window['statGraphComponentRef'].cyQtipMenuCallback)(targets[0], targetMenu);
-    };
-
     // ==========================================
     // ==  cy utilities 등록
     // ==========================================
+
+    cy.$api.cyQtipMenuCallback = function( target, value ){
+      // mapping user Functions
+      if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyQtipMenuCallback )
+        (window['angularComponentRef'].cyQtipMenuCallback)(target, value);
+      if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyQtipMenuCallback )
+        (window['metaGraphComponentRef'].cyQtipMenuCallback)(target, value);
+      if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyQtipMenuCallback )
+        (window['dataGraphComponentRef'].cyQtipMenuCallback)(target, value);
+      if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyQtipMenuCallback )
+        (window['statGraphComponentRef'].cyQtipMenuCallback)(target, value);
+    };
 
     cy.$api.findById = function(id){
       let eles = cy.elements().getElementById(id);
@@ -574,49 +563,6 @@
       return connectedNodes;
     };
 
-
-    // ==========================================
-    // ==  cy cxtmenu 등록
-    // ==========================================
-    
-    // cxt menu for core
-    if( !_.isNil(cy._private.options.useCxtmenu) && cy._private.options.useCxtmenu )
-      cy.cxtmenu({
-        menuRadius: 80,
-        selector: 'core',
-        fillColor: 'rgba(0, 60, 0, 0.65)',
-        commands: [{
-            content: '<span style="display:inline-block; width:20px; font-size:10pt">Reverse select</span>',
-            select: function(){
-              let selected = cy.elements(':selected');
-              let unselected = cy.elements(':unselected');
-              cy.$api.view.removeHighlights();
-              selected.unselect();
-              unselected.select();
-            }
-          },{
-            content: '<span style="display:inline-block; width:20px; font-size:10pt">Hide unselected</span>',
-            select: function(){
-              cy.$api.view.hide(cy.elements(":unselected"));
-            },
-          },{
-            content: '<span style="display:inline-block; width:20px; font-size:10pt">Show all</span>',
-            select: function(){
-              cy.$api.view.show(cy.elements(":hidden"));
-            },
-          },{
-            content: '<span style="display:inline-block; width:20px; font-size:10pt">Unlock all</span>',
-            select: function(){
-              cy.elements(":locked").unlock();
-            }
-          },{
-            content: '<span style="display:inline-block; width:20px; font-size:10pt">Remove expands</span>',
-            select: function(){
-              cy.elements(".expand").remove();
-            }
-          }
-        ]
-      });
   };
 
 
