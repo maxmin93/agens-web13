@@ -6,6 +6,7 @@ import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
+import { IDoubleListDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../global.config';
 
@@ -22,15 +23,18 @@ export class QueryGraphComponent implements OnInit {
   isLoading: boolean = false;
 
   btnStatus: any = { 
-    mouseWheel: false,      // 마우스휠 사용여부
-    searchPath: false,      // 경로검색 사용여부 
+    mouseWheel: false,        // 마우스휠 사용여부
+    shortestPath: false,      // 경로검색 사용여부 
   };
 
+  gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
 
   selectedElement: any = undefined;  
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
+
+  shortestPathDto:any = { sid: undefined, eid: undefined, result: undefined, order: 0 };
 
   // material elements
   @ViewChild('btnMouseWheelZoom') public btnMouseWheelZoom: MatButtonToggle;
@@ -88,11 +92,13 @@ export class QueryGraphComponent implements OnInit {
     console.log("data-graph.elem-click:", target);
 
     // null 이 아니면 정보창 (infoBox) 출력
-    this.selectedElement = target;
-
-    // HighlightNeighbors 상태가 아닌 일반 상태라면 unselect
-    if( !this.btnHighlightNeighbors.checked ){
-      agens.cy.elements(':selected').unselect();
+    if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
+    else{
+      this.selectedElement = target;
+      // HighlightNeighbors 상태가 아닌 일반 상태라면 unselect
+      if( !this.btnHighlightNeighbors.checked ){
+        this.cy.elements(':selected').unselect();
+      }
     }
   }  
 
@@ -133,25 +139,21 @@ export class QueryGraphComponent implements OnInit {
     this.toggleHighlightNeighbors(false);
   }
 
-  addLabel( label:ILabel ){
-    this.labels.push( label );
-  }
-  addNode( ele:INode ){
-    this.cy.add( ele );
-  }
-  addEdge( ele:IEdge ){
-    this.cy.add( ele );
-  }
+  setGid( gid: number ){ this.gid = gid; }
+  addLabel( label:ILabel ){ this.labels.push( label ); }
+  addNode( ele:INode ){ this.cy.add( ele ); }
+  addEdge( ele:IEdge ){ this.cy.add( ele ); }
+
   refresh(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
     if( this.isVisible ) this.cy.$api.changeLayout('cose');
-    agens.cy = this.cy;
   }
   resize(){
     this.cy.resize();
     this.cy.fit( this.cy.elements(), 50);
+    agens.cy = this.cy;
   }
   refreshCanvas(){
     this.refresh();
@@ -367,14 +369,61 @@ export class QueryGraphComponent implements OnInit {
   // graph Toolbar button controlls
   /////////////////////////////////////////////////////////////////
 
-  searchPath(){
-    this.btnStatus.searchPath = !this.btnStatus.searchPath;
-    // off 모드이면 나가기
-    if( !this.btnStatus.searchPath ){
-      return;
-    }
+  toggleFindShortestPath(option:boolean=undefined){
+    if( !option ) this.btnStatus.shortestPath = !this.btnStatus.shortestPath;
+    else this.btnStatus.shortestPath = option;
 
-    // 첫번째 클릭 node는 start node, 두번째 클릭 node는 end node 로 지정
-    // 
+    // enable 모드이면 start_id, end_id 리셋
+    if( this.btnStatus.shortestPath ){
+      this.shortestPathDto = { sid: undefined, eid: undefined, result:undefined, order: 0 };
+    }
+    console.log( 'toggleFindShortestPath', this.shortestPathDto );
+  }
+
+  selectFindShortestPath(target:any){
+    this.cy.elements(':selected').unselect();
+    if( target.isNode() ){
+      this.shortestPathDto.order += 1;
+      if( this.shortestPathDto.order % 2 == 1 ){
+        this.shortestPathDto.sid = target.id();
+        this.shortestPathDto.eid = undefined;
+        // setTimeout(() => {
+        //   this.cy.nodes(`#${this.shortestPathDto.sid}, #${this.shortestPathDto.eid}`).select();
+        // }, 50);
+      } 
+      else {
+        this.shortestPathDto.eid = target.id();
+        setTimeout(() => {
+          this.cy.getElementById(this.shortestPathDto.sid).select();
+        }, 50);
+      }
+    }
+  }
+
+  callFindShortestPath(option:boolean=undefined){
+    if( !this.gid || !this.shortestPathDto.sid || !this.shortestPathDto.eid ) return;
+
+    this._api.graph_findShortestPath( this.gid, this.shortestPathDto.sid, this.shortestPathDto.eid )
+    .subscribe(
+      (x:IDoubleListDto) => { 
+        this.shortestPathDto = x; 
+      },
+      err => {},
+      () => {}
+    );
+  }
+
+  highlightShortestPath(path:Array<string>){
+    this.cy.elements(':selected').unselect();
+    setTimeout(()=>{
+      let sourceVid:string = undefined;
+      path.forEach(vid => {
+        this.cy.getElementById(vid).select();
+        if( sourceVid ){
+          this.cy.edges(`[source="${sourceVid}"][target="${vid}"]`).select();
+        }
+        sourceVid = vid;
+      });
+    }, 30);
   }
 }

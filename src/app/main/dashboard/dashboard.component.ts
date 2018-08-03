@@ -202,18 +202,18 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     // this.cy.elements(':selected').unselect();
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.$api.changeLayout('dagre');
+    this.cy.$api.changeLayout('klay');
     agens.cy = this.cy;
   }
   resize(){
     this.cy.resize();
-    this.cy.fit( this.cy.elements(), 50);
+    this.cy.fit( this.cy.elements(), 100);
   }
   refreshCanvas(){
     this.refresh();
     this.resize();
   }
-    
+
   //////////////////////////////////////////////
 
   createSubjects():any {
@@ -298,7 +298,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   showGraph(){
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.$api.changeLayout('dagre');
+    this.cy.$api.changeLayout('klay');    
   }
 
   ////////////////////////////////////////////////////////

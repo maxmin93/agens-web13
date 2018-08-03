@@ -59,3 +59,12 @@ export interface IGraphDto extends IResponseDto {
 
   gid: number;
 }
+
+export interface IDoubleListDto extends IResponseDto {
+  // group == 'dlist_dto'
+
+  gid?: number;
+  sid?: number;
+  eid?: number;
+  result?: Array<Array<string>>;
+}

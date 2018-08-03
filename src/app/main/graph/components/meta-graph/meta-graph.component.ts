@@ -22,6 +22,7 @@ export class MetaGraphComponent implements OnInit {
   isVisible: boolean = false;
   isFirstOnData: boolean = false;
 
+  gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
 
@@ -116,6 +117,7 @@ export class MetaGraphComponent implements OnInit {
     this.timeoutNodeEvent = undefined;
   }
 
+  setGid( gid:number ){ this.gid = gid; }
   addLabel( label:ILabel ){
     this.labels.push( label );
   }
@@ -131,12 +133,12 @@ export class MetaGraphComponent implements OnInit {
     // this.cy.elements(':selected').unselect();
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.$api.changeLayout('dagre');
-    agens.cy = this.cy;
+    this.cy.$api.changeLayout('klay');
   }
   resize(){
     this.cy.resize();
-    this.cy.fit( this.cy.elements(), 50);
+    this.cy.fit( this.cy.elements(), 100);
+    agens.cy = this.cy;
   }
   refreshCanvas(){
     this.refresh();

@@ -56,7 +56,8 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   editor: any = undefined;
   // CodeMirror Editor : initial value
   query:string =
-`match path=(a:customer)-[]->(b:"order")-[]->(c:product) return path, a, b, c limit 5;
+`match path1=(c:customer)-[]->(o:"order")-[]->(p:product), path2=(e:employee)-[]->(o), 
+path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
  `;
 
   // core/query API 결과
@@ -274,6 +275,11 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
     result.info$.subscribe((x:IResultDto) => {
       console.log( 'call core_query:', x);
       this.resultDto = <IResultDto>x;
+      if( x.hasOwnProperty('gid') ) {
+        this.queryGraph.setGid( x.gid );
+        this.metaGraph.setGid( x.gid );
+        this.statGraph.setGid( x.gid );
+      }
       this.queryResult.setData(<IResponseDto>x);
 
       // this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});

@@ -6,7 +6,7 @@ import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { map, filter, concatAll } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto } from '../models/agens-response-types';
+import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto, IDoubleListDto } from '../models/agens-response-types';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IRecord, IColumn, IRow } from '../models/agens-data-types';
 import { ILogs, IProject } from '../models/agens-manager-types';
 
@@ -335,4 +335,14 @@ export class AgensDataService {
           }
         });
   }  
+
+  graph_findShortestPath(gid:number, sid:string, eid:string):Observable<IDoubleListDto> {
+    const url = `${this.api.grph}/findspath/${gid}`;
+    let params:HttpParams = new HttpParams();
+    params = params.append('sid', sid);   // start node id
+    params = params.append('eid', eid);   // end node id
+
+    return this._http.get<IDoubleListDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
 }
