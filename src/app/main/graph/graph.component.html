@@ -16,7 +16,7 @@
         <p></p>
         <!-- REQUEST : cypher query -->
         <form class="border m-20 p-20 border-dashed">
-            <textarea placeholder="input Cypher Query.." 
+            <textarea
             id="agensQuery" #queryEditor type="text" name="query"
             (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
         </form>

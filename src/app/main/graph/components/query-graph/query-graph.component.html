@@ -29,7 +29,7 @@
                     </div>
                 </ng-container>
                 <ng-container *ngIf="btnStatus.searchPath">
-                    <div id="slide-toggle" class="slide">
+                    <div id="slide-toggle" class="slide border col">
                         <ul class="list list-sm col strech">
                             <li class="row-center">
                                 <h4>Search <strong>Path</strong></h4>
@@ -38,6 +38,23 @@
                                     <span>End Node</span>
                             </li>
                         </ul>
+
+                        <!-- 위의 search path 가 아래의 구조처럼 변경되어야합니다 -->
+
+                        <!-- <div id="slide-toggle" class="slide border col">
+                            <div class="row-center">
+                                <h4>Search <strong>Path</strong></h4>
+                            </div>
+                            <ul class="list col strech border noborder m-10">
+                                <li class="side-margin">
+                                    <span>Start Node</span>
+                                </li>
+                                <li class="side-margin">
+                                    <span>End Node</span>
+                                </li>
+    
+                            </li>
+                        </div> -->
                     </div>
                 </ng-container>
             </nav>

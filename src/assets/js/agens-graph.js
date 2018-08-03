@@ -124,7 +124,7 @@
           'font-size': 12,
           'text-opacity': 1,
           'border-width':'3',
-          'border-color':'#5fa9dc'
+          'border-color':'#f5f5f5'
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
