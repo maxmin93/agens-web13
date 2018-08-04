@@ -2,6 +2,7 @@ import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
 
 import { Observable, of, from, Subject, Subscription, concat, forkJoin } from 'rxjs';
+import { map, filter, concatAll } from 'rxjs/operators';
 
 import { Angulartics2 } from 'angulartics2';
 import * as _ from 'lodash';
@@ -16,7 +17,7 @@ import { InputCreateLabelDialog } from './dialogs/input-create-label.dialog';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
-import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty } from '../../models/agens-data-types'
+import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IEnd } from '../../models/agens-data-types'
 import { IResponseDto } from '../../models/agens-response-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import * as CONFIG from '../../global.config';
@@ -229,51 +230,48 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   callCoreSchema(){
 
     this.toggleProgress(true);
+    
+    // call API
+    let data$:Observable<any> = this._api.core_schema();
 
-    // this.schema = this._api.getSchemaSubjects();
-    let schema = this.createSubjects();
-    schema.info$.subscribe({
-      next: (x:ISchemaDto) => {
+    data$.pipe( filter(x => x['group'] == 'schema') ).subscribe(
+      (x:ISchemaDto) => {
         this.datasource = x.datasource;
         this.labels = x.labels;
-      }
-    });
-    schema.graph$.subscribe( (x:IGraph) => {
-      this.graph = x;
-      this.graph.labels = new Array<ILabel>();
-      this.graph.nodes = new Array<INode>();
-      this.graph.edges = new Array<IEdge>();
-    });
-    schema.labels$.subscribe( (x:ILabel) => {
-      this.graph.labels.push(x);
-    });
-    schema.nodes$.subscribe( (x:INode) => {
-      this.injectElementStyle( x );
-      this.graph.nodes.push(x);
-      this.cy.add(x);
-    });
-    schema.edges$.subscribe( (x:IEdge) => {
-      this.injectElementStyle( x );
-      this.graph.edges.push(x);
-      this.cy.add(x);
-    });
-
-    // 작업 직렬화 : complete 시 post 작업 수행
-    forkJoin( schema.info$.asObservable(), schema.graph$.asObservable()
-        , schema.labels$.asObservable(), schema.nodes$.asObservable(), schema.edges$.asObservable() )
-      .subscribe({
-        complete: () => {
-          this.showGraph();
-          // 화면 출력 : ngAfterViewInit emitter 이후 실행
-          Promise.resolve(null).then(() => {
-            this.showDatasource();
-            this.showTable();
-          });         
-          this.toggleProgress(false);
-        }
       });
-
-    this.subscription = this._api.core_schema(schema);  // call API
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.graph = x;
+        this.graph.labels = new Array<ILabel>();
+        this.graph.nodes = new Array<INode>();
+        this.graph.edges = new Array<IEdge>();
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => {
+        this.graph.labels.push(x);
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        this.injectElementStyle( x );
+        this.graph.nodes.push(x);
+        this.cy.add(x);
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.injectElementStyle( x );
+        this.graph.edges.push(x);
+        this.cy.add(x);
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        this.showGraph();
+        // 화면 출력 : ngAfterViewInit emitter 이후 실행
+        Promise.resolve(null).then(() => {
+          this.showDatasource();
+          this.showTable();
+        });         
+        this.toggleProgress(false);
+      });
   }
 
   showDatasource(){

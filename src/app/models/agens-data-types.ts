@@ -121,3 +121,9 @@ export interface IRow {
   index: number;
   row: any[];
 };
+
+///////////////////////////////////////////////////////////////
+
+export interface IEnd {
+  group: string;
+};

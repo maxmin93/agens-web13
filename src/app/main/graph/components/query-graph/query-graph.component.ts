@@ -424,6 +424,6 @@ export class QueryGraphComponent implements OnInit {
         }
         sourceVid = vid;
       });
-    }, 30);
+    }, 10);
   }
 }

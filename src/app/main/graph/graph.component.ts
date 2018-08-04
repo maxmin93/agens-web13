@@ -12,13 +12,14 @@ import { Angulartics2 } from 'angulartics2';
 
 import * as _ from 'lodash';
 import { concat, Observable, Subscription, Subject, forkJoin } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
 import * as CONFIG from '../../global.config';
 
 import { IResultDto, IResponseDto, IGraphDto } from '../../models/agens-response-types';
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IRecord, IColumn, IRow } from '../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IRecord, IColumn, IRow, IEnd } from '../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import { IProject } from '../../models/agens-manager-types';
 
@@ -206,29 +207,6 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
     } 
   }
 
-  createResultSubjects(){
-    return {
-      info$: new Subject<IResultDto>(),
-      graph$: new Subject<IGraph>(),
-      labels$: new Subject<ILabel>(),
-      nodes$: new Subject<INode>(),
-      edges$: new Subject<IEdge>(),
-      record$: new Subject<IRecord>(),
-      columns$: new Subject<IColumn>(),
-      rows$: new Subject<IRow>(),
-    };
-  }
-
-  createTgraphSubjects(){
-    return {
-      info$: new Subject<IGraphDto>(),
-      graph$: new Subject<IGraph>(),
-      labels$: new Subject<ILabel>(),
-      nodes$: new Subject<INode>(),
-      edges$: new Subject<IEdge>()
-    };
-  }
-
   /////////////////////////////////////////////////////////////////
   // Editor Controllers
   /////////////////////////////////////////////////////////////////
@@ -259,7 +237,7 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
   /////////////////////////////////////////////////////////////////
 
   // call API: db
-  runQuery() {
+  runQuery(){
 
     this.queryResult.toggleTimer(true);
     this.isLoading = true;
@@ -270,90 +248,82 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
     // 이전 결과들 비우고
     this.clearResults();
 
-    // let result = this._api.getResultSubjects();
-    let result = this.createResultSubjects();
-    result.info$.subscribe((x:IResultDto) => {
-      console.log( 'call core_query:', x);
-      this.resultDto = <IResultDto>x;
-      if( x.hasOwnProperty('gid') ) {
-        this.queryGraph.setGid( x.gid );
-        this.metaGraph.setGid( x.gid );
-        this.statGraph.setGid( x.gid );
-      }
-      this.queryResult.setData(<IResponseDto>x);
+    // call API
+    let data$:Observable<any> = this._api.core_query( sql );
 
-      // this._angulartics2.eventTrack.next({ action: 'runQuery', properties: { category: 'graph', label: data.message }});
-    });
+    this.subscription_data = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
+      (x:IResultDto) => {
+        this.resultDto = <IResultDto>x;
+        if( x.hasOwnProperty('gid') ) {
+          this.queryGraph.setGid( x.gid );
+          this.metaGraph.setGid( x.gid );
+          this.statGraph.setGid( x.gid );
+        }  
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.resultGraph = x;
+        this.resultGraph.labels = new Array<ILabel>();
+        this.resultGraph.nodes = new Array<INode>();
+        this.resultGraph.edges = new Array<IEdge>();
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
+                , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };      
+        this.resultGraph.labels.push( x );
+        this.queryGraph.addLabel( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        // setNeighbors from this.resultGraph.labels;
+        x.scratch['_neighbors'] = new Array<string>();
+        this.resultGraph.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.label)
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
+            x.scratch['_style'] = label.scratch['_style'];
+          });
 
-    result.graph$.subscribe((x:IGraph) => {
-      this.resultGraph = x;
-      this.resultGraph.labels = new Array<ILabel>();
-      this.resultGraph.nodes = new Array<INode>();
-      this.resultGraph.edges = new Array<IEdge>();
-    });
-    result.labels$.subscribe((x:ILabel) => {
-      x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
-          , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };      
-      this.resultGraph.labels.push( x );
-      this.queryGraph.addLabel( x );
-    });
-    result.nodes$.subscribe((x:INode) => {    
-      // setNeighbors from this.resultGraph.labels;
-      x.scratch['_neighbors'] = new Array<string>();
-      this.resultGraph.labels
-        .filter(val => val.type == 'nodes' && val.name == x.data.label)
-        .map(label => {
-          x.scratch['_neighbors'] += label.targets;
-          x.scratch['_style'] = label.scratch['_style'];
-        });
-
-      this.resultGraph.nodes.push( x );
-      this.queryGraph.addNode( x );
-    });
-    result.edges$.subscribe((x:IEdge) => {
-      this.resultGraph.labels
+        this.resultGraph.nodes.push( x );
+        this.queryGraph.addNode( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.resultGraph.labels
         .filter(val => val.type == 'edges' && val.name == x.data.label)
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
         });
 
-      this.resultGraph.edges.push( x );
-      this.queryGraph.addEdge( x );
-    });
-
-    result.record$.subscribe((x:IRecord) => {
-      this.resultRecord = x;
-      this.resultRecord.columns = new Array<IColumn>();
-      this.resultRecord.rows = new Array<IRow>();
-    });
-    result.columns$.subscribe((x:IColumn) => {
-      this.resultRecord.columns.push( x );
-    });
-    result.rows$.subscribe((x:IRow) => {
-      this.resultRecord.rows.push( x );
-    });
-
-    forkJoin( [result.info$.asObservable(), result.graph$.asObservable(),
-          result.labels$.asObservable(), result.nodes$.asObservable(), result.edges$.asObservable()] )
-    .subscribe({
-      next: data => {
-      },
-      error: (err) => {
-      },
-      complete: () => {
+        this.resultGraph.edges.push( x );
+        this.queryGraph.addEdge( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'record') ).subscribe(
+      (x:IRecord) => {
+        this.resultRecord = x;
+        this.resultRecord.columns = new Array<IColumn>();
+        this.resultRecord.rows = new Array<IRow>();
+      });
+    data$.pipe( filter(x => x['group'] == 'columns') ).subscribe(
+      (x:IColumn) => {
+        this.resultRecord.columns.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'rows') ).subscribe(
+      (x:IRow) => {
+        this.resultRecord.rows.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
         this.isLoading = false;
-        // **NOTE: layout 실행시 stack overflow 가 간헐적으로 발생. 안전 차원에서 일단 담아둠
-        // setTimeout(()=>{
-          this.queryGraph.refresh();
-          // this.queryTable.setData( this.resultRecord );
-        // }, 100);
+        this.queryResult.setData(<IResponseDto>this.resultDto);
+
+        this.queryGraph.refresh();
+
         // **NOTE: 이어서 schema graph 호출 (gid)
         if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
           this.runGraphSchema( this.resultDto.gid );
-      }
-    });
+      });
 
-    this.subscription_data = this._api.core_query( result, sql );
   }
 
   // when button "STOP" click
@@ -365,26 +335,29 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
   }
 
   runGraphSchema(gid: number){
-    // let tgraph = this._api.getTgraphSubjects();
-    let tgraph = this.createTgraphSubjects();
-    tgraph.info$.subscribe((x:IGraphDto) => {
-      console.log("call graph_schema:", x);
-    });
+    // call API
+    let data$:Observable<any> = this._api.grph_schema(gid);
 
-    tgraph.graph$.subscribe((x:IGraph) => {
-      this.resultMeta = x;
-      this.resultMeta.labels = new Array<ILabel>();
-      this.resultMeta.nodes = new Array<INode>();
-      this.resultMeta.edges = new Array<IEdge>();
-    });
-    tgraph.labels$.subscribe((x:ILabel) => {
-      x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
-          , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`graph_dto receiving : gid=${x.gid} (${gid})`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.resultMeta = x;
+        this.resultMeta.labels = new Array<ILabel>();
+        this.resultMeta.nodes = new Array<INode>();
+        this.resultMeta.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
+                , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };
       this.resultMeta.labels.push( x );
       this.metaGraph.addLabel( x );
       this.statGraph.addLabel( x );
-    });
-    tgraph.nodes$.subscribe((x:INode) => {    
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
       // setNeighbors from this.resultGraph.labels;
       x.scratch['_neighbors'] = new Array<string>();
       this.resultGraph.labels
@@ -396,9 +369,10 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
       this.resultMeta.nodes.push( x );
       this.metaGraph.addNode( x );
       this.statGraph.addNode( x );
-    });
-    tgraph.edges$.subscribe((x:IEdge) => {
-      this.resultGraph.labels
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.resultGraph.labels
         .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
@@ -406,24 +380,15 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
       this.resultMeta.edges.push( x );
       this.metaGraph.addEdge( x );
       this.statGraph.addEdge( x );
-    });
-
-    forkJoin( [tgraph.info$.asObservable(), tgraph.graph$.asObservable(),
-        tgraph.labels$.asObservable(), tgraph.nodes$.asObservable(), tgraph.edges$.asObservable()] )
-    .subscribe({
-      next: data => {
-      },
-      error: (err) => {
-      },
-      complete: () => {
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
         setTimeout(()=>{
           this.metaGraph.refresh();
           this.statGraph.refresh();
-        }, 100);
-      }
-    });
-
-    this.subscription_meta = this._api.grph_schema( tgraph, gid );
+        }, 100);  
+      });
+      
   }
 
   /////////////////////////////////////////////////////////////////

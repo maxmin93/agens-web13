@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material';
 
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
-import { map, filter, concatAll } from 'rxjs/operators';
+import { map, filter, concatAll, share } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto, IDoubleListDto } from '../models/agens-response-types';
@@ -154,82 +154,24 @@ export class AgensDataService {
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
   }
 
-  core_schema(schema:any):Subscription {
+  core_schema():Observable<any> {
     const url = `${this.api.core}/schema`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
-        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
-        .subscribe({
-          next: x => {
-            this.setResponses(<IResponseDto>x);
-            switch( x['group'] ){
-              case 'schema':  schema.info$.next(x); break;
-              case 'graph':   schema.graph$.next(x); break;
-              case 'labels':  schema.labels$.next(x); break;
-              case 'nodes':   schema.nodes$.next(x); break;
-              case 'edges':   schema.edges$.next(x); break;
-            }
-          },
-          error: err => {
-            this.setResponses(<IResponseDto>{
-              group: 'core.schema',
-              state: CONFIG.StateType.ERROR,
-              message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
-            });
-          },
-          complete: () => {
-            schema.info$.complete();
-            schema.graph$.complete();
-            schema.labels$.complete();
-            schema.nodes$.complete();
-            schema.edges$.complete();
-          }
-        });
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
-  core_query(result:any, sql:string){
+  core_query(sql:string):Observable<any> {
     const url = `${this.api.core}/query`;
     // **NOTE: encodeURIComponent( sql ) 처리
-    // (SQL문의 '+','%','&','/' 등의 특수문자 변환)
+    //         (SQL문의 '+','%','&','/' 등의 특수문자 변환)
     let params:HttpParams = new HttpParams().set('sql', encodeURIComponent( sql ) );
 
-    return this._http.get<IResultDto>(url, {params: params, headers: this.createAuthorizationHeader()})
-      .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
-      .subscribe({
-        next: x => {
-          this.setResponses(<IResponseDto>x);
-          switch( x['group'] ){
-            case 'result':  result.info$.next(x); break;
-            case 'graph':   result.graph$.next(x); break;
-            case 'labels':  result.labels$.next(x); break;
-            case 'nodes':   result.nodes$.next(x); break;
-            case 'edges':   result.edges$.next(x); break;
-            case 'record':  result.record$.next(x); break;
-            case 'columns': result.columns$.next(x); break;
-            case 'rows':    result.rows$.next(x); break;
-          }
-        },
-        error: err => {
-          this.setResponses(<IResponseDto>{
-            group: 'core.query',
-            state: CONFIG.StateType.ERROR,
-            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
-          });
-        },
-        complete: () => {
-          result.info$.complete();
-          result.graph$.complete();
-          result.labels$.complete();
-          result.nodes$.complete();
-          result.edges$.complete();
-          result.record$.complete();
-          result.columns$.complete();
-          result.rows$.complete();
-        }
-      });
+    return this._http.get<any>(url, {params: params, headers: this.createAuthorizationHeader()})
+      .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
   // call API: expand from selected Node
-  core_query_expand( sourceId: string, sourceLabel:string, targetLabel:string ){
+  core_query_expand( sourceId: string, sourceLabel:string, targetLabel:string ):Observable<any> {
     //
     // ** NOTE: 확장 쿼리
     //     ex) match (s:"customer")-[e]-(v:"order") where id(s) = '11.1' return e, v limit 5;
@@ -246,7 +188,8 @@ export class AgensDataService {
     params = params.append('sql', encodeURIComponent( sql ) );
     params = params.append('options', 'loggingOff');
 
-    return this._http.get<IResultDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+    return this._http.get<any>(url, {params: params, headers: this.createAuthorizationHeader()})
+      .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
   core_command_drop_label(target:ILabel):Observable<ILabelDto> {
@@ -304,36 +247,10 @@ export class AgensDataService {
 
   ////////////////////////////////////////////////
 
-  grph_schema(tgraph:any, gid:number):Subscription {
+  grph_schema(gid:number):Observable<any> {
     const url = `${this.api.grph}/schema?gid=${gid}`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
-        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) )
-        .subscribe({
-          next: x => {
-            this.setResponses(<IResponseDto>x);
-            switch( x['group'] ){
-              case 'graph_dto': tgraph.info$.next(x); break;
-              case 'graph':     tgraph.graph$.next(x); break;
-              case 'labels':    tgraph.labels$.next(x); break;
-              case 'nodes':     tgraph.nodes$.next(x); break;
-              case 'edges':     tgraph.edges$.next(x); break;
-            }
-          },
-          error: err => {
-            this.setResponses(<IResponseDto>{
-              group: 'grph.schema',
-              state: CONFIG.StateType.ERROR,
-              message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
-            });
-          },
-          complete: () => {
-            tgraph.info$.complete();
-            tgraph.graph$.complete();
-            tgraph.labels$.complete();
-            tgraph.nodes$.complete();
-            tgraph.edges$.complete();
-          }
-        });
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }  
 
   graph_findShortestPath(gid:number, sid:string, eid:string):Observable<IDoubleListDto> {
