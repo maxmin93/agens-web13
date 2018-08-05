@@ -4,6 +4,7 @@ import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from
 import { AgensDataService } from './agens-data.service';
 import { Observable, Subject } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
+import { IClientDto } from '../models/agens-response-types';
 
 @Injectable()
 export class AuthGuardService implements CanActivate {
@@ -15,7 +16,7 @@ export class AuthGuardService implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):Observable<boolean> {
-    let isValid$ = this._api.getIsValid$();
+    let isValid$:Observable<boolean> = this._api.auth_valid();
     isValid$.subscribe(x => {
       if( !x ){
         console.log(`isValid=${x}, move to "/login" by force`);
@@ -23,7 +24,7 @@ export class AuthGuardService implements CanActivate {
       }
     });
     
-    return this._api.auth_valid().pipe( first() );
+    return isValid$;
   }
 
 }

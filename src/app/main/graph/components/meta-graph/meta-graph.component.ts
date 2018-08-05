@@ -1,5 +1,4 @@
 import { Component, OnInit, NgZone, ViewChild, ElementRef, Input} from '@angular/core';
-
 import { MatDialog, MatButtonToggle } from '@angular/material';
 
 import { AgensDataService } from '../../../../services/agens-data.service';

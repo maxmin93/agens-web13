@@ -3,7 +3,7 @@ import { ViewChild, ElementRef, NgZone } from '@angular/core';
 
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { HttpErrorResponse } from '@angular/common/http/src/response';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { MatSnackBar } from '@angular/material';
@@ -87,9 +87,10 @@ export class HistoryComponent implements AfterViewInit {
           this._api.setResponses(<IResponseDto>{
             group: 'core.command.deleteLabel',
             state: CONFIG.StateType.ERROR,
-            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+            message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
           });
-
+          if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
+  
           this._router.navigate(['/login'], { queryParams: { returnUrl: this._router.url }});
         },
         () => {

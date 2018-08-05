@@ -25,7 +25,6 @@ export class AgensDataService {
   };
 
   private lastResponse$ = new Subject<IResponseDto>();
-  private isValid$ = new Subject<boolean>();
 
   private productTitle$ = new BehaviorSubject<string>('Bitnine');
   private currentMenu$ = new BehaviorSubject<string>("login");
@@ -77,9 +76,6 @@ export class AgensDataService {
   getClient():IClientDto {
     return this.client;
   }
-  getIsValid$():Observable<boolean> {
-    return this.isValid$.asObservable();
-  }
 
   setResponses(dto:IResponseDto) {
     if( dto && dto.hasOwnProperty('state') && dto.hasOwnProperty('message') ) 
@@ -108,29 +104,10 @@ export class AgensDataService {
     return new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': this.getSSID() }); 
   }
 
-  auth_valid() {
+  auth_valid():Observable<boolean> {
     const url = `${this.api.auth}/valid`;
-    this._http.get<IClientDto>(url, {headers: this.createAuthorizationHeader()})
-        .subscribe({
-          next: dto => {
-            this.setResponses(<IResponseDto>dto);
-            if(dto.valid === true){
-              this.saveClient(dto);
-              this.isValid$.next(true);
-            }
-            else this.isValid$.next(false);
-          },
-          error: err => {
-            this.setResponses(<IResponseDto>{
-              group: 'auth.valid',
-              state: CONFIG.StateType.ERROR,
-              message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
-            });
-            this.isValid$.next(false);
-          }
-        });
-
-    return this.isValid$.asObservable();
+    return this._http.get<IClientDto>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( map(dto => dto.valid), share() );
   }
 
   auth_connect():Observable<boolean> {
@@ -141,17 +118,16 @@ export class AgensDataService {
           this.setResponses(<IResponseDto>dto);
           if( dto.valid === true ){
             this.saveClient(dto);
-            this.isValid$.next(true);
-            localStorage.setItem(CONFIG.USER_KEY, dto.ssid);
             return true;
           } 
-          else return false;
+          return false;
         }) );
   }
 
   private saveClient(dto:IClientDto){   
     this.client = dto;
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
+    localStorage.setItem(CONFIG.USER_KEY, dto.ssid);
   }
 
   core_schema():Observable<any> {
@@ -260,6 +236,12 @@ export class AgensDataService {
     params = params.append('eid', eid);   // end node id
 
     return this._http.get<IDoubleListDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
+  graph_findConnectedGroup(gid:number):Observable<IDoubleListDto> {
+    const url = `${this.api.grph}/findcgroup/${gid}`;
+
+    return this._http.get<IDoubleListDto>(url, {headers: this.createAuthorizationHeader()});
   }
 
 }

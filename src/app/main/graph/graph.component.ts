@@ -1,5 +1,6 @@
 import { Component, AfterViewInit, OnInit, OnDestroy } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 
 // materials
@@ -47,7 +48,9 @@ declare var agens: any;
 })
 export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
-  private subscription_data: Subscription = undefined;
+  private handlers: Array<Subscription> = [
+    undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined
+  ];
   private subscription_meta: Subscription = undefined;
   public project: any = undefined;
 
@@ -57,9 +60,14 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   editor: any = undefined;
   // CodeMirror Editor : initial value
   query:string =
-`match path1=(c:customer)-[]->(o:"order")-[]->(p:product), path2=(e:employee)-[]->(o), 
-path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
- `;
+`match path=(c:customer)-[]->(:"order")-[]->(p:product)-[]-(t:category)
+where c.id in ['CENTC','NORTS','SPECD','GROSR','THEBI','FRANR'] and t.id in [4,8,7]
+return path;
+`;
+// `match path=(c:customer)-[]->(o:"order")-[]->(p:product)-[]->()
+// return path limit 20;
+//  `;
+
 
   // core/query API 결과
   private resultDto: IResultDto = undefined;
@@ -101,8 +109,7 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
   }
 
   ngOnDestroy(){
-    if( !!this.subscription_data ) this.subscription_data.unsubscribe();
-    if( !!this.subscription_meta ) this.subscription_meta.unsubscribe();
+    this.clearSubscriptions();
   }
 
   ngAfterViewInit() {
@@ -141,7 +148,6 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
   }
 
   tabAnimationDone(){
-    console.log( `tabChangedDone: index = ${this.currentTabIndex}` );
     switch( this.currentTabIndex ){
       case 0: 
           this.metaGraph.isVisible = true;
@@ -197,14 +203,10 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
   }
 
   clearSubscriptions(){
-    if( !!this.subscription_data ){ 
-      this.subscription_data.unsubscribe(); 
-      this.subscription_data = undefined;
-    }
-    if( !!this.subscription_meta ){
-      this.subscription_meta.unsubscribe();
-      this.subscription_meta = undefined;
-    } 
+    this.handlers.forEach(x => {
+      if( x ) x.unsubscribe();
+      x = undefined;
+    });
   }
 
   /////////////////////////////////////////////////////////////////
@@ -251,7 +253,7 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
     // call API
     let data$:Observable<any> = this._api.core_query( sql );
 
-    this.subscription_data = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
+    this.handlers[0] = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
       (x:IResultDto) => {
         this.resultDto = <IResultDto>x;
         if( x.hasOwnProperty('gid') ) {
@@ -259,21 +261,31 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
           this.metaGraph.setGid( x.gid );
           this.statGraph.setGid( x.gid );
         }  
+      },
+      err => {
+        this._api.setResponses(<IResponseDto>{
+          group: 'core.query',
+          state: CONFIG.StateType.ERROR,
+          message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
+        });
+        if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
+        this.clearSubscriptions();
       });
-    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+
+    this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
         this.resultGraph = x;
         this.resultGraph.labels = new Array<ILabel>();
         this.resultGraph.nodes = new Array<INode>();
         this.resultGraph.edges = new Array<IEdge>();
       });
-    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+    this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
       (x:ILabel) => { x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
                 , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };      
         this.resultGraph.labels.push( x );
         this.queryGraph.addLabel( x );
       });
-    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+    this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
         // setNeighbors from this.resultGraph.labels;
         x.scratch['_neighbors'] = new Array<string>();
@@ -287,7 +299,7 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
         this.resultGraph.nodes.push( x );
         this.queryGraph.addNode( x );
       });
-    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+    this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
         this.resultGraph.labels
         .filter(val => val.type == 'edges' && val.name == x.data.label)
@@ -298,21 +310,21 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
         this.resultGraph.edges.push( x );
         this.queryGraph.addEdge( x );
       });
-    data$.pipe( filter(x => x['group'] == 'record') ).subscribe(
+    this.handlers[5] = data$.pipe( filter(x => x['group'] == 'record') ).subscribe(
       (x:IRecord) => {
         this.resultRecord = x;
         this.resultRecord.columns = new Array<IColumn>();
         this.resultRecord.rows = new Array<IRow>();
       });
-    data$.pipe( filter(x => x['group'] == 'columns') ).subscribe(
+    this.handlers[6] = data$.pipe( filter(x => x['group'] == 'columns') ).subscribe(
       (x:IColumn) => {
         this.resultRecord.columns.push( x );
       });
-    data$.pipe( filter(x => x['group'] == 'rows') ).subscribe(
+    this.handlers[7] = data$.pipe( filter(x => x['group'] == 'rows') ).subscribe(
       (x:IRow) => {
         this.resultRecord.rows.push( x );
       });
-    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+    this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         this.isLoading = false;
         this.queryResult.setData(<IResponseDto>this.resultDto);
@@ -388,7 +400,7 @@ path3=(s:supplier)-[]->(p) return path1, path2, path3 limit 20;
           this.statGraph.refresh();
         }, 100);  
       });
-      
+
   }
 
   /////////////////////////////////////////////////////////////////

@@ -1,5 +1,7 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 import { Observable, of, from, Subject, Subscription, concat, forkJoin } from 'rxjs';
 import { map, filter, concatAll } from 'rxjs/operators';
@@ -46,7 +48,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   labelColors: any[] = [];
 
   // call API
-  subscription: Subscription;
+  handlers:Subscription[] = [undefined, undefined, undefined, undefined, undefined, undefined];
   datasource: IDatasource = undefined;
   graph: IGraph;
   labels: Array<ILabel>;
@@ -88,6 +90,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private _angulartics2: Angulartics2,
+    private _router: Router,
     public dialog: MatDialog,
     private _ngZone: NgZone,
     private _api: AgensDataService,
@@ -106,7 +109,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     };    
   }
   ngOnDestroy(){
-    if( this.subscription ) this.subscription.unsubscribe();
+    this.clearSubscriptions();
     // 내부-외부 함수 공유 해제
     window['angularComponentRef'] = undefined;
   }
@@ -188,6 +191,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     if( this.cy ) this.cy.elements().remove();
   }
 
+  clearSubscriptions(){
+    this.handlers.forEach(x => { 
+      if(x) x.unsubscribe(); 
+      x = undefined; 
+    });
+  }
+
   clearTables(){
     this.selectedLabels = <ILabel[]>[];
     this.selectedLabel = EMPTY_LABEL;
@@ -217,52 +227,46 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   //////////////////////////////////////////////
 
-  createSubjects():any {
-    return {
-      info$: new Subject<ISchemaDto>(),
-      graph$: new Subject<IGraph>(),
-      labels$: new Subject<ILabel>(),
-      nodes$: new Subject<INode>(),
-      edges$: new Subject<IEdge>()
-    };  
-  }
-
   callCoreSchema(){
 
     this.toggleProgress(true);
     
     // call API
     let data$:Observable<any> = this._api.core_schema();
-
-    data$.pipe( filter(x => x['group'] == 'schema') ).subscribe(
+    
+    this.handlers[0] = data$.pipe( filter(x => x['group'] == 'schema') ).subscribe(
       (x:ISchemaDto) => {
         this.datasource = x.datasource;
         this.labels = x.labels;
+      },
+      err => {
+        this.clearSubscriptions();
+        this._router.navigate(['/login'], { queryParams: { returnUrl: '/' }});
       });
-    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+    this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
         this.graph = x;
         this.graph.labels = new Array<ILabel>();
         this.graph.nodes = new Array<INode>();
         this.graph.edges = new Array<IEdge>();
       });
-    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+    this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
       (x:ILabel) => {
         this.graph.labels.push(x);
       });
-    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+    this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
         this.injectElementStyle( x );
         this.graph.nodes.push(x);
         this.cy.add(x);
       });
-    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+    this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
         this.injectElementStyle( x );
         this.graph.edges.push(x);
         this.cy.add(x);
       });
-    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+    this.handlers[5] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         this.showGraph();
         // 화면 출력 : ngAfterViewInit emitter 이후 실행
@@ -377,8 +381,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           this._api.setResponses(<IResponseDto>{
             group: 'core.command.deleteLabel',
             state: CONFIG.StateType.ERROR,
-            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+            message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
           });
+          if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
         }
       );
     });
@@ -428,8 +433,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           this._api.setResponses(<IResponseDto>{
             group: 'core.command.deleteLabel',
             state: CONFIG.StateType.ERROR,
-            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
+            message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
           });
+          if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
         }
       );
     });

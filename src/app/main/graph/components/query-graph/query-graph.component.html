@@ -65,9 +65,12 @@
         <div id="agens-graph-toolbar" class="viewbox border theme">
             <div class="scroll-hide">
             <ul class="list icon border noborder">
-                <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.mouseWheel, 'is-inactive': !btnStatus.mouseWheel }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
-                        <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
+                    <mat-icon>label</mat-icon></a>
                 </li>
+                <!-- <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.mouseWheel, 'is-inactive': !btnStatus.mouseWheel }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
+                        <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
+                </li> -->
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
                         <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
                 </li>
@@ -121,7 +124,7 @@
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
                         <mat-icon>image</mat-icon></a>
                 </li>
-                <li><a (click)="showClusters()" matTooltip="show Clusters" matTooltipPosition="above">
+                <li><a (click)="toggleFindConnectedGroup()" matTooltip="find Connected Group" matTooltipPosition="above">
                     <mat-icon>view_quilt</mat-icon></a>
                 </li>
                 <li><a (click)="toggleFindShortestPath()" matTooltip="find Shortest Path" matTooltipPosition="above">

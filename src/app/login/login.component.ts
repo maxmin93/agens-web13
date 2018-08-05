@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
+import { HttpErrorResponse } from '@angular/common/http';
+
 import { MatSnackBar } from '@angular/material';
 
 import { Angulartics2 } from 'angulartics2';
@@ -40,35 +42,42 @@ export class LoginComponent implements OnInit {
     this.login();
   }
 
-  openSnackBar() {
-    this._api.getResponse().subscribe(
-      x => this._snackBar.open(x.message, x.state, { duration: 3000, })
-    );    
-  }
-
   login() {
     let connect$:Observable<boolean> = this._api.auth_connect();
 
     connect$.subscribe(
-        x => { 
-          if( x ) this.openSnackBar();
-        },
-        err => {
-          this._api.setResponses(<IResponseDto>{
-            group: 'auth.valid',
-            state: CONFIG.StateType.ERROR,
-            message: !(err.error instanceof Error) ? err.error.message : JSON.stringify(err)
-          });
-          this.openSnackBar();
-        },
-        () => {
+      x => { 
+        console.log('auth.connect: return =', x);
+        if( x ){
           // after a few minitues, start navigation
           setTimeout(() => {
             console.log(`wait ${this.waitTime/1000} seconds..`);            
             // returnUrl 로 이동
             this._router.navigate([this.returnUrl]);
-          }, this.waitTime);          
+          }, this.waitTime);
+        }
+        else{
+          setTimeout(() => {
+            console.log(`retry login after ${this.waitTime/1000} seconds..`);
+            // login 페이지로 이동
+            this._router.navigate(['/login']);
+          }, this.waitTime);
+        } 
+      },
+      err => {
+        this._api.setResponses(<IResponseDto>{
+          group: 'auth.connect',
+          state: CONFIG.StateType.ERROR,
+          message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
         });
+        if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
+
+        setTimeout(() => {
+          console.log(`retry login after ${this.waitTime/1000} seconds..`);
+          // login 페이지로 이동
+          this._router.navigate(['/login']);
+        }, this.waitTime);
+    });
   }
 
 

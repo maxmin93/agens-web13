@@ -23,6 +23,7 @@ export class QueryGraphComponent implements OnInit {
   isLoading: boolean = false;
 
   btnStatus: any = { 
+    showHideTitle: false,     // Node Title 노출여부 
     mouseWheel: false,        // 마우스휠 사용여부
     shortestPath: false,      // 경로검색 사용여부 
   };
@@ -37,7 +38,8 @@ export class QueryGraphComponent implements OnInit {
   shortestPathDto:any = { sid: undefined, eid: undefined, result: undefined, order: 0 };
 
   // material elements
-  @ViewChild('btnMouseWheelZoom') public btnMouseWheelZoom: MatButtonToggle;
+  @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
+  // @ViewChild('btnMouseWheelZoom') public btnMouseWheelZoom: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
@@ -76,6 +78,8 @@ export class QueryGraphComponent implements OnInit {
         hideNodeTitle: true,        // hide nodes' title
         hideEdgeTitle: true,        // hide edges' title
       });
+
+    setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -135,7 +139,7 @@ export class QueryGraphComponent implements OnInit {
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
     // 그래프 관련 콘트롤러들 초기화
-    this.toggleMouseWheelZoom(false);
+    this.toggleShowHideTitle(true);
     this.toggleHighlightNeighbors(false);
   }
 
@@ -196,13 +200,23 @@ export class QueryGraphComponent implements OnInit {
     else target.lock();
   }
 
-  toggleMouseWheelZoom(checked?:boolean): void{
-    if( checked === undefined ) this.btnMouseWheelZoom.checked = !this.btnMouseWheelZoom.checked;
-    else this.btnMouseWheelZoom.checked = checked;
+  // toggleMouseWheelZoom(checked?:boolean): void{
+  //   if( checked === undefined ) this.btnMouseWheelZoom.checked = !this.btnMouseWheelZoom.checked;
+  //   else this.btnMouseWheelZoom.checked = checked;
+
+  //   // graph의 userZoomingEnabled 설정 변경
+  //   this.cy.userZoomingEnabled( this.btnMouseWheelZoom.checked ); 
+  //   this.btnStatus.mouseWheel = this.btnMouseWheelZoom.checked;
+  // }
+
+  toggleShowHideTitle(checked?:boolean): void{
+    if( checked === undefined ) this.btnShowHideTitle.checked = !this.btnShowHideTitle.checked;
+    else this.btnShowHideTitle.checked = checked;
+    this.btnStatus.showHideTitle = this.btnShowHideTitle.checked;
 
     // graph의 userZoomingEnabled 설정 변경
-    this.cy.userZoomingEnabled( this.btnMouseWheelZoom.checked ); 
-    this.btnStatus.mouseWheel = this.btnMouseWheelZoom.checked;
+    this.cy.scratch('_config').hideNodeTitle = this.btnShowHideTitle.checked; 
+    this.cy.style(agens.graph.stylelist['dark']).update();
   }
 
   toggleHighlightNeighbors(checked?:boolean): void{
@@ -426,4 +440,77 @@ export class QueryGraphComponent implements OnInit {
       });
     }, 10);
   }
+
+  /////////////////////////////////////////////////////////////////
+  // graph Toolbar button controlls
+  /////////////////////////////////////////////////////////////////
+
+  toggleFindConnectedGroup(option:boolean=undefined){
+    if( !option ) this.btnStatus.connectedGroup = !this.btnStatus.connectedGroup;
+    else this.btnStatus.connectedGroup = option;
+
+    // enable 모드이면 start_id, end_id 리셋
+    if( this.btnStatus.connectedGroup ) {
+      let result = [["3.10", "3.11", "3.18", "3.36", "3.37", "3.59", "3.69", "3.72", "4.4", "4.8", "8.13", "8.33", "8.53", "8.74", "8.77", "9.12", "9.21", "9.270", "9.461", "9.505", "9.538", "9.717", "9.745", "9.796"]
+      , ["3.51", "4.7", "8.26", "9.613"]];
+
+      result.forEach( (row, idx) => {
+        let grp_id = 'grp_'+idx;
+        // add parent node
+        let pnode:INode = { group: 'nodes',
+          data: { id: grp_id, label: 'cgroup', props: null, size: row.length },
+          scratch: { }
+        };
+        pnode.scratch['_memebers'] = row;
+        let pp = this.cy.add( pnode );
+        console.log( pp );
+        // add member nodes to parent
+        row.forEach(v => {
+          let node = this.cy.getElementById(v);
+          node._private.data.parent = grp_id;
+          node._private.parent = pp;
+        });
+      });
+      this.cy.style(agens.graph.stylelist['dark']).update();
+
+      // this.callFindConnectedGroup();
+    }
+    else this.removeConnectedGroup();
+  }
+
+  removeConnectedGroup(){
+    let pnodes = this.cy.nodes(`[label='cgroup']`);
+    pnodes.forEach(grp => {
+      this.cy.nodes(`[parent='${grp.id()}']`).remove();
+    })
+    pnodes.remove();
+  }
+
+  callFindConnectedGroup(){
+    if( !this.gid ) return;
+
+    this._api.graph_findConnectedGroup( this.gid )
+    .subscribe(
+      (x:IDoubleListDto) => { 
+        if( !x.hasOwnProperty('result') ) return;
+
+        console.log( x.result );
+        x.result.forEach( (row, idx) => {
+          // add parent node
+          let pnode:INode = { group: 'nodes',
+            data: { id: 'grp_'+idx, label: 'cgroup', props: null, size: row.length },
+            scratch: { }
+          };
+          pnode.scratch['_memebers'] = row;
+          this.cy.add( pnode );
+          // add member nodes to parent
+          row.forEach(v => {
+            let node = this.cy.getElementById(v);
+            node.data('parent', 'grp_'+idx);
+          })
+        })
+      }
+    );
+  }
+
 }

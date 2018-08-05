@@ -105,6 +105,20 @@
           "selection-box-border-color": "#aaa",
           "selection-box-border-width": 1,
         }}, {
+        selector: ':parent',
+        css:{
+          'shape': 'roundrectangle',                   
+        }}, {
+          selector: '$node > node',
+          css:{
+            'padding-top': '10px',
+            'padding-left': '10px',
+            'padding-bottom': '10px',
+            'padding-right': '10px',
+            'text-valign': 'top',
+            'text-halign': 'center',
+            'background-color': '#bbb'
+        }}, {
         selector: 'node',
         css: {
           'label': function(e){

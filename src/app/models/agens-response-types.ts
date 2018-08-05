@@ -23,6 +23,7 @@ export interface IClientDto extends IResponseDto {
   valid: boolean; 
   user_name: string;
   user_ip: string;
+  gid: number;
   product_name: string;
   product_version: string;
   timestamp: string;
@@ -63,7 +64,7 @@ export interface IGraphDto extends IResponseDto {
 export interface IDoubleListDto extends IResponseDto {
   // group == 'dlist_dto'
 
-  gid?: number;
+  gid: number;
   sid?: number;
   eid?: number;
   result?: Array<Array<string>>;

@@ -60,15 +60,15 @@ export interface IElement {
   };
   classes?: string;
 
-  getPropertyId: () => string;
-  getPropertyName: () => string;
-  getProperty: (key:string) => any;
-  setProperty: (key:string, val:any) => void;
+  getPropertyId?: () => string;
+  getPropertyName?: () => string;
+  getProperty?: (key:string) => any;
+  setProperty?: (key:string, val:any) => void;
 };
 
 export interface INode extends IElement {
-  getNeighbors: () => string[];
-  setNeighbors: (labels:ILabel[]) => void;
+  getNeighbors?: () => string[];
+  setNeighbors?: (labels:ILabel[]) => void;
 }
 
 export interface IEdge extends IElement {
