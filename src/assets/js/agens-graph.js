@@ -52,7 +52,7 @@
   agens.styles = {
     nodeLabel: function(e){
       if( e.scratch('_style') && e.scratch('_style').title )
-        if( e.data('props').hasOwnProperty(e.scratch('_style').title) ) 
+        if( e.data('props') && e.data('props').hasOwnProperty(e.scratch('_style').title) ) 
           return e.data('props')[e.scratch('_style').title];
       return '';
     },
@@ -68,7 +68,7 @@
     },
     edgeLabel: function(e){
       if( e.scratch('_style') && e.scratch('_style').title )
-        if( e.data('props').hasOwnProperty(e.scratch('_style').title) )
+        if( e.data('props') && e.data('props').hasOwnProperty(e.scratch('_style').title) )
           return e.data('props')[e.scratch('_style').title];
       return '';
     },
@@ -107,18 +107,19 @@
         }}, {
         selector: ':parent',
         css:{
-          'shape': 'roundrectangle',                   
-        }}, {
-          selector: '$node > node',
-          css:{
-            'padding-top': '10px',
-            'padding-left': '10px',
-            'padding-bottom': '10px',
-            'padding-right': '10px',
-            'text-valign': 'top',
-            'text-halign': 'center',
-            'background-color': '#bbb'
-        }}, {
+          'background-opacity': 0.333,
+          'z-compound-depth': 'bottom',
+          'border-width':'1',
+          'border-color':'#888',
+          'border-style':'dotted',
+          'padding-top': '10px',
+          'padding-left': '10px',
+          'padding-bottom': '10px',
+          'padding-right': '10px',
+          'text-valign': 'top',
+          'text-halign': 'center',
+          'background-color': '#B8BdB1'
+      }}, {
         selector: 'node',
         css: {
           'label': function(e){
@@ -483,28 +484,26 @@
 
     // layouts = { bread-first, circle, cose, cola, 'klay', 'dagre', 'cose-bilkent', 'concentric" }
     // **NOTE: euler 는 속도가 빠르지만 간혹 stack overflow 문제를 일으켜 제외
-    cy.$api.changeLayout = function(layout='cose', selected=false){
+    cy.$api.changeLayout = function(layout='cose', options=undefined){
       console.log( 'cy.$api.changeLayout:', layout);
       let elements = cy.elements(':visible');
-      let selectedElements = cy.elements(':selected');
-      if( selected && selectedElements.length > 1 ) elements = selectedElements;
+      if( options && options.hasOwnProperty('useSelected') ){
+        let selectedElements = cy.elements(':selected');
+        if( options.useSelected && selectedElements.size() > 1 ) elements = selectedElements;
+      } 
         
       let layoutOption = {
         name: layout,
-        fit: true, padding: 100, boundingBox: undefined, 
+        fit: true, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){}, stop: function(){}
       };
+      if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
+      if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
   
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);
-      // layoutHandler.on('layoutstart', function(){
-      //   // 최대 3초(3000ms) 안에는 멈추도록 설정
-      //   setTimeout(function(){
-      //     layoutHandler.stop();
-      //   }, 3000);
-      // });
       layoutHandler.run();
     }
   
@@ -547,7 +546,7 @@
 
       // 새로운 label타입의 edge에 대한 connectedNodes 찾기
       // 1) 새로운 label 타입의 edges (uniqLabels에 없는)
-      let connectedEdges = node.connectedEdges().filter(function(i, ele){
+      let connectedEdges = node.connectedEdges().filter(function(ele, i){
         return uniqLabels.indexOf(ele.data('label')) < 0;
       });
       // 2) edge에 연결된 node collection을 merge (중복제거)
@@ -565,7 +564,7 @@
       // 4) append recursive results
       maxHops -= 1;
       connectedNodes.difference(node).forEach(elem => {
-        let collection = cy.$api.view.findNeighbors(elem, uniqLabels.slice(0), maxHops);
+        let collection = cy.$api.findNeighbors(elem, uniqLabels.slice(0), maxHops);
         connectedNodes = connectedNodes.merge( collection );
       });
       // 5) return connectedNodes
@@ -576,6 +575,49 @@
       
       return connectedNodes;
     };
+
+    cy.$api.grouping = function(members=undefined, title=undefined){
+      let nodes = cy.nodes(':selected');
+      if( members && !members.empty() ) nodes = members;
+      let edges = nodes.connectedEdges();
+      if( nodes.empty() ) return;
+      
+      cy.elements(':selected').unselect();
+      nodes.remove();
+  
+      let parentId = agens.graph.makeid();
+      let parentPos = nodes.boundingBox();
+      let parent = { "group": "nodes", "data": { "id": parentId, "name": title, "parent": undefined }
+                  , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } }
+      let parentNode = cy.add(parent);
+      parentNode.style('width', parentPos.x2-parentPos.x1 );
+      parentNode.style('height', parentPos.y2-parentPos.y1 );
+      parentNode.scratch('_style', { "witdh": undefined, "color": '#b5b5b5', "title": 'name' } );
+  
+      nodes.forEach(v => {
+        v._private.data.parent = parentId;
+      });
+      cy.add(nodes);
+      cy.add(edges);
+    }
+  
+    cy.$api.degrouping = function(target=undefined){
+      if( !target || !target.isNode() ) {
+        let nodes = cy.nodes(':selected');
+        if( nodes.empty() || !nodes[0].isParent() ) return;
+        target = nodes[0];
+      }
+  
+      let children = target.children().nodes();
+      let edges = children.connectedEdges();
+      children.forEach(e => {
+        e._private.data.parent = undefined;
+      });
+      target.remove();
+      cy.add(children);
+      cy.add(edges);
+    }
+
 
   };
 

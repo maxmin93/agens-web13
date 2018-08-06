@@ -6,14 +6,14 @@
         <mat-icon>bubble_chart</mat-icon> AGENSBROWSER <small>WEB 1.3</small>
     </h1>
     <span class="example-spacer"></span>
-    <mat-button-toggle-group>
-        <mat-button-toggle value="main" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
+    <mat-button-toggle-group #btnMenuGroup="matButtonToggleGroup" [value]="currentPath">
+        <mat-button-toggle #btnMenuMain value="/" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
             <a>DASHBOARD</a>
         </mat-button-toggle>
-        <mat-button-toggle value="graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']">
+        <mat-button-toggle #btnMenuGraph value="/graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']">
             <a>GRAPH</a>
         </mat-button-toggle>
-        <mat-button-toggle value="history" disabled="{{ currentMenu=='history' }}" [routerLink]="['/history']">
+        <mat-button-toggle #btnMenuHistory value="/history" disabled="{{ currentMenu=='history' }}" [routerLink]="['/history']">
             <a>HISTORY</a>
         </mat-button-toggle>
         <mat-button-toggle value="show help-documents" matTooltipPosition="above" > 

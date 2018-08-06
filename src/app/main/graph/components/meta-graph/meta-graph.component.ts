@@ -99,7 +99,9 @@ export class MetaGraphComponent implements OnInit {
 
   // for banana javascript, have to use 'document.querySelector(...)'
   toggleProgressBar(option:boolean = undefined){
-    let graphProgressBar:any = document.querySelector('div#graphProgressBar');
+    let graphProgressBar:any = document.querySelector('div#progressBarMetaGraph');
+    if( !graphProgressBar ) return;
+
     if( option === undefined ) option = !((graphProgressBar.style.visibility == 'visible') ? true : false);
     // toggle progressBar's visibility
     if( option ) graphProgressBar.style.visibility = 'visible';

@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone, ViewChild, ElementRef, Input } from '@angular/core';
 
-import { MatDialog, MatButtonToggle } from '@angular/material';
+import { MatDialog, MatButtonToggle, MatSlideToggle } from '@angular/material';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -10,6 +10,7 @@ import { IDoubleListDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../global.config';
 
+declare var _: any;
 declare var agens: any;
 
 @Component({
@@ -26,6 +27,7 @@ export class QueryGraphComponent implements OnInit {
     showHideTitle: false,     // Node Title 노출여부 
     mouseWheel: false,        // 마우스휠 사용여부
     shortestPath: false,      // 경로검색 사용여부 
+    neighbors: false,         // 이웃노드 하일라이팅
   };
 
   gid: number = undefined;
@@ -35,9 +37,11 @@ export class QueryGraphComponent implements OnInit {
   selectedElement: any = undefined;  
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
 
-  shortestPathDto:any = { sid: undefined, eid: undefined, result: undefined, order: 0 };
+  shortestPathOptions:any = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
 
   // material elements
+  @ViewChild('btnShortestPath') public btnShortestPath: MatButtonToggle;
+  @ViewChild('slideShortestPathDirected') public slideSPathDirected: MatSlideToggle;
   @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
   // @ViewChild('btnMouseWheelZoom') public btnMouseWheelZoom: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
@@ -97,6 +101,7 @@ export class QueryGraphComponent implements OnInit {
 
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
+    if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
     else{
       this.selectedElement = target;
       // HighlightNeighbors 상태가 아닌 일반 상태라면 unselect
@@ -123,7 +128,9 @@ export class QueryGraphComponent implements OnInit {
 
   // for banana javascript, have to use 'document.querySelector(...)'
   toggleProgressBar(option:boolean = undefined){
-    let graphProgressBar:any = document.querySelector('div#graphProgressBar');
+    let graphProgressBar:any = document.querySelector('div#progressBarQueryGraph');
+    if( !graphProgressBar ) return;
+
     if( option === undefined ) option = !((graphProgressBar.style.visibility == 'visible') ? true : false);
     // toggle progressBar's visibility
     if( option ) graphProgressBar.style.visibility = 'visible';
@@ -152,7 +159,6 @@ export class QueryGraphComponent implements OnInit {
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
-    if( this.isVisible ) this.cy.$api.changeLayout('cose');
   }
   resize(){
     this.cy.resize();
@@ -188,7 +194,11 @@ export class QueryGraphComponent implements OnInit {
 
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
-    if( this.isVisible ) this.cy.$api.changeLayout(layout);
+    if( this.isVisible ) 
+      this.cy.$api.changeLayout(layout, {
+        "ready": () => this.toggleProgressBar(true)
+        , "stop": () => this.toggleProgressBar(false)
+      });
   }
 
   /////////////////////////////////////////////////////////////////
@@ -220,6 +230,15 @@ export class QueryGraphComponent implements OnInit {
   }
 
   toggleHighlightNeighbors(checked?:boolean): void{
+    if( checked === undefined ) this.btnHighlightNeighbors.checked = !this.btnHighlightNeighbors.checked;
+    else this.btnHighlightNeighbors.checked = checked;
+    this.btnStatus.neighbors = this.btnHighlightNeighbors.checked;
+  }
+
+  highlightNeighbors(target){
+    // neighbors select
+    var neighbors = this.cy.$api.findNeighbors(target, [], 3);
+    this.cy.$api.view.highlight(neighbors);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -300,82 +319,94 @@ export class QueryGraphComponent implements OnInit {
   /////////////////////////////////////////////////////////////////
   // Centrality methods
   /////////////////////////////////////////////////////////////////
+  
+  graphCentrality(option:string='degree'){ 
+    // options: degree, pagerank, closeness, betweenness
+    switch( option ){
+      case 'degree': this.centralrityDg();      break;
+      case 'pagerank': this.centralrityPR();    break;
+      case 'closeness': this.centralrityCn();   break;
+      case 'betweenness': this.centralrityBt(); break;
+      default: 
+        this.cy.elements().forEach(e => {
+          e.scratch('_style', _.clone(e.scratch('_styleBak')));
+        });
+    }
+    this.cy.style(agens.graph.stylelist['dark']).update();
+
+  }
 
   centralrityPR(){
-    let centrality = agens.cy.elements().pageRank();
-    agens.cy.nodes().map(ele => {
+    let centrality = this.cy.elements().pageRank();
+    this.cy.nodes().map(ele => {
       ele.scratch('_centralrityPr', centrality.rank(ele));
     });
-    let acc = agens.cy.nodes().reduce((acc, cur) => {
+    let acc = this.cy.nodes().reduce((acc, cur) => {
         acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityPr') < acc[0] ) ? cur.scratch('_centralrityPr') : acc[0];   // min
         acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityPr') > acc[1] ) ? cur.scratch('_centralrityPr') : acc[1];   // max
         acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityPr') : acc[2] + cur.scratch('_centralrityPr');   // sum
         return acc;
       }, []);
-    console.log( 'pageRank Centrality: ', acc[0], acc[1], acc[2]/agens.cy.nodes().size() );
-    agens.cy.nodes().map(ele => {
-      let val = Math.floor( (ele.scratch('_centralrityPr') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      console.log( ele.id(), ele.data('name'), val );
-      ele.style('width', val).style('height', val);
+    console.log( 'pageRank Centrality: ', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
+    this.cy.nodes().map(ele => {
+      let value = Math.floor( (ele.scratch('_centralrityPr') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
+      ele.scratch('_style').width = value + 'px';
     });
   }
 
   centralrityDg(){
-    let centrality = agens.cy.elements().degreeCentralityNormalized();
-    agens.cy.nodes().map(ele => {
+    let centrality = this.cy.elements().degreeCentralityNormalized();
+    this.cy.nodes().map(ele => {
       ele.scratch('_centralrityDg', centrality.degree(ele));
     });
-    let acc = agens.cy.nodes().reduce((acc, cur) => {
+    let acc = this.cy.nodes().reduce((acc, cur) => {
         acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityDg') < acc[0] ) ? cur.scratch('_centralrityDg') : acc[0];   // min
         acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityDg') > acc[1] ) ? cur.scratch('_centralrityDg') : acc[1];   // max
         acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityDg') : acc[2] + cur.scratch('_centralrityDg');   // sum
         return acc;
       }, []);
-    console.log( 'Degree Centrality: ', acc[0], acc[1], acc[2]/agens.cy.nodes().size() );
-    agens.cy.nodes().map(ele => {
-      let val = Math.floor( (ele.scratch('_centralrityDg') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      console.log( ele.id(), ele.data('name'), val );
-      ele.style('width', val).style('height', val);
+    console.log( 'Degree Centrality: ', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
+    this.cy.nodes().map(ele => {
+      let value = Math.floor( (ele.scratch('_centralrityDg') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
+      ele.scratch('_style').width = value + 'px';
     });
   }
 
   centralrityCn(){
-    let centrality = agens.cy.elements().closenessCentralityNormalized();
+    let centrality = this.cy.elements().closenessCentralityNormalized();
 
-    agens.cy.nodes().map(ele => {
+    this.cy.nodes().map(ele => {
       ele.scratch('_centralrityCn', centrality.closeness(ele));
     });
-    let acc = agens.cy.nodes().reduce((acc, cur) => {
+    let acc = this.cy.nodes().reduce((acc, cur) => {
         acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityCn') < acc[0] ) ? cur.scratch('_centralrityCn') : acc[0];   // min
         acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityCn') > acc[1] ) ? cur.scratch('_centralrityCn') : acc[1];   // max
         acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityCn') : acc[2] + cur.scratch('_centralrityCn');   // sum
         return acc;
       }, []);
-    console.log( 'Closeness Centrality:', acc[0], acc[1], acc[2]/agens.cy.nodes().size() );
-    agens.cy.nodes().map(ele => {
-      let val = Math.floor( (ele.scratch('_centralrityCn') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      console.log( ele.id(), ele.data('name'), val );
-      ele.style('width', val).style('height', val);
+    console.log( 'Closeness Centrality:', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
+    this.cy.nodes().map(ele => {
+      let value = Math.floor( (ele.scratch('_centralrityCn') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
+      ele.scratch('_style').width = value + 'px';
     });
   }
   
   centralrityBt(){
-    let centrality = agens.cy.elements().betweennessCentrality();
+    let centrality = this.cy.elements().betweennessCentrality();
 
-    agens.cy.nodes().map(ele => {
+    this.cy.nodes().map(ele => {
       ele.scratch('_centralrityBt', centrality.betweenness(ele));
     });
-    let acc = agens.cy.nodes().reduce((acc, cur) => {
+    let acc = this.cy.nodes().reduce((acc, cur) => {
         acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityBt') < acc[0] ) ? cur.scratch('_centralrityBt') : acc[0];   // min
         acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityBt') > acc[1] ) ? cur.scratch('_centralrityBt') : acc[1];   // max
         acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityBt') : acc[2] + cur.scratch('_centralrityBt');   // sum
         return acc;
       }, []);
-    console.log( 'Betweenness Centrality:', acc[0], acc[1], acc[2]/agens.cy.nodes().size() );
-    agens.cy.nodes().map(ele => {
-      let val = Math.floor( (ele.scratch('_centralrityBt') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      console.log( ele.id(), ele.data('name'), val );
-      ele.style('width', val).style('height', val);
+    console.log( 'Betweenness Centrality:', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
+    this.cy.nodes().map(ele => {
+      let value = Math.floor( (ele.scratch('_centralrityBt') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
+      ele.scratch('_style').width = value + 'px';
     });
   }
   
@@ -387,58 +418,46 @@ export class QueryGraphComponent implements OnInit {
     if( !option ) this.btnStatus.shortestPath = !this.btnStatus.shortestPath;
     else this.btnStatus.shortestPath = option;
 
-    // enable 모드이면 start_id, end_id 리셋
+    // enable 모드이면 options 리셋
     if( this.btnStatus.shortestPath ){
-      this.shortestPathDto = { sid: undefined, eid: undefined, result:undefined, order: 0 };
+      this.shortestPathOptions = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
+
     }
-    console.log( 'toggleFindShortestPath', this.shortestPathDto );
   }
 
   selectFindShortestPath(target:any){
     this.cy.elements(':selected').unselect();
     if( target.isNode() ){
-      this.shortestPathDto.order += 1;
-      if( this.shortestPathDto.order % 2 == 1 ){
-        this.shortestPathDto.sid = target.id();
-        this.shortestPathDto.eid = undefined;
-        // setTimeout(() => {
-        //   this.cy.nodes(`#${this.shortestPathDto.sid}, #${this.shortestPathDto.eid}`).select();
-        // }, 50);
+      this.shortestPathOptions.order += 1;
+      if( this.shortestPathOptions.order % 2 == 1 ){
+        this.shortestPathOptions.sid = target.id();
+        this.shortestPathOptions.eid = undefined;
+        setTimeout(() => {         
+          this.cy.nodes(`#${this.shortestPathOptions.sid}`).select();
+        }, 30);
       } 
       else {
-        this.shortestPathDto.eid = target.id();
-        setTimeout(() => {
-          this.cy.getElementById(this.shortestPathDto.sid).select();
-        }, 50);
+        this.shortestPathOptions.eid = target.id();
+        setTimeout(() => {         
+          this.cy.nodes(`#${this.shortestPathOptions.sid}, #${this.shortestPathOptions.eid}`).select();
+        }, 30);
       }
     }
   }
 
-  callFindShortestPath(option:boolean=undefined){
-    if( !this.gid || !this.shortestPathDto.sid || !this.shortestPathDto.eid ) return;
-
-    this._api.graph_findShortestPath( this.gid, this.shortestPathDto.sid, this.shortestPathDto.eid )
-    .subscribe(
-      (x:IDoubleListDto) => { 
-        this.shortestPathDto = x; 
-      },
-      err => {},
-      () => {}
-    );
-  }
-
-  highlightShortestPath(path:Array<string>){
+  doFindShortestPath(directed:boolean=false){
     this.cy.elements(':selected').unselect();
-    setTimeout(()=>{
-      let sourceVid:string = undefined;
-      path.forEach(vid => {
-        this.cy.getElementById(vid).select();
-        if( sourceVid ){
-          this.cy.edges(`[source="${sourceVid}"][target="${vid}"]`).select();
-        }
-        sourceVid = vid;
-      });
-    }, 10);
+
+    let dijkstra = this.cy.elements().dijkstra(
+      this.cy.getElementById(this.shortestPathOptions.sid)
+      , function(edge){ return !edge.data('weight') ? 1 : edge.data('weight'); }
+      , this.slideSPathDirected.checked );
+    
+    let pathTo = dijkstra.pathTo( this.cy.getElementById(this.shortestPathOptions.eid) );
+    if( !pathTo.empty() ){
+      this.shortestPathOptions.distTo = dijkstra.distanceTo( this.cy.getElementById(this.shortestPathOptions.eid) );
+      this.cy.$api.view.highlight(pathTo);
+    }
   }
 
   /////////////////////////////////////////////////////////////////
@@ -451,66 +470,17 @@ export class QueryGraphComponent implements OnInit {
 
     // enable 모드이면 start_id, end_id 리셋
     if( this.btnStatus.connectedGroup ) {
-      let result = [["3.10", "3.11", "3.18", "3.36", "3.37", "3.59", "3.69", "3.72", "4.4", "4.8", "8.13", "8.33", "8.53", "8.74", "8.77", "9.12", "9.21", "9.270", "9.461", "9.505", "9.538", "9.717", "9.745", "9.796"]
-      , ["3.51", "4.7", "8.26", "9.613"]];
-
-      result.forEach( (row, idx) => {
-        let grp_id = 'grp_'+idx;
-        // add parent node
-        let pnode:INode = { group: 'nodes',
-          data: { id: grp_id, label: 'cgroup', props: null, size: row.length },
-          scratch: { }
-        };
-        pnode.scratch['_memebers'] = row;
-        let pp = this.cy.add( pnode );
-        console.log( pp );
-        // add member nodes to parent
-        row.forEach(v => {
-          let node = this.cy.getElementById(v);
-          node._private.data.parent = grp_id;
-          node._private.parent = pp;
-        });
+      let groups:any[] = this.cy.elements().components();
+      groups.forEach((grp,idx) => {
+        this.cy.$api.grouping(grp.nodes(), 'group#'+idx);
       });
-      this.cy.style(agens.graph.stylelist['dark']).update();
-
-      // this.callFindConnectedGroup();
     }
-    else this.removeConnectedGroup();
-  }
-
-  removeConnectedGroup(){
-    let pnodes = this.cy.nodes(`[label='cgroup']`);
-    pnodes.forEach(grp => {
-      this.cy.nodes(`[parent='${grp.id()}']`).remove();
-    })
-    pnodes.remove();
-  }
-
-  callFindConnectedGroup(){
-    if( !this.gid ) return;
-
-    this._api.graph_findConnectedGroup( this.gid )
-    .subscribe(
-      (x:IDoubleListDto) => { 
-        if( !x.hasOwnProperty('result') ) return;
-
-        console.log( x.result );
-        x.result.forEach( (row, idx) => {
-          // add parent node
-          let pnode:INode = { group: 'nodes',
-            data: { id: 'grp_'+idx, label: 'cgroup', props: null, size: row.length },
-            scratch: { }
-          };
-          pnode.scratch['_memebers'] = row;
-          this.cy.add( pnode );
-          // add member nodes to parent
-          row.forEach(v => {
-            let node = this.cy.getElementById(v);
-            node.data('parent', 'grp_'+idx);
-          })
-        })
-      }
-    );
+    else {
+      let parents:any = this.cy.nodes().parent();
+      parents.forEach(target => {
+        this.cy.$api.degrouping(target);
+      });
+    }
   }
 
 }

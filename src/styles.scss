@@ -145,12 +145,23 @@ a {
   font-size: .8125rem; 
 }
 
-.mat-button-toggle-disabled,
-.mat-button-toggle-disabled.mat-button-toggle-checked, 
-.mat-button-toggle.mat-button-toggle-checked { 
+.mat-button-toggle{
   background: #222e44 !important; 
   color: #f9f9f9;
 }
+.mat-button-toggle-disabled {
+  background: #222e44 !important; 
+  color: #f9f9f9;
+}
+.mat-button-toggle-disabled.mat-button-toggle-checked {
+  background: #f9f9f9 !important; 
+  color: #222e44;
+}
+.mat-button-toggle.mat-button-toggle-checked { 
+  background: #f9f9f9 !important; 
+  color: #222e44;
+}
+
 
 /* 기본 설정 datatable css 수정 
 datatable의 세팅값은 각 태그에 존재함*/

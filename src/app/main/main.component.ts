@@ -1,8 +1,8 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatButtonToggle } from '@angular/material';
 
 import { Angulartics2 } from 'angulartics2';
 
@@ -19,6 +19,11 @@ export class MainComponent implements OnInit, AfterViewInit {
   currentMenu: string = 'main';
 
   private currentPath: string = '/';
+  
+  // @ViewChild('btnMenuGroup') public btnMenuGroup: matButtonToggleGroup;
+  @ViewChild('btnMenuMain') public btnMenuMain: MatButtonToggle;
+  @ViewChild('btnMenuGraph') public btnMenuGraph: MatButtonToggle;
+  @ViewChild('btnMenuHistory') public btnMenuHistory: MatButtonToggle;
 
   constructor(
     private _router: Router,

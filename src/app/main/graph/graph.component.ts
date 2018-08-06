@@ -294,6 +294,7 @@ return path;
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
             x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_styleBak'] = _.clone(label.scratch['_style']);
           });
 
         this.resultGraph.nodes.push( x );
@@ -305,6 +306,7 @@ return path;
         .filter(val => val.type == 'edges' && val.name == x.data.label)
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = _.clone(label.scratch['_style']);
         });
 
         this.resultGraph.edges.push( x );
@@ -328,7 +330,6 @@ return path;
       (x:IEnd) => {
         this.isLoading = false;
         this.queryResult.setData(<IResponseDto>this.resultDto);
-
         this.queryGraph.refresh();
 
         // **NOTE: 이어서 schema graph 호출 (gid)
@@ -396,6 +397,8 @@ return path;
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         setTimeout(()=>{
+          this.queryGraph.graphChangeLayout('cose');
+
           this.metaGraph.refresh();
           this.statGraph.refresh();
         }, 100);  

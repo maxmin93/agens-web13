@@ -1,6 +1,6 @@
 <div id="graphCard" class="col strech">
   
-    <div #progressBar style='visibility:hidden;'>
+    <div id="progressBarStatGraph" #progressBar style='visibility:hidden;'>
         <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
     </div>
 
@@ -53,8 +53,9 @@
             </div>
         </div> 
         <div class="col strech">
-            <div class="col-side strech border p-20">
+            <div id="div-d3-chart" #divD3Chart class="col-side strech border p-20">
                 <h5><strong>CHART</strong> GRAPH</h5>
+                <svg id="svg-d3-chart" width="600" height="150"></svg>
             </div>
             <div class="strech border p-20">
                 <h5><strong>LINE</strong> GRAPH </h5>

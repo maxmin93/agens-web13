@@ -1,6 +1,6 @@
   <!-- GRAPH -->
   <div id="graphCard" class="col strech">
-    <div #progressBar style='visibility:hidden;'>
+    <div id="progressBarQueryGraph" #progressBar style='visibility:hidden;'>
         <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
     </div>
     <!-- Graph content -->
@@ -35,19 +35,18 @@
                         </div>
                         <ul class="list col strech border noborder m-10">
                             <li class="side-margin">
-                                <span>Start Node</span><span>{{ shortestPathDto.sid }}</span>
+                                <span>Start Node</span><span>{{ shortestPathOptions.sid }}</span>
                             </li>
                             <li class="side-margin">
-                                <span>End Node</span><span>{{ shortestPathDto.eid }}</span>
+                                <span>End Node</span><span>{{ shortestPathOptions.eid }}</span>
+                            </li>
+                            <li class="side-margin">
+                                <mat-slide-toggle #slideShortestPathDirected [checked]="shortestPathOptions.directed" matTooltip="directed option">
+                                </mat-slide-toggle>
                             </li>
                         </ul>
-                        <mat-list role="list" *ngIf="shortestPathDto.result">
-                            <mat-list-item role="listitem" *ngFor="let item of shortestPathDto.result; index as i">
-                                <a href="javascript:void(0)" (click)="highlightShortestPath(item)">
-                                Path[{{ i }}]: length = {{ item.length }}
-                            </a></mat-list-item>
-                        </mat-list>
-                        <button mat-raised-button color="primary" (click)="callFindShortestPath()">Search</button>
+                        <span *ngIf="shortestPathOptions.distTo">dijkstra.distance = {{ shortestPathOptions.distTo }}</span>
+                        <button mat-raised-button color="primary" (click)="doFindShortestPath()">Search</button>
                         <button mat-raised-button (click)="toggleFindShortestPath(false)">Close</button>
                     </div>
                 </ng-container>
@@ -109,6 +108,8 @@
                             <h4 class="mat-subhead">Centrality <strong>methods</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
+                            <button mat-menu-item (click)="graphCentrality('reset')">Reset styles</button>
+                        <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphCentrality('degree')">Degree</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphCentrality('pagerank')">PageRank</button>
@@ -127,7 +128,7 @@
                 <li><a (click)="toggleFindConnectedGroup()" matTooltip="find Connected Group" matTooltipPosition="above">
                     <mat-icon>view_quilt</mat-icon></a>
                 </li>
-                <li><a (click)="toggleFindShortestPath()" matTooltip="find Shortest Path" matTooltipPosition="above">
+                <li><a mat-button-toggle [ngClass]="{ 'on-btn': btnStatus.shortestPath, 'off-btn': !btnStatus.shortestPath }" #btnShortestPath (click)="toggleFindShortestPath()" matTooltip="find Shortest Path" matTooltipPosition="above">
                     <mat-icon>timeline</mat-icon></a>
                 </li>
                 <li><a (click)="frindCircle()" matTooltip="find Circle" matTooltipPosition="above">
