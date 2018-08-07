@@ -25,8 +25,8 @@
         <app-query-result #queryResult></app-query-result>
     </div>
 
-    <mat-tab-group #resultTapGroup [selectedIndex]="1" 
-        (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()" class="m-20 strech">
+    <mat-tab-group #resultTapGroup [selectedIndex]="1" class="m-20 strech md-no-animation"
+        (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
         <mat-tab label="Meta"> 
             <!-- META(0) -->
             <app-meta-graph #metaGraph></app-meta-graph>

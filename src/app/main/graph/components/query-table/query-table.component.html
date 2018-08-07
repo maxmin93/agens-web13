@@ -1,14 +1,15 @@
 
   <div>
-    <ngx-datatable #recordTable class='material' [columnMode]="'force'"
+    <ngx-datatable #recordTable  class="material m-20"
         [limit]="10" [reorderable]="reorderable" [scrollbarH]="true"
-        [rows]='recordRows' [columns]='recordColumns'
-        [headerHeight]="38" [footerHeight]="38" [rowHeight]="auto"
-        (activate)="onActivateTableRow($event)">
+        [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
+        [headerHeight]="40" [footerHeight]="40" [rowHeight]="40"
+        >
+        <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
-        <ngx-datatable-column name="Index" [width]="80" [canAutoResize]="false" [sortable]="false">
-            <ng-template let-row="row" ngx-datatable-cell-template>
-                <span>{{ row.$$index }}</span>
+        <ngx-datatable-column name="Index" [width]="60" [canAutoResize]="false" [sortable]="false">
+            <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
+                <span>{{ rowIndex }}</span>
             </ng-template>
         </ngx-datatable-column>
 
@@ -17,13 +18,13 @@
             <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
                 <span (click)="recordSort(col)">{{col.name}}</span>
             </ng-template>
-            <ng-template let-row="row" ngx-datatable-cell-template>
+            <ng-template let-rowIndex="rowIndex" let-column="col" let-row="row" ngx-datatable-cell-template>
                 <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0"
-                    (click)="showJsonFormat(col,row)">
+                    (click)="showJsonFormat(rowIndex, col, row)">
                     {{ row[col.name] | json }}
                 </span>
                 <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0"
-                    (click)="showJsonFormat(col,row)">
+                    (click)="showJsonFormat(rowIndex, col,row)">
                     {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
                 </span>
             </ng-template>

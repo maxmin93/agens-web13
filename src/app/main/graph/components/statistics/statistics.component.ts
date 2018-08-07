@@ -150,11 +150,15 @@ export class StatisticsComponent implements OnInit {
     // this.cy.elements(':selected').unselect();
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.$api.changeLayout('klay');
+    this.cy.fit( this.cy.elements(), 50);
   }
   resize(){
     this.cy.resize();
-    this.cy.fit( this.cy.elements(), 100);
+    this.cy.$api.changeLayout('klay', {
+      "padding": 50
+      , "ready": () => this.toggleProgressBar(true)
+      , "stop": () => this.toggleProgressBar(false)
+    });
     agens.cy = this.cy;
 
     if( this.isVisible ){

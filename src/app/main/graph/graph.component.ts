@@ -333,7 +333,10 @@ return path;
         this.queryResult.setData(<IResponseDto>this.resultDto);
         this.queryGraph.refresh();
 
-        // **NOTE: 이어서 schema graph 호출 (gid)
+        // send data to Table 
+        this.queryTable.setData(this.resultRecord);
+
+        // // **NOTE: 이어서 schema graph 호출 (gid)
         if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
           this.runGraphSchema( this.resultDto.gid );
       });
@@ -397,9 +400,8 @@ return path;
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
+        this.queryGraph.graphChangeLayout('cose');
         setTimeout(()=>{
-          this.queryGraph.graphChangeLayout('cose');
-
           this.metaGraph.refresh();
           this.statGraph.refresh();
         }, 100);  

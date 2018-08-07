@@ -196,7 +196,8 @@ export class QueryGraphComponent implements OnInit {
   graphChangeLayout(layout:string){
     if( this.isVisible ) 
       this.cy.$api.changeLayout(layout, {
-        "ready": () => this.toggleProgressBar(true)
+        "padding": 50
+        , "ready": () => this.toggleProgressBar(true)
         , "stop": () => this.toggleProgressBar(false)
       });
   }

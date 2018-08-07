@@ -52,7 +52,7 @@
               "node_modules/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js",
               "node_modules/dagre/dist/dagre.js",
               "node_modules/cytoscape-dagre/cytoscape-dagre.js",
-              
+              "node_modules/cytoscape-euler/cytoscape-euler.js",
               "node_modules/cytoscape-expand-collapse/cytoscape-expand-collapse.js",
               "node_modules/klayjs/klay.js",
               "node_modules/cytoscape-klay/cytoscape-klay.js",

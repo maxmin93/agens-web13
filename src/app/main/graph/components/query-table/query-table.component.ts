@@ -19,6 +19,7 @@ export class QueryTableComponent implements OnInit {
   recordRowsCount: number = 0;
   isJsonCell: boolean = false;
 
+  selected: any[] = [];
   selectedCell: any = {};
   selectedRowIndex: number = -1;
   selectedColIndex: number = -1;
@@ -51,8 +52,8 @@ export class QueryTableComponent implements OnInit {
 
   setData(record:IRecord){
     this.recordColumns = record.columns;
-    // this.recordRows = this.convertRowToAny(record.columns, record.rows);
-    // this.recordRowsCount = this.recordRows.length;
+    this.recordRows = this.convertRowToAny(record.columns, record.rows);
+    this.recordRowsCount = this.recordRows.length;
   }
 
   // rows를 변환 : Array<Array<any>> ==> Array<Map<string,any>>
@@ -62,7 +63,7 @@ export class QueryTableComponent implements OnInit {
       let temp:any = {};
       for( let col of columns ){
         let key:string = col.name;
-        let val:any = row[col.index];
+        let val:any = row.row[col.index];
         temp[key] = val;
       }
       tempArray.push(temp);
@@ -70,17 +71,15 @@ export class QueryTableComponent implements OnInit {
     return tempArray;
   }
 
-  onActivateTableRow(event){
-    // console.log('Activate Event', event);
-  }
-
   // 늘상 보이는 것으로 변경
-  showJsonFormat(col:IColumn, row:any) {
+  showJsonFormat(rowIndex:number, col:IColumn, row:any) {
     this.tableCell.nativeElement.style.visibility = 'visible';   // this.isJsonCell = true;
     this.selectedCell = row[col.name];
-    this.selectedRowIndex = row.$$index;
+    this.selectedRowIndex = rowIndex;
     this.selectedColIndex = col.index+1;
     document.querySelector('#tableCell').scrollIntoView();
+
+    console.log( rowIndex, col, row );
   }
 
   // 클립보드에 복사하기
@@ -97,8 +96,12 @@ export class QueryTableComponent implements OnInit {
   // ** 이유
   // 1) JSON 형태에 대해서 정렬 안됨 : Node, Edge, Graph 등
   // 2) record 크기가 1000개 이상이면 브라우저 성능상 부하 가능 ==> order by 구문으로 처리하도록 유도
-  recordSort(col:IColumn){
-    //console.log('recordSort =>', col);
-  }
+  // recordSort(col:IColumn){
+  //   console.log('recordSort =>', col);
+  // }
+
+  // onSelect(event) {
+  //   console.log('Event: select', event, this.selected);
+  // }
 
 }

@@ -497,8 +497,11 @@
         fit: true, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
-        ready: function(){}, stop: function(){}
+        ready: function(){}, stop: function(){},
+        // for euler
+        springLength: edge => 120, springCoeff: edge => 0.0008,
       };
+      if( options && options.hasOwnProperty('padding') ) layoutOption.padding = options.padding;
       if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
       if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
   
