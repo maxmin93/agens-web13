@@ -84,14 +84,12 @@ export class HistoryComponent implements AfterViewInit {
         },
         err => {
           this.toggleProgress(false);
+          console.log( 'manager.logs: ERROR=', err instanceof HttpErrorResponse, err.error );
           this._api.setResponses(<IResponseDto>{
-            group: 'core.command.deleteLabel',
-            state: CONFIG.StateType.ERROR,
-            message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
+            group: 'manager.logs',
+            state: err.statusText,
+            message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
           });
-          if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
-  
-          this._router.navigate(['/login'], { queryParams: { returnUrl: this._router.url }});
         },
         () => {
           this.toggleProgress(false);

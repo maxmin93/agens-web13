@@ -263,12 +263,13 @@ return path;
         }  
       },
       err => {
+        console.log( 'core.query: ERROR=', err instanceof HttpErrorResponse, err.error );
         this._api.setResponses(<IResponseDto>{
           group: 'core.query',
-          state: CONFIG.StateType.ERROR,
-          message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
+          state: err.statusText,
+          message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
         });
-        if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
+        
         this.clearSubscriptions();
       });
 

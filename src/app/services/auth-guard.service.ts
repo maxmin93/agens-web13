@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
+import { HttpErrorResponse } from '@angular/common/http';
+
 import { AgensDataService } from './agens-data.service';
-import { Observable, Subject } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
-import { IClientDto } from '../models/agens-response-types';
+import { of, Observable, Subject } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { IClientDto, IResponseDto } from '../models/agens-response-types';
+
+import * as CONFIG from '../global.config';
 
 @Injectable()
 export class AuthGuardService implements CanActivate {
@@ -22,9 +26,22 @@ export class AuthGuardService implements CanActivate {
         console.log(`isValid=${x}, move to "/login" by force`);
         this._router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
       }
+    },
+    err => {
+      console.log( 'auth.valid[0]:', err instanceof HttpErrorResponse, err.error );
+      this._api.setResponses(<IResponseDto>{
+        group: 'auth.connect',
+        state: err.statusText,
+        message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
+      });
+
+      setTimeout(() => {
+        // login 페이지로 이동
+        this._router.navigate(['/login'], { queryParams: { returnUrl: state.url }});
+      }, 10);
     });
     
-    return isValid$;
+    return isValid$.pipe( catchError(err => of(false)) );    
   }
 
 }

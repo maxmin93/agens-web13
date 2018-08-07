@@ -240,8 +240,17 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         this.labels = x.labels;
       },
       err => {
+        console.log( 'core.schema: ERROR=', err instanceof HttpErrorResponse, err.error );
+        this._api.setResponses(<IResponseDto>{
+          group: 'core.schema',
+          state: err.statusText,
+          message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
+        });
+        
         this.clearSubscriptions();
-        this._router.navigate(['/login'], { queryParams: { returnUrl: '/' }});
+        setTimeout(()=>{
+          this._router.navigate(['/login'], { queryParams: { returnUrl: '/' }});
+        },30);
       });
     this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
@@ -378,12 +387,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           if( dto.state == CONFIG.StateType.SUCCESS ) this.deleteLabelUpdate(dto.label);
         },
         err => {
+          console.log( 'schema.deleteLabel: ERROR=', err instanceof HttpErrorResponse, err.error );
           this._api.setResponses(<IResponseDto>{
-            group: 'core.command.deleteLabel',
-            state: CONFIG.StateType.ERROR,
-            message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
+            group: 'schema.deleteLabel',
+            state: err.statusText,
+            message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
           });
-          if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
         }
       );
     });
@@ -430,12 +439,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           if( dto.state == CONFIG.StateType.SUCCESS ) this.createLabelUpdate(dto.label);
         },
         err => {
+          console.log( 'schema.createLabel: ERROR=', err instanceof HttpErrorResponse, err.error );
           this._api.setResponses(<IResponseDto>{
-            group: 'core.command.deleteLabel',
-            state: CONFIG.StateType.ERROR,
-            message: (err instanceof HttpErrorResponse) ? err.message : 'Unknown Error'
+            group: 'schema.createLabel',
+            state: err.statusText,
+            message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
           });
-          if( !(err instanceof HttpErrorResponse) ) console.log( 'Unknown Error', err );
         }
       );
     });
