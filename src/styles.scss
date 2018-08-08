@@ -107,13 +107,16 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 .p-20 { padding: 1.25rem; }
 .p-10 { padding: .625rem; }
 
-.border { border: 1px solid #ddd; }
+.border { border: 1px solid #ddd;  
+  &.border-dotted { border-style: dotted; } 
+  &.border-dashed { border-style: dashed; }
+}
+
 .border-left-no { border-left: none; }
 .border-top-no { border-top: none; }
 
 ul.border {
-  &.noborder { border: none }
-  &.border-dashed { border-style: dashed; }
+  &.noborder { border: none }  
   > li { border-bottom: 1px solid #ddd; }
 }
 
@@ -145,22 +148,24 @@ a {
   font-size: .8125rem; 
 }
 
-.mat-button-toggle{
-  background: #222e44 !important; 
-  color: #f9f9f9;
-}
+// .mat-button-toggle {
+//   background: #222e44 !important; 
+//   color: #f9f9f9;
+// }
+
 .mat-button-toggle-disabled {
   background: #222e44 !important; 
   color: #f9f9f9;
 }
 .mat-button-toggle-disabled.mat-button-toggle-checked {
-  background: #f9f9f9 !important; 
-  color: #222e44;
+  color: #ccc;
 }
+
 .mat-button-toggle.mat-button-toggle-checked { 
-  background: #f9f9f9 !important; 
-  color: #222e44;
+  color: #f5f5f5;
 }
+
+
 
 
 /* 기본 설정 datatable css 수정 
@@ -168,44 +173,48 @@ datatable의 세팅값은 각 태그에 존재함*/
 
 .ngx-datatable.material { 
   display: flex; 
-  flex-direction: column; 
+  flex-direction: column;
+  align-items: flex-start; 
 
   div.visible { 
     display: flex; 
     flex-direction: column; 
+    flex: 1; 
 
-    .datatable-header { overflow: initial; }
+    .datatable-header { 
+      background: #f5f5f5; 
+      overflow: initial; 
+      border-bottom: 0;   
+    }
 
     .datatable-body {  
       flex: 1; 
       overflow-x: hidden; 
       overflow-y: auto; 
+
+      .datatable-body-cell {
+        display: flex; 
+        align-items: center; 
+        padding: .8rem 1.2rem; 
+        border-top: 1px solid #f5f5f5; 
+        font-size: .8125rem; 
+        color: #585858;
+        
+        .datatable-body-cell-label { 
+          width: inherit; 
+          overflow: hidden; 
+          text-overflow: ellipsis; 
+          white-space: nowrap; 
+        }
+      }
     }
   }
 }
 
-.datatable-header-cell { 
-  background: #f5f5f5; 
-  border-bottom: 0; 
-}
 
 .ngx-datatable .datatable-body .datatable-scroll { width: 100% !important; }
-.ngx-datatable.material .datatable-header { border-bottom: 0; }
+
 .ngx-datatable.material .empty-row { line-height: 28px; }
-
-.datatable-body-cell-label {
-  display: flex; 
-  align-items: center; 
-}
-
-.ngx-datatable.material .datatable-body .datatable-body-row .datatable-body-cell {
-  display: flex; 
-  align-items: center; 
-  padding: .8rem 1.2rem; 
-  border-top: 1px solid #f5f5f5; 
-  font-size: .8125rem; 
-  color: #585858;
-}
 
 // datatable active 되었을 때 애니메이션 
 .ngx-datatable.material.single-selection .datatable-body-row.active, 
@@ -325,7 +334,7 @@ form, input {
 
 .CodeMirror { 
   font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
-  font-size: .875rem;
+  font-size: .825rem;
   font-weight: 400; 
 }
 
