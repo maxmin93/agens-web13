@@ -13,13 +13,13 @@
           </span>
         </div>
       </div>
-      <div class="col m-20">
+      <div class="col m-20 strech">
         <div #progressBar style='visibility:hidden;'>
           <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
         </div>
         
         <!-- (activate)="onActivateTableLabels($event)" -->
-        <ngx-datatable #logsTable class="material" [columnMode]="'flex'"
+        <ngx-datatable #logsTable class="material strech" [columnMode]="'flex'"
                 [rows]="logRows" [reorderable]="reorderable" [limit]="9"
                 [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
                 >

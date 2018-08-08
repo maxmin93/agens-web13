@@ -1,9 +1,9 @@
 
-  <div>
-    <ngx-datatable #recordTable  class="material m-20"
-        [limit]="10" [reorderable]="reorderable" [scrollbarH]="true"
+  <div class="row strech">
+    <ngx-datatable #recordTable  class="material strech row-side col"
+        [limit]="9" [reorderable]="reorderable" [scrollbarH]="true"
         [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
-        [headerHeight]="40" [footerHeight]="40" [rowHeight]="40"
+        [headerHeight]="48" [footerHeight]="48" [rowHeight]="auto"
         >
         <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
@@ -30,20 +30,23 @@
             </ng-template>
         </ngx-datatable-column>            
     </ngx-datatable>    
-</div>
-<!-- " *ngIf="isJsonCell" -->
-<div id="tableCell" #tableCell class="json" style="visibility: hidden;">
-    <h4>CELL <small>VALUE</small></h4>
-    <mat-card-content class="scrollbar">
-        <!-- 
-            JSON Pretty formatter
-            https://www.npmjs.com/package/angular2-prettyjson
-        -->            
-        <div>
-            <a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above"><i class="fa fa-clone" aria-hidden="true"></i></a>
-            <h5><i class="fa fa-mouse-pointer" aria-hidden="true"></i> 
-                clicked [ row, col ] = [ <span>{{selectedRowIndex}}, {{selectedColIndex}}</span> ]</h5>              
+    <div class="col strech border border-dashed p-20">
+        <h5>CELL <strong>VALUE</strong> </h5>
+        <!-- " *ngIf="isJsonCell" -->
+        <div id="tableCell" #tableCell class="json strech" style="visibility: hidden;">
+            
+            <mat-card-content class="scrollbar">
+                <!-- 
+                    JSON Pretty formatter
+                    https://www.npmjs.com/package/angular2-prettyjson
+                -->            
+                <div class="row">
+                    <a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above"><i class="fa fa-clone" aria-hidden="true"></i></a>
+                    <h5><i class="fa fa-mouse-pointer" aria-hidden="true"></i> 
+                        clicked [ row, col ] = [ <span>{{selectedRowIndex}}, {{selectedColIndex}}</span> ]</h5>              
+                </div>
+                <pre id="cellValue" [innerHtml]="selectedCell | prettyjson:3"></pre>
+            </mat-card-content>    
         </div>
-        <pre id="cellValue" [innerHtml]="selectedCell | prettyjson:3"></pre>
-    </mat-card-content>    
+    </div>
 </div>
