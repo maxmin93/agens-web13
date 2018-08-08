@@ -117,14 +117,15 @@ return path;
 
     // CodeMirror : get mime type
     var mime = 'application/x-cypher-query';
-    this.editor = CodeMirror.fromTextArea( this.queryEditor.nativeElement, {
+    this.editor = new CodeMirror.fromTextArea( this.queryEditor.nativeElement, {
       mode: mime,
-      indentWithTabs: true,
-      smartIndent: true,
+      indentWithTabs: false,
+      smartIndent: false,
       lineNumbers: true,
-      matchBrackets : true,
+      styleActiveLine: true,
+      matchBrackets: true,
       autofocus: true,
-      theme: 'eclipse'
+      theme: 'idea'
     });
     // CodeMirror : initial value
     this.editor.setValue( this.query );
@@ -402,6 +403,9 @@ return path;
       (x:IEnd) => {
         this.queryGraph.graphChangeLayout('cose');
         setTimeout(()=>{
+          this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5 );
+          this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x );
+      
           this.metaGraph.refresh();
           this.statGraph.refresh();
         }, 100);  

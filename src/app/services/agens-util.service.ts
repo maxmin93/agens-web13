@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 
+import { IElement } from '../models/agens-data-types';
+
+import * as d3 from 'd3';
 import * as CONFIG from '../global.config';
 
 declare var randomColor: any;
@@ -9,10 +12,17 @@ declare var randomColor: any;
 })
 export class AgensUtilService {
 
-  constructor() { }
+  // pallets : Node 와 Edge 라벨별 color 셋
+  colorIndex: number = 0;
+  labelColors: any[] = [];
+  
+  constructor() { 
+    // pallets 생성 : luminosity='dark'
+    this.labelColors = this.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);
+  }
 
   /////////////////////////////////////////////////////////////////
-  // Common Utilities
+  // Common Utilities : Color Pallete
   /////////////////////////////////////////////////////////////////
   
   // calculate color distance
@@ -59,6 +69,10 @@ export class AgensUtilService {
     return colors;
   }
   
+  /////////////////////////////////////////////////////////////////
+  // Common Utilities : Binning
+  /////////////////////////////////////////////////////////////////
+  
   // 구간화 
   // http://www.statisticshowto.com/choose-bin-sizes-statistics/
   // https://www.mathway.com/ko/popular-problems/Finite%20Math/621737
@@ -79,4 +93,29 @@ export class AgensUtilService {
     
     return values;
   }  
+
+  private makeBins(data:number[]){
+    let binCount = 10;
+    let x = d3.scaleLinear().domain( d3.extent(data) ).nice( binCount );
+    let histogram = d3.histogram().domain( d3.extent(x.domain()) ).thresholds( x.ticks(binCount) );
+    return histogram( data );
+  }
+
+  public calcElementStyles(eles:Array<IElement>, fn:Function){
+    let bins = this.makeBins( eles.map(x => x.data['size']) );
+    eles.map( ele => {
+      bins.forEach((x,idx) => {
+        if( ele.data['size'] >= x.x0 && ele.data['size'] < x.x1 ){
+          ele.scratch._style = {
+            color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
+            , width: fn(idx) + 'px'
+            , title: 'name'
+          };
+          this.colorIndex += 1;
+          return false;
+        }
+      });
+    });
+  }
+
 }

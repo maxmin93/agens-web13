@@ -25,6 +25,8 @@ import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import * as CONFIG from '../../global.config';
 import { ISchemaDto } from '../../models/agens-response-types';
 
+import * as d3 from 'd3';
+
 declare var $: any;
 declare var agens: any;
 
@@ -43,10 +45,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   // cytoscape 객체
   private cy:any = null;
   
-  // pallets : Node 와 Edge 라벨별 color 셋
-  colorIndex: number = 0;
-  labelColors: any[] = [];
-
   // call API
   handlers:Subscription[] = [undefined, undefined, undefined, undefined, undefined, undefined];
   datasource: IDatasource = undefined;
@@ -141,9 +139,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
       events: { visible: function(event, api) { $('.qtip').click(function(){ $('.qtip').hide(); }); } }
     });
-
-    // pallets 생성 : luminosity='dark'
-    this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);
 
     // schemaData
     this.callCoreSchema();
@@ -265,13 +260,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       });
     this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
-        this.injectElementStyle( x );
         this.graph.nodes.push(x);
         this.cy.add(x);
       });
     this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
-        this.injectElementStyle( x );
         this.graph.edges.push(x);
         this.cy.add(x);
       });
@@ -308,28 +301,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   showGraph(){
+    this._util.calcElementStyles( this.graph.nodes, (x)=>40+x*5 );
+    this._util.calcElementStyles( this.graph.edges, (x)=>2+x );
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.$api.changeLayout('klay');    
   }
 
   ////////////////////////////////////////////////////////
-
-  // ** 참고: https://github.com/davidmerfield/randomColor
-  injectElementStyle( ele:IElement ){
-    if( ele.group == 'nodes' )
-      ele.scratch._style = {
-          color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
-          , width: (50 + Math.floor(Math.log10(ele.data['size']+1))*10) +'px'
-          , title: 'name'
-        };
-    else if( ele.group == 'edges' )
-      ele.scratch._style = {
-          color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
-          , width: (2 + Math.floor(Math.log10(ele.data['size']+1))*2) +'px'
-          , title: 'name'
-        };
-    this.colorIndex += 1;
-  }
 
   // 클릭된 element 해당하는 label 정보를 화면에 연결하기
   selectFromGraph(id:string):ILabel {
