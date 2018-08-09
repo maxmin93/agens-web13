@@ -16,16 +16,14 @@
                             <div id="slide-toggle" class="slide border col">
                                 <div class="row-center">
                                     <h4>DATA <strong>INFO</strong></h4>
-                                    <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
-                                    [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
-                                    </mat-slide-toggle>
                                 </div>
                                 <ul class="list border noborder col strech m-10">
                                     <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
                                     <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
-                                    <li class="col strech side-margin">
-                                        <span>Data</span>
-                                        <div class="json strech m-10"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
+                                    <li class="side-margin"><span>Size</span>{{ selectedElement.data('size') }}</li>
+                                    <li class="col strech side-margin" *ngIf="selectedElement.data('props').hasOwnProperty('propsCount')">
+                                        <span>Property groupCount</span>
+                                        <div class="json strech m-10"><pre [innerHtml]="selectedElement.data('props')['propsCount'] | prettyjson:3"></pre></div>
                                     </li>
                                 </ul>
                             </div>
@@ -47,6 +45,10 @@
                     <ul class="list icon border noborder">
                         <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
                                 <mat-icon>refresh</mat-icon></a></li>
+                        <li><a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
+                            <mat-icon>unfold_more</mat-icon></a></li>
+                        <li><a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
+                            <mat-icon>unfold_less</mat-icon></a></li>
                     </ul>
                 </div>
             </div>

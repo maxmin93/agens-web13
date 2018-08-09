@@ -104,8 +104,8 @@ export class AgensUtilService {
   public calcElementStyles(eles:Array<IElement>, fn:Function){
     let bins = this.makeBins( eles.map(x => x.data['size']) );
     eles.map( ele => {
-      bins.forEach((x,idx) => {
-        if( ele.data['size'] >= x.x0 && ele.data['size'] < x.x1 ){
+      bins.forEach( (x,idx) => {
+        if( x.includes( ele.data['size'] ) ){
           ele.scratch._style = {
             color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
             , width: fn(idx) + 'px'

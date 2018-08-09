@@ -166,13 +166,15 @@
         }}, {
         selector: 'node.expand',
         css: {
+          'label': function(e){ return e.data('name'); },
           'opacity': 0.6,
           'color':'black',
-          'background-color': 'darkorange',
-          'width': '40px',
-          'height': '40px',
-          'border-color':'orange',
-          'border-width': 2,
+          'border-color':'black',
+          'border-width': 1,
+          'color': 'black',
+          'font-weight': 200,
+          'font-size': 6,
+          'text-opacity': 1,
         }}, {
         selector: 'edge',
         css: {
@@ -219,10 +221,7 @@
         selector: 'edge.expand',             
         css: {
           'opacity': 0.6,
-          'line-style':'dotted',
-          'line-color': 'orange',
-          'target-arrow-color': 'orange',
-          'source-arrow-color': 'orange',
+          'line-style':'dotted'
         }}, {
         // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
         selector: 'node.highlighted',      
@@ -485,26 +484,28 @@
     // layouts = { bread-first, circle, cose, cola, 'klay', 'dagre', 'cose-bilkent', 'concentric" }
     // **NOTE: euler 는 속도가 빠르지만 간혹 stack overflow 문제를 일으켜 제외
     cy.$api.changeLayout = function(layout='cose', options=undefined){
-      console.log( 'cy.$api.changeLayout:', layout);
       let elements = cy.elements(':visible');
-      if( options && options.hasOwnProperty('useSelected') ){
-        let selectedElements = cy.elements(':selected');
-        if( options.useSelected && selectedElements.size() > 1 ) elements = selectedElements;
-      } 
-        
+      let boundingBox = undefined;
+      if( options ){
+        if( options.hasOwnProperty('elements') ) elements = options['elements'];
+        if( options.hasOwnProperty('boundingBox') ) boundingBox = options['boundingBox'];
+      }
+
       let layoutOption = {
         name: layout,
-        fit: true, padding: 50, boundingBox: undefined, 
+        fit: true, padding: 50, boundingBox: boundingBox, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){}, stop: function(){},
         // for euler
         springLength: edge => 120, springCoeff: edge => 0.0008,
       };
+      if( options && options.hasOwnProperty('animate') ) layoutOption.animate = options.animate;
       if( options && options.hasOwnProperty('padding') ) layoutOption.padding = options.padding;
       if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
       if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
-  
+      console.log( 'cy.$api.changeLayout:', layout, layoutOption);
+
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);
       layoutHandler.run();

@@ -129,25 +129,126 @@ export class MetaGraphComponent implements OnInit {
     this.cy.add( ele );
   }
 
+  addProperties( nodes:any[] ){
+    nodes.forEach(ele => {
+      if( !ele._private.data.props.hasOwnProperty('propsCount') ) return true;
+      let propsCount:Map<string,any> = ele._private.data.props['propsCount'];
+
+      Object.keys(propsCount).forEach(k => {
+        let pNode = <INode>{ group: 'nodes', data: {
+            id: ele._private.data.id + ':' + k,
+            // parent: ele._private.data.id,
+            label: 'property',
+            props: {},
+            size: propsCount[k]
+          },
+          scratch: {
+            _style: <IStyle>{
+              color: ele._private.scratch._style.color, width: '20px', title: k
+            }},
+          classes: 'expand' 
+        };
+        pNode.data['owner'] = ele._private.data.id;
+        pNode.data['name'] = k;
+        let pEdge = <IEdge>{ group: 'edges', data: {
+            id: ele._private.data.id + ':has:' + k,
+            label: 'property',
+            source: ele._private.data.id,
+            target: ele._private.data.id + ':' + k,
+            props: {},
+            size: 1
+          },
+          scratch: {
+            _style: <IStyle>{
+              color: ele._private.scratch._style.color, width: '2px', title: undefined
+            }},
+          classes: 'expand' 
+        };
+        pEdge.data['owner'] = ele._private.data.id;
+
+        this.cy.add( pNode );
+        this.cy.add( pEdge );
+      });
+    });
+  }
+
+
   refresh(){
-    // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
-    // this.cy.elements(':selected').unselect();
+    // add Properties of Node
+    this.addProperties(this.cy.nodes());
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
   }
   resize(){
     this.cy.resize();
+    this.cy.$api.view.hide( this.cy.elements(`[label='property']`) );
     this.cy.$api.changeLayout('klay', {
-      "padding": 100
+      "elements": this.cy.elements(`[label!='property']`)
+      , "padding": 50
       , "ready": () => this.toggleProgressBar(true)
       , "stop": () => this.toggleProgressBar(false)
     });
     agens.cy = this.cy;
+
+    // setTimeout(() => {
+    //   console.log( 'layoutProperties does not work. Why?' );
+    //   this.layoutProperties( this.cy.nodes(`[label!='property']`) );
+    // }, 1000);
   }
   refreshCanvas(){
     this.refresh();
     this.resize();
   }
 
+  layoutProperties( targets:any[] ){    
+    targets.forEach(p => {
+      if( !p._private.data.props.hasOwnProperty('propsCount') ) return true;
+      let elements = this.cy.elements(`[owner='${p.id()}']`);
+      elements.add(p);
+
+      let position = p.position();
+      let margin = 400 + parseInt(p._private.scratch._style.width.replace('px',''));
+      let boundingBox = { x1: position.x - margin, x2: position.x + margin, y1: position.y - margin, y2: position.y + margin };
+
+      let expandLayout:any = {
+        name: 'concentric',
+        fit: true,                          // whether to fit the viewport to the graph
+        padding: 50,                        // the padding on fit
+        startAngle: 3 / 2 * Math.PI,        // where nodes start in radians
+        sweep: undefined,                   // how many radians should be between the first and last node (defaults to full circle)
+        clockwise: true,                    // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
+        equidistant: false,                 // whether levels have an equal radial distance betwen them, may cause bounding box overflow
+        minNodeSpacing: 10,                 // min spacing between outside of nodes (used for radius adjustment)
+        boundingBox: boundingBox,           // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+        avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
+        nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+        concentric: function( node ){ return node.degree(); },  // returns numeric value for each node, placing higher nodes in levels towards the centre
+        levelWidth: function( nodes ){ return nodes.maxDegree() / 4; }, // the variation of concentric values in each level
+        animate: false,                     // whether to transition the node positions
+      };
+
+      setTimeout(() => {
+        elements.makeLayout(expandLayout).run();
+      }, 100);        
+    });
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Properties Controllers
+  /////////////////////////////////////////////////////////////////
+
+  unfoldProperties(){
+    this.layoutProperties( this.cy.nodes(`[label!='property']`) );
+    this.cy.$api.view.show( this.cy.elements(`[label='property']`) );
+    setTimeout(() => {
+      this.cy.style(agens.graph.stylelist['dark']).update();
+      this.cy.fit( this.cy.elements(), 50);
+    }, 100);
+  }
+
+  foldProperties(){
+    this.cy.$api.view.hide( this.cy.elements(`[label='property']`) );
+    this.cy.fit( this.cy.elements(), 50);
+  }
 }
