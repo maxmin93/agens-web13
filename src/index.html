@@ -19,6 +19,8 @@
     // ga('send', 'pageview');
   </script>
 
+  
+
 </head>
 <body oncontextmenu="return false;">
   <app-root>
@@ -27,5 +29,26 @@
         <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
     </div>    
   </app-root>
+  <script>
+  
+  function sizeToggler(){
+    let toggler = document.getElementById('sizeToggler')
+    toggler.classList.toggle('on')
+    
+    if( toggler.classList.contains('on') ){
+      document.querySelectorAll('.edit-size').forEach( editSize => {
+        editSize.classList.add('strech')
+      })
+    } else {
+      document.querySelectorAll('.edit-size').forEach( editSize => {
+        editSize.classList.remove('strech')
+      })
+    }
+  }
+    
+   
+    
+  </script>  
 </body>
+
 </html>

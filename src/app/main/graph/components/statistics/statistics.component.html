@@ -11,35 +11,6 @@
                 <div id="statistics-canvas" #divCanvas class="graph-canvas strech border" 
                     [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
                 </div>
-                <!-- graph element info Box -->
-                <nav>
-                    <ng-container *ngIf="selectedElement">
-                        <div id="slide-toggle" class="slide border col">      
-                            <div class="row-center">
-                                <h4>DATA <strong>INFO</strong></h4>
-                                <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
-                                [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
-                                </mat-slide-toggle>
-                            </div>                    
-                            <ul class="list border noborder col strech m-10">
-                                <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
-                                <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
-                                <li class="col strech side-margin">
-                                    <span>Data</span>
-                                    <div class="json strech m-10"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
-                                </li>
-                            </ul>
-                        </div>
-                    </ng-container>
-                </nav>
-                <!-- Graph.Meta : Labels content -->
-                <mat-chip-list id="agens-graph-labels">
-                    <mat-chip *ngFor="let label of labels" [selected]="true" 
-                        (click)="clickGraphLabelChip(label.type, label.name)" [style.background]="label.scratch['_style'].color">
-                        <span *ngIf="label.type=='nodes'" class="nodeType">{{label.name}} ({{label.size}})</span>
-                        <span *ngIf="label.type=='edges'" class="edgeType">{{label.name}} ({{label.size}})</span>
-                    </mat-chip>
-                </mat-chip-list>
             </div>            
             <!-- Graph.Meta : toolbar -->
             <div id="agens-graph-toolbar" class="viewbox border border-left-no theme">
@@ -54,11 +25,11 @@
         </div> 
         <div class="col strech">
             <div id="div-d3-chart" #divD3Chart class="col-side strech border p-20">
-                <h5><strong>CHART</strong> GRAPH</h5>
+                <h5 class="title"><strong>CHART</strong></h5>
                 <svg id="svg-d3-chart" width="600" height="150"></svg>
             </div>
             <div class="strech border p-20">
-                <h5><strong>LINE</strong> GRAPH </h5>
+                <h5 class="title"><strong>LINE</strong></h5>
             </div>
         </div>
     </div>

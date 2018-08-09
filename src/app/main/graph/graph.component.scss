@@ -1,0 +1,31 @@
+#queryCard { position: relative; }
+
+.toggler { 
+    background: #fff; 
+    width: 35px; 
+    height: 35px; 
+    border-radius: 50%; 
+    position: absolute; 
+    bottom: -17.5px; 
+    right: 0; 
+    left: 0; 
+    margin: auto; 
+    cursor: pointer;
+
+    &::before, &::after { 
+        content:'';
+        width: 7px; 
+        height: 2px; 
+        display: block; 
+        background: #1bc9e4;
+    }
+
+    &::before { transform: translate(11px, 17px) rotate(45deg) }
+    &::after { transform: translate(15px, 15px) rotate(-45deg) }
+
+    &:hover {
+        background: #1bc9e4; 
+
+        &::before, &::after { background: #fff }
+    }
+}

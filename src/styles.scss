@@ -112,6 +112,8 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
   &.border-dashed { border-style: dashed; }
 }
 
+.border-bottom { border-bottom: 1px solid #ddd; }
+
 .border-left-no { border-left: none; }
 .border-top-no { border-top: none; }
 
@@ -351,7 +353,8 @@ form, input {
 .expand-cell::before, 
 .empty-row::before, 
 .mat-subhead::before, 
-.slide h4::before,  {
+.slide h4::before,
+.title::before  {
   content:'';
   background: #1bc9e4; 
   width: 8px; 
