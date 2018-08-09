@@ -2,30 +2,35 @@
 
 .toggler { 
     background: #fff; 
-    width: 35px; 
-    height: 35px; 
+    width: 2.1875rem; 
+    height: 2.1875rem; 
     border-radius: 50%; 
     position: absolute; 
-    bottom: -17.5px; 
+    bottom: -1.09375rem;
     right: 0; 
     left: 0; 
     margin: auto; 
     cursor: pointer;
+    transition: all .5s ease-in-out; 
 
     &::before, &::after { 
         content:'';
-        width: 7px; 
-        height: 2px; 
-        display: block; 
         background: #1bc9e4;
+        width: 0.4375rem; 
+        height: 0.125rem; 
+        display: block;
+        transition: all .5s ease-in-out;  
     }
 
-    &::before { transform: translate(11px, 17px) rotate(45deg) }
-    &::after { transform: translate(15px, 15px) rotate(-45deg) }
+    &::before { transform: translate(0.6875rem, 1.0625rem) rotate(45deg) }
+    &::after { transform: translate(0.9375rem, 0.9375rem) rotate(-45deg) }
 
     &:hover {
         background: #1bc9e4; 
 
         &::before, &::after { background: #fff }
     }
+
+    &.on::before { transform: translate(0.6875rem, 0.9375rem) rotate(-45deg) }
+    &.on::after { transform: translate(0.9375rem, 0.8125rem) rotate(45deg) }
 }
