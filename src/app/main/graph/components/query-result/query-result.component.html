@@ -1,10 +1,10 @@
 <div #resultProgressBar style='visibility:hidden;'>
   <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
 </div>
-<div class="row-center">
+<div class="row-center strech">
   <span>RESULT</span>
-  <form>
-    <textarea #queryState type="text" readonly [value]="messageText" [style.color]="messageColor" rows="1">
+  <form class="col strech">
+    <textarea #queryState type="text" readonly [value]="messageText" [style.color]="messageColor" rows="1" class="strech">
     </textarea>
   </form>
 </div>
