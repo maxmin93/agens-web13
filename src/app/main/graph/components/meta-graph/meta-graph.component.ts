@@ -172,33 +172,37 @@ export class MetaGraphComponent implements OnInit {
     });
   }
 
-
-  refresh(){
+  // 데이터 불러오고 최초 적용되는 작업들 
+  initCanvas(){
     // add Properties of Node
     this.addProperties(this.cy.nodes());
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
   }
-  resize(){
+  // 액티브 상태가 될 때마다 실행되는 작업들
+  refreshCanvas(){
     this.cy.resize();
     this.cy.$api.view.hide( this.cy.elements(`[label='property']`) );
-    this.cy.$api.changeLayout('klay', {
-      "elements": this.cy.elements(`[label!='property']`)
-      , "padding": 50
-      , "ready": () => this.toggleProgressBar(true)
-      , "stop": () => this.toggleProgressBar(false)
-    });
+    this.changeLayout( this.cy.elements(`[label!='property']`) );
     agens.cy = this.cy;
-
-    // setTimeout(() => {
-    //   console.log( 'layoutProperties does not work. Why?' );
-    //   this.layoutProperties( this.cy.nodes(`[label!='property']`) );
-    // }, 1000);
   }
-  refreshCanvas(){
-    this.refresh();
-    this.resize();
+
+  changeLayout( elements ){
+    let options = { name: 'klay',
+      nodeDimensionsIncludeLabels: false, fit: true, padding: 50,
+      animate: false, transform: function( node, pos ){ return pos; },
+      klay: {
+        aspectRatio: 2.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
+        borderSpacing: 60, // Minimal amount of space to be left to the border
+        edgeRouting: 'POLYLINE', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
+        edgeSpacingFactor: 0.6, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
+        spacing: 60, // Overall setting for the minimal amount of space to be left between objects
+        thoroughness: 6 // How much effort should be spent to produce a nice layout..
+      }
+    };    
+    // adjust layout
+    elements.layout(options).run();
   }
 
   layoutProperties( targets:any[] ){    

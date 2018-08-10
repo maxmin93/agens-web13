@@ -37,6 +37,7 @@ import { LabelStyleSettingDialog } from './dialogs/label-style-setting.dialog';
 import { ImageExportDialog } from './dialogs/image-export.dialog';
 import { StatisticsComponent } from './components/statistics/statistics.component';
 import { MetaGraphComponent } from './components/meta-graph/meta-graph.component';
+import { element } from '../../../../node_modules/protractor';
 
 declare var CodeMirror: any;
 declare var agens: any;
@@ -99,7 +100,8 @@ return path;
   @ViewChild('statistics') statGraph: StatisticsComponent;
 
   constructor(    
-    private _angulartics2: Angulartics2,    
+    private _angulartics2: Angulartics2,
+    private _router: Router,
     public dialog: MatDialog,    
     private _api: AgensDataService,
     private _util: AgensUtilService,
@@ -154,20 +156,20 @@ return path;
           this.metaGraph.isVisible = true;
           this.queryGraph.isVisible = false;
           this.statGraph.isVisible = false;
-          Promise.resolve(null).then(() => this.metaGraph.resize() ); 
+          Promise.resolve(null).then(() => this.metaGraph.refreshCanvas() ); 
           break;
       case -1:
       case 1: 
           this.metaGraph.isVisible = false;
           this.queryGraph.isVisible = true;
           this.statGraph.isVisible = false;
-          Promise.resolve(null).then(() => this.queryGraph.resize() ); 
+          Promise.resolve(null).then(() => this.queryGraph.refreshCanvas() ); 
           break;
       case 3: 
           this.metaGraph.isVisible = false;
           this.queryGraph.isVisible = false;
           this.statGraph.isVisible = true;
-          Promise.resolve(null).then(() => this.statGraph.resize() ); 
+          Promise.resolve(null).then(() => this.statGraph.refreshCanvas() ); 
           break;
     }
   }
@@ -272,6 +274,8 @@ return path;
         });
         
         this.clearSubscriptions();
+        // login 페이지로 이동
+        this._router.navigate(['/login']);
       });
 
     this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
@@ -282,8 +286,10 @@ return path;
         this.resultGraph.edges = new Array<IEdge>();
       });
     this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
-      (x:ILabel) => { x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
-                , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };      
+      (x:ILabel) => { 
+        x.scratch['_style'] = <IStyle>{ 
+                width: undefined, title: 'name', 
+                color: (x.type == 'nodes') ? this._util.nextColor() : undefined };
         this.resultGraph.labels.push( x );
         this.queryGraph.addLabel( x );
       });
@@ -332,7 +338,7 @@ return path;
       (x:IEnd) => {
         this.isLoading = false;
         this.queryResult.setData(<IResponseDto>this.resultDto);
-        this.queryGraph.refresh();
+        this.queryGraph.initCanvas();
 
         // send data to Table 
         this.queryTable.setData(this.resultRecord);
@@ -368,8 +374,7 @@ return path;
         this.resultMeta.edges = new Array<IEdge>();    
       });
     data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
-      (x:ILabel) => { x.scratch['_style'] = <IStyle>{ width: undefined, title: 'name'
-                , color: this.labelColors[ (++this.colorIndex)%CONFIG.MAX_COLOR_SIZE ] };
+      (x:ILabel) => { 
       this.resultMeta.labels.push( x );
       this.metaGraph.addLabel( x );
       this.statGraph.addLabel( x );
@@ -403,11 +408,19 @@ return path;
       (x:IEnd) => {
         this.queryGraph.graphChangeLayout('cose');
         setTimeout(()=>{
-          this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5 );
-          this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x );
-      
-          this.metaGraph.refresh();
-          this.statGraph.refresh();
+          this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5, false );
+          this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x, false );
+          this._util.applyLabelColor(this.resultMeta.nodes, this.resultGraph.labels, 
+            (ele:IElement, label:ILabel) => {
+              return label.type == 'nodes' && ele.data['id'] == label.id;
+            });
+          this._util.applyLabelColor(this.resultMeta.edges, this.resultGraph.labels, 
+            (ele:IElement, label:ILabel) => {
+              return label.type == 'edges' && ele.data['id'] == label.id;
+            });
+        
+          this.metaGraph.initCanvas();
+          this.statGraph.initCanvas();
         }, 100);  
       });
 

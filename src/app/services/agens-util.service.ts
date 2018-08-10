@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { IElement } from '../models/agens-data-types';
+import { IElement, ILabel } from '../models/agens-data-types';
 
 import * as d3 from 'd3';
 import * as CONFIG from '../global.config';
@@ -101,21 +101,82 @@ export class AgensUtilService {
     return histogram( data );
   }
 
-  public calcElementStyles(eles:Array<IElement>, fn:Function){
+  public calcElementStyles(eles:Array<IElement>, fn:Function, newColor:boolean=true){
     let bins = this.makeBins( eles.map(x => x.data['size']) );
     eles.map( ele => {
       bins.forEach( (x,idx) => {
         if( x.includes( ele.data['size'] ) ){
           ele.scratch._style = {
-            color: this.labelColors[ this.colorIndex%CONFIG.MAX_COLOR_SIZE ]
+            color: (newColor && ele.group == 'nodes') ? this.nextColor() : undefined
             , width: fn(idx) + 'px'
             , title: 'name'
-          };
-          this.colorIndex += 1;
+          };          
+          if( newColor ) this.colorIndex += 1;
           return false;
         }
       });
     });
   }
 
+  public applyLabelColor(eles:Array<IElement>, labels:Array<ILabel>, fn:Function): any{
+    eles.forEach( ele => {
+      labels.forEach( x => {
+        if( fn(ele, x) ) {
+          ele.scratch._style.color = x.scratch._style.color;
+          return false;
+        }
+      });
+    });
+  }
+
+  public nextColor():any {
+    this.colorIndex += 1;
+    if( this.colorIndex >= colorPallets.length ) this.colorIndex = 1;
+    return colorPallets[this.colorIndex];
+  }
 }
+
+// { "bc": bg-color, "dc": border-color }
+export const colorPallets:any[] = [
+  { "bc": '#939393', "dc": '#e3e3e3'},  // gray: default edge color
+  { "bc": '#10263b', "dc": '#0e2134'}, 
+  { "bc": '#1f478d', "dc": '#1b3f84'}, 
+  { "bc": '#0063b0', "dc": '#005aa8'}, 
+  { "bc": '#6585c2', "dc": '#5c7bbb'}, 
+  { "bc": '#1ca1dc', "dc": '#1898d7'}, 
+  { "bc": '#44a3db', "dc": '#3d9ad6'}, 
+  { "bc": '#6fbee9', "dc": '#66b7e6'}, 
+  { "bc": '#008eb6', "dc": '#0085ae'}, 
+  { "bc": '#216477', "dc": '#1d5b6d'}, 
+  { "bc": '#275259', "dc": '#224a50'}, 
+  { "bc": '#45543d', "dc": '#3d4c36'}, 
+  { "bc": '#215517', "dc": '#1d4c14'}, 
+  { "bc": '#4f9c2a', "dc": '#479325'}, 
+  { "bc": '#8ab326', "dc": '#80ab21'}, 
+  { "bc": '#bcda78', "dc": '#b5d56e'}, 
+  { "bc": '#aad5a7', "dc": '#a1d09e'}, 
+  { "bc": '#96cfa6', "dc": '#8dc99d'}, 
+  { "bc": '#009577', "dc": '#008c6d'}, 
+  { "bc": '#006347', "dc": '#005a3f'}, 
+  { "bc": '#4a746a', "dc": '#426b61'}, 
+  { "bc": '#595a4a', "dc": '#505142'}, 
+  { "bc": '#7c7853', "dc": '#726e4b'}, 
+  { "bc": '#a9a160', "dc": '#a09857'}, 
+  { "bc": '#aba082', "dc": '#a39778'}, 
+  { "bc": '#d9cb8e', "dc": '#d4c585'}, 
+  { "bc": '#f0d061', "dc": '#eeca58'}, 
+  { "bc": '#fddb5f', "dc": '#fdd656'}, 
+  { "bc": '#ffe864', "dc": '#ffe55b'}, 
+  { "bc": '#ffc466', "dc": '#ffbd5d'}, 
+  { "bc": '#f5b83b', "dc": '#f4b034'}, 
+  { "bc": '#e65272', "dc": '#e34a69'}, 
+  { "bc": '#d71345', "dc": '#d2103d'}, 
+  { "bc": '#d12853', "dc": '#cb234b'}, 
+  { "bc": '#843554', "dc": '#7a2f4c'}, 
+  { "bc": '#a74a45', "dc": '#9e423d'}, 
+  { "bc": '#7e584b', "dc": '#744f43'}, 
+  { "bc": '#c06842', "dc": '#b95f3b'}, 
+  { "bc": '#f36c32', "dc": '#f1632c'}, 
+  { "bc": '#f47b50', "dc": '#f27148'}, 
+  { "bc": '#f89146', "dc": '#f7883e'}, 
+];
