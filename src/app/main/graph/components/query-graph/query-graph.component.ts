@@ -1,6 +1,8 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Input } from '@angular/core';
-
+import { Component, OnInit, NgZone, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatButtonToggle, MatSlideToggle } from '@angular/material';
+
+import { Observable, Subject, interval } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -9,6 +11,7 @@ import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types
 import { IDoubleListDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../global.config';
+import { delayWhen } from '../../../../../../node_modules/rxjs/operators';
 
 declare var _: any;
 declare var agens: any;
@@ -18,7 +21,7 @@ declare var agens: any;
   templateUrl: './query-graph.component.html',
   styleUrls: ['./query-graph.component.scss','../../graph.component.scss']
 })
-export class QueryGraphComponent implements OnInit {
+export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isVisible: boolean = false;
   isLoading: boolean = false;
@@ -47,6 +50,9 @@ export class QueryGraphComponent implements OnInit {
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
+  @Output() initDone:EventEmitter<boolean> = new EventEmitter();
+  todo$:Subject<any> = new Subject();
+  
   constructor(
     private _ngZone: NgZone,
     private _elf: ElementRef,
@@ -138,11 +144,11 @@ export class QueryGraphComponent implements OnInit {
   } 
 
   // 결과들만 삭제 : runQuery 할 때 사용
-  clear(){
+  clear(option:boolean=true){
     // 그래프 비우고
     this.cy.elements().remove();
     // 그래프 라벨 칩리스트 비우고
-    this.labels = [];
+    if( option ) this.labels = [];
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
     // 그래프 관련 콘트롤러들 초기화
@@ -160,7 +166,11 @@ export class QueryGraphComponent implements OnInit {
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
+    this.cy.fit( this.cy.elements(), 50);
+
+    this.initDone.emit(this.isVisible);
   }
+
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
     this.cy.resize();
@@ -168,26 +178,16 @@ export class QueryGraphComponent implements OnInit {
     agens.cy = this.cy;
   }
 
-  // graph 데이터
-  showResultGraph(data:IGraph){
-    if( data === null || data.nodes === null || data.nodes.length === 0 ) return;
-
-    // label chips
-    this.labels = data.labels;
-  }
-
   adjustMenuOnNode(labels: Array<ILabel>, collection:any ){
 
   }
 
-  // add $$color property ==> ILabelType, INode.data, IEdge.data
-  // ** 참고: https://github.com/davidmerfield/randomColor
-  randomStyleInjection(data:IGraph, stats:any){
-
-  }
-
   clickGraphLabelChip( labelType:string, labelName:string ): void {
-
+    this.cy.elements(':selected').unselect();
+    setTimeout(()=>{
+      let group = (labelType == 'edges') ? 'edge' : 'node';
+      this.cy.elements(`${group}[label='${labelName}']`).select();
+    }, 20);
   }
 
   // cytoscape makeLayout & run
@@ -236,8 +236,9 @@ export class QueryGraphComponent implements OnInit {
 
   highlightNeighbors(target){
     // neighbors select
-    var neighbors = this.cy.$api.findNeighbors(target, [], 3);
+    let neighbors = this.cy.$api.findNeighbors(target, [], 3);
     this.cy.$api.view.highlight(neighbors);
+    Promise.resolve(null).then(() => { neighbors.select(); });
   }
 
   /////////////////////////////////////////////////////////////////

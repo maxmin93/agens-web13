@@ -1,6 +1,9 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Input} from '@angular/core';
+import { Component, OnInit, NgZone, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 
 import { MatDialog, MatButtonToggle } from '@angular/material';
+
+import { Observable, Subject } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -46,6 +49,8 @@ export class StatisticsComponent implements OnInit {
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
   @ViewChild('divD3Chart', {read: ElementRef}) divD3Chart: ElementRef;
   
+  @Output() initDone:EventEmitter<boolean> = new EventEmitter();
+
   constructor(
     private _ngZone: NgZone,    
     private dialog: MatDialog,
@@ -79,7 +84,9 @@ export class StatisticsComponent implements OnInit {
         hideNodeTitle: false,        // hide nodes' title
         hideEdgeTitle: false,        // hide edges' title
       });
-  }
+
+      setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
+    }
 
   /////////////////////////////////////////////////////////////////
   // Canvas Controllers
@@ -152,6 +159,8 @@ export class StatisticsComponent implements OnInit {
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
+    
+    this.initDone.emit(this.isVisible);
   }
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){

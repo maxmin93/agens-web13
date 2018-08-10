@@ -229,6 +229,12 @@ export class AgensDataService {
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }  
 
+  grph_groupBy(gid:number, label:string, props:string):Observable<any> {
+    const url = `${this.api.grph}/groupby/${gid}?label=${label}&props=${props}`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
+  }
+
   graph_findShortestPath(gid:number, sid:string, eid:string):Observable<IDoubleListDto> {
     const url = `${this.api.grph}/findspath/${gid}`;
     let params:HttpParams = new HttpParams();

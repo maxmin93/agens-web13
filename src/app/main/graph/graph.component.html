@@ -28,11 +28,12 @@
             (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
             <mat-tab label="Meta"> 
                 <!-- META(0) -->
-                <app-meta-graph #metaGraph></app-meta-graph>
+                <app-meta-graph #metaGraph (initDone)="initCallbackMeta($event)"
+                    (groupByCall)="runGraphGroupBy($event)"></app-meta-graph>
             </mat-tab>
             <mat-tab label="Graph">
                 <!-- GRAPH(1) -->
-                <app-query-graph #queryGraph></app-query-graph>
+                <app-query-graph #queryGraph (initDone)="initCallbackData($event)"></app-query-graph>
             </mat-tab>
             <mat-tab label="Table" [disabled]="false"> 
                 <!-- TABLE(2) -->
@@ -40,7 +41,7 @@
             </mat-tab>
             <mat-tab label="Statistic" [disabled]="false">
                 <!-- STATIC(3) -->
-                <app-statistics #statistics></app-statistics>
+                <app-statistics #statistics (initDone)="initCallbackStat($event)"></app-statistics>
             </mat-tab>
         </mat-tab-group>
     </div>

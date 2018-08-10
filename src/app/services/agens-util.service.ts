@@ -122,7 +122,9 @@ export class AgensUtilService {
     eles.forEach( ele => {
       labels.forEach( x => {
         if( fn(ele, x) ) {
-          ele.scratch._style.color = x.scratch._style.color;
+          if( ele.scratch.hasOwnProperty('_style') )
+            ele.scratch._style.color = x.scratch._style.color;
+          else ele.scratch._style = x.scratch._style;
           return false;
         }
       });

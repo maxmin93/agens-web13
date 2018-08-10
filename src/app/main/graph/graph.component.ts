@@ -69,12 +69,12 @@ return path;
 // return path limit 20;
 //  `;
 
-
   // core/query API 결과
   private resultDto: IResultDto = undefined;
   private resultGraph: IGraph = undefined;
   private resultRecord: IRecord = undefined;
   private resultMeta: IGraph = undefined;
+  private resultTemp: IGraph = undefined;
 
   // expandTo 를 위한 query API 결과
   private resultExpandDto: IResultDto = undefined;
@@ -98,6 +98,10 @@ return path;
   @ViewChild('queryGraph') queryGraph: QueryGraphComponent;
   @ViewChild('queryTable') queryTable: QueryTableComponent;
   @ViewChild('statistics') statGraph: StatisticsComponent;
+
+  // metaGraphTodo$:Subject<any> = new Subject<any>();
+  // dataGraphTodo$:Subject<any> = new Subject<any>();
+  // statGraphTodo$:Subject<any> = new Subject<any>();
 
   constructor(    
     private _angulartics2: Angulartics2,
@@ -147,6 +151,7 @@ return path;
   }
 
   tabChanged($event){
+    // console.log( `tabChanged from ${this.currentTabIndex} to ${$event.index}`);
     this.currentTabIndex = $event.index;
   }
 
@@ -163,7 +168,13 @@ return path;
           this.metaGraph.isVisible = false;
           this.queryGraph.isVisible = true;
           this.statGraph.isVisible = false;
-          Promise.resolve(null).then(() => this.queryGraph.refreshCanvas() ); 
+          Promise.resolve(null).then(() => this.queryGraph.refreshCanvas() )
+          .then(() => {
+            this.queryGraph.todo$.subscribe(x => {
+              console.log( 'tabChangeAfter: dataGraph is visible =>', x);
+              this.queryGraph.graphChangeLayout('cose');
+            });
+          }) 
           break;
       case 3: 
           this.metaGraph.isVisible = false;
@@ -174,10 +185,18 @@ return path;
     }
   }
 
-  togglePageSize(){
-
+  initCallbackMeta(isVisible:boolean){
+    console.log('initCallbackMeta =', isVisible);
   }
-  
+  initCallbackData(isVisible:boolean){
+    console.log('initCallbackData =', isVisible);
+    if( isVisible ) this.queryGraph.graphChangeLayout('cose');
+    else this.queryGraph.todo$.next({ cmd: 'changeLayout', param: 'cose' });
+  }
+  initCallbackStat(isVisible:boolean){
+    console.log('initCallbackStat =', isVisible);
+  }
+
   /////////////////////////////////////////////////////////////////
   // Editor Controllers
   /////////////////////////////////////////////////////////////////
@@ -410,7 +429,7 @@ return path;
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        this.queryGraph.graphChangeLayout('cose');
+        // this.queryGraph.graphChangeLayout('cose');
         setTimeout(()=>{
           this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5, false );
           this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x, false );
@@ -426,6 +445,68 @@ return path;
           this.metaGraph.initCanvas();
           this.statGraph.initCanvas();
         }, 100);  
+      });
+
+  }
+
+  runGraphGroupBy($event: any){
+
+    this.queryGraph.clear(false);   // clear canvas except labels
+
+    // call API
+    let data$:Observable<any> = this._api.grph_groupBy(this.resultDto.gid, $event.label, $event.props);
+
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`graph_dto receiving : gid=${x.gid} (${this.resultDto.gid})`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.resultTemp = x;
+        this.resultTemp.labels = new Array<ILabel>();
+        this.resultTemp.nodes = new Array<INode>();
+        this.resultTemp.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+      this.resultTemp.labels.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+      // setNeighbors from this.resultGraph.labels;
+      x.scratch['_neighbors'] = new Array<string>();
+      this.resultGraph.labels
+        .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
+        .map(label => {
+          x.scratch['_neighbors'] += label.targets;
+          x.scratch['_style'] = label.scratch['_style'];
+        });
+      this.resultTemp.nodes.push( x );
+      this.queryGraph.addNode( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.resultGraph.labels
+        .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+        });
+      this.resultTemp.edges.push( x );
+      this.queryGraph.addEdge( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        this._util.applyLabelColor(this.resultTemp.nodes, this.resultGraph.labels, 
+          (ele:IElement, label:ILabel) => {
+            return label.type == 'nodes' && ele.data['label'] == label.name;
+          });
+        this._util.applyLabelColor(this.resultTemp.edges, this.resultGraph.labels, 
+          (ele:IElement, label:ILabel) => {
+            return label.type == 'edges' && ele.data['label'] == label.name;
+          });
+
+        this.queryGraph.initCanvas();
+        // this.queryGraph.graphChangeLayout('cose');
       });
 
   }

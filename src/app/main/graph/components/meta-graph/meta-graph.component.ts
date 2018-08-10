@@ -1,5 +1,8 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Input} from '@angular/core';
+import { Component, OnInit, NgZone, ViewChild, ElementRef, Input, Output, EventEmitter} from '@angular/core';
 import { MatDialog, MatButtonToggle } from '@angular/material';
+
+import { Observable, Subject } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -7,9 +10,10 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../mode
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 
 import * as CONFIG from '../../../../global.config';
+import { initChangeDetectorIfExisting } from '../../../../../../node_modules/@angular/core/src/render3/instructions';
 
+declare var $: any;
 declare var agens: any;
-
 
 @Component({
   selector: 'app-meta-graph',
@@ -30,6 +34,9 @@ export class MetaGraphComponent implements OnInit {
 
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
+
+  @Output() groupByCall:EventEmitter<any> = new EventEmitter<any>();
+  @Output() initDone:EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(
     private _ngZone: NgZone,    
@@ -65,6 +72,8 @@ export class MetaGraphComponent implements OnInit {
         hideNodeTitle: false,        // hide nodes' title
         hideEdgeTitle: false,        // hide edges' title
       });
+
+    setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -80,18 +89,21 @@ export class MetaGraphComponent implements OnInit {
   cyElemCallback(target:any):void {
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
+    console.log( 'cyElemCallback', target._private.data );
   }  
 
   // Neighbor Label 로의 확장
-  cyQtipMenuCallback( target:any, targetLabel:string ){
-    let expandId = target.data('label')+'_'+target.data('id');
-    target.scratch('_expandid', expandId);
-
-    let position = target.position();
-    let boundingBox = { x1: position.x - 40, x2: position.x + 40, y1: position.y - 40, y2: position.y + 40 };
-
+  cyQtipMenuCallback( target:any, value:string ){
+    console.log( 'qtipMenuCallback:', target, value );
+    // let expandId = target.data('label')+'_'+target.data('id');
+    // target.scratch('_expandid', expandId);
+    // let position = target.position();
+    // let boundingBox = { x1: position.x - 40, x2: position.x + 40, y1: position.y - 40, y2: position.y + 40 };
     // this.runExpandTo( target, targetLabel );
+
+    this.groupByCall.emit({ label: target, props: value });
   }
+
   
   /////////////////////////////////////////////////////////////////
   // Graph Controllers
@@ -174,11 +186,15 @@ export class MetaGraphComponent implements OnInit {
 
   // 데이터 불러오고 최초 적용되는 작업들 
   initCanvas(){
+    // add groupBy menu
+    this.addQtipMenu( this.cy.elements() );
     // add Properties of Node
     this.addProperties(this.cy.nodes());
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
+
+    this.initDone.emit(this.isVisible);
   }
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
@@ -241,6 +257,32 @@ export class MetaGraphComponent implements OnInit {
   /////////////////////////////////////////////////////////////////
   // Properties Controllers
   /////////////////////////////////////////////////////////////////
+
+  addQtipMenu( elements:any ){
+    //
+    // **NOTE: cy.on('cxttap', fun..) 구문을 사용하면 안먹는다 (-_-;)
+    // 
+    // mouse right button click event on nodes
+    elements.qtip({
+      content: function() {
+        // return 'Example qTip on ele ' + this.id();
+        let menuHtml:string = `<div class="hide-me"><h4>groupBy( ${this.data('name')} )</h4><hr/><ul>`
+                  + `<li><a href="javascript:void(0);" onclick="agens.cy.$api.cyQtipMenuCallback('${this.data('name')}','');">`
+                  + `All <i class="material-icons">keyboard_arrow_left</i></a></li>`;
+        let props:Map<string,any> = this.data('props').propsCount;
+        Object.keys(props).forEach(k => {
+          menuHtml += `<li><a href="javascript:void(0);" onclick="agens.cy.$api.cyQtipMenuCallback('${this.data('name')}','${k}');">`
+                  + `${k} (size=${props[k]}) <i class="material-icons">keyboard_arrow_left</i></a></li>`;
+        });
+        return menuHtml+'</ul></div>';
+      },
+      style: { classes: 'qtip-bootstrap', tip: { width: 24, height: 8 } },
+      position: { target: 'mouse', adjust: { mouse: false } },
+      events: { visible: function(event, api) { $('.qtip').click(function(){ $('.qtip').hide(); }); } },
+      show: { event: 'cxttap' },          // cxttap: mouse right button click event
+      hide: { event: 'click unfocus' }
+    });    
+  }
 
   unfoldProperties(){
     this.layoutProperties( this.cy.nodes(`[label!='property']`) );
