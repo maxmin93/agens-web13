@@ -45,6 +45,8 @@
       document.querySelectorAll('.edit-size').forEach( editSize => {
         editSize.classList.remove('strech')
       })
+      // toggle off : canvas resize (안그러면 위치 인식 못해서 클릭 안됨)
+      if( agens.cy ) agens.cy.resize();
     }
   }
   </script>  
