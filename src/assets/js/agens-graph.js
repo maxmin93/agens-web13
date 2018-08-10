@@ -85,7 +85,7 @@
     edgeDColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.dc;
-      return '#a3a3a3';
+      return '#d3d3d3';
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 

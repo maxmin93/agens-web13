@@ -196,6 +196,7 @@ datatable의 세팅값은 각 태그에 존재함*/
       overflow-x: hidden; 
       overflow-y: auto; 
 
+      .datatable-scroll { width: 100% !important; }
       .datatable-body-cell {
         display: flex; 
         align-items: center; 
@@ -214,9 +215,6 @@ datatable의 세팅값은 각 태그에 존재함*/
     }
   }
 }
-
-
-.ngx-datatable .datatable-body .datatable-scroll { width: 100% !important; }
 
 .ngx-datatable.material .empty-row { line-height: 28px; }
 
@@ -315,6 +313,13 @@ form, input {
     right: .625rem; 
     position: absolute; 
   }
+}
+.mat-form-field-appearance-legacy .mat-form-field-wrapper { 
+  padding-bottom: 0; 
+}
+
+.mat-form-field-appearance-legacy .mat-form-field-underline {
+  bottom: 0 !important; 
 }
 
 .mat-form-field.block { display: block; }
