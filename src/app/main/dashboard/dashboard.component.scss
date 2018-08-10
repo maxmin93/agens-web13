@@ -1,8 +1,10 @@
 // 좌측 side의 사이즈
 .row-side { 
-        width: 35%; 
+        width: 36%; 
         min-width: 36.5625rem;
-        max-width: 43.75rem; 
+        max-width: 46.75rem; 
+        padding-right: 2rem; 
+        border-right: 1px solid #ddd; 
 }
 
 // :host /deep/ { }
