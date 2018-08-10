@@ -43,7 +43,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1, h2, h3, h4, h5, h6, 
-ul, html, body, material-app, input, textarea, .mat-menu-item, pre { 
+ul, html, body, material-app, input, textarea, .mat-menu-item, pre, .mat-tab-label { 
   margin: 0; 
   padding: 0; 
   font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
@@ -77,6 +77,8 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 .row-side { margin-right: 1.875rem; }
 .col-side { margin-bottom: 1.875rem; }
+
+.wrap { flex-wrap: wrap}
 
 .strech { 
   width: 100%; 
@@ -194,6 +196,7 @@ datatable의 세팅값은 각 태그에 존재함*/
       overflow-x: hidden; 
       overflow-y: auto; 
 
+      .datatable-scroll { width: 100% !important; }
       .datatable-body-cell {
         display: flex; 
         align-items: center; 
@@ -212,9 +215,6 @@ datatable의 세팅값은 각 태그에 존재함*/
     }
   }
 }
-
-
-.ngx-datatable .datatable-body .datatable-scroll { width: 100% !important; }
 
 .ngx-datatable.material .empty-row { line-height: 28px; }
 
@@ -314,6 +314,13 @@ form, input {
     position: absolute; 
   }
 }
+.mat-form-field-appearance-legacy .mat-form-field-wrapper { 
+  padding-bottom: 0; 
+}
+
+.mat-form-field-appearance-legacy .mat-form-field-underline {
+  bottom: 0 !important; 
+}
 
 .mat-form-field.block { display: block; }
 
@@ -329,6 +336,13 @@ form, input {
 .mat-tab-body-wrapper { 
   margin-top: 1.55rem; 
   flex: 1; 
+}
+
+.mat-tab-labels .mat-tab-label { 
+  height: 3rem; 
+  padding: 0 1.5rem; 
+  min-width: 10rem; 
+  font-size: 0.875rem;
 }
 
 /* CodeMirror

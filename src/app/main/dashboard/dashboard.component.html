@@ -5,9 +5,9 @@
                 <h4>DATA <strong>SOURCE</strong></h4>
                 <p class="sub-title">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
                 <ul class="list textover border noborder">
-                    <li><span> URL</span>{{infos.uri}}</li>
-                    <li><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
-                    <li><span> DESC</span>{{infos.desc}}</li>
+                    <li title={{infos.uri}}><span> URL</span>{{infos.uri}}</li>
+                    <li title={{infos.name}}><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
+                    <li title={{infos.desc}}><span> DESC</span>{{infos.desc}}</li>
                 </ul>
                 <!--
                 <div class="card-dash-number">
@@ -53,26 +53,26 @@
         <div class="col strech">            
             <h4>SCHEMA <strong>GRAPH</strong></h4>
             <div class="col">
-                <ul class="row list m-20 theme">
-                    <li class="strech side-margin"><span>TYPE </span> {{selectedLabel.type}}</li>
-                    <li class="strech side-margin"><span>ID </span> {{selectedLabel.id}}</li>
-                    <li class="strech side-margin"><span>NAME </span> {{selectedLabel.name}}</li>
-                    <li class="strech side-margin"><span>OWNER </span> {{selectedLabel.owner}}</li>
-                    <li class="strech side-margin"><span>SIZE </span> {{selectedLabel.size | number}}</li>
+                <ul class="row list m-20">
+                    <li class="strech side-margin border"><span>TYPE </span> {{selectedLabel.type}}</li>
+                    <li class="strech side-margin border border-left-no"><span>ID </span> {{selectedLabel.id}}</li>
+                    <li class="strech side-margin border border-left-no"><span>NAME </span> {{selectedLabel.name}}</li>
+                    <li class="strech side-margin border border-left-no"><span>OWNER </span> {{selectedLabel.owner}}</li>
+                    <li class="strech side-margin border border-left-no"><span>SIZE </span> {{selectedLabel.size | number}}</li>
                 </ul>
                 <ul class="list">
-                    <li class="theme"><span>DESCRIPTION </span> "{{selectedLabel.desc}}"</li>
+                    <li class="border"><span>DESCRIPTION </span> "{{selectedLabel.desc}}"</li>
                 </ul>
             </div>
             <div class="row strech">
                 <div id="div-canvas" #divCanvas class="graph-canvas strech border"></div>
-                <div class="viewbox theme">
+                <div class="viewbox">
                     <div class="scroll-hide">
                         <ul class="list icon border border-left-no">
-                            <li><a matTooltip="Create" matTooltipPosition="left" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
-                            <li><a matTooltip="Edit" matTooltipPosition="left"><mat-icon>edit</mat-icon></a></li>
-                            <li><a matTooltip="Expand" matTooltipPosition="left"><mat-icon>control_camera</mat-icon></a></li>
-                            <li><a matTooltip="Delete" matTooltipPosition="left"><mat-icon>delete_outline</mat-icon></a></li>
+                            <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
+                            <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
+                            <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
+                            <li><a matTooltip="Delete" matTooltipPosition="above"><mat-icon>delete_outline</mat-icon></a></li>
                             <li><a (click)="resize()" matTooltip="refresh Canvas" matTooltipPosition="above">
                                 <mat-icon>refresh</mat-icon></a></li>
                         </ul>
