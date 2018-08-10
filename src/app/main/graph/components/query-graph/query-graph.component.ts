@@ -155,19 +155,17 @@ export class QueryGraphComponent implements OnInit {
   addNode( ele:INode ){ this.cy.add( ele ); }
   addEdge( ele:IEdge ){ this.cy.add( ele ); }
 
-  refresh(){
+  // 데이터 불러오고 최초 적용되는 작업들 
+  initCanvas(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
     this.cy.style(agens.graph.stylelist['dark']).update();
   }
-  resize(){
+  // 액티브 상태가 될 때마다 실행되는 작업들
+  refreshCanvas(){
     this.cy.resize();
     this.cy.fit( this.cy.elements(), 50);
     agens.cy = this.cy;
-  }
-  refreshCanvas(){
-    this.refresh();
-    this.resize();
   }
 
   // graph 데이터

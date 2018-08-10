@@ -56,10 +56,15 @@
           return e.data('props')[e.scratch('_style').title];
       return '';
     },
-    nodeColor: function(e){
+    nodeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
-        return e.scratch('_style').color;
-      return '#68bdf6';
+        return e.scratch('_style').color.bc;
+      return '#939393';
+    },
+    nodeDColor: function(e){
+      if( e.scratch('_style') && e.scratch('_style').color ) 
+        return e.scratch('_style').color.dc;
+      return '#e3e3e3';
     },
     nodeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
@@ -72,10 +77,15 @@
           return e.data('props')[e.scratch('_style').title];
       return '';
     },
-    edgeColor: function(e){
+    edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
-        return e.scratch('_style').color;
-      return '#a5abb6';
+        return e.scratch('_style').color.bc;
+      return '#d3d3d3';
+    },
+    edgeDColor: function(e){
+      if( e.scratch('_style') && e.scratch('_style').color ) 
+        return e.scratch('_style').color.dc;
+      return '#a3a3a3';
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
@@ -122,11 +132,14 @@
       }}, {
         selector: 'node',
         css: {
+          'color': 'white',
           'label': function(e){
               if( e._private.cy.scratch('_config').hideNodeTitle ) return '';
               return agens.styles.nodeLabel(e);
               },
-          'background-color': function(e){ return agens.styles.nodeColor(e); },
+          'background-color': function(e){ return agens.styles.nodeBColor(e); },
+          'border-width':'3',
+          'border-color': function(e){ return agens.styles.nodeDColor(e); },
           'width':  function(e){ return agens.styles.nodeWidth(e); },
           'height': function(e){ return agens.styles.nodeWidth(e); },
   
@@ -134,12 +147,10 @@
           'text-max-width':'75px',
           'text-halign': 'center',    // text-halign: left, center, right
           'text-valign': 'center',    // text-valign: top, center, bottom
-          'color': 'white',
           'font-weight': 400,
           'font-size': 12,
+          'min-zoomed-font-size': 6,  // not shown when less than this
           'text-opacity': 1,
-          'border-width':'3',
-          'border-color':'#f5f5f5'
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
@@ -168,12 +179,11 @@
         css: {
           'label': function(e){ return e.data('name'); },
           'opacity': 0.6,
-          'color':'black',
           'border-color':'black',
           'border-width': 1,
           'color': 'black',
           'font-weight': 200,
-          'font-size': 6,
+          'font-size': 4,
           'text-opacity': 1,
         }}, {
         selector: 'edge',
@@ -183,9 +193,9 @@
             if( e._private.cy.scratch('_config').hideEdgeTitle ) return '';
             return agens.styles.edgeLabel(e);
             },
-          'line-color': function(e){ return agens.styles.edgeColor(e); },
-          'target-arrow-color': function(e){ return agens.styles.edgeColor(e); },
-          'source-arrow-color': function(e){ return agens.styles.edgeColor(e); },
+          'line-color': function(e){ return agens.styles.edgeBColor(e); },
+          'target-arrow-color': function(e){ return agens.styles.edgeDColor(e); },
+          'source-arrow-color': function(e){ return agens.styles.edgeDColor(e); },
           'width':  function(e){ return agens.styles.edgeWidth(e); },
 
           'text-rotation':'autorotate',
