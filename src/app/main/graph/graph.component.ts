@@ -140,6 +140,10 @@ return path;
           this.statGraph.isVisible = false;
           Promise.resolve(null).then(() => this.queryGraph.refreshCanvas() );
           break;
+      case 1: 
+          this.queryGraph.isVisible = false;
+          this.statGraph.isVisible = false;
+          break;
       case 2: 
           this.queryGraph.isVisible = false;
           this.statGraph.isVisible = true;
