@@ -8,7 +8,7 @@ import { of, Observable, Subject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { IClientDto, IResponseDto } from '../models/agens-response-types';
 
-import * as CONFIG from '../global.config';
+import * as CONFIG from '../app.config';
 
 @Injectable()
 export class AuthGuardService implements CanActivate {

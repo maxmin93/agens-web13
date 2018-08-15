@@ -4,7 +4,7 @@ import { Input, Output, EventEmitter } from '@angular/core';
 import { Subscription, timer } from 'rxjs';
 
 import { IResponseDto } from '../../../../models/agens-response-types';
-import * as CONFIG from '../../../../global.config';
+import * as CONFIG from '../../../../app.config';
 
 const COLOR_BLUE = 'rgb(136, 139, 143)';
 const COLOR_RED  = 'rgb(230, 36, 84)';

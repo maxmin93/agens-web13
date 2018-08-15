@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
 import { IGraph, ILabel, IElement, INode, IEdge, IProperty, IStyle } from './agens-data-types';
-import { all } from '../../../node_modules/@types/q';
+import { all } from 'q';
 
 export class Label implements ILabel {
   readonly group: string = 'labels';      // group == 'labels'
@@ -30,12 +30,12 @@ export class Label implements ILabel {
     this.type = type;
   }
 
-  get color():string {
+  get color():any {
     return (this.scratch._style) ? this.scratch._style.color : undefined;
   }
-  set color(val:string) {
+  set color(val:any) {
     if( this.scratch._style ) this.scratch._style.color = val;
-    else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined };
+    else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined, visible: true };
   }
 
   get width():string {
@@ -43,7 +43,7 @@ export class Label implements ILabel {
   }
   set width(val:string) {
     if( this.scratch._style ) this.scratch._style.width = val;
-    else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined };
+    else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined, visible: true };
   }
 
   get title():string {
@@ -51,7 +51,7 @@ export class Label implements ILabel {
   }
   set title(val:string) {
     if( this.scratch._style ) this.scratch._style.title = val;
-    else this.scratch._style = <IStyle>{ color: undefined, width: undefined, title: val };
+    else this.scratch._style = <IStyle>{ color: undefined, width: undefined, title: val, visible: true };
   }
 };
 
@@ -125,12 +125,12 @@ export class Element implements IElement {
     else this.classes = this.classes.replace(style, '').replace(/&nbsp;&nbsp;/g,' ');
   }
 
-  get color():string {
+  get color():any {
     return (this.scratch._style) ? this.scratch._style.color : undefined;
   }
-  set color(val:string) {
+  set color(val:any) {
     if( this.scratch._style ) this.scratch._style.color = val;
-    else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined };
+    else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined, visible: true };
   }
 
   get width():string {
@@ -138,7 +138,7 @@ export class Element implements IElement {
   }
   set width(val:string) {
     if( this.scratch._style ) this.scratch._style.width = val;
-    else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined };
+    else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined, visible: true };
   }
 
   get title():string {
@@ -146,7 +146,7 @@ export class Element implements IElement {
   }
   set title(val:string) {
     if( this.scratch._style ) this.scratch._style.title = val;
-    else this.scratch._style = <IStyle>{ color: undefined, width: undefined, title: val };
+    else this.scratch._style = <IStyle>{ color: undefined, width: undefined, title: val, visible: true };
   }
 };
 

@@ -1,0 +1,65 @@
+<!-- GRAPH -->
+<div id="graphCard" class="col strech">
+    <div id="progressBarSheet" #progressBar style='visibility:hidden;'>
+        <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+    </div>
+
+    <!-- Graph content -->
+    <div class="row strech">
+        <div class="row strech row-side">
+            <div class="col strech">
+                <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
+            </div>
+             <!-- Graph.Meta : toolbar -->
+            <div class="row">
+                <div id="agens-graph-toolbar" class="viewbox border strech theme">                    
+                    <ul class="list icon border noborder">
+                        <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                                <mat-icon>refresh</mat-icon></a></li>
+                        <li><a (click)="restoreStyles()" matTooltip="Style restore" matTooltipPosition="above">
+                                <mat-icon>settings_backup_restore</mat-icon></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col strech">
+
+            <div class="strech border p-20 color-box">
+                <h5 class="title"><strong>Visibility </strong></h5>
+                <mat-slide-toggle [(ngModel)]="selectedStyle.visible" matTooltip="Visibility"
+                    (change)="onChangeStyleVisible($event)">
+                </mat-slide-toggle>
+            </div>
+            <div class="strech border p-20 color-box">
+                <h5 class="title"><strong>COLOR </strong></h5>
+                <ul class="row wrap m-10 strech" id="colorPalette">
+                    <li *ngFor="let c of colors; let i = index" [attr.data-index]="i"
+                        [style.background-color]="c.bc" (click)="onChangeStyleColor(i)"
+                        [style.border-color]="'black'"
+                        [style.border-width]="(selectedStyle.color.bc == c.bc) ? '2px' : '0px'"
+                        ></li>
+                </ul>
+            </div>
+            <div class="strech border m-20 p-20">
+                <h5 class="title"><strong>SIZE </strong></h5>
+                <mat-slider name="labelSize" class="row-center strech" [formControl]="labelSizeCtl"
+                            [min]="labelSizeRange.min" [max]="labelSizeRange.max" [step]="labelSizeRange.step" 
+                            [value]="labelSizeRange.value" [thumbLabel]="true"
+                            (change)="onChangeStyleWidth($event)">
+                </mat-slider>
+            </div>
+            <div class="strech border m-20 p-20">    
+                <h5 class="title"><strong>TITLE </strong></h5>
+                <mat-form-field class="strech row-center">
+                  <mat-select name="labelName" [formControl]="labelNameCtl" [value]="selectedStyle.title"
+                              (selectionChange)="onChangeStyleTitle($event)" required>
+                    <mat-option value="_null_">_NONE_</mat-option>
+                    <mat-option *ngFor="let prop of selectedProperties" [value]="prop.key">{{ prop.key }}</mat-option>
+                  </mat-select>
+                </mat-form-field>                
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!selectedElement || !isChanged" 
+                    (click)="close()">Apply</button>
+    </div>
+    
+</div>

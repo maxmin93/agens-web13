@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { Observable, of, from, Subject, Subscription, concat, forkJoin } from 'rxjs';
 import { map, filter, concatAll } from 'rxjs/operators';
 
-import { Angulartics2 } from 'angulartics2';
 import * as _ from 'lodash';
 
 // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
@@ -22,7 +21,7 @@ import { AgensUtilService } from '../../services/agens-util.service';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IEnd } from '../../models/agens-data-types'
 import { IResponseDto } from '../../models/agens-response-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
-import * as CONFIG from '../../global.config';
+import * as CONFIG from '../../app.config';
 import { ISchemaDto } from '../../models/agens-response-types';
 
 import * as d3 from 'd3';
@@ -87,7 +86,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
   constructor(
-    private _angulartics2: Angulartics2,
     private _router: Router,
     public dialog: MatDialog,
     private _ngZone: NgZone,

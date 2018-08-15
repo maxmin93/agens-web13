@@ -1,0 +1,29 @@
+    <div class="row strech">
+      <div class="col strech border p-20">
+          <div class="row-center">
+              <h5 class="title">CELL <strong>VALUE</strong> </h5>
+          </div>
+          <!-- " *ngIf="isJsonCell" -->
+          <div id="tableCell" #tableCell class="json strech m-20" style="visibility: hidden;">
+              
+              <div class="scrollbar">
+                  <!-- 
+                      JSON Pretty formatter
+                      https://www.npmjs.com/package/angular2-prettyjson
+                  -->            
+                  
+                  <pre id="cellValue" [innerHtml]="cellValue | prettyjson:3"></pre>
+              </div>    
+          </div>
+      </div>
+      <div class="viewbox theme">
+          <div class="scroll-hide">
+              <ul class="list icon border border-left-no">
+                  <li><a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above">
+                      <mat-icon>bookmarks</mat-icon></a></li>
+                  <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                      <mat-icon>close</mat-icon></a></li>
+              </ul>
+          </div>
+      </div>
+  </div>

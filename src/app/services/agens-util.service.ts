@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { IElement, ILabel } from '../models/agens-data-types';
+import { IGraph, IElement, ILabel } from '../models/agens-data-types';
 
 import * as d3 from 'd3';
-import * as CONFIG from '../global.config';
-
-declare var randomColor: any;
+import * as CONFIG from '../app.config';
 
 @Injectable({
   providedIn: 'root'
@@ -13,18 +11,17 @@ declare var randomColor: any;
 export class AgensUtilService {
 
   // pallets : Node 와 Edge 라벨별 color 셋
-  colorIndex: number = 0;
-  labelColors: any[] = [];
+  private colorIndex: number = 0;
+
+  colors: any[] = colorPallets;
   
   constructor() { 
-    // pallets 생성 : luminosity='dark'
-    this.labelColors = this.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);
   }
 
   /////////////////////////////////////////////////////////////////
   // Common Utilities : Color Pallete
   /////////////////////////////////////////////////////////////////
-  
+  /*  
   // calculate color distance
   private calcColorDistance(preColor:string, newColor:string):number{
     let distance:number = 0.0;
@@ -68,7 +65,8 @@ export class AgensUtilService {
     }
     return colors;
   }
-  
+  */
+ 
   /////////////////////////////////////////////////////////////////
   // Common Utilities : Binning
   /////////////////////////////////////////////////////////////////
@@ -101,30 +99,89 @@ export class AgensUtilService {
     return histogram( data );
   }
 
+  // **NOTE: main의 schema graph와 graph의 meta graph가 함께 사용한다
   public calcElementStyles(eles:Array<IElement>, fn:Function, newColor:boolean=true){
     let bins = this.makeBins( eles.map(x => x.data['size']) );
     eles.map( ele => {
       bins.forEach( (x,idx) => {
         if( x.includes( ele.data['size'] ) ){
-          ele.scratch._style = {
-            color: (newColor && ele.group == 'nodes') ? this.nextColor() : undefined
-            , width: fn(idx) + 'px'
-            , title: 'name'
-          };          
-          if( newColor ) this.colorIndex += 1;
+          // _style 객체가 새로 생성됨 (있으면 width만 갱신)
+          if( ele.scratch.hasOwnProperty('_style') ){
+            ele.scratch._style.width = fn(idx) + 'px';
+          }
+          else{
+            ele.scratch._style = {
+              color: (newColor && ele.group == 'nodes') ? this.nextColor() : undefined
+              , width: fn(idx) + 'px'
+              , title: 'name'
+              , visible: true
+            };
+          }
           return false;
         }
       });
     });
   }
 
-  public applyLabelColor(eles:Array<IElement>, labels:Array<ILabel>, fn:Function): any{
+  public applyLabelStyle(eles:Array<IElement>, labels:Array<ILabel>, fn:Function): any{
     eles.forEach( ele => {
       labels.forEach( x => {
         if( fn(ele, x) ) {
-          if( ele.scratch.hasOwnProperty('_style') )
-            ele.scratch._style.color = x.scratch._style.color;
-          else ele.scratch._style = x.scratch._style;
+          // if( ele.scratch.hasOwnProperty('_style') )
+          //   ele.scratch._style.color = x.scratch._style.color;
+          // else 
+          ele.scratch._style = x.scratch._style;
+          return false;
+        }
+      });
+    });
+  }
+
+  // MetaGraph CyElements 에서 DataGraph IElement 로 Style 복사
+  public copyStylesC2DataG(eles:any[], graph:IGraph){
+    this.copyStylesC2GWidthFn( eles, graph.nodes, 
+      (ele:any, x:IElement) => {
+        return ele._private.data.name == x.data.label && ele._private.group == x.group;
+      });    
+    this.copyStylesC2GWidthFn( eles, graph.edges, 
+      (ele:any, x:IElement) => {
+        return ele._private.data.name == x.data.label && ele._private.group == x.group;
+      });    
+  }
+  // MetaGraph CyElements 에서 MetaGraph IElement 로 Style 복사
+  public copyStylesC2MetaG(eles:any[], graph:IGraph){
+    this.copyStylesC2GWidthFn( eles, graph.nodes, 
+      (ele:any, x:IElement) => {
+        return ele._private.data.id == x.data.id && ele._private.group == x.group;
+      });    
+    this.copyStylesC2GWidthFn( eles, graph.edges, 
+      (ele:any, x:IElement) => {
+        return ele._private.data.id == x.data.id && ele._private.group == x.group;
+      });    
+  }
+  private copyStylesC2GWidthFn(eles:any[], items:Array<IElement>, fn:Function){
+    eles.forEach( ele => {
+      items.forEach( x => {
+        if( fn(ele, x) ) {
+          x.scratch._style = ele._private.scratch._style;
+          return false;
+        }
+      });
+    });
+  }
+
+  // MetaGraph CyElements 에서 Labels ILabel 로 Style 복사
+  public copyStylesC2Label(eles:any[], labels:Array<ILabel>){
+    this.copyStylesC2LWidthFn( eles, labels, 
+      (ele:any, x:ILabel) => {
+        return ele._private.data.id == x.id && ele._private.group == x.type;
+      });    
+  }
+  private copyStylesC2LWidthFn(eles:any[], labels:Array<ILabel>, fn:Function){
+    eles.forEach( ele => {
+      labels.forEach( x => {
+        if( fn(ele, x) ) {
+          x.scratch._style = ele._private.scratch._style;
           return false;
         }
       });

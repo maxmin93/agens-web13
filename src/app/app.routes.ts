@@ -15,7 +15,6 @@ const routes: Routes = [
     , children: [
       { path: '', component: DashboardComponent }
       ,{ path: 'graph', component: GraphComponent }
-      ,{ path: 'graph/:oid', component: GraphComponent }
       ,{ path: 'history', component: HistoryComponent }
     ]},
   // all other routes

@@ -1,16 +1,15 @@
 import { Component, OnInit, NgZone, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { MatDialog, MatButtonToggle } from '@angular/material';
 
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
-
-import * as CONFIG from '../../../../global.config';
 
 import * as d3 from 'd3-selection';
 import * as d3Scale from 'd3-scale';
@@ -20,11 +19,11 @@ import * as d3Axis from 'd3-axis';
 declare var agens: any;
 
 @Component({
-  selector: 'app-statistics',
-  templateUrl: './statistics.component.html',
-  styleUrls: ['./statistics.component.scss','../../graph.component.scss']
+  selector: 'app-stat-graph',
+  templateUrl: './stat-graph.component.html',
+  styleUrls: ['./stat-graph.component.scss','../../graph.component.scss']
 })
-export class StatisticsComponent implements OnInit {
+export class StatGraphComponent implements OnInit {
 
   isVisible: boolean = false;
 
@@ -52,14 +51,14 @@ export class StatisticsComponent implements OnInit {
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
 
   constructor(
-    private _ngZone: NgZone,    
+    private _ngZone: NgZone,  
     private dialog: MatDialog,
     private _api: AgensDataService,
     private _util: AgensUtilService,
   ) { 
   }
 
-  ngOnInit() {
+  ngOnInit() {    
     // prepare to call this.function from external javascript
     window['statGraphComponentRef'] = {
       zone: this._ngZone,
@@ -68,6 +67,7 @@ export class StatisticsComponent implements OnInit {
       cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
       component: this
     };
+
   }
   ngOnDestroy(){
     // 내부-외부 함수 공유 해제
@@ -158,10 +158,11 @@ export class StatisticsComponent implements OnInit {
     // this.cy.elements(':selected').unselect();
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.fit( this.cy.elements(), 50);
-    
+    this.cy.fit( this.cy.elements(), 50);   
+
     this.initDone.emit(this.isVisible);
   }
+
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
     this.cy.resize();

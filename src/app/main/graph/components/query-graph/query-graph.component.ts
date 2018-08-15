@@ -1,8 +1,11 @@
 import { Component, OnInit, NgZone, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
-import { MatDialog, MatButtonToggle, MatSlideToggle } from '@angular/material';
+import { MatDialog, MatButtonToggle, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
+
+import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
+import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -10,8 +13,8 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../mode
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IDoubleListDto } from '../../../../models/agens-response-types';
 
-import * as CONFIG from '../../../../global.config';
-import { delayWhen } from '../../../../../../node_modules/rxjs/operators';
+import * as CONFIG from '../../../../app.config';
+import { delayWhen } from 'rxjs/operators';
 
 declare var _: any;
 declare var agens: any;
@@ -26,16 +29,21 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   isVisible: boolean = false;
   isLoading: boolean = false;
 
+  selectedOption: string = undefined;
   btnStatus: any = { 
     showHideTitle: false,     // Node Title 노출여부 
     mouseWheel: false,        // 마우스휠 사용여부
     shortestPath: false,      // 경로검색 사용여부 
     neighbors: false,         // 이웃노드 하일라이팅
   };
+  labelSearchCount: number = 0;
 
   gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
+
+  dataGraph: IGraph = undefined;
+  metaGraph: IGraph = undefined;
 
   selectedElement: any = undefined;  
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
@@ -46,7 +54,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('btnShortestPath') public btnShortestPath: MatButtonToggle;
   @ViewChild('slideShortestPathDirected') public slideSPathDirected: MatSlideToggle;
   @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
-  // @ViewChild('btnMouseWheelZoom') public btnMouseWheelZoom: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
@@ -56,9 +63,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private _ngZone: NgZone,
     private _elf: ElementRef,
-    private dialog: MatDialog,
+    private _dialog: MatDialog,
     private _api: AgensDataService,
     private _util: AgensUtilService,
+    private _sheet: MatBottomSheet
   ) { 
   }
 
@@ -90,6 +98,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
     setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
+  }
+
+  setData(dataGraph:IGraph){
+    this.dataGraph = dataGraph;
+  }
+  setMeta(metaGraph:IGraph){
+    this.metaGraph = metaGraph;
   }
 
   /////////////////////////////////////////////////////////////////
@@ -165,9 +180,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   initCanvas(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
+
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
 
+    // 완료 상태를 상위 graph.component 에 알려주기 (& layout 적용)
     this.initDone.emit(this.isVisible);
   }
 
@@ -218,10 +235,31 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   //   this.btnStatus.mouseWheel = this.btnMouseWheelZoom.checked;
   // }
 
+  updateFilterTitle($event){
+    const kwd = $event.target.value.toLowerCase();
+    this.cy.$api.view.removeHighlights();
+
+    // filter our data
+    const elements = this.cy.nodes().filter(x => {
+      const title = x.style('label');
+      return title.toLowerCase().indexOf(kwd) > -1;
+    });
+    this.labelSearchCount = elements.size();
+    // console.log('updateFilterLabel', kwd, elements);
+    setTimeout(() => { if( !elements.empty() ) this.cy.$api.view.highlight( elements )}, 10);
+  }
+
   toggleShowHideTitle(checked?:boolean): void{
     if( checked === undefined ) this.btnShowHideTitle.checked = !this.btnShowHideTitle.checked;
     else this.btnShowHideTitle.checked = checked;
     this.btnStatus.showHideTitle = this.btnShowHideTitle.checked;
+
+    // 선택옵션 설정
+    if( this.btnShowHideTitle.checked ) this.selectedOption = undefined;
+    else{
+      this.selectedOption = 'labelSearch';
+      this.labelSearchCount = 0;
+    } 
 
     // graph의 userZoomingEnabled 설정 변경
     this.cy.scratch('_config').hideNodeTitle = this.btnShowHideTitle.checked; 
@@ -238,7 +276,12 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // neighbors select
     let neighbors = this.cy.$api.findNeighbors(target, [], 3);
     this.cy.$api.view.highlight(neighbors);
-    Promise.resolve(null).then(() => { neighbors.select(); });
+    let edges = neighbors.edgesWith(neighbors); // inter-connected edges
+    console.log( 'highlightNeighbors:', edges);
+    this.cy.$api.view.highlight(edges);
+    Promise.resolve(null).then(() => { 
+      neighbors.select(); 
+    });
   }
 
   /////////////////////////////////////////////////////////////////
@@ -246,53 +289,41 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   openSearchResultDialog(): void {
-    // if( this.cy.elements().length == 0 || this.graphLabels.length == 0 ) return;
+    if( !this.metaGraph ) return;
 
-    // let inputData = {
-    //   labels: this.graphLabels,
-    //   labelPallets: this.labelColors
-    // };
-    // let dialogRef = this.dialog.open( SearchResultDialog, {
-    //   width: '400px', height: 'auto',
-    //   data: inputData
-    // });
+    const bottomSheetRef = this._sheet.open(MetaGraphComponent, {
+      ariaLabel: 'Meta Graph',
+      panelClass: 'sheet-meta-graph',
+      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
+    });
 
-    // dialogRef.afterClosed().subscribe(result => {
-    //   console.log('SearchResultDialog was closed:', result );
-    //   if( result === null ) return;
-
-    //   result.select().addClass('highlighted');
-    // });
+    bottomSheetRef.afterDismissed().subscribe((x) => {
+      this.selectedOption = undefined;
+      agens.cy = this.cy;
+      // 변경된 meta에 대해 data reload
+      if( x && x.changed ) this.cy.style().update();
+    });
   }
 
   /////////////////////////////////////////////////////////////////
   // Label Style Setting Controllers
   /////////////////////////////////////////////////////////////////
 
-  openLabelStyleSettingDialog(): void {
-  }
+  openLabelStyleSheet(): void {
+    if( !this.metaGraph ) return;
 
-  // 라벨에 대한 스타일 바꾸기
-  // **NOTE: project load 한 상태에서는 resultDto가 없기 때문에
-  //          graphLabels 와 graphData 내에서만 해결해야 한다!!
-  private changeLabelStyle(styleChange:any){
+    const bottomSheetRef = this._sheet.open(LabelStyleComponent, {
+      ariaLabel: 'Label Style',
+      panelClass: 'shhet-label-style',
+      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
+    });
 
-    // 1) ILabelType.$$style 변경,
-    let label:ILabel = this.labels.filter(function(val){ return styleChange.target === val.id; })[0];
-    label.scratch['_style'] = <IStyle>{ color: styleChange.color, width: styleChange.size+'px', title: styleChange.title };
-
-    // 2) graphAgens.elements() 중 해당 label 에 대한 $$style 변경
-    let elements = [];
-    if( label.type == 'nodes' ) elements = this.cy.nodes();
-    else elements = this.cy.edges();
-    for( let i=0; i<elements.length; i+= 1){
-      if( elements[i].data('label') == label.name ){
-        elements[i].data('$$style', { _self: { color: null, size: null, label: null }, _label: label['$$style'] });
-      }
-    }
-
-    // 3) apply
-    this.cy.style().update();
+    bottomSheetRef.afterDismissed().subscribe((x) => {
+      this.selectedOption = undefined;
+      agens.cy = this.cy;
+      // 스타일 변경 반영
+      if( x && x.changed ) this.cy.style().update();
+    });
   }
 
   /////////////////////////////////////////////////////////////////
@@ -421,8 +452,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // enable 모드이면 options 리셋
     if( this.btnStatus.shortestPath ){
       this.shortestPathOptions = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
-
+      this.selectedOption = 'shortestPath';
     }
+    else this.selectedOption = undefined;
   }
 
   selectFindShortestPath(target:any){

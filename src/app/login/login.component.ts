@@ -5,14 +5,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import { MatSnackBar } from '@angular/material';
 
-import { Angulartics2 } from 'angulartics2';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
 
 import { AgensDataService } from '../services/agens-data.service';
 import { IResponseDto } from '../models/agens-response-types';
 
-import * as CONFIG from '../global.config';
+import * as CONFIG from '../app.config';
 
 @Component({
   selector: 'app-login',
@@ -27,7 +26,6 @@ export class LoginComponent implements OnInit {
   constructor(
     private _route: ActivatedRoute,
     private _router: Router,
-    private _angulartics2: Angulartics2,
     private _api: AgensDataService,
     public _snackBar: MatSnackBar
   ) { 

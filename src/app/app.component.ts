@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 
-import { Angulartics2 } from 'angulartics2';
-import { Angulartics2GoogleAnalytics } from 'angulartics2/ga';
-
 // Google Analytics
 declare let ga: Function;
 
@@ -15,9 +12,7 @@ declare let ga: Function;
 export class AppComponent implements OnInit {
 
   constructor(
-    public angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-    public router: Router,
-    private angulartics2: Angulartics2
+    public router: Router
   ) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
@@ -28,7 +23,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(){
-    this.angulartics2.setUsername.next( 'unknown' );
   }
 
 }

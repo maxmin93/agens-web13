@@ -1,9 +1,12 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
+import { CellViewerComponent } from '../../sheets/cell-viewer/cell-viewer.component';
+
 import { IRecord, IColumn, IRow } from '../../../../models/agens-data-types';
-import * as CONFIG from '../../../../global.config';
+import * as CONFIG from '../../../../app.config';
 
 @Component({
   selector: 'app-query-table',
@@ -26,9 +29,9 @@ export class QueryTableComponent implements OnInit {
 
   @ViewChild('recordTable') recordTable: DatatableComponent;
 
-  @ViewChild('tableCell') public tableCell: ElementRef;
-
-  constructor() { }
+  constructor(
+    private _sheet: MatBottomSheet
+  ) { }
 
   ngOnInit() {
   }
@@ -43,8 +46,7 @@ export class QueryTableComponent implements OnInit {
     this.recordRowsCount = 0;
     this.recordRows = [];
     this.recordColumns = [];
-    // 클릭된 셀 Json 출력도 비우고
-    this.tableCell.nativeElement.style.visibility = 'hidden';   // this.isJsonCell = false;
+
     this.selectedCell = {};
     this.selectedRowIndex = -1;
     this.selectedColIndex = -1;
@@ -71,27 +73,6 @@ export class QueryTableComponent implements OnInit {
     return tempArray;
   }
 
-  // 늘상 보이는 것으로 변경
-  showJsonFormat(rowIndex:number, col:IColumn, row:any) {
-    this.tableCell.nativeElement.style.visibility = 'visible';   // this.isJsonCell = true;
-    this.selectedCell = row[col.name];
-    this.selectedRowIndex = rowIndex;
-    this.selectedColIndex = col.index+1;
-    document.querySelector('#tableCell').scrollIntoView();
-
-    console.log( rowIndex, col, row );
-  }
-
-  // 클립보드에 복사하기
-  copyCellValue(){
-    let $temp:any = document.querySelector("<input>");
-    (<any>document.querySelector("body")).append($temp);
-    $temp.val( (<any>document.querySelector("#cellValue")).text() ).select();
-    document.execCommand("copy");
-    // console.log('copyCellValue :', $("#cellValue").text());
-    $temp.remove();
-  }
-
   // table 컬럼 정렬 기능은 제거
   // ** 이유
   // 1) JSON 형태에 대해서 정렬 안됨 : Node, Edge, Graph 등
@@ -100,8 +81,21 @@ export class QueryTableComponent implements OnInit {
   //   console.log('recordSort =>', col);
   // }
 
-  // onSelect(event) {
-  //   console.log('Event: select', event, this.selected);
-  // }
+  onSelect(event) {
+    // console.log('Event: select', event, this.selected);
+    this.openBottomSheet();
+  }
+
+  openBottomSheet(): void {
+    const bottomSheetRef = this._sheet.open(CellViewerComponent, {
+      ariaLabel: 'Json viewer',
+      panelClass: 'sheet-cell-viewer',
+      data: (this.selected) ? this.selected[0] : null
+    });
+
+    bottomSheetRef.afterDismissed().subscribe(() => {
+      console.log('Bottom sheet has been dismissed.');
+    });
+  }
 
 }

@@ -8,10 +8,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 // Router
 import { appRoutes, appRoutingProviders } from './app.routes';
 
-// Google Analytics
-import { Angulartics2Module } from 'angulartics2';
-import { Angulartics2GoogleAnalytics } from 'angulartics2/ga';
-
 // Material : 이거 하나면 하위 모듈들 모두 커버 되는듯..
 import { CdkTableModule } from '@angular/cdk/table';
 import {
@@ -21,8 +17,7 @@ import {
   MatListModule, MatMenuModule, MatNativeDateModule, MatPaginatorModule, MatProgressBarModule,
   MatProgressSpinnerModule, MatRadioModule, MatRippleModule, MatSelectModule, MatSidenavModule,
   MatSliderModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule, MatStepperModule,
-  MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, 
-  MatTreeModule, MatFormFieldModule
+  MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule
 } from '@angular/material';
 
 // UI Libraries
@@ -49,8 +44,10 @@ import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-la
 import { QueryResultComponent } from './main/graph/components/query-result/query-result.component';
 import { QueryGraphComponent } from './main/graph/components/query-graph/query-graph.component';
 import { QueryTableComponent } from './main/graph/components/query-table/query-table.component';
-import { MetaGraphComponent } from './main/graph/components/meta-graph/meta-graph.component';
-import { StatisticsComponent } from './main/graph/components/statistics/statistics.component';
+import { StatGraphComponent } from './main/graph/components/stat-graph/stat-graph.component';
+import { MetaGraphComponent } from './main/graph/sheets/meta-graph/meta-graph.component';
+import { CellViewerComponent } from './main/graph/sheets/cell-viewer/cell-viewer.component';
+import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style.component';
 
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
@@ -74,7 +71,9 @@ import { StatisticsComponent } from './main/graph/components/statistics/statisti
     MetaGraphComponent,
     QueryGraphComponent,
     QueryTableComponent,
-    StatisticsComponent,
+    CellViewerComponent,
+    LabelStyleComponent,
+    StatGraphComponent,
 
     // LabelStyleSettingDialog,
     // ImageExportDialog,
@@ -97,15 +96,12 @@ import { StatisticsComponent } from './main/graph/components/statistics/statisti
     MatInputModule, MatListModule, MatMenuModule, MatNativeDateModule, MatPaginatorModule,
     MatProgressBarModule, MatProgressSpinnerModule, MatRadioModule, MatRippleModule, MatSelectModule,
     MatSidenavModule, MatSliderModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule,
-    MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, 
-    MatTreeModule, MatFormFieldModule,
+    MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule,
     
     NgxDatatableModule, 
+    PrettyJsonModule,
 
-    appRoutes,
-    Angulartics2Module.forRoot([ Angulartics2GoogleAnalytics ]),
-
-    PrettyJsonModule
+    appRoutes
   ], 
   // modules needed to run this module
   providers: [
@@ -125,6 +121,10 @@ import { StatisticsComponent } from './main/graph/components/statistics/statisti
     // ProjectOpenDialog,
     // ProjectSaveDialog,
     // SearchResultDialog
+
+    LabelStyleComponent,
+    MetaGraphComponent,
+    CellViewerComponent,
   ],
   bootstrap: [ AppComponent ]
 })

@@ -1,5 +1,5 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Input, Output, EventEmitter} from '@angular/core';
-import { MatDialog, MatButtonToggle } from '@angular/material';
+import { Component, OnInit, NgZone, ViewChild, ElementRef, Inject, Output, EventEmitter} from '@angular/core';
+import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
 
 import { Observable, Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
@@ -9,41 +9,39 @@ import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 
-import * as CONFIG from '../../../../global.config';
-import { initChangeDetectorIfExisting } from '../../../../../../node_modules/@angular/core/src/render3/instructions';
+import * as CONFIG from '../../../../app.config';
 
+declare var _: any;
 declare var $: any;
 declare var agens: any;
 
 @Component({
   selector: 'app-meta-graph',
   templateUrl: './meta-graph.component.html',
-  styleUrls: ['./meta-graph.component.scss','../../graph.component.scss']
+  styleUrls: ['./meta-graph.component.scss']
 })
 export class MetaGraphComponent implements OnInit {
 
   isVisible: boolean = false;
-  isFirstOnData: boolean = false;
+  metaGraph: IGraph = undefined;
 
   gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
 
   selectedElement: any = undefined;  
-  timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
 
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
-  @Output() groupByCall:EventEmitter<any> = new EventEmitter<any>();
-  @Output() initDone:EventEmitter<boolean> = new EventEmitter<boolean>();
-
   constructor(
     private _ngZone: NgZone,    
-    private dialog: MatDialog,
     private _api: AgensDataService,
     private _util: AgensUtilService,
-  ) { 
+    private _sheetRef: MatBottomSheetRef<MetaGraphComponent>,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any        
+  ) {
+    this.metaGraph = (this.data) ? _.cloneDeep(this.data['metaGraph']) : undefined;
   }
 
   ngOnInit() {
@@ -55,14 +53,7 @@ export class MetaGraphComponent implements OnInit {
       cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
       component: this
     };
-  }
 
-  ngOnDestroy(){
-    // 내부-외부 함수 공유 해제
-    window['metaGraphComponentRef'] = undefined;
-  }
-
-  ngAfterViewInit() {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
@@ -72,8 +63,33 @@ export class MetaGraphComponent implements OnInit {
         hideNodeTitle: false,        // hide nodes' title
         hideEdgeTitle: false,        // hide edges' title
       });
+    this.cy.userZoomingEnabled( true );
+  }
 
-    setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
+  ngOnDestroy(){
+    // 내부-외부 함수 공유 해제
+    window['metaGraphComponentRef'] = undefined;
+  }
+
+  ngAfterViewInit() {
+    if( this.metaGraph ) this.initLoad();
+  }
+
+  close(): void {
+    this._sheetRef.dismiss();
+    event.preventDefault();
+  }
+
+  initLoad(){
+    this.metaGraph.nodes.forEach(e => {
+      this.cy.add( e );
+    });
+    this.metaGraph.edges.forEach(e => {
+      this.cy.add( e );
+    });
+    this.initCanvas();
+
+    this.changeLayout( this.cy.elements() );
   }
 
   /////////////////////////////////////////////////////////////////
@@ -100,8 +116,6 @@ export class MetaGraphComponent implements OnInit {
     // let position = target.position();
     // let boundingBox = { x1: position.x - 40, x2: position.x + 40, y1: position.y - 40, y2: position.y + 40 };
     // this.runExpandTo( target, targetLabel );
-
-    this.groupByCall.emit({ label: target, props: value });
   }
 
   
@@ -127,7 +141,6 @@ export class MetaGraphComponent implements OnInit {
     // 그래프 라벨 칩리스트 비우고
     this.labels = [];
     this.selectedElement = undefined;
-    this.timeoutNodeEvent = undefined;
   }
 
   setGid( gid:number ){ this.gid = gid; }
@@ -156,7 +169,7 @@ export class MetaGraphComponent implements OnInit {
           },
           scratch: {
             _style: <IStyle>{
-              color: ele._private.scratch._style.color, width: '20px', title: k
+              color: ele._private.scratch._style.color, width: '20px', title: k, visible: true
             }},
           classes: 'expand' 
         };
@@ -172,7 +185,7 @@ export class MetaGraphComponent implements OnInit {
           },
           scratch: {
             _style: <IStyle>{
-              color: ele._private.scratch._style.color, width: '2px', title: undefined
+              color: ele._private.scratch._style.color, width: '2px', title: undefined, visible: true
             }},
           classes: 'expand' 
         };
@@ -193,8 +206,6 @@ export class MetaGraphComponent implements OnInit {
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
-
-    this.initDone.emit(this.isVisible);
   }
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
@@ -205,17 +216,11 @@ export class MetaGraphComponent implements OnInit {
   }
 
   changeLayout( elements ){
-    let options = { name: 'klay',
-      nodeDimensionsIncludeLabels: false, fit: true, padding: 50,
-      animate: false, transform: function( node, pos ){ return pos; },
-      klay: {
-        aspectRatio: 2.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
-        borderSpacing: 60, // Minimal amount of space to be left to the border
-        edgeRouting: 'POLYLINE', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
-        edgeSpacingFactor: 0.6, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
-        spacing: 60, // Overall setting for the minimal amount of space to be left between objects
-        thoroughness: 6 // How much effort should be spent to produce a nice layout..
-      }
+    let options = { name: 'cose',
+      nodeDimensionsIncludeLabels: true, fit: true, padding: 50, animate: false, 
+      randomize: false, componentSpacing: 80, nodeOverlap: 4,
+      idealEdgeLength: 50, edgeElasticity: 50, nestingFactor: 1.5,
+      gravity: 0.5, numIter: 1000
     };    
     // adjust layout
     elements.layout(options).run();
@@ -228,8 +233,8 @@ export class MetaGraphComponent implements OnInit {
       elements.add(p);
 
       let position = p.position();
-      let margin = 400 + parseInt(p._private.scratch._style.width.replace('px',''));
-      let boundingBox = { x1: position.x - margin, x2: position.x + margin, y1: position.y - margin, y2: position.y + margin };
+      let boundingBox = { x1: position.x - 300, x2: position.x + 300, y1: position.y - 300, y2: position.y + 300 };
+      console.log( 'layoutProperties', p._private.data, boundingBox );
 
       let expandLayout:any = {
         name: 'concentric',
