@@ -95,22 +95,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnInit(){
-    // prepare to call this.function from external javascript
-    window['angularComponentRef'] = {
-      zone: this._ngZone,
-      cyCanvasCallback: () => this.cyCanvasCallback(),
-      cyElemCallback: (target) => this.cyElemCallback(target),
-      cyQtipMenuCallback: (target, value) => this.cyQtipMenuCallback(target, value),
-      component: this
-    };    
-  }
-  ngOnDestroy(){
-    this.clearSubscriptions();
-    // 내부-외부 함수 공유 해제
-    window['angularComponentRef'] = undefined;
-  }
-
-  ngAfterViewInit() {
     this._api.changeMenu('main');
 
     // Cytoscape 생성 & 초기화
@@ -121,13 +105,30 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         userCxtmenu: true,          // whether to use Context menu or not
         hideNodeTitle: false,       // hide nodes' title
         hideEdgeTitle: false,       // hide edges' title
-      }
-    );
+    });
+  }
+
+  ngOnDestroy(){
+    this.clearSubscriptions();
+    // 내부-외부 함수 공유 해제
+    window['angularComponentRef'] = undefined;
+  }
+
+  ngAfterViewInit() {
+    this.cy.on('tap', (e) => { 
+      if( e.target === this.cy ) this.cyCanvasCallback();
+      else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+    });
+    Promise.resolve(null).then(() => {
+      this.cy.$api.qtipFn = this.cyQtipMenuCallback;
+    });
+
     // Cytoscape 바탕화면 qTip menu
-    this.cy.qtip({
+    let tooltip = this.cy.qtip({
       content: function(e){ 
+        console.log( 'qtip.content:', e );
         let html:string = `<div class="hide-me"><h4><strong>Menu</strong></h4><hr/><ul>`;
-        html += `<li><a href="javascript:void(0)" onclick="agens.cy.$api.cyQtipMenuCallback('core','addNode')">create new NODE</a></li>`;
+        html += `<li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipFn('addNode','all')")>create new NODE</a></li>`;
         html += `</ul></div>`;
         return html;
       },
@@ -135,11 +136,19 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       hide: { event: 'click unfocus' },
       position: { target: 'mouse', adjust: { mouse: false } },
       style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
-      events: { visible: function(event, api) { $('.qtip').click(function(){ $('.qtip').hide(); }); } }
+      events: { visible: (event, api) => { $('.qtip').click(() => { $('.qtip').hide(); }); }}
     });
 
     // schemaData
     this.callCoreSchema();
+
+    // qTip
+  }
+
+
+  qtipMenuClick(){
+    console.log('qtipMenuClick!!', this.cy._private.container);
+
   }
 
   /////////////////////////////////////////////////////////////////
@@ -207,11 +216,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.$api.changeLayout('klay');
-    agens.cy = this.cy;
   }
   refreshCanvas(){
     this.cy.resize();
-    this.cy.fit( this.cy.elements(), 100);
+    this.cy.fit( this.cy.elements(), 50);
   }
 
   //////////////////////////////////////////////

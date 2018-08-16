@@ -11,6 +11,8 @@ import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types
 
 import * as CONFIG from '../../../../app.config';
 
+import * as cytoscape from 'cytoscape';
+
 declare var _: any;
 declare var $: any;
 declare var agens: any;
@@ -33,6 +35,7 @@ export class MetaGraphComponent implements OnInit {
 
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
+  @ViewChild('divPopup', {read: ElementRef}) divPopup: ElementRef;
 
   constructor(
     private _ngZone: NgZone,    
@@ -45,15 +48,6 @@ export class MetaGraphComponent implements OnInit {
   }
 
   ngOnInit() {
-    // prepare to call this.function from external javascript
-    window['metaGraphComponentRef'] = {
-      zone: this._ngZone,
-      cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
-      cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
-      cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
-      component: this
-    };
-
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
@@ -63,7 +57,9 @@ export class MetaGraphComponent implements OnInit {
         hideNodeTitle: false,        // hide nodes' title
         hideEdgeTitle: false,        // hide edges' title
       });
+
     this.cy.userZoomingEnabled( true );
+    agens.cy = this.cy;  
   }
 
   ngOnDestroy(){
@@ -72,7 +68,17 @@ export class MetaGraphComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    if( this.metaGraph ) this.initLoad();
+    this.cy.on('tap', (e) => { 
+      console.log( 'meta-graph.tapEvent:', e.target);
+      if( e.target === this.cy ) this.cyCanvasCallback();
+      else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+    });
+
+    if( this.metaGraph ){
+      this.initLoad();
+      console.log( 'after initLoad():', this.cy.nodes()[0]);
+      // this.selectedElement = this.cy.nodes()[0];
+    }
   }
 
   close(): void {
@@ -81,10 +87,15 @@ export class MetaGraphComponent implements OnInit {
   }
 
   initLoad(){
+    this._util.calcElementStyles( this.metaGraph.nodes, (x)=>40+x*5, false );
+    this._util.calcElementStyles( this.metaGraph.edges, (x)=>2+x, false );
+
     this.metaGraph.nodes.forEach(e => {
+      e.classes += ' dataLabel';
       this.cy.add( e );
     });
     this.metaGraph.edges.forEach(e => {
+      e.classes += ' dataLabel';
       this.cy.add( e );
     });
     this.initCanvas();
@@ -105,7 +116,6 @@ export class MetaGraphComponent implements OnInit {
   cyElemCallback(target:any):void {
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
-    console.log( 'cyElemCallback', target._private.data );
   }  
 
   // Neighbor Label 로의 확장
@@ -154,55 +164,10 @@ export class MetaGraphComponent implements OnInit {
     this.cy.add( ele );
   }
 
-  addProperties( nodes:any[] ){
-    nodes.forEach(ele => {
-      if( !ele._private.data.props.hasOwnProperty('propsCount') ) return true;
-      let propsCount:Map<string,any> = ele._private.data.props['propsCount'];
-
-      Object.keys(propsCount).forEach(k => {
-        let pNode = <INode>{ group: 'nodes', data: {
-            id: ele._private.data.id + ':' + k,
-            // parent: ele._private.data.id,
-            label: 'property',
-            props: {},
-            size: propsCount[k]
-          },
-          scratch: {
-            _style: <IStyle>{
-              color: ele._private.scratch._style.color, width: '20px', title: k, visible: true
-            }},
-          classes: 'expand' 
-        };
-        pNode.data['owner'] = ele._private.data.id;
-        pNode.data['name'] = k;
-        let pEdge = <IEdge>{ group: 'edges', data: {
-            id: ele._private.data.id + ':has:' + k,
-            label: 'property',
-            source: ele._private.data.id,
-            target: ele._private.data.id + ':' + k,
-            props: {},
-            size: 1
-          },
-          scratch: {
-            _style: <IStyle>{
-              color: ele._private.scratch._style.color, width: '2px', title: undefined, visible: true
-            }},
-          classes: 'expand' 
-        };
-        pEdge.data['owner'] = ele._private.data.id;
-
-        this.cy.add( pNode );
-        this.cy.add( pEdge );
-      });
-    });
-  }
-
   // 데이터 불러오고 최초 적용되는 작업들 
   initCanvas(){
     // add groupBy menu
     this.addQtipMenu( this.cy.elements() );
-    // add Properties of Node
-    this.addProperties(this.cy.nodes());
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
@@ -226,39 +191,6 @@ export class MetaGraphComponent implements OnInit {
     elements.layout(options).run();
   }
 
-  layoutProperties( targets:any[] ){    
-    targets.forEach(p => {
-      if( !p._private.data.props.hasOwnProperty('propsCount') ) return true;
-      let elements = this.cy.elements(`[owner='${p.id()}']`);
-      elements.add(p);
-
-      let position = p.position();
-      let boundingBox = { x1: position.x - 300, x2: position.x + 300, y1: position.y - 300, y2: position.y + 300 };
-      console.log( 'layoutProperties', p._private.data, boundingBox );
-
-      let expandLayout:any = {
-        name: 'concentric',
-        fit: true,                          // whether to fit the viewport to the graph
-        padding: 50,                        // the padding on fit
-        startAngle: 3 / 2 * Math.PI,        // where nodes start in radians
-        sweep: undefined,                   // how many radians should be between the first and last node (defaults to full circle)
-        clockwise: true,                    // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
-        equidistant: false,                 // whether levels have an equal radial distance betwen them, may cause bounding box overflow
-        minNodeSpacing: 10,                 // min spacing between outside of nodes (used for radius adjustment)
-        boundingBox: boundingBox,           // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-        avoidOverlap: true,                 // prevents node overlap, may overflow boundingBox if not enough space
-        nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-        concentric: function( node ){ return node.degree(); },  // returns numeric value for each node, placing higher nodes in levels towards the centre
-        levelWidth: function( nodes ){ return nodes.maxDegree() / 4; }, // the variation of concentric values in each level
-        animate: false,                     // whether to transition the node positions
-      };
-
-      setTimeout(() => {
-        elements.makeLayout(expandLayout).run();
-      }, 100);        
-    });
-  }
-
   /////////////////////////////////////////////////////////////////
   // Properties Controllers
   /////////////////////////////////////////////////////////////////
@@ -269,18 +201,7 @@ export class MetaGraphComponent implements OnInit {
     // 
     // mouse right button click event on nodes
     elements.qtip({
-      content: function() {
-        // return 'Example qTip on ele ' + this.id();
-        let menuHtml:string = `<div class="hide-me"><h4>groupBy( ${this.data('name')} )</h4><hr/><ul>`
-                  + `<li><a href="javascript:void(0);" onclick="agens.cy.$api.cyQtipMenuCallback('${this.data('name')}','');">`
-                  + `All <i class="material-icons">keyboard_arrow_left</i></a></li>`;
-        let props:Map<string,any> = this.data('props').propsCount;
-        Object.keys(props).forEach(k => {
-          menuHtml += `<li><a href="javascript:void(0);" onclick="agens.cy.$api.cyQtipMenuCallback('${this.data('name')}','${k}');">`
-                  + `${k} (size=${props[k]}) <i class="material-icons">keyboard_arrow_left</i></a></li>`;
-        });
-        return menuHtml+'</ul></div>';
-      },
+      content: function() { return this.divPopup.nativeElement; },
       style: { classes: 'qtip-bootstrap', tip: { width: 24, height: 8 } },
       position: { target: 'mouse', adjust: { mouse: false } },
       events: { visible: function(event, api) { $('.qtip').click(function(){ $('.qtip').hide(); }); } },
@@ -290,7 +211,6 @@ export class MetaGraphComponent implements OnInit {
   }
 
   unfoldProperties(){
-    this.layoutProperties( this.cy.nodes(`[label!='property']`) );
     this.cy.$api.view.show( this.cy.elements(`[label='property']`) );
     setTimeout(() => {
       this.cy.style(agens.graph.stylelist['dark']).update();

@@ -59,22 +59,6 @@ export class StatGraphComponent implements OnInit {
   }
 
   ngOnInit() {    
-    // prepare to call this.function from external javascript
-    window['statGraphComponentRef'] = {
-      zone: this._ngZone,
-      cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
-      cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
-      cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
-      component: this
-    };
-
-  }
-  ngOnDestroy(){
-    // 내부-외부 함수 공유 해제
-    window['statGraphComponentRef'] = undefined;
-  }
-
-  ngAfterViewInit() {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
@@ -85,8 +69,17 @@ export class StatGraphComponent implements OnInit {
         hideEdgeTitle: false,        // hide edges' title
       });
 
-      setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
-    }
+  }
+
+  ngOnDestroy(){
+  }
+
+  ngAfterViewInit() {
+    this.cy.on('tap', (e) => { 
+      if( e.target === this.cy ) this.cyCanvasCallback();
+      else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+    });
+  }
 
   /////////////////////////////////////////////////////////////////
   // Canvas Controllers
@@ -99,21 +92,15 @@ export class StatGraphComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("stat-graph.elem-click:", target);
+    console.log("stat-graph.tap:", target);
 
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
   }  
 
-  // Neighbor Label 로의 확장
-  cyQtipMenuCallback( target:any, targetLabel:string ){
-    let expandId = target.data('label')+'_'+target.data('id');
-    target.scratch('_expandid', expandId);
+  // qtipMenu 선택 이벤트
+  cyQtipMenuCallback( target:any, value:string ){
 
-    let position = target.position();
-    let boundingBox = { x1: position.x - 40, x2: position.x + 40, y1: position.y - 40, y2: position.y + 40 };
-
-    // this.runExpandTo( target, targetLabel );
   }
   
   /////////////////////////////////////////////////////////////////
