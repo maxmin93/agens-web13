@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, OnInit, OnDestroy } from '@angular/core';
 import { ViewChild, ElementRef, NgZone } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, } from '@angular/router';
 
 // materials
 import { MatDialog, MatSnackBar, MatButtonToggle, MatInput } from '@angular/material';
@@ -9,25 +9,24 @@ import { MatTabGroup } from '@angular/material/tabs';
 
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 import { PrettyJsonModule } from 'angular2-prettyjson';
-import { Angulartics2 } from 'angulartics2';
 
 import * as _ from 'lodash';
-import { concat, Observable, Subscription, Subject, forkJoin } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
-import * as CONFIG from '../../global.config';
+import { StateType } from '../../app.config';
 
 import { IResultDto, IResponseDto, IGraphDto } from '../../models/agens-response-types';
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IRecord, IColumn, IRow, IEnd } from '../../models/agens-data-types';
-import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import { IProject } from '../../models/agens-manager-types';
 
 // Components
 import { QueryResultComponent } from './components/query-result/query-result.component';
 import { QueryGraphComponent } from './components/query-graph/query-graph.component';
 import { QueryTableComponent } from './components/query-table/query-table.component';
+import { StatGraphComponent } from './components/stat-graph/stat-graph.component';
 
 // Dialogs
 import { SearchResultDialog } from './dialogs/search-result.dialog';
@@ -35,12 +34,10 @@ import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 import { LabelStyleSettingDialog } from './dialogs/label-style-setting.dialog';
 import { ImageExportDialog } from './dialogs/image-export.dialog';
-import { StatisticsComponent } from './components/statistics/statistics.component';
-import { MetaGraphComponent } from './components/meta-graph/meta-graph.component';
-import { element } from '../../../../node_modules/protractor';
 
 declare var CodeMirror: any;
 declare var agens: any;
+
 
 @Component({
   selector: 'app-graph',
@@ -76,35 +73,19 @@ return path;
   private resultMeta: IGraph = undefined;
   private resultTemp: IGraph = undefined;
 
-  // expandTo 를 위한 query API 결과
-  private resultExpandDto: IResultDto = undefined;
-  private resultExpandGraph: IGraph = undefined;
-
-  // pallets : Node 와 Edge 라벨별 color 셋
-  labelColors: any[] = [];
-  colorIndex: number = -1;
-
-  initWindowHeight:number = 0;
-
   currProject: IProject = undefined;
-  currentTabIndex: number = -1;
+  currentTabIndex: number = 0;
 
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
   @ViewChild('queryResult') queryResult: QueryResultComponent;
 
   @ViewChild('resultTapGroup') tapGroup: MatTabGroup;
 
-  @ViewChild('metaGraph') metaGraph: MetaGraphComponent;
   @ViewChild('queryGraph') queryGraph: QueryGraphComponent;
   @ViewChild('queryTable') queryTable: QueryTableComponent;
-  @ViewChild('statistics') statGraph: StatisticsComponent;
-
-  // metaGraphTodo$:Subject<any> = new Subject<any>();
-  // dataGraphTodo$:Subject<any> = new Subject<any>();
-  // statGraphTodo$:Subject<any> = new Subject<any>();
+  @ViewChild('statGraph') statGraph: StatGraphComponent;
 
   constructor(    
-    private _angulartics2: Angulartics2,
     private _router: Router,
     public dialog: MatDialog,    
     private _api: AgensDataService,
@@ -145,52 +126,40 @@ return path;
       // console.log('this.editor is keyup:', e.keyCode );
       if( e.keyCode == 13 ) agens.cy.resize();
     });      
-
-    // pallets 생성 : luminosity='dark'
-    this.labelColors = this._util.randomColorGenerator('dark', CONFIG.MAX_COLOR_SIZE);    
   }
 
   tabChanged($event){
-    // console.log( `tabChanged from ${this.currentTabIndex} to ${$event.index}`);
+    console.log( `tabChanged from ${this.currentTabIndex} to ${$event.index}`);
     this.currentTabIndex = $event.index;
   }
 
   tabAnimationDone(){
     switch( this.currentTabIndex ){
       case 0: 
-          this.metaGraph.isVisible = true;
-          this.queryGraph.isVisible = false;
-          this.statGraph.isVisible = false;
-          Promise.resolve(null).then(() => this.metaGraph.refreshCanvas() ); 
-          break;
-      case -1:
-      case 1: 
-          this.metaGraph.isVisible = false;
           this.queryGraph.isVisible = true;
           this.statGraph.isVisible = false;
-          Promise.resolve(null).then(() => this.queryGraph.refreshCanvas() )
-          .then(() => {
-            this.queryGraph.todo$.subscribe(x => {
-              console.log( 'tabChangeAfter: dataGraph is visible =>', x);
-              this.queryGraph.graphChangeLayout('cose');
-            });
-          }) 
+          Promise.resolve(null).then(() => this.queryGraph.refreshCanvas() );
           break;
-      case 3: 
-          this.metaGraph.isVisible = false;
+      case 1: 
+          this.queryGraph.isVisible = false;
+          this.statGraph.isVisible = false;
+          break;
+      case 2: 
           this.queryGraph.isVisible = false;
           this.statGraph.isVisible = true;
           Promise.resolve(null).then(() => this.statGraph.refreshCanvas() ); 
           break;
+      default: 
+          Promise.resolve(null).then(() => this.currentTabIndex = 0 );
+          break;
     }
   }
 
-  initCallbackMeta(isVisible:boolean){
-    console.log('initCallbackMeta =', isVisible);
-  }
+  // query-graph Canvas의 초기화 작업 완료 이벤트
+  // ==> Visible 상태이면 layout 적용
   initCallbackData(isVisible:boolean){
-    console.log('initCallbackData =', isVisible);
-    if( isVisible ) this.queryGraph.graphChangeLayout('cose');
+    console.log('initCallbackData ==>', isVisible);
+    if( isVisible ) this.queryGraph.graphChangeLayout('random');
     else this.queryGraph.todo$.next({ cmd: 'changeLayout', param: 'cose' });
   }
   initCallbackStat(isVisible:boolean){
@@ -210,6 +179,7 @@ return path;
     this.resultGraph = undefined;
     this.resultRecord = undefined;
     this.resultMeta = undefined;
+    this.resultTemp = undefined;
 
     // 에디터 비우고
     this.editor.setValue('');
@@ -219,10 +189,12 @@ return path;
   }
 
   clearResults(){
+    // 탭 위치 초기화 (queryGraph 탭으로)
+    this.currentTabIndex = 0;
+
     this.queryResult.clear();
     this.queryGraph.clear();
     this.queryTable.clear();
-    this.metaGraph.clear();
     this.statGraph.clear();
 
     this.clearSubscriptions();
@@ -253,13 +225,6 @@ return path;
     return newLines.join(' ');
   }
 
-  injectMetaElementStyle( ele:IElement ){
-    this.resultGraph.labels.map(label => {
-      if( label.type == ele.group && label.name == ele.data.label)
-        if( !!label.scratch._style ) ele.scratch._style = label.scratch._style;
-    });
-  }
-
   /////////////////////////////////////////////////////////////////
   // Editor Controllers
   /////////////////////////////////////////////////////////////////
@@ -284,7 +249,6 @@ return path;
         this.resultDto = <IResultDto>x;
         if( x.hasOwnProperty('gid') ) {
           this.queryGraph.setGid( x.gid );
-          this.metaGraph.setGid( x.gid );
           this.statGraph.setGid( x.gid );
         }  
       },
@@ -312,7 +276,10 @@ return path;
       (x:ILabel) => { 
         x.scratch['_style'] = <IStyle>{ 
                 width: undefined, title: 'name', 
-                color: (x.type == 'nodes') ? this._util.nextColor() : undefined };
+                color: (x.type == 'nodes') ? this._util.nextColor() : undefined 
+                , visible: true
+              };
+        x.scratch['_styleBak'] = _.clone(x.scratch['_style']);
         this.resultGraph.labels.push( x );
         this.queryGraph.addLabel( x );
       });
@@ -325,7 +292,7 @@ return path;
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
             x.scratch['_style'] = label.scratch['_style'];
-            x.scratch['_styleBak'] = _.clone(label.scratch['_style']);
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];
           });
 
         this.resultGraph.nodes.push( x );
@@ -334,11 +301,11 @@ return path;
     this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
         this.resultGraph.labels
-        .filter(val => val.type == 'edges' && val.name == x.data.label)
-        .map(label => {
-          x.scratch['_style'] = label.scratch['_style'];
-          x.scratch['_styleBak'] = _.clone(label.scratch['_style']);
-        });
+          .filter(val => val.type == 'edges' && val.name == x.data.label)
+          .map(label => {
+            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_styleBak'] =label.scratch['_styleBak'];
+          });
 
         this.resultGraph.edges.push( x );
         this.queryGraph.addEdge( x );
@@ -361,12 +328,15 @@ return path;
       (x:IEnd) => {
         this.isLoading = false;
         this.queryResult.setData(<IResponseDto>this.resultDto);
+
+        // send data to Canvas
+        this.queryGraph.setData(this.resultGraph);
         this.queryGraph.initCanvas();
 
         // send data to Table 
         this.queryTable.setData(this.resultRecord);
 
-        // // **NOTE: 이어서 schema graph 호출 (gid)
+        // **NOTE: 이어서 schema graph 호출 (gid)
         if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
           this.runGraphSchema( this.resultDto.gid );
       });
@@ -375,10 +345,10 @@ return path;
 
   // when button "STOP" click
   stopQuery(){
-    this.clearSubscriptions();
-
     this.isLoading = false;
     this.queryResult.abort();
+    
+    this.clearSubscriptions();
   }
 
   runGraphSchema(gid: number){
@@ -398,53 +368,45 @@ return path;
       });
     data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
       (x:ILabel) => { 
-      this.resultMeta.labels.push( x );
-      this.metaGraph.addLabel( x );
-      this.statGraph.addLabel( x );
+        // meta-graph 에는 스타일을 부여하지 않는다 (nodes, edges 둘뿐이라)
+        this.resultMeta.labels.push( x );
+        this.statGraph.addLabel( x );
       });
     data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
-      // setNeighbors from this.resultGraph.labels;
-      x.scratch['_neighbors'] = new Array<string>();
-      this.resultGraph.labels
-        .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
-        .map(label => {
-          x.scratch['_neighbors'] += label.targets;
-          x.scratch['_style'] = label.scratch['_style'];
-        });
-      this.resultMeta.nodes.push( x );
-      this.metaGraph.addNode( x );
-      this.statGraph.addNode( x );
+        // setNeighbors from this.resultGraph.labels;
+        x.classes = 'meta';     // meta class style
+        x.scratch['_neighbors'] = new Array<string>();
+        this.resultGraph.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
+            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+          });
+        this.resultMeta.nodes.push( x );
+        this.statGraph.addNode( x );
       });
     data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
+        x.classes = 'meta';     // meta class style
         this.resultGraph.labels
         .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
       this.resultMeta.edges.push( x );
-      this.metaGraph.addEdge( x );
       this.statGraph.addEdge( x );
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        // this.queryGraph.graphChangeLayout('cose');
-        setTimeout(()=>{
-          this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5, false );
-          this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x, false );
-          this._util.applyLabelColor(this.resultMeta.nodes, this.resultGraph.labels, 
-            (ele:IElement, label:ILabel) => {
-              return label.type == 'nodes' && ele.data['id'] == label.id;
-            });
-          this._util.applyLabelColor(this.resultMeta.edges, this.resultGraph.labels, 
-            (ele:IElement, label:ILabel) => {
-              return label.type == 'edges' && ele.data['id'] == label.id;
-            });
-        
-          this.metaGraph.initCanvas();
-          this.statGraph.initCanvas();
-        }, 100);  
+        // // meta-graph에 대한 width 스타일만 적용 (label 스타일 연결)
+        // // : newColor option = false (새로운 색상 사용 안함)
+        // this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5, false );
+        // this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x, false );
+        this.queryGraph.setMeta(this.resultMeta);
+        this.statGraph.initCanvas();
       });
 
   }
@@ -480,6 +442,7 @@ return path;
         .map(label => {
           x.scratch['_neighbors'] += label.targets;
           x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
       this.resultTemp.nodes.push( x );
       this.queryGraph.addNode( x );
@@ -490,20 +453,21 @@ return path;
         .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
         .map(label => {
           x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
       this.resultTemp.edges.push( x );
       this.queryGraph.addEdge( x );
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        this._util.applyLabelColor(this.resultTemp.nodes, this.resultGraph.labels, 
-          (ele:IElement, label:ILabel) => {
-            return label.type == 'nodes' && ele.data['label'] == label.name;
-          });
-        this._util.applyLabelColor(this.resultTemp.edges, this.resultGraph.labels, 
-          (ele:IElement, label:ILabel) => {
-            return label.type == 'edges' && ele.data['label'] == label.name;
-          });
+        // this._util.applyLabelStyle(this.resultTemp.nodes, this.resultGraph.labels, 
+        //   (ele:IElement, label:ILabel) => {
+        //     return label.type == 'nodes' && ele.data['label'] == label.name;
+        //   });
+        // this._util.applyLabelStyle(this.resultTemp.edges, this.resultGraph.labels, 
+        //   (ele:IElement, label:ILabel) => {
+        //     return label.type == 'edges' && ele.data['label'] == label.name;
+        //   });
 
         this.queryGraph.initCanvas();
         // this.queryGraph.graphChangeLayout('cose');
@@ -521,7 +485,7 @@ return path;
     if( sql.length < 5 ){
       this._api.setResponses(<IResponseDto>{
         group: 'project::save',
-        state: CONFIG.StateType.WARNING,
+        state: StateType.WARNING,
         message: 'Query Editor is empty. Graph has to be with its query'
       });
       return;
@@ -532,7 +496,7 @@ return path;
     if( graph_json.length < 5 ){
       this._api.setResponses(<IResponseDto>{
         group: 'project::save',
-        state: CONFIG.StateType.WARNING,
+        state: StateType.WARNING,
         message: 'Graph is empty. Blank graph cannot be saved'
       });
       return;
@@ -563,8 +527,6 @@ return path;
       console.log('close ProjectSaveDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // saved Project
       this.currProject = result;
-
-      this._angulartics2.eventTrack.next({ action: 'saveProject', properties: { category: 'graph', label: result.userName+'.'+result.id }});
     });
   }
 
@@ -579,8 +541,6 @@ return path;
       console.log('close ProjectOpenDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // Project Open 위한 API 호출
       this.currProject = this.loadProject(<IProject>result);
-
-      this._angulartics2.eventTrack.next({ action: 'openProject', properties: { category: 'graph', label: result.userName+'.'+result.id }});
     });
   }
 
@@ -599,7 +559,7 @@ return path;
       console.log('graph_json parse error =>', ex);
       this._api.setResponses(<IResponseDto>{
         group: 'project::load',
-        state: CONFIG.StateType.ERROR,
+        state: StateType.ERROR,
         message: 'JSON parse error on loading project'
       });
     }

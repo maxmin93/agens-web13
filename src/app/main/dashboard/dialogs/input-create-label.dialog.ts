@@ -5,7 +5,7 @@ import { NgForm, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
-import * as CONFIG from '../../../global.config';
+import * as CONFIG from '../../../app.config';
 import { ILabel, IProperty } from '../../../models/agens-data-types';
 
 const EMPTY_LABEL: ILabel = { 

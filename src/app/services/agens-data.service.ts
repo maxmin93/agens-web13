@@ -10,7 +10,7 @@ import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto,
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IRecord, IColumn, IRow } from '../models/agens-data-types';
 import { ILogs, IProject } from '../models/agens-manager-types';
 
-import * as CONFIG from '../global.config';
+import * as CONFIG from '../app.config';
 
 @Injectable({
   providedIn: 'root'

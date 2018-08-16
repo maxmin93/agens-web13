@@ -4,8 +4,8 @@
         [limit]="9" [reorderable]="reorderable" [scrollbarH]="true"
         [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
         [headerHeight]="48" [footerHeight]="48" [rowHeight]="auto"
+        [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)"
         >
-        <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
         <ngx-datatable-column name="Index" [width]="60" [canAutoResize]="false" [sortable]="false">
             <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
@@ -13,50 +13,19 @@
             </ng-template>
         </ngx-datatable-column>
 
-        <!-- <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="true" prop="{{col.name}}"> -->
         <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false">
             <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
-                <span (click)="recordSort(col)">{{col.name}}</span>
+                <span>{{col.name}}</span>
             </ng-template>
             <ng-template let-rowIndex="rowIndex" let-column="col" let-row="row" ngx-datatable-cell-template>
-                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0"
-                    (click)="showJsonFormat(rowIndex, col, row)">
+                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0">
                     {{ row[col.name] | json }}
                 </span>
-                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0"
-                    (click)="showJsonFormat(rowIndex, col,row)">
+                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0">
                     {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
                 </span>
             </ng-template>
-        </ngx-datatable-column>            
-    </ngx-datatable>    
-    <div class="row strech">
-        <div class="col strech border p-20">
-            <div class="row-center">
-                <h5 class="title">CELL <strong>VALUE</strong> </h5>
-                <div class="row">
-                    <h5>You clicked [ Row, Col ] = [ <span>{{selectedRowIndex}}, {{selectedColIndex}}</span> ]</h5>              
-                </div>
-            </div>
-            <!-- " *ngIf="isJsonCell" -->
-            <div id="tableCell" #tableCell class="json strech m-20" style="visibility: hidden;">
-                
-                <div class="scrollbar">
-                    <!-- 
-                        JSON Pretty formatter
-                        https://www.npmjs.com/package/angular2-prettyjson
-                    -->            
-                    
-                    <pre id="cellValue" [innerHtml]="selectedCell | prettyjson:3"></pre>
-                </div>    
-            </div>
-        </div>
-        <div class="viewbox theme">
-            <div class="scroll-hide">
-                <ul class="list icon border border-left-no">
-                    <li><a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above"><mat-icon>bookmarks</mat-icon></a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
+        </ngx-datatable-column>
+
+    </ngx-datatable>
 </div>

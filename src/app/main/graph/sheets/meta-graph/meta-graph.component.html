@@ -1,0 +1,55 @@
+<!-- GRAPH -->
+<div id="graphCard" class="col strech">    
+    <div id="progressBarMetaGraph" #progressBar style='visibility:hidden;'>
+        <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+    </div>
+
+    <!-- Graph content -->
+    <div class="row strech">
+        <div class="row strech row-side">
+            <div class="col strech">
+                <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
+            </div>
+            <nav>
+            <ng-container *ngIf="!!selectedElement">
+                <div id="slide-toggle" class="slide border col">
+                    <div class="row-center">
+                        <h4>DATA <strong>INFO</strong></h4>
+                    </div>
+                    <ul class="list border noborder col strech m-10">
+                        <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
+                        <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                        <li class="side-margin"><span>Size</span>{{ selectedElement.data('size') }}</li>
+                        <li class="col strech side-margin" *ngIf="selectedElement.data('props').hasOwnProperty('propsCount')">
+                            <span>Property groupCount</span>
+                            <div class="json strech m-10"><pre [innerHtml]="selectedElement.data('props')['propsCount'] | prettyjson:3"></pre></div>
+                        </li>
+                    </ul>
+                </div>
+            </ng-container>
+            </nav>
+             <!-- Graph.Meta : toolbar -->
+            <div class="row">
+                <div id="agens-graph-toolbar" class="viewbox border strech theme">                    
+                    <ul class="list icon border noborder">
+                        <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                                <mat-icon>refresh</mat-icon></a></li>
+                        <li><a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
+                                <mat-icon>unfold_more</mat-icon></a></li>
+                        <li><a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
+                                <mat-icon>unfold_less</mat-icon></a></li>
+                        <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                                <mat-icon>close</mat-icon></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>    
+        <div class="col strech">
+                <div class="strech border m-20 p-20">    
+                    <h5 class="title"><strong>FILTER </strong></h5>
+                </div>
+                <button mat-raised-button color="primary" [disabled]="!isChanged"
+                        (click)="close()">Reload</button>
+        </div>        
+    </div>
+</div>

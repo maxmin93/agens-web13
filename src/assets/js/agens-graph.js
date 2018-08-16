@@ -50,11 +50,29 @@
   /////////////////////////////////////////////////////////
 
   agens.styles = {
-    nodeLabel: function(e){
-      if( e.scratch('_style') && e.scratch('_style').title )
+    visibility: function(e){     // visible or hidden
+      if( e.scratch('_style') && e.scratch('_style').hasOwnProperty('visible') ) 
+        return e.scratch('_style').visible ? 'visible' : 'hidden';
+      return 'visible';
+    },
+    // opacity: function(e){     // 0.0 ~ 1.0
+    //   if( e.scratch('_style') && e.scratch('_style').opacity ) 
+    //     return e.scratch('_style').opacity;
+    //   return 1.0;
+    // },
+    dataLabel: function(e){
+      if( e.scratch('_style') ){
         if( e.data('props') && e.data('props').hasOwnProperty(e.scratch('_style').title) ) 
           return e.data('props')[e.scratch('_style').title];
+      }
       return '';
+    },
+    metaLabel: function(e){
+      if( e.scratch('_style') ){
+        if( e.data('props') && e.data('props').hasOwnProperty('name') ) 
+          return e.data('props')['name'] + '\n(' + e.scratch('_style').title +')';
+      }
+      return '('+e.scratch('_style').title+')';
     },
     nodeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -67,15 +85,8 @@
       return '#e3e3e3';
     },
     nodeWidth: function(e){
-      if( e.scratch('_style') && e.scratch('_style').width ) 
-        return e.scratch('_style').width;
+      if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
       return '55px';
-    },
-    edgeLabel: function(e){
-      if( e.scratch('_style') && e.scratch('_style').title )
-        if( e.data('props') && e.data('props').hasOwnProperty(e.scratch('_style').title) )
-          return e.data('props')[e.scratch('_style').title];
-      return '';
     },
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -88,8 +99,7 @@
       return '#d3d3d3';
     },
     edgeWidth: function(e){
-      if( e.scratch('_style') && e.scratch('_style').width ) 
-        return e.scratch('_style').width;
+      if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
       return '2px';
     }
   };
@@ -129,20 +139,20 @@
           'text-valign': 'top',
           'text-halign': 'center',
           'background-color': '#B8BdB1'
-      }}, {
+        }}, {
         selector: 'node',
         css: {
           'color': 'white',
           'label': function(e){
               if( e._private.cy.scratch('_config').hideNodeTitle ) return '';
-              return agens.styles.nodeLabel(e);
+              return agens.styles.dataLabel(e);
               },
-          'background-color': function(e){ return agens.styles.nodeBColor(e); },
+          'background-color': function(e){ return agens.styles.nodeDColor(e); },
           'border-width':'3',
-          'border-color': function(e){ return agens.styles.nodeDColor(e); },
+          'border-color': function(e){ return agens.styles.nodeBColor(e); },
           'width':  function(e){ return agens.styles.nodeWidth(e); },
           'height': function(e){ return agens.styles.nodeWidth(e); },
-  
+          'visibility': function(e){ return agens.styles.visibility(e); },
           'text-wrap':'wrap',
           'text-max-width':'75px',
           'text-halign': 'center',    // text-halign: left, center, right
@@ -164,7 +174,8 @@
           'border-style':'dashed',
           'border-color': '#68bdf6',
           'border-width':'3',
-          'color':'#68bdf6'
+          'color':'#68bdf6',
+          'z-index': 9
         }}, {
         selector: 'node:locked',
         css: {
@@ -178,7 +189,7 @@
         selector: 'node.expand',
         css: {
           'label': function(e){ return e.data('name'); },
-          'opacity': 0.6,
+          'opacity': 0.7,
           'border-color':'black',
           'border-width': 1,
           'color': 'black',
@@ -188,16 +199,15 @@
         }}, {
         selector: 'edge',
         css: {
-          'opacity': 1,
           'label': function(e){
-            if( e._private.cy.scratch('_config').hideEdgeTitle ) return '';
-            return agens.styles.edgeLabel(e);
+              if( e._private.cy.scratch('_config').hideEdgeTitle ) return '';
+              return agens.styles.dataLabel(e);
             },
           'line-color': function(e){ return agens.styles.edgeBColor(e); },
           'target-arrow-color': function(e){ return agens.styles.edgeDColor(e); },
           'source-arrow-color': function(e){ return agens.styles.edgeDColor(e); },
           'width':  function(e){ return agens.styles.edgeWidth(e); },
-
+          'visibility': function(e){ return agens.styles.visibility(e); },
           'text-rotation':'autorotate',
           'text-margin-y': -12,
           'line-style': 'solid',            // line-style: solid, dotted, dashed
@@ -218,6 +228,7 @@
           'text-margin-y': -15,
           'text-outline-width': 2,
           'text-outline-color': 'white',
+          'z-index': 9
         }}, {
         /// 엣지를 잠궜을 때 변화
         selector: 'edge:locked',              
@@ -233,6 +244,14 @@
           'opacity': 0.6,
           'line-style':'dotted'
         }}, {
+        // meta-graph 에서 사용할 스타일 : width와 color는 그대로 사용
+        selector: '.meta',
+        css: {
+          'label': function(e){ return agens.styles.metaLabel(e); },
+          'visibility': 'visible',
+          'opacity': function(e){ return agens.styles.visibility(e) == 'visible' ? 1.0 : 0.3 ; },
+        }}, {
+
         // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
         selector: 'node.highlighted',      
         css: {
@@ -246,17 +265,25 @@
           'border-width': 4,
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s',
+          'z-index': 99
         }},{
         selector: 'edge.highlighted',
         css: {
           'width': 12,
-          'opacity': 1,
           'color': '#483d41',
           'text-outline-width': 0,
           'line-style':'dashed',
           'line-color': '#83878d',
           'target-arrow-color': '#83878d',
           'source-arrow-color': '#83878d',
+          'z-index': 99
+        }},{
+
+        selector: '.downlighted',
+        css: {
+          'label': '',
+          'opacity': 0.6,
+          'z-index': 1
         }},{
         selector: '.traveled',
         css: {
@@ -606,7 +633,6 @@
       let parentNode = cy.add(parent);
       parentNode.style('width', parentPos.x2-parentPos.x1 );
       parentNode.style('height', parentPos.y2-parentPos.y1 );
-      parentNode.scratch('_style', { "witdh": undefined, "color": '#b5b5b5', "title": 'name' } );
   
       nodes.forEach(v => {
         v._private.data.parent = parentId;

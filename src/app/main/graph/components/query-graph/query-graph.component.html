@@ -10,6 +10,24 @@
                 [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"></div>
             <!-- graph element info Box -->
             <nav>
+                <!-- 입력상자 : 라벨검색 -->
+                <ng-container *ngIf="selectedOption && selectedOption == 'labelSearch'">
+                    <div id="slide-toggle" class="slide border col">
+                        <div class="row-center">
+                            <span class="search">
+                                <mat-icon>search</mat-icon>
+                                <input
+                                class="border"
+                                type='text'            
+                                placeholder='Type to filter label text...'
+                                (keyup)='updateFilterTitle($event)'/>
+                            </span>
+                            <p><span>found elements = {{ labelSearchCount }}</span></p>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <!-- 출력상자 : 상세 정보 -->
                 <ng-container *ngIf="!!selectedElement">
                     <div id="slide-toggle" class="slide border col">
                         <div class="row-center">
@@ -28,7 +46,9 @@
                         </ul>
                     </div>
                 </ng-container>
-                <ng-container *ngIf="btnStatus.shortestPath">
+
+                <!-- 입력상자 : 최단 경로 -->
+                <ng-container *ngIf="selectedOption && selectedOption == 'shortestPath'">
                     <div id="slide-toggle" class="slide border col">
                         <div class="row-center">
                             <h4>find <strong>Shortest Path</strong></h4>
@@ -68,11 +88,8 @@
                 <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
                     <mat-icon>label</mat-icon></a>
                 </li>
-                <!-- <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.mouseWheel, 'is-inactive': !btnStatus.mouseWheel }" id="btnMouseWheelZoom" mat-button-toggle #btnMouseWheelZoom (click)="toggleMouseWheelZoom()" matTooltip="Mouse Wheel Zoom" matTooltipPosition="above">
-                        <mat-icon id="btnMouseWheelZoomIcon">mouse</mat-icon></a>
-                </li> -->
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
-                        <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSheet()" matTooltip="Styling by Label" matTooltipPosition="above">
+                    <mat-icon>palette</mat-icon></a>    <!-- <mat-icon>flip_to_back</mat-icon> -->
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
                         <mat-icon>search</mat-icon></a>
@@ -122,8 +139,8 @@
                             <button mat-menu-item (click)="graphCentrality('betweenness')">Betweenness</button>
                     </mat-menu>
                 </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSettingDialog()" matTooltip="Styling Label" matTooltipPosition="above">
-                        <mat-icon>palette</mat-icon></a>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
+                        <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
                         <mat-icon>image</mat-icon></a>

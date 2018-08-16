@@ -9,15 +9,14 @@ import { Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
-import { Angulartics2 } from 'angulartics2';
 import * as _ from 'lodash';
 
 import { AgensDataService } from '../../services/agens-data.service';
 
 import { IResponseDto } from '../../models/agens-response-types';
 import { ILogs } from '../../models/agens-manager-types';
-import * as CONFIG from '../../global.config';
-import { concatAll } from '../../../../node_modules/rxjs/operators';
+import * as CONFIG from '../../app.config';
+import { concatAll } from 'rxjs/operators';
 
 @Component({
   selector: 'app-history',
@@ -36,8 +35,7 @@ export class HistoryComponent implements AfterViewInit {
 
   @ViewChild('progressBar') progressBar: ElementRef;
 
-  constructor(    
-    private _angulartics2: Angulartics2,    
+  constructor(
     private _router: Router,
     private _api: AgensDataService,
   ) { }

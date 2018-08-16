@@ -1,4 +1,4 @@
-import { ValueType } from '../global.config';
+import { ValueType } from '../app.config';
 
 export interface IDatasource {
   group: string;        // group == 'datasource'
@@ -89,10 +89,12 @@ export interface IProperty {
   size: number;
 };
 
-export interface IStyle {  // <== element.scratch('_style')
-  color: string;           // NODE: background-color | EDGE: line-color
-  width: string;           // NODE: width, height | EDGE: width
-  title: string;           // one of keys of props (default: 'name')
+export interface IStyle {   // <== element.scratch('_style')
+  color: any;               // { bc, dc }
+  width: string;            // NODE: width, height | EDGE: width
+  title: string;            // one of keys of props (default: 'name')
+  visible?: boolean;        // 'visible' = true, 'hidden' = false
+  opacity?: number;         // 0.0 ~ 1.0
 };
 
 ///////////////////////////////////////////////////////////////

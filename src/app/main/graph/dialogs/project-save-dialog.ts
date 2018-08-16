@@ -8,13 +8,11 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material';
 
-import * as CONFIG from '../../../global.config';
+import * as CONFIG from '../../../app.config';
 import { IProject } from '../../../models/agens-manager-types';
 
 // services
 import { AgensDataService } from '../../../services/agens-data.service';
-
-import { Angulartics2 } from 'angulartics2';
 
 declare var $:any;
 declare var agens:any;
@@ -113,7 +111,6 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     private _http: HttpClient,
     private _api: AgensDataService,
     private _ngZone: NgZone,
-    private _angulartics2: Angulartics2,
     public _snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<ProjectSaveDialog>,
     @Inject(MAT_DIALOG_DATA) public data: IProject

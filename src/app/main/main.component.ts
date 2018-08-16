@@ -4,8 +4,6 @@ import { Title } from '@angular/platform-browser';
 
 import { MatSnackBar, MatButtonToggle } from '@angular/material';
 
-import { Angulartics2 } from 'angulartics2';
-
 import { AgensDataService } from '../services/agens-data.service';
 
 @Component({
@@ -27,7 +25,6 @@ export class MainComponent implements OnInit, AfterViewInit {
 
   constructor(
     private _router: Router,
-    private cd: ChangeDetectorRef,
     private _title: Title,
     public _snackBar: MatSnackBar,    
     private _api: AgensDataService

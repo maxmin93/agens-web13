@@ -24,26 +24,20 @@
         <div id="sizeToggler" class="toggler border" onclick="sizeToggler()"><span></span></div>
     </div>
     <div id="tabComponent" class="col strech m-20 card">
-        <mat-tab-group #resultTapGroup [selectedIndex]="1" class="strech md-no-animation"
+        <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="strech md-no-animation"
             (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
-            <mat-tab label="Meta"> 
-                <!-- META(0) -->
-                <app-meta-graph #metaGraph (initDone)="initCallbackMeta($event)"
-                    (groupByCall)="runGraphGroupBy($event)"></app-meta-graph>
-            </mat-tab>
             <mat-tab label="Graph">
-                <!-- GRAPH(1) -->
+                <!-- GRAPH(0) -->
                 <app-query-graph #queryGraph (initDone)="initCallbackData($event)"></app-query-graph>
             </mat-tab>
             <mat-tab label="Table" [disabled]="false"> 
-                <!-- TABLE(2) -->
+                <!-- TABLE(1) -->
                 <app-query-table #queryTable></app-query-table>
             </mat-tab>
             <mat-tab label="Statistic" [disabled]="false">
-                <!-- STATIC(3) -->
-                <app-statistics #statistics (initDone)="initCallbackStat($event)"></app-statistics>
+                <!-- STATIC(2) -->
+                <app-stat-graph #statGraph (initDone)="initCallbackStat($event)"></app-stat-graph>
             </mat-tab>
         </mat-tab-group>
     </div>
 </div>
-
