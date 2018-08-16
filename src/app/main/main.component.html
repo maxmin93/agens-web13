@@ -1,11 +1,9 @@
 <!-- menu toolbar -->
-<mat-toolbar id="appToolbar">
-   
+<mat-toolbar id="appToolbar" class="row-center">   
     <h1>
         <!-- {{ productTitle }} -->
-        <mat-icon>bubble_chart</mat-icon> AGENSBROWSER <small>WEB 1.3</small>
+        AGENSBROWSER <small>WEB 1.3</small>
     </h1>
-    <span class="example-spacer"></span>
     <mat-button-toggle-group #btnMenuGroup="matButtonToggleGroup" [value]="currentPath">
         <mat-button-toggle #btnMenuMain value="/" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
             <a>DASHBOARD</a>
