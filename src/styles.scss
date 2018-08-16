@@ -27,6 +27,7 @@
 }
 
 html, body, material-app  {  
+  background: #f9f9f9; 
   width: 100%;
   height: 100vh;
   font-size: 16px;   
@@ -61,6 +62,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 .content { 
   height: calc(100% - 64px);
   padding: 1.875rem; 
+  padding-top: 1.25rem; 
 }
 
 /* flex 기본 설정값으로 col-side는 side의 너비값을 줄 경우, 
@@ -75,7 +77,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
   align-items: center; 
 }
 
-.row-side { margin-right: 1.875rem; }
+.row-side { margin-right: 1.25rem; }
 .col-side { margin-bottom: 1.875rem; }
 
 .wrap { flex-wrap: wrap}
@@ -109,7 +111,7 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 .p-20 { padding: 1.25rem; }
 .p-10 { padding: .625rem; }
 
-.border { border: 1px solid #ddd;  
+.card, .border { border: 1px solid #ddd;  
   &.border-dotted { border-style: dotted; } 
   &.border-dashed { border-style: dashed; }
 }
@@ -157,17 +159,24 @@ a {
 //   color: #f9f9f9;
 // }
 
-.mat-button-toggle-disabled {
-  background: #222e44 !important; 
-  color: #f9f9f9;
-}
-.mat-button-toggle-disabled.mat-button-toggle-checked {
-  color: #ccc;
+.mat-button-toggle-group { 
+  height: 100%; 
+  .mat-button-toggle {
+    display: flex; 
+    &.mat-button-toggle-checked {
+      color: #282828;
+    }
+  }
 }
 
-.mat-button-toggle.mat-button-toggle-checked { 
-  color: #f5f5f5;
+.mat-button-toggle-disabled {
+  background: #fff !important; 
+  color: #282828; 
 }
+.mat-button-toggle-disabled.mat-button-toggle-checked {
+  color: #ddd;
+}
+
 
 
 
@@ -480,6 +489,15 @@ ul.list {
       }
     }
   }
+}
+
+// card 
+
+.card { 
+  background: #fff; 
+  box-shadow: 0 0 1px rgba(0,0,0,0.3); 
+  padding: 1.25rem; 
+  border-radius: .325rem; 
 }
 
 // json 

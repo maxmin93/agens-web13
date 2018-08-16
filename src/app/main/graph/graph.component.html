@@ -1,7 +1,7 @@
 <div id="top" class="content col">
 
   <!-- editor -->
-    <div id="queryCard" class="col border-bottom edit-size">
+    <div id="queryCard" class="col border-bottom edit-size card">
         <div class="row-center">
             <h4>QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small></h4>
             <ul class="row icon list inline">
@@ -23,7 +23,7 @@
         <app-query-result #queryResult class="edit-size col"></app-query-result>
         <div id="sizeToggler" class="toggler border" onclick="sizeToggler()"><span></span></div>
     </div>
-    <div id="tabComponent" class="col strech m-20">
+    <div id="tabComponent" class="col strech m-20 card">
         <mat-tab-group #resultTapGroup [selectedIndex]="1" class="strech md-no-animation"
             (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
             <mat-tab label="Meta"> 
