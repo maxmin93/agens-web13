@@ -1,4 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Inject } from '@angular/core';
+
+import { FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
 
 import { Observable, Subject } from 'rxjs';
@@ -32,8 +34,10 @@ export class MetaGraphComponent implements OnInit {
   labels: ILabel[] = [];    // for Label chips
 
   selectedElement: any = undefined;  
-  eleName: string = 'nameTest';
-  eleLabel: string = 'labelTest';
+  selectedLabel: ILabel = undefined;
+  selectedProps: string[] = undefined;
+
+  formGrp: FormGroup;
 
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
@@ -41,6 +45,7 @@ export class MetaGraphComponent implements OnInit {
 
   constructor(
     private _cd: ChangeDetectorRef,
+    private formBuilder: FormBuilder,
     private _api: AgensDataService,
     private _util: AgensUtilService,
     private _sheetRef: MatBottomSheetRef<MetaGraphComponent>,
@@ -59,29 +64,22 @@ export class MetaGraphComponent implements OnInit {
         hideNodeTitle: false,        // hide nodes' title
         hideEdgeTitle: false,        // hide edges' title
       });
-
-    this.cy.userZoomingEnabled( true );
-    agens.cy = this.cy;  
   }
 
   ngOnDestroy(){
-    // 내부-외부 함수 공유 해제
-    window['metaGraphComponentRef'] = undefined;
+
   }
 
   ngAfterViewInit() {
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
-      
+
       // change Detection by force
       this._cd.detectChanges();
     });
 
-    if( this.metaGraph ){
-      this.initLoad();
-      this.selectedElement = this.cy.nodes()[0];
-    }
+    this.initLoad();
   }
 
   close(): void {
@@ -115,14 +113,26 @@ export class MetaGraphComponent implements OnInit {
     this.selectedElement = undefined;
   }
 
+  findLabel(element:any): ILabel {
+    let target:ILabel = undefined;
+    this.data['labels'].filter(x => x.type == element._private.group)
+      .forEach(x => { 
+        if( x.id == element.id() ){
+          target = x;
+          return false;
+        }  
+      });
+    return target;
+  }
+
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
-    console.log( 'meta-graph.click:', this.selectedElement.data('name'), this.selectedElement.data('label'));
-    this.eleName = this.selectedElement.data('name');
-    this.eleLabel = this.selectedElement.data('label');
+    this.selectedLabel = this.findLabel(target);
+    this.selectedProps = Object.keys(this.selectedElement.data('props')['propsCount']);
+    console.log( 'meta-graph.click:', this.selectedElement._private, this.selectedLabel);
 
+    this.makeFormGroup(this.selectedProps);
   }  
 
   // Neighbor Label 로의 확장
@@ -135,7 +145,23 @@ export class MetaGraphComponent implements OnInit {
     // this.runExpandTo( target, targetLabel );
   }
 
-  
+  // 참고 : Angular create checkbox array dynamically
+  // https://coryrylan.com/blog/creating-a-dynamic-checkbox-list-in-angular
+  makeFormGroup(props:string[]){
+    const controls = props.map(k => new FormControl(false));
+    this.formGrp = this.formBuilder.group({
+      conditions: new FormArray(controls)
+    });
+  }
+
+  submitFormGroup() {
+    const selectedOrderIds = this.formGrp.value.conditions
+      .map((v, i) => v ? this.selectedProps[i] : null)
+      .filter(v => v !== null);
+
+    console.log(selectedOrderIds);
+  }  
+
   /////////////////////////////////////////////////////////////////
   // Graph Controllers
   /////////////////////////////////////////////////////////////////

@@ -10,6 +10,8 @@ import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
+import { AgensGraphService } from '../../../../services/agens-graph.service';
+
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IDoubleListDto } from '../../../../models/agens-response-types';
@@ -63,9 +65,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   
   constructor(
     private _cd: ChangeDetectorRef,
-    private _dialog: MatDialog,
+    private _dialog: MatDialog,    
     private _api: AgensDataService,
     private _util: AgensUtilService,
+    private _graph: AgensGraphService,
     private _sheet: MatBottomSheet
   ) { 
   }
@@ -358,17 +361,18 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this._cd.detectChanges();
     });
   }
+
   /////////////////////////////////////////////////////////////////
-  // Centrality methods
+  // graph Toolbar button controlls
   /////////////////////////////////////////////////////////////////
-  
+
   graphCentrality(option:string='degree'){ 
     // options: degree, pagerank, closeness, betweenness
     switch( option ){
-      case 'degree': this.centralrityDg();      break;
-      case 'pagerank': this.centralrityPR();    break;
-      case 'closeness': this.centralrityCn();   break;
-      case 'betweenness': this.centralrityBt(); break;
+      case 'degree': this._graph.centralrityDg( this.cy );      break;
+      case 'pagerank': this._graph.centralrityPR( this.cy );    break;
+      case 'closeness': this._graph.centralrityCn( this.cy );   break;
+      case 'betweenness': this._graph.centralrityBt(this.cy ); break;
       default: 
         this.cy.elements().forEach(e => {
           e.scratch('_style', _.clone(e.scratch('_styleBak')));
@@ -377,84 +381,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cy.style(agens.graph.stylelist['dark']).update();
 
   }
-
-  centralrityPR(){
-    let centrality = this.cy.elements().pageRank();
-    this.cy.nodes().map(ele => {
-      ele.scratch('_centralrityPr', centrality.rank(ele));
-    });
-    let acc = this.cy.nodes().reduce((acc, cur) => {
-        acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityPr') < acc[0] ) ? cur.scratch('_centralrityPr') : acc[0];   // min
-        acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityPr') > acc[1] ) ? cur.scratch('_centralrityPr') : acc[1];   // max
-        acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityPr') : acc[2] + cur.scratch('_centralrityPr');   // sum
-        return acc;
-      }, []);
-    console.log( 'pageRank Centrality: ', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
-    this.cy.nodes().map(ele => {
-      let value = Math.floor( (ele.scratch('_centralrityPr') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
-    });
-  }
-
-  centralrityDg(){
-    let centrality = this.cy.elements().degreeCentralityNormalized();
-    this.cy.nodes().map(ele => {
-      ele.scratch('_centralrityDg', centrality.degree(ele));
-    });
-    let acc = this.cy.nodes().reduce((acc, cur) => {
-        acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityDg') < acc[0] ) ? cur.scratch('_centralrityDg') : acc[0];   // min
-        acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityDg') > acc[1] ) ? cur.scratch('_centralrityDg') : acc[1];   // max
-        acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityDg') : acc[2] + cur.scratch('_centralrityDg');   // sum
-        return acc;
-      }, []);
-    console.log( 'Degree Centrality: ', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
-    this.cy.nodes().map(ele => {
-      let value = Math.floor( (ele.scratch('_centralrityDg') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
-    });
-  }
-
-  centralrityCn(){
-    let centrality = this.cy.elements().closenessCentralityNormalized();
-
-    this.cy.nodes().map(ele => {
-      ele.scratch('_centralrityCn', centrality.closeness(ele));
-    });
-    let acc = this.cy.nodes().reduce((acc, cur) => {
-        acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityCn') < acc[0] ) ? cur.scratch('_centralrityCn') : acc[0];   // min
-        acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityCn') > acc[1] ) ? cur.scratch('_centralrityCn') : acc[1];   // max
-        acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityCn') : acc[2] + cur.scratch('_centralrityCn');   // sum
-        return acc;
-      }, []);
-    console.log( 'Closeness Centrality:', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
-    this.cy.nodes().map(ele => {
-      let value = Math.floor( (ele.scratch('_centralrityCn') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
-    });
-  }
-  
-  centralrityBt(){
-    let centrality = this.cy.elements().betweennessCentrality();
-
-    this.cy.nodes().map(ele => {
-      ele.scratch('_centralrityBt', centrality.betweenness(ele));
-    });
-    let acc = this.cy.nodes().reduce((acc, cur) => {
-        acc[0] = ( acc[0] === undefined || cur.scratch('_centralrityBt') < acc[0] ) ? cur.scratch('_centralrityBt') : acc[0];   // min
-        acc[1] = ( acc[1] === undefined || cur.scratch('_centralrityBt') > acc[1] ) ? cur.scratch('_centralrityBt') : acc[1];   // max
-        acc[2] = ( acc[2] === undefined ) ? cur.scratch('_centralrityBt') : acc[2] + cur.scratch('_centralrityBt');   // sum
-        return acc;
-      }, []);
-    console.log( 'Betweenness Centrality:', acc[0], acc[1], acc[2]/this.cy.nodes().size() );
-    this.cy.nodes().map(ele => {
-      let value = Math.floor( (ele.scratch('_centralrityBt') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
-    });
-  }
-  
-  /////////////////////////////////////////////////////////////////
-  // graph Toolbar button controlls
-  /////////////////////////////////////////////////////////////////
 
   toggleFindShortestPath(option:boolean=undefined){
     if( !option ) this.btnStatus.shortestPath = !this.btnStatus.shortestPath;

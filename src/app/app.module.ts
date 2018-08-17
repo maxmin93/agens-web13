@@ -36,7 +36,7 @@ import { HistoryComponent } from './main/history/history.component';
 import { AuthGuardService } from './services/auth-guard.service';
 import { AgensDataService } from './services/agens-data.service'
 import { AgensUtilService } from './services/agens-util.service'
-// import { WindowRefService } from '../services/window-ref.service';
+import { AgensGraphService } from './services/agens-graph.service';
 
 // // Dialogs
 import { ConfirmDeleteLabelDialog } from './main/dashboard/dialogs/confirm-delete-label.dialog';
@@ -109,7 +109,8 @@ import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.co
   providers: [
     appRoutingProviders,
     Title,
-    AuthGuardService,  
+    AuthGuardService,
+    AgensGraphService,  
     AgensDataService,
     AgensUtilService
   ], 

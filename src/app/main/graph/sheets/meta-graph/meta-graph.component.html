@@ -10,6 +10,32 @@
             <div class="col strech">
                 <!-- graph canvas -->
                 <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
+                <nav>
+                <!-- 출력상자 : 상세 정보 -->
+                <ng-container *ngIf="!!selectedElement">
+                    <div id="slide-toggle" class="slide border col">
+                        <div class="row-center">
+                            <h4>Label <strong>info.</strong></h4>
+                        </div>
+                        <ul class="list col strech border noborder m-10">
+                            <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
+                            <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                            <li class="col strech side-margin">
+                                <span>Properties</span>
+                                <div class="json strech m-10" *ngIf="selectedProps">
+                                    <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()">
+                                        <label formArrayName="conditions" *ngFor="let prop of formGrp.controls.conditions.controls; let i = index">
+                                            <input type="checkbox" [formControlName]="i">
+                                            {{ selectedProps[i] }}
+                                        </label>
+                                        <button>submit</button>
+                                    </form>                                    
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </ng-container>
+                </nav>
             </div>
              <!-- Graph.Meta : toolbar -->
             <div class="row">
@@ -29,23 +55,17 @@
         </div>    
         <div class="col strech">
                 <div class="strech border m-20 p-20">    
-                        <span >{{ eleName }} [{{ eleLabel }}]</span>
-                        <div class="row-center">
-                        <h4>groupBy, Filter</h4>
+                    <div class="row-center">
+                        <h4>groupBy, filterBy</h4>
                     </div>
-                    <ul class="list col strech border noborder m-10">
-                        <li class="side-margin"><span>Label</span>
-                            <span *ngIf="selectedElement">{{ selectedElement.data('name') }} [{{ selectedElement.data('label') }}]</span></li>
-                        <li class="side-margin"><span>Size</span>
-                            <span *ngIf="selectedElement">({{ selectedElement.data('size') }})</span></li>
-                        <li class="col strech side-margin">
-                            <span>Data</span>
-                            <div class="json strech m-10" *ngIf="selectedElement">
-                                <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
-                            </div>
-                        </li>
-                    </ul>
-
+                    <div class="json strech m-10" *ngIf="selectedElement">
+                        <ul *ngIf="selectedLabel">
+                            <li *ngFor="let item of selectedConditions">
+                                <span>{{ item.label }}</span><span>{{ item.property }}</span>
+                                <button>Del</button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <button mat-raised-button color="primary" [disabled]="!isChanged"
                         (click)="close()">Reload</button>
