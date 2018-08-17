@@ -1,0 +1,53 @@
+.row-side { flex: 3; }
+
+.color-box { 
+    flex: 4; 
+    #colorPalette, #colorHistory {        
+        li { 
+            width: 1.25rem; 
+            height: 1.25rem; 
+            margin-right: .325rem; 
+            margin-bottom: .325rem; 
+            border-radius: .125rem; 
+            cursor: pointer;
+        }
+    }
+
+    #colorPalette { 
+        padding-bottom: 1.25rem; 
+        margin-bottom: 1.25rem; 
+        align-content: flex-start; 
+        overflow-y: auto; 
+    }
+
+    #colorHistory { 
+        max-width: 25.95rem; 
+        overflow: hidden; 
+        align-items: center; 
+        .sub-title { margin-right: 1rem; }
+        li { margin-bottom: 0; }
+    }
+}
+
+
+
+.example-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.example-container > * {
+  width: 100%;
+}
+
+.example-container form {
+  margin-bottom: 20px;
+}
+
+.example-container form > * {
+  margin: 5px 0;
+}
+
+.example-container .mat-radio-button {
+  margin: 0 5px;
+}

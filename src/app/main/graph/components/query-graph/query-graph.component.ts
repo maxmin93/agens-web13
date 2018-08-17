@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatButtonToggle, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
@@ -6,6 +6,7 @@ import { takeWhile } from 'rxjs/operators';
 
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
+import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -61,8 +62,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   todo$:Subject<any> = new Subject();
   
   constructor(
-    private _ngZone: NgZone,
-    private _elf: ElementRef,
+    private _cd: ChangeDetectorRef,
     private _dialog: MatDialog,
     private _api: AgensDataService,
     private _util: AgensUtilService,
@@ -71,22 +71,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    // prepare to call this.function from external javascript
-    window['dataGraphComponentRef'] = {
-      zone: this._ngZone,
-      cyCanvasCallback: () =>{ if(this.isVisible) this.cyCanvasCallback() },
-      cyElemCallback: (target) =>{ if(this.isVisible) this.cyElemCallback(target) },
-      cyQtipMenuCallback: (target, value) =>{ if(this.isVisible) this.cyQtipMenuCallback(target, value) },
-      component: this
-    };
-  }
-
-  ngOnDestroy(){
-    // 내부-외부 함수 공유 해제
-    window['dataGraphComponentRef'] = undefined;
-  }
-
-  ngAfterViewInit() {
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
@@ -95,9 +79,19 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         useCxtmenu: true,           // whether to use Context menu or not
         hideNodeTitle: true,        // hide nodes' title
         hideEdgeTitle: true,        // hide edges' title
-      });
+    });
+  }
 
-    setTimeout(() => this.cy.userZoomingEnabled( true ), 30);
+  ngOnDestroy(){
+  }
+
+  ngAfterViewInit() {
+    this.cy.on('tap', (e) => { 
+      if( e.target === this.cy ) this.cyCanvasCallback();
+      else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+      // change Detection by force
+      this._cd.detectChanges();
+    });
   }
 
   setData(dataGraph:IGraph){
@@ -118,7 +112,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("data-graph.elem-click:", target);
+    console.log("data-graph.tap:", target._private);
 
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
@@ -132,15 +126,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }  
 
-  // Neighbor Label 로의 확장
-  cyQtipMenuCallback( target:any, targetLabel:string ){
-    let expandId = target.data('label')+'_'+target.data('id');
-    target.scratch('_expandid', expandId);
+  // qtipMenu 선택 이벤트
+  cyQtipMenuCallback( target:any, value:string ){
 
-    let position = target.position();
-    let boundingBox = { x1: position.x - 40, x2: position.x + 40, y1: position.y - 40, y2: position.y + 40 };
-
-    // this.runExpandTo( target, targetLabel );
   }
   
   /////////////////////////////////////////////////////////////////
@@ -289,7 +277,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   openSearchResultDialog(): void {
-    if( !this.metaGraph ) return;
+    // if( !this.metaGraph ) return;
 
     const bottomSheetRef = this._sheet.open(MetaGraphComponent, {
       ariaLabel: 'Meta Graph',
@@ -302,6 +290,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
       if( x && x.changed ) this.cy.style().update();
+
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
@@ -314,7 +305,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const bottomSheetRef = this._sheet.open(LabelStyleComponent, {
       ariaLabel: 'Label Style',
-      panelClass: 'shhet-label-style',
+      panelClass: 'sheet-label-style',
       data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
     });
 
@@ -323,6 +314,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       agens.cy = this.cy;
       // 스타일 변경 반영
       if( x && x.changed ) this.cy.style().update();
+
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
@@ -347,6 +341,23 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // });
   }
 
+  openEditGraphSheet(){
+    const bottomSheetRef = this._sheet.open(EditGraphComponent, {
+      ariaLabel: 'Edit Graph',
+      panelClass: 'sheet-label-style',
+      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((x) => {
+      this.selectedOption = undefined;
+      agens.cy = this.cy;
+      // 스타일 변경 반영
+      if( x && x.changed ) this.cy.style().update();
+
+      // change Detection by force
+      this._cd.detectChanges();
+    });
+  }
   /////////////////////////////////////////////////////////////////
   // Centrality methods
   /////////////////////////////////////////////////////////////////

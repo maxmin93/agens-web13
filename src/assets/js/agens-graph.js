@@ -251,7 +251,11 @@
           'visibility': 'visible',
           'opacity': function(e){ return agens.styles.visibility(e) == 'visible' ? 1.0 : 0.3 ; },
         }}, {
-
+        selector: '.dataLabel',
+        css: {
+          'label': function(e){ return agens.styles.dataLabel(e); },
+        }}, {
+  
         // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
         selector: 'node.highlighted',      
         css: {
@@ -445,8 +449,6 @@
       zoomOutIcon: 'fa fa-minus',
       resetIcon: 'fa fa-expand'
     });
-    // mouse wheel disable
-    cy.$api.panzoom.userZoomingEnabled( false );
 
     // ==========================================
     // ==  cy events 등록
@@ -457,40 +459,15 @@
       cy.scratch('_cxtPosition', e.cyPosition);
     });
 
+    // ** 여기서는 공통의 탭이벤트만 처리
     cy.on('tap', function(e){
       // 바탕화면 탭 이벤트
       if( e.target === cy ){
         // cancel selected and highlights
         if( cy.$api.view !== undefined ) cy.$api.view.removeHighlights();
-        cy.$(':selected').unselect();
-        cy.pivotNode = null;
-
-        // mapping user Functions
-        if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyCanvasCallback )
-          (window['angularComponentRef'].cyCanvasCallback)();
-        if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyCanvasCallback )
-          (window['metaGraphComponentRef'].cyCanvasCallback)();
-        if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyCanvasCallback )
-          (window['dataGraphComponentRef'].cyCanvasCallback)();
-        if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyCanvasCallback )
-          (window['statGraphComponentRef'].cyCanvasCallback)();
+        cy.elements(':selected').unselect();
+        cy.scratch('_selected', null);
       }
-      // 노드 또는 에지에 대한 클릭 이벤트
-      else if( e.target.isNode() || e.target.isEdge() ){
-        
-        // mapping user Functions
-        if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyElemCallback )
-          (window['angularComponentRef'].cyElemCallback)(e.target);
-        if( !!window['metaGraphComponentRef'] && !!window['metaGraphComponentRef'].cyElemCallback )
-          (window['metaGraphComponentRef'].cyElemCallback)(e.target);
-        if( !!window['dataGraphComponentRef'] && !!window['dataGraphComponentRef'].cyElemCallback )
-          (window['dataGraphComponentRef'].cyElemCallback)(e.target);
-        if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyElemCallback )
-          (window['statGraphComponentRef'].cyElemCallback)(e.target);
-        // NODE : if( e.target.isNode() ){}
-        // EDGE : if( e.target.isEdge() ){}
-      }
-
     });
 
     // ** NOTE: mouseover 이벤트는 부하가 심하고 작동도 하지 않음!
@@ -500,7 +477,8 @@
     // ==========================================
     // ==  cy utilities 등록
     // ==========================================
-
+/*
+    // **NOTE: 외부 js 함수에서 내부 angular 함수 호출할 다른 방법을 강구중..
     cy.$api.cyQtipMenuCallback = function( target, value ){
       // mapping user Functions
       if( !!window['angularComponentRef'] && !!window['angularComponentRef'].cyQtipMenuCallback )
@@ -512,14 +490,14 @@
       if( !!window['statGraphComponentRef'] && !!window['statGraphComponentRef'].cyQtipMenuCallback )
         (window['statGraphComponentRef'].cyQtipMenuCallback)(target, value);
     };
-
+*/
     cy.$api.findById = function(id){
       let eles = cy.elements().getElementById(id);
       return eles.nonempty() ? result[0] : undefined;
     };
 
     // layouts = { bread-first, circle, cose, cola, 'klay', 'dagre', 'cose-bilkent', 'concentric" }
-    // **NOTE: euler 는 속도가 빠르지만 간혹 stack overflow 문제를 일으켜 제외
+    // **NOTE: euler 는 속도가 빠르지만 간혹 stack overflow 문제를 일으킨다. 사용 주의!!
     cy.$api.changeLayout = function(layout='cose', options=undefined){
       let elements = cy.elements(':visible');
       let boundingBox = undefined;
@@ -657,7 +635,6 @@
       cy.add(children);
       cy.add(edges);
     }
-
 
   };
 

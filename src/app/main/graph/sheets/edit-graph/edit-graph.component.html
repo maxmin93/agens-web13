@@ -1,0 +1,74 @@
+<form class="example-form">
+    <mat-form-field class="example-full-width">
+      <input name="eleName" matInput placeholder="selected" [(ngModel)]="ele_name">
+    </mat-form-field>
+</form>    
+<!-- GRAPH -->
+<div id="graphCard" class="col strech">
+    <div id="progressBarMetaGraph" #progressBar style='visibility:hidden;'>
+        <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+    </div>
+
+    <!-- Graph content -->
+    <div class="row strech">
+        <div class="row strech row-side">
+            <div class="col strech">
+                <!-- graph canvas -->
+                <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
+            </div>
+             <!-- Graph.Meta : toolbar -->
+            <div class="row">
+                <div id="agens-graph-toolbar" class="viewbox border strech theme">                    
+                    <ul class="list icon border noborder">
+                        <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                                <mat-icon>refresh</mat-icon></a></li>
+                        <li><a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
+                                <mat-icon>unfold_more</mat-icon></a></li>
+                        <li><a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
+                                <mat-icon>unfold_less</mat-icon></a></li>
+                        <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                                <mat-icon>close</mat-icon></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>    
+        <div class="col strech">
+                <div class="strech border m-20 p-20">    
+
+<div class="example-container">
+    <form class="example-container" [formGroup]="options">
+      <mat-checkbox formControlName="hideRequired">Hide required marker</mat-checkbox>
+      <div>
+        <label>Float label: </label>
+        <mat-radio-group formControlName="floatLabel">
+          <mat-radio-button value="auto">Auto</mat-radio-button>
+          <mat-radio-button value="always">Always</mat-radio-button>
+          <mat-radio-button value="never">Never</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </form>
+  
+    <mat-form-field
+        [hideRequiredMarker]="options.value.hideRequired"
+        [floatLabel]="options.value.floatLabel">
+      <input matInput placeholder="Simple placeholder" required>
+    </mat-form-field>
+  
+    <mat-form-field [floatLabel]="options.value.floatLabel">
+      <mat-label>Both a label and a placeholder</mat-label>
+      <input matInput placeholder="Simple placeholder">
+    </mat-form-field>
+  
+    <mat-form-field
+        [hideRequiredMarker]="options.value.hideRequired"
+        [floatLabel]="options.value.floatLabel">
+      <mat-select required>
+        <mat-option>-- None --</mat-option>
+        <mat-option value="option">Option</mat-option>
+      </mat-select>
+      <mat-label><mat-icon>favorite</mat-icon> <b> Fancy</b> <i> label</i></mat-label>
+    </mat-form-field>
+  </div>
+
+</div>
+</div>

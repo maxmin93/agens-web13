@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Inject, Output, EventEmitter} from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Inject } from '@angular/core';
 import { NgForm, FormGroup, FormControl, Validators } from '@angular/forms';
 
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
@@ -50,7 +50,7 @@ export class LabelStyleComponent implements OnInit {
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
   constructor(
-    private _ngZone: NgZone,    
+    private _cd: ChangeDetectorRef,
     private _api: AgensDataService,
     private _util: AgensUtilService,
     private _sheetRef: MatBottomSheetRef<LabelStyleComponent>,
@@ -61,15 +61,6 @@ export class LabelStyleComponent implements OnInit {
   }
 
   ngOnInit() {
-    // prepare to call this.function from external javascript
-    window['metaGraphComponentRef'] = {
-      zone: this._ngZone,
-      cyCanvasCallback: () => this.cyCanvasCallback(),
-      cyElemCallback: (target) => this.cyElemCallback(target),
-      cyQtipMenuCallback: (target, value) => this.cyQtipMenuCallback(target, value),
-      component: this
-    };
-
     // Cytoscape 생성
     this.cy = agens.graph.graphFactory(
       this.divCanvas.nativeElement, {
@@ -79,7 +70,6 @@ export class LabelStyleComponent implements OnInit {
         hideNodeTitle: false,        // hide nodes' title
         hideEdgeTitle: false,        // hide edges' title
       });
-    this.cy.userZoomingEnabled( true );
 
     this.labelNameCtl = new FormControl('_null_', []);
     this.labelColorCtl = new FormControl(this.selectedStyle.color['bc'], []);
@@ -87,13 +77,17 @@ export class LabelStyleComponent implements OnInit {
   }
 
   ngOnDestroy(){
-    console.log('label-style destoryed!');
-
-    // 내부-외부 함수 공유 해제
-    window['metaGraphComponentRef'] = undefined;
   }
 
   ngAfterViewInit() {
+    this.cy.on('tap', (e) => { 
+      if( e.target === this.cy ) this.cyCanvasCallback();
+      else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+      
+      // change Detection by force
+      this._cd.detectChanges();
+    });
+
     this.initLoad();
     this.setFormValues(this.selectedStyle);
   }
@@ -121,6 +115,7 @@ export class LabelStyleComponent implements OnInit {
 
   // graph canvas 클릭 콜백 함수
   cyCanvasCallback():void {
+    // 선택 안된 상태에서 색상 등의 스타일을 변경하기 위해 주석 처리
     // this.selectedElement = undefined;
   }
 
