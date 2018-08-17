@@ -1,9 +1,18 @@
 // 좌측 side의 사이즈
-.row-side { 
-        width: 36%; 
-        min-width: 43.5625rem;
-        max-width: 46.75rem; 
+
+.left-side {  
+  min-width: 34.5rem; 
+  max-width: 34%; 
 }
+
+.right-side { 
+  width: 66%; 
+
+  .row-side { 
+    flex: 3; 
+  }
+}
+
 
 // :host /deep/ { }
 

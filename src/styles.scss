@@ -96,7 +96,6 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; }
 .material-icons { font-size: 1.5rem !important; }
-.theme { background: #f5f5f5; }
 .mat-button-toggle { color: #798694; }
 .expand-cell { color: #585858; }
  
@@ -126,7 +125,7 @@ ul.border {
   > li { border-bottom: 1px solid #ddd; }
 }
 
-.mat-menu-item, .sub-title { font-size: .75rem; color: #aeb1b4; } 
+.mat-menu-item, .sub-title { font-size: .895rem; color: #aeb1b4; } 
 
 /* button 관련 정리로 
 추후 theme을 가진 button도 추가예정 */
@@ -136,6 +135,10 @@ a {
   text-decoration: none; 
   color: inherit; 
   cursor: pointer; 
+
+  &.checked { 
+    background: #dfdfdf; 
+  }
 }
 
 .mat-button, .mat-fab, .mat-flat-button, 
@@ -153,11 +156,6 @@ a {
   box-shadow: none !important; 
   font-size: .8125rem; 
 }
-
-// .mat-button-toggle {
-//   background: #222e44 !important; 
-//   color: #f9f9f9;
-// }
 
 .mat-button-toggle-group { 
   height: 100%; 
@@ -177,10 +175,6 @@ a {
   color: #ddd;
 }
 
-
-
-
-
 /* 기본 설정 datatable css 수정 
 datatable의 세팅값은 각 태그에 존재함*/
 
@@ -196,8 +190,14 @@ datatable의 세팅값은 각 태그에 존재함*/
 
     .datatable-header { 
       background: #f5f5f5; 
+      height: 3rem !important; 
+      display: flex; 
+      align-items: center; 
       overflow: initial; 
       border-bottom: 0;   
+      .datatable-header-cell { 
+        font-size: .75rem; 
+      }
     }
 
     .datatable-body {  
@@ -223,6 +223,23 @@ datatable의 세팅값은 각 태그에 존재함*/
       }
     }
   }
+
+  .datatable-footer {
+    .datatable-pager {
+      a {
+        min-width: 1.5rem; 
+        height: 1.375rem; 
+        line-height: 1.375rem; 
+        padding: 0 .375rem; 
+        margin: .375rem .1875rem; 
+        i { 
+          font-size: 1.25rem !important; 
+          line-height: 1.25rem !important; 
+          padding: 0 .375rem !important; 
+        }
+      }
+    }
+  }
 }
 
 .ngx-datatable.material .empty-row { line-height: 28px; }
@@ -241,8 +258,14 @@ datatable의 세팅값은 각 태그에 존재함*/
 .ngx-datatable.material.multi-selection .datatable-body-row.active:hover .datatable-row-group, 
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover, 
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group  {
-  background: #f1f9f9; 
+  background: #f1f9f9;
   cursor: pointer;
+}
+
+.ngx-datatable.material.cell-selection .datatable-body-cell.active:focus, 
+.ngx-datatable.material.cell-selection .datatable-body-cell.active:focus .datatable-row-group { 
+  background: #f1f9f9;
+  color: #585858;
 }
 
 .ngx-datatable.material:not(.cell-selection) .datatable-body-row:hover, 
@@ -340,18 +363,35 @@ form, input {
   background: #1bc9e4; 
 }
 
-.mat-tab-body-content { overflow: hidden !important }
+.mat-tab-group { 
+  .mat-tab-header {
+    margin-top: 5px; 
+    margin-right: 1.25rem; 
+    border: none; 
+    border-right: 1px solid #ccc; 
+    .mat-tab-labels .mat-tab-label { 
+      min-width: 6.5rem; 
+      height: 3rem; 
+      padding: 0 1rem; 
+      border: 1px solid #ccc; 
+      border-right: 0; 
+      border-top: 0; 
+      font-size: 0.875rem;
 
-.mat-tab-body-wrapper { 
-  margin-top: 1.55rem; 
-  flex: 1; 
+      &:first-child { 
+        border-top: 1px solid #ccc; 
+      }
+    }
+  }
+  .mat-tab-body-wrapper { flex: 1; 
+    .mat-tab-body-content { overflow: hidden !important }
+  }
 }
 
-.mat-tab-labels .mat-tab-label { 
-  height: 3rem; 
-  padding: 0 1.5rem; 
-  min-width: 10rem; 
-  font-size: 0.875rem;
+#tabComponent .mat-tab-group { 
+  flex-direction: row; 
+  .mat-tab-labels { flex-direction: column; }
+  .mat-ink-bar { display: none; }
 }
 
 /* CodeMirror
@@ -378,7 +418,8 @@ form, input {
 .empty-row::before, 
 .mat-subhead::before, 
 .slide h4::before,
-.title::before  {
+.title::before,
+.mat-tab-label-active::before  {
   content:'';
   background: #1bc9e4; 
   width: 8px; 
@@ -469,7 +510,7 @@ ul.list {
     &.row > li {
       margin: 0 1.875rem; 
       padding: 0; 
-      a{ min-height: 0; }
+      a { min-height: 0; }
     }
 
     &.palette > li {

@@ -54,6 +54,7 @@
             </div>
         </div>    
         <div class="col strech">
+<<<<<<< HEAD
                 <div class="strech border m-20 p-20">    
                     <div class="row-center">
                         <h4>groupBy, filterBy</h4>
@@ -66,9 +67,31 @@
                             </li>
                         </ul>
                     </div>
+=======
+                <div class="strech border p-20">    
+                        <span >{{ eleName }} [{{ eleLabel }}]</span>
+                        <div class="row-center">
+                        <h4>groupBy, Filter</h4>
+                    </div>
+                    <ul class="list col strech border noborder m-10">
+                        <li class="side-margin"><span>Label</span>
+                            <span *ngIf="selectedElement">{{ selectedElement.data('name') }} [{{ selectedElement.data('label') }}]</span></li>
+                        <li class="side-margin"><span>Size</span>
+                            <span *ngIf="selectedElement">({{ selectedElement.data('size') }})</span></li>
+                        <li class="col strech side-margin">
+                            <span>Data</span>
+                            <div class="json strech m-10" *ngIf="selectedElement">
+                                <pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre>
+                            </div>
+                        </li>
+                    </ul>
+>>>>>>> bf454a5afa47a9b570ffd52317440275766ee902
                 </div>
-                <button mat-raised-button color="primary" [disabled]="!isChanged"
-                        (click)="close()">Reload</button>
+                <div class="col m-20">
+                    <button class="strech" mat-raised-button color="primary" [disabled]="!isChanged"
+                    (click)="close()">Reload</button>
+                </div>
+                
         </div>        
     </div>
 </div>
