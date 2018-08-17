@@ -24,6 +24,7 @@ export class MainComponent implements OnInit, AfterViewInit {
   @ViewChild('btnMenuHistory') public btnMenuHistory: MatButtonToggle;
 
   constructor(
+    private _cd: ChangeDetectorRef,
     private _router: Router,
     private _title: Title,
     public _snackBar: MatSnackBar,    

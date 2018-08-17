@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { Input, Output, EventEmitter } from '@angular/core';
 
 import { Subscription, timer } from 'rxjs';
@@ -32,7 +32,9 @@ export class QueryResultComponent implements OnInit {
   @ViewChild('resultProgressBar') progressBar: ElementRef;
   @ViewChild('queryState') queryState: ElementRef;
 
-  constructor() { }
+  constructor(
+    private _cd: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
   }
@@ -79,6 +81,9 @@ export class QueryResultComponent implements OnInit {
     this.counter = 0;
     this.messageText = '...';
     this.messageColor = COLOR_GRAY;
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   abort(){
@@ -87,6 +92,9 @@ export class QueryResultComponent implements OnInit {
 
     this.messageText = `User abort! (${this.elapsedTimeText()})`;
     this.messageColor = COLOR_GRAY;
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   setData(dto:IResponseDto){
@@ -94,6 +102,9 @@ export class QueryResultComponent implements OnInit {
 
     this._dto = dto;
     this.setMessage(dto.state, dto.message);
+    
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   /////////////////////////////////////////////////////////

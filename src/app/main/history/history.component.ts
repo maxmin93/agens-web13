@@ -1,5 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
-import { ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
@@ -36,6 +35,7 @@ export class HistoryComponent implements AfterViewInit {
   @ViewChild('progressBar') progressBar: ElementRef;
 
   constructor(
+    private _cd: ChangeDetectorRef,
     private _router: Router,
     private _api: AgensDataService,
   ) { }

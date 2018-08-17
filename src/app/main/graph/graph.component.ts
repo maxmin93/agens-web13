@@ -1,5 +1,4 @@
-import { Component, AfterViewInit, OnInit, OnDestroy } from '@angular/core';
-import { ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, } from '@angular/router';
 
@@ -86,6 +85,7 @@ return path;
   @ViewChild('statGraph') statGraph: StatGraphComponent;
 
   constructor(    
+    private _cd: ChangeDetectorRef,
     private _router: Router,
     public dialog: MatDialog,    
     private _api: AgensDataService,
@@ -161,9 +161,15 @@ return path;
     console.log('initCallbackData ==>', isVisible);
     if( isVisible ) this.queryGraph.graphChangeLayout('random');
     else this.queryGraph.todo$.next({ cmd: 'changeLayout', param: 'cose' });
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
   initCallbackStat(isVisible:boolean){
     console.log('initCallbackStat =', isVisible);
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   /////////////////////////////////////////////////////////////////
@@ -186,6 +192,9 @@ return path;
 
     // 프로젝트 정보 지우고
     this.currProject = undefined;
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   clearResults(){
@@ -349,6 +358,9 @@ return path;
     this.queryResult.abort();
     
     this.clearSubscriptions();
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   runGraphSchema(gid: number){
@@ -527,6 +539,9 @@ return path;
       console.log('close ProjectSaveDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // saved Project
       this.currProject = result;
+
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
@@ -541,6 +556,9 @@ return path;
       console.log('close ProjectOpenDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // Project Open 위한 API 호출
       this.currProject = this.loadProject(<IProject>result);
+
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 

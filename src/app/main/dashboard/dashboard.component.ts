@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
-import { ViewChild, ElementRef, NgZone } from '@angular/core';
+import { ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -88,7 +88,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   constructor(
     private _router: Router,
     public dialog: MatDialog,
-    private _ngZone: NgZone,
+    private _cd: ChangeDetectorRef,
     private _api: AgensDataService,
     private _util: AgensUtilService,
   ) { 
@@ -110,14 +110,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(){
     this.clearSubscriptions();
-    // 내부-외부 함수 공유 해제
-    window['angularComponentRef'] = undefined;
   }
 
   ngAfterViewInit() {
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+      // change Detection by force
+      this._cd.detectChanges();
     });
     Promise.resolve(null).then(() => {
       this.cy.$api.qtipFn = this.cyQtipMenuCallback;
@@ -144,7 +144,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
     // qTip
   }
-
 
   qtipMenuClick(){
     console.log('qtipMenuClick!!', this.cy._private.container);

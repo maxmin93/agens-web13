@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatButtonToggle, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
@@ -6,6 +6,7 @@ import { takeWhile } from 'rxjs/operators';
 
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
+import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -61,8 +62,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   todo$:Subject<any> = new Subject();
   
   constructor(
-    private _ngZone: NgZone,
-    private _elf: ElementRef,
+    private _cd: ChangeDetectorRef,
     private _dialog: MatDialog,
     private _api: AgensDataService,
     private _util: AgensUtilService,
@@ -89,6 +89,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
@@ -288,6 +290,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
       if( x && x.changed ) this.cy.style().update();
+
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
@@ -300,7 +305,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const bottomSheetRef = this._sheet.open(LabelStyleComponent, {
       ariaLabel: 'Label Style',
-      panelClass: 'shhet-label-style',
+      panelClass: 'sheet-label-style',
       data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
     });
 
@@ -309,6 +314,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       agens.cy = this.cy;
       // 스타일 변경 반영
       if( x && x.changed ) this.cy.style().update();
+
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
@@ -333,6 +341,23 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // });
   }
 
+  openEditGraphSheet(){
+    const bottomSheetRef = this._sheet.open(EditGraphComponent, {
+      ariaLabel: 'Edit Graph',
+      panelClass: 'sheet-label-style',
+      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((x) => {
+      this.selectedOption = undefined;
+      agens.cy = this.cy;
+      // 스타일 변경 반영
+      if( x && x.changed ) this.cy.style().update();
+
+      // change Detection by force
+      this._cd.detectChanges();
+    });
+  }
   /////////////////////////////////////////////////////////////////
   // Centrality methods
   /////////////////////////////////////////////////////////////////

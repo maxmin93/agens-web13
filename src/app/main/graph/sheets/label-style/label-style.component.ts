@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Inject, Output, EventEmitter} from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Inject } from '@angular/core';
 import { NgForm, FormGroup, FormControl, Validators } from '@angular/forms';
 
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
@@ -50,7 +50,7 @@ export class LabelStyleComponent implements OnInit {
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
 
   constructor(
-    private _ngZone: NgZone,    
+    private _cd: ChangeDetectorRef,
     private _api: AgensDataService,
     private _util: AgensUtilService,
     private _sheetRef: MatBottomSheetRef<LabelStyleComponent>,
@@ -83,6 +83,9 @@ export class LabelStyleComponent implements OnInit {
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+      
+      // change Detection by force
+      this._cd.detectChanges();
     });
 
     this.initLoad();

@@ -48,6 +48,7 @@ import { StatGraphComponent } from './main/graph/components/stat-graph/stat-grap
 import { MetaGraphComponent } from './main/graph/sheets/meta-graph/meta-graph.component';
 import { CellViewerComponent } from './main/graph/sheets/cell-viewer/cell-viewer.component';
 import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style.component';
+import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.component';
 
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
@@ -73,6 +74,7 @@ import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style
     QueryTableComponent,
     CellViewerComponent,
     LabelStyleComponent,
+    EditGraphComponent,
     StatGraphComponent,
 
     // LabelStyleSettingDialog,
@@ -125,6 +127,7 @@ import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style
     LabelStyleComponent,
     MetaGraphComponent,
     CellViewerComponent,
+    EditGraphComponent
   ],
   bootstrap: [ AppComponent ]
 })

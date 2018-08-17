@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
 
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
@@ -30,6 +30,7 @@ export class QueryTableComponent implements OnInit {
   @ViewChild('recordTable') recordTable: DatatableComponent;
 
   constructor(
+    private _cd: ChangeDetectorRef,
     private _sheet: MatBottomSheet
   ) { }
 
@@ -50,12 +51,18 @@ export class QueryTableComponent implements OnInit {
     this.selectedCell = {};
     this.selectedRowIndex = -1;
     this.selectedColIndex = -1;
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   setData(record:IRecord){
     this.recordColumns = record.columns;
     this.recordRows = this.convertRowToAny(record.columns, record.rows);
     this.recordRowsCount = this.recordRows.length;
+    
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   // rows를 변환 : Array<Array<any>> ==> Array<Map<string,any>>

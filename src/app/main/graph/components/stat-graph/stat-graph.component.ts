@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { MatDialog, MatButtonToggle } from '@angular/material';
@@ -51,8 +51,7 @@ export class StatGraphComponent implements OnInit {
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
 
   constructor(
-    private _ngZone: NgZone,  
-    private dialog: MatDialog,
+    private _cd: ChangeDetectorRef,
     private _api: AgensDataService,
     private _util: AgensUtilService,
   ) { 
@@ -79,6 +78,9 @@ export class StatGraphComponent implements OnInit {
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
     });
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   /////////////////////////////////////////////////////////////////
@@ -126,6 +128,9 @@ export class StatGraphComponent implements OnInit {
     this.labels = [];
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
+
+    // change Detection by force
+    this._cd.detectChanges();
   }
 
   setGid( gid:number ){ this.gid = gid; }
