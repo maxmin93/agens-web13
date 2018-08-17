@@ -1,6 +1,6 @@
 <div id="top" class="content col">
     <div class="row strech">
-        <div class="row-side col">
+        <div class="left-side row-side col">
             <div class="card">
                 <h4>DATA <strong>SOURCE</strong></h4>
                 <p class="sub-title">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
@@ -27,7 +27,7 @@
                 <ngx-datatable #tableLabels class="material m-20 strech"
                     [columnMode]="'force'" [limit]="8"
                     [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
-                    [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
+                    [footerHeight]="48" [rowHeight]="'auto'"
                     [selected]="selectedLabels" [selectionType]="'single'"
                     (select)="onSelectTableLabels($event)"
                     >
@@ -49,39 +49,36 @@
                 </ngx-datatable>
             </div> 
         </div>
-    
-        <div class="col strech card">            
-            <h4>SCHEMA <strong>GRAPH</strong></h4>
-            <div class="col">
-                <ul class="row list m-20">
-                    <li class="strech side-margin border"><span>TYPE </span> {{selectedLabel.type}}</li>
-                    <li class="strech side-margin border border-left-no"><span>ID </span> {{selectedLabel.id}}</li>
-                    <li class="strech side-margin border border-left-no"><span>NAME </span> {{selectedLabel.name}}</li>
-                    <li class="strech side-margin border border-left-no"><span>OWNER </span> {{selectedLabel.owner}}</li>
-                    <li class="strech side-margin border border-left-no"><span>SIZE </span> {{selectedLabel.size | number}}</li>
-                </ul>
-                <ul class="list">
-                    <li class="border"><span>DESCRIPTION </span> "{{selectedLabel.desc}}"</li>
-                </ul>
-            </div>
-            <div class="row strech">
-                <div id="div-canvas" #divCanvas class="graph-canvas strech border"></div>
-                <div class="viewbox">
-                    <div class="scroll-hide">
-                        <ul class="list icon border border-left-no">
-                            <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
-                            <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
-                            <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
-                            <li><a matTooltip="Delete" matTooltipPosition="above"><mat-icon>delete_outline</mat-icon></a></li>
-                            <li><a (click)="resize()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                                <mat-icon>refresh</mat-icon></a></li>
-                        </ul>
+        <div class="right-side row strech">
+            <div class="col strech card row-side">            
+                <h4>SCHEMA <strong>GRAPH</strong></h4>
+                <div class="row strech m-20">
+                    <div id="div-canvas" #divCanvas class="graph-canvas strech border"></div>
+                    <div class="viewbox">
+                        <div class="scroll-hide">
+                            <ul class="list icon border border-left-no">
+                                <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
+                                <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
+                                <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
+                                <li><a matTooltip="Delete" matTooltipPosition="above"><mat-icon>delete_outline</mat-icon></a></li>
+                                <li><a (click)="resize()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                                    <mat-icon>refresh</mat-icon></a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                
             </div>
-            
-                
+            <div class="col strech card">
+                <h4>SCHEM <strong>INFO</strong></h4>
+                <ul class="list m-10 strech border noborder">
+                    <li class="row-center"><span>TYPE </span> {{selectedLabel.type}}</li>
+                    <li class="row-center"><span>ID </span> {{selectedLabel.id}}</li>
+                    <li class="row-center"><span>NAME </span> {{selectedLabel.name}}</li>
+                    <li class="row-center"><span>OWNER </span> {{selectedLabel.owner}}</li>
+                    <li class="row-center"><span>SIZE </span> {{selectedLabel.size | number}}</li>
+                    <li class="row-center"><span>DESCRIPTION </span>"{{selectedLabel.desc}}"</li>
+                </ul>
+            </div>
         </div>  
     </div>
 </div>

@@ -12,9 +12,10 @@
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
                 <ng-container *ngIf="selectedOption && selectedOption == 'labelSearch'">
-                    <div id="slide-toggle" class="slide border col">
-                        <div class="row-center">
-                            <span class="search">
+                    <div id="slide-toggle" class="slide border search-component">
+                        <div class="col">
+                            <h4>Label <strong>INFO</strong></h4>
+                            <span class="search m-20">
                                 <mat-icon>search</mat-icon>
                                 <input
                                 class="border"
@@ -85,7 +86,7 @@
         <div id="agens-graph-toolbar" class="viewbox border">
             <div class="scroll-hide">
             <ul class="list icon border noborder">
-                <li><a [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
+                <li><a class="checked" [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
                     <mat-icon>label</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSheet()" matTooltip="Styling by Label" matTooltipPosition="above">
@@ -97,35 +98,35 @@
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
                     <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
                         <div td-menu-header>
-                            <h4 class="mat-subhead">LAYOUT <strong>TYPE</strong></h4>
+                            <h4 class="mat-subhead">Layout <strong>Type</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('random')">RANDOM</button>
+                            <button mat-menu-item (click)="graphChangeLayout('random')">Random</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('grid')">GRID</button>
+                            <button mat-menu-item (click)="graphChangeLayout('grid')">Grid</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">BREADTHFIRST</button>
+                            <button mat-menu-item (click)="graphChangeLayout('breadthfirst')">Breadth-first</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('concentric')">CONCENTRIC</button>
+                            <button mat-menu-item (click)="graphChangeLayout('concentric')">Concentric</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cola')">COLA</button>
+                            <button mat-menu-item (click)="graphChangeLayout('cola')">Cola</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose')">COSE (nodes.size &lt; 400)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('cose')">Cose(nodes.size &lt; 400)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">COSE-BILKENT (very slow)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">Cose-Bilkent(very slow)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('dagre')">DAGRE (hierachy)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('dagre')">Dagre(hierachy)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('klay')">KLAY</button>
+                            <button mat-menu-item (click)="graphChangeLayout('klay')">Klay</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('euler')">EULER</button>
+                            <button mat-menu-item (click)="graphChangeLayout('euler')">Euler</button>
                     </mat-menu>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="centralityMenu" matTooltip="Centrality" matTooltipPosition="above">
                     <mat-icon>surround_sound</mat-icon></a>
                     <mat-menu #centralityMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
                         <div td-menu-header>
-                            <h4 class="mat-subhead">Centrality <strong>methods</strong></h4>
+                            <h4 class="mat-subhead">Centrality <strong>Methods</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphCentrality('reset')">Reset styles</button>

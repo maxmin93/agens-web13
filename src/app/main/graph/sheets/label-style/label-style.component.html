@@ -24,23 +24,28 @@
         </div>
         <div class="col strech">
 
-            <div class="strech border p-20 color-box">
+            <div class="border p-20 row-center">
                 <h5 class="title"><strong>Visibility </strong></h5>
                 <mat-slide-toggle [(ngModel)]="selectedStyle.visible" matTooltip="Visibility"
                     (change)="onChangeStyleVisible($event)">
                 </mat-slide-toggle>
             </div>
-            <div class="strech border p-20 color-box">
+            <div class="col strech border m-20 p-20 color-box">
                 <h5 class="title"><strong>COLOR </strong></h5>
-                <ul class="row wrap m-10 strech" id="colorPalette">
-                    <li *ngFor="let c of colors; let i = index" [attr.data-index]="i"
-                        [style.background-color]="c.bc" (click)="onChangeStyleColor(i)"
-                        [style.border-color]="'black'"
-                        [style.border-width]="(selectedStyle.color.bc == c.bc) ? '2px' : '0px'"
-                        ></li>
-                </ul>
+                <div class="col m-20 strech" id="colorPalette">
+                    <ul class="row wrap">
+                        <li *ngFor="let c of colors; let i = index" [attr.data-index]="i"
+                            [style.background-color]="c.bc" (click)="onChangeStyleColor(i)"
+                            [style.border-color]="'black'"
+                            [style.border-width]="(selectedStyle.color.bc == c.bc) ? '2px' : '0px'"
+                            ></li>
+                    </ul>
+                </div>
+                <div>
+                    <h6 class="row-center">Select Color : <span>rgb(255,255,255)</span></h6>
+                </div>
             </div>
-            <div class="strech border m-20 p-20">
+            <div class="border m-20 p-20">
                 <h5 class="title"><strong>SIZE </strong></h5>
                 <mat-slider name="labelSize" class="row-center strech" [formControl]="labelSizeCtl"
                             [min]="labelSizeRange.min" [max]="labelSizeRange.max" [step]="labelSizeRange.step" 
@@ -48,7 +53,7 @@
                             (change)="onChangeStyleWidth($event)">
                 </mat-slider>
             </div>
-            <div class="strech border m-20 p-20">    
+            <div class="border m-20 p-20">    
                 <h5 class="title"><strong>TITLE </strong></h5>
                 <mat-form-field class="strech row-center">
                   <mat-select name="labelName" [formControl]="labelNameCtl" [value]="selectedStyle.title"
@@ -58,8 +63,8 @@
                   </mat-select>
                 </mat-form-field>                
             </div>
-            <button mat-raised-button color="primary" [disabled]="!selectedElement || !isChanged" 
-                    (click)="close()">Apply</button>
+            <div class="m-20 col strech"><button mat-raised-button color="primary" [disabled]="!selectedElement || !isChanged" 
+                    (click)="close()">Apply</button></div>
     </div>
     
 </div>
