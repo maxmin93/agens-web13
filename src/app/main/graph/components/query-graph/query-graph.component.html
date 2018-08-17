@@ -11,7 +11,7 @@
             <!-- graph element info Box -->
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
-                <ng-container *ngIf="selectedOption && selectedOption == 'labelSearch'">
+                <ng-container *ngIf="btnStatus.showHideTitle">
                     <div id="slide-toggle" class="slide border search-component">
                         <div class="col">
                             <h4>Label <strong>INFO</strong></h4>
@@ -49,7 +49,7 @@
                 </ng-container>
 
                 <!-- 입력상자 : 최단 경로 -->
-                <ng-container *ngIf="selectedOption && selectedOption == 'shortestPath'">
+                <ng-container *ngIf="btnStatus.shortestPath">
                     <div id="slide-toggle" class="slide border col">
                         <div class="row-center">
                             <h4>find <strong>Shortest Path</strong></h4>
@@ -72,7 +72,8 @@
                     </div>
                 </ng-container>
             </nav>
-                <!-- Graph.Meta : Labels content -->
+            
+            <!-- Graph.Meta : Labels content -->
             <mat-chip-list id="agens-graph-labels">
                 <mat-chip *ngFor="let label of labels" [selected]="true"
                     (click)="clickGraphLabelChip(label.type, label.name)" 
@@ -86,13 +87,13 @@
         <div id="agens-graph-toolbar" class="viewbox border">
             <div class="scroll-hide">
             <ul class="list icon border noborder">
-                <li><a class="checked" [ngClass]="{ 'disabled-btn': isLoading, 'is-active': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
+                <li><a class="checked" [ngClass]="{ 'checked': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
                     <mat-icon>label</mat-icon></a>
                 </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openLabelStyleSheet()" matTooltip="Styling by Label" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'checked': btnStatus.labelStyle }" (click)="openLabelStyleSheet()" matTooltip="Styling by Label" matTooltipPosition="above">
                     <mat-icon>palette</mat-icon></a>    <!-- <mat-icon>flip_to_back</mat-icon> -->
                 </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'checked': btnStatus.metaGraph }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
                         <mat-icon>search</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
@@ -140,25 +141,25 @@
                             <button mat-menu-item (click)="graphCentrality('betweenness')">Betweenness</button>
                     </mat-menu>
                 </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'checked': btnStatus.neighbors }" id="btnHighlightNeighbors" mat-button-toggle #btnHighlightNeighbors (click)="toggleHighlightNeighbors()" matTooltip="Highlight Neighbors" matTooltipPosition="above">
                         <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" matTooltip="Image Export" matTooltipPosition="above">
                         <mat-icon>image</mat-icon></a>
                 </li>
-                <li><a (click)="toggleFindConnectedGroup()" matTooltip="find Connected Group" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'checked': btnStatus.connectedGroup }" (click)="toggleFindConnectedGroup()" matTooltip="find Connected Group" matTooltipPosition="above">
                     <mat-icon>view_quilt</mat-icon></a>
                 </li>
-                <li><a mat-button-toggle [ngClass]="{ 'on-btn': btnStatus.shortestPath, 'off-btn': !btnStatus.shortestPath }" #btnShortestPath (click)="toggleFindShortestPath()" matTooltip="find Shortest Path" matTooltipPosition="above">
+                <li><a mat-button-toggle [ngClass]="{ 'checked': btnStatus.shortestPath }" #btnShortestPath (click)="toggleFindShortestPath()" matTooltip="find Shortest Path" matTooltipPosition="above">
                     <mat-icon>timeline</mat-icon></a>
                 </li>
-                <li><a (click)="openEditGraphSheet()" matTooltip="edit Graph" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'checked': btnStatus.editGraph }" (click)="openEditGraphSheet()" matTooltip="edit Graph" matTooltipPosition="above">
                     <mat-icon>youtube_searched_for</mat-icon></a>
                 </li>
-                <li><a (click)="playTimeline()" matTooltip="play Timeline" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'checked': btnStatus.timeLine }" (click)="playTimeline()" matTooltip="play Timeline" matTooltipPosition="above">
                     <mat-icon>fast_forward</mat-icon></a>
                 </li>
-                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
                         <mat-icon>refresh</mat-icon></a>
                 </li>
             </ul>

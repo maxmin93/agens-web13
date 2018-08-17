@@ -38,6 +38,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     mouseWheel: false,        // 마우스휠 사용여부
     shortestPath: false,      // 경로검색 사용여부 
     neighbors: false,         // 이웃노드 하일라이팅
+    connectedGroup: false,
+    timeLine: false,
+    editGraph: false,
+    megaGraph: false,
+    labelStyle: false
   };
   labelSearchCount: number = 0;
 
@@ -119,12 +124,14 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
-    if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
+    else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
     else{
-      this.selectedElement = target;
-      // HighlightNeighbors 상태가 아닌 일반 상태라면 unselect
-      if( !this.btnHighlightNeighbors.checked ){
+      let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
+      if( !allStatus ){
+        this.selectedElement = target;
+        // HighlightNeighbors 상태가 아닌 일반 상태라면 unselect
         this.cy.elements(':selected').unselect();
+        // if( !this.btnHighlightNeighbors.checked ){}
       }
     }
   }  
@@ -158,7 +165,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
     // 그래프 관련 콘트롤러들 초기화
-    this.toggleShowHideTitle(true);
+    this.toggleShowHideTitle(false);
     this.toggleHighlightNeighbors(false);
   }
 
@@ -246,20 +253,23 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.btnStatus.showHideTitle = this.btnShowHideTitle.checked;
 
     // 선택옵션 설정
-    if( this.btnShowHideTitle.checked ) this.selectedOption = undefined;
-    else{
+    if( this.btnShowHideTitle.checked ){
       this.selectedOption = 'labelSearch';
       this.labelSearchCount = 0;
     } 
+    else{
+      this.selectedOption = undefined;
+    } 
 
     // graph의 userZoomingEnabled 설정 변경
-    this.cy.scratch('_config').hideNodeTitle = this.btnShowHideTitle.checked; 
+    this.cy.scratch('_config').hideNodeTitle = !this.btnShowHideTitle.checked;
     this.cy.style(agens.graph.stylelist['dark']).update();
   }
 
   toggleHighlightNeighbors(checked?:boolean): void{
     if( checked === undefined ) this.btnHighlightNeighbors.checked = !this.btnHighlightNeighbors.checked;
     else this.btnHighlightNeighbors.checked = checked;
+
     this.btnStatus.neighbors = this.btnHighlightNeighbors.checked;
   }
 
@@ -280,8 +290,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   openSearchResultDialog(): void {
-    // if( !this.metaGraph ) return;
+    if( !this.metaGraph ) return;
 
+    this.btnStatus.metaGraph = true;
     const bottomSheetRef = this._sheet.open(MetaGraphComponent, {
       ariaLabel: 'Meta Graph',
       panelClass: 'sheet-meta-graph',
@@ -289,7 +300,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {
-      this.selectedOption = undefined;
+      this.btnStatus.metaGraph = false;
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
       if( x && x.changed ) this.cy.style().update();
@@ -306,6 +317,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   openLabelStyleSheet(): void {
     if( !this.metaGraph ) return;
 
+    this.btnStatus.labelStyle = true;
     const bottomSheetRef = this._sheet.open(LabelStyleComponent, {
       ariaLabel: 'Label Style',
       panelClass: 'sheet-label-style',
@@ -313,7 +325,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {
-      this.selectedOption = undefined;
+      this.btnStatus.labelStyle = false;
       agens.cy = this.cy;
       // 스타일 변경 반영
       if( x && x.changed ) this.cy.style().update();
@@ -345,6 +357,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openEditGraphSheet(){
+    if( !this.metaGraph ) return;
+
+    this.btnStatus.editGraph = true;
     const bottomSheetRef = this._sheet.open(EditGraphComponent, {
       ariaLabel: 'Edit Graph',
       panelClass: 'sheet-label-style',
@@ -352,7 +367,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {
-      this.selectedOption = undefined;
+      this.btnStatus.editGraph = false;
       agens.cy = this.cy;
       // 스타일 변경 반영
       if( x && x.changed ) this.cy.style().update();

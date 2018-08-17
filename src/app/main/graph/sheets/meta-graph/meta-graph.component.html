@@ -54,36 +54,23 @@
             </div>
         </div>    
         <div class="col strech">
-                <div class="strech border m-20 p-20">    
-                        <div class="row-center">
-                            <h4>groupBy, filterBy</h4>
-                        </div>
-                        <div class="json strech m-10" *ngIf="selectedElement">
-                            <ul *ngIf="selectedLabel">
-                                <li *ngFor="let item of selectedConditions">
-                                    <span>{{ item.label }}</span><span>{{ item.property }}</span>
-                                    <button>Del</button>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="strech border p-20">    
-                    <div class="row-center">
-                        <h4>groupBy, filterBy</h4>
-                    </div>
-                    <div class="json strech m-10" *ngIf="selectedElement">
-                        <ul *ngIf="selectedLabel">
-                            <li *ngFor="let item of selectedConditions">
-                                <span>{{ item.label }}</span><span>{{ item.property }}</span>
-                                <button>Del</button>
-                            </li>
-                        </ul>
-                    </div>
+            <div class="strech border p-20">    
+                <div class="row-center">
+                    <h4>groupBy, filterBy</h4>
                 </div>
-                <div class="col m-20">
-                    <button class="strech" mat-raised-button color="primary" [disabled]="!isChanged"
-                    (click)="close()">Reload</button>
+                <div class="json strech m-10" *ngIf="selectedElement">
+                    <ul *ngIf="selectedLabel">
+                        <li *ngFor="let item of selectedConditions">
+                            <span>{{ item.label }}</span><span>{{ item.property }}</span>
+                            <button>Del</button>
+                        </li>
+                    </ul>
                 </div>
-                
+            </div>
+            <div class="col m-20">
+                <button class="strech" mat-raised-button color="primary" [disabled]="!isChanged"
+                (click)="close()">Reload</button>
+            </div>                
         </div>        
     </div>
 </div>
