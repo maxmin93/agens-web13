@@ -23,12 +23,15 @@
                             <li class="col strech side-margin">
                                 <span>Properties</span>
                                 <div class="json strech m-10" *ngIf="selectedProps">
-                                    <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()">
+                                    <!-- <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()"> -->
+                                    <form [formGroup]="formGrp">
                                         <label formArrayName="conditions" *ngFor="let prop of formGrp.controls.conditions.controls; let i = index">
                                             <input type="checkbox" [formControlName]="i">
                                             {{ selectedProps[i] }}
                                         </label>
-                                        <button>submit</button>
+                                        <button mat-raised-button color="accent" (click)="addItemGroupBy()">Add groupBy</button>
+                                        <button mat-raised-button color="accent" (click)="addItemFilterBy()">Add filterBy</button>
+                                        <button mat-raised-button color="primary" (click)="resetChecked()">reset</button>
                                     </form>                                    
                                 </div>
                             </li>
@@ -54,21 +57,36 @@
             </div>
         </div>    
         <div class="col strech">
-            <div class="strech border p-20">    
-                <div class="row-center">
-                    <h4>groupBy, filterBy</h4>
-                </div>
-                <div class="json strech m-10" *ngIf="selectedElement">
-                    <ul *ngIf="selectedLabel">
-                        <li *ngFor="let item of selectedConditions">
-                            <span>{{ item.label }}</span><span>{{ item.property }}</span>
-                            <button>Del</button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+            <mat-tab-group class="strech border p-10">
+                <mat-tab label="groupBy">
+                    <div class="row-center">
+                        <h4>groupBy List</h4>
+                    </div>
+                    <div class="json strech m-10" *ngIf="groupByList">
+                        <ul>
+                            <li *ngFor="let item of groupByList; let i = index">
+                                <span>{{ item.label }}</span>: <span>{{ item.props }}</span>&nbsp;&nbsp;
+                                <button mat-raised-button color="accent" (click)="removeItemGroupBy(i)">Del</button>
+                            </li>
+                        </ul>
+                    </div>
+                </mat-tab>
+                <mat-tab label="filterBy">
+                    <div class="row-center">
+                        <h4>filterBy List</h4>
+                    </div>
+                    <div class="json strech m-10" *ngIf="filterByList">
+                        <ul>
+                            <li *ngFor="let item of filterByList; let i = index">
+                                <span>{{ item.label }}</span>: <span>{{ item.prop }}</span>, <span>{{ item.oper }}</span>, <span>{{ item.value }}</span>&nbsp;&nbsp;
+                                <button mat-raised-button color="accent" (click)="removeItemFilterBy(i)">Del</button>
+                            </li>
+                        </ul>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>                
             <div class="col m-20">
-                <button class="strech" mat-raised-button color="primary" [disabled]="!isChanged"
+                <button class="strech" mat-raised-button color="primary" [disabled]="groupByList.length == 0 && filterByList.length == 0"
                 (click)="close()">Reload</button>
             </div>                
         </div>        

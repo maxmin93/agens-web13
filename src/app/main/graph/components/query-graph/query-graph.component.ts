@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Input, Out
 import { MatDialog, MatButtonToggle, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
@@ -12,9 +12,9 @@ import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
 import { AgensGraphService } from '../../../../services/agens-graph.service';
 
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
-import { IDoubleListDto } from '../../../../models/agens-response-types';
+import { IGraphDto, IDoubleListDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../app.config';
 import { delayWhen } from 'rxjs/operators';
@@ -52,6 +52,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   dataGraph: IGraph = undefined;
   metaGraph: IGraph = undefined;
+  tempGraph: IGraph = undefined;
 
   selectedElement: any = undefined;  
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
@@ -165,8 +166,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
     // 그래프 관련 콘트롤러들 초기화
-    this.toggleShowHideTitle(false);
-    this.toggleHighlightNeighbors(false);
+    Object.keys(this.btnStatus).map( key => this.btnStatus[key] = false );
   }
 
   setGid( gid: number ){ this.gid = gid; }
@@ -187,10 +187,38 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // 액티브 상태가 될 때마다 실행되는 작업들
-  refreshCanvas(){
+  refreshCanvas(){   
     this.cy.resize();
     this.cy.fit( this.cy.elements(), 50);
     agens.cy = this.cy;
+  }
+
+  reloadGraph(){
+    if( !this.dataGraph ) return;
+    
+    this.clear(false);    
+    this.dataGraph.nodes.forEach( x => { 
+      let ele = this.cy.add( x );
+      if( x.scratch.hasOwnProperty('_position') ) ele.position( _.clone( x.scratch['_position'] ) );
+    });
+    this.dataGraph.edges.forEach( x => { 
+      this.cy.add( x ) 
+    });
+
+    this.refreshCanvas();
+  }
+
+  savePositions( graph ){
+    graph.nodes.forEach( (x:INode) => {
+      let ele = this.cy.getElementById(x.data.id);
+      if( ele.empty() ) return true;
+      x.scratch['_position'] = _.clone( ele.position() );
+    });
+    graph.edges.forEach( (x:IEdge) => {
+      let ele = this.cy.getElementById(x.data.id);
+      if( ele.empty() ) return true;
+      x.scratch['_position'] = _.clone( ele.position() );
+    });
   }
 
   adjustMenuOnNode(labels: Array<ILabel>, collection:any ){
@@ -303,7 +331,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.btnStatus.metaGraph = false;
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
-      if( x && x.changed ) this.cy.style().update();
+      if( x ) this.runGraphGroupBy(x.groupBy);
 
       // change Detection by force
       this._cd.detectChanges();
@@ -444,10 +472,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  /////////////////////////////////////////////////////////////////
-  // graph Toolbar button controlls
-  /////////////////////////////////////////////////////////////////
-
   toggleFindConnectedGroup(option:boolean=undefined){
     if( !option ) this.btnStatus.connectedGroup = !this.btnStatus.connectedGroup;
     else this.btnStatus.connectedGroup = option;
@@ -467,4 +491,73 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /////////////////////////////////////////////////////////////////
+  // graph Toolbar button controlls
+  /////////////////////////////////////////////////////////////////
+
+  runGraphGroupBy(list: any[]){
+
+    this.savePositions( this.dataGraph );
+    this.clear(false);   // clear canvas except labels
+
+    // call API
+    let data$:Observable<any> = this._api.grph_groupBy(this.gid, list);
+
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`graph_dto receiving : gid=${x.gid} (${this.gid})`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.tempGraph = x;
+        this.tempGraph.labels = new Array<ILabel>();
+        this.tempGraph.nodes = new Array<INode>();
+        this.tempGraph.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+      this.tempGraph.labels.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+      // setNeighbors from this.resultGraph.labels;
+      x.scratch['_neighbors'] = new Array<string>();
+      this.labels
+        .filter(val => val.type == 'nodes' && val.name == x.data['label'])
+        .map(label => {
+          console.log('runGraphGroupBy:', x, label);
+          x.scratch['_neighbors'] += label.targets;
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
+      this.tempGraph.nodes.push( x );
+      this.addNode( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.labels
+        .filter(val => val.type == 'edges' && val.name == x.data['label'])
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
+      this.tempGraph.edges.push( x );
+      this.addEdge( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        // this._util.applyLabelStyle(this.resultTemp.nodes, this.resultGraph.labels, 
+        //   (ele:IElement, label:ILabel) => {
+        //     return label.type == 'nodes' && ele.data['label'] == label.name;
+        //   });
+        // this._util.applyLabelStyle(this.resultTemp.edges, this.resultGraph.labels, 
+        //   (ele:IElement, label:ILabel) => {
+        //     return label.type == 'edges' && ele.data['label'] == label.name;
+        //   });
+
+        this.initCanvas();
+        // this.queryGraph.graphChangeLayout('cose');
+      });
+
+  }  
 }

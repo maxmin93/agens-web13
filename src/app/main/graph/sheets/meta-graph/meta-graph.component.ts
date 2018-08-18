@@ -39,6 +39,9 @@ export class MetaGraphComponent implements OnInit {
 
   formGrp: FormGroup;
 
+  groupByList: any[] = [];    // { label: "", props="a,b" }
+  filterByList: any[] = [];   // { label: "", prop="a", oper="gt", value="10" };
+
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
   @ViewChild('divPopup', {read: ElementRef}) divPopup: ElementRef;
@@ -83,7 +86,7 @@ export class MetaGraphComponent implements OnInit {
   }
 
   close(): void {
-    this._sheetRef.dismiss();
+    this._sheetRef.dismiss({ groupBy: this.groupByList, filterBy: this.filterByList });
     event.preventDefault();
   }
 
@@ -154,13 +157,33 @@ export class MetaGraphComponent implements OnInit {
     });
   }
 
-  submitFormGroup() {
-    const selectedOrderIds = this.formGrp.value.conditions
+  resetChecked() {
+    (<FormArray> this.formGrp.controls.conditions).reset(false);
+  }  
+
+  addItemGroupBy() {
+    const selected:string[] = this.formGrp.value.conditions
       .map((v, i) => v ? this.selectedProps[i] : null)
       .filter(v => v !== null);
 
-    console.log(selectedOrderIds);
+    this.groupByList.push({ label: this.selectedElement.data('name'), props: selected.join(',') });
   }  
+  addItemFilterBy() {
+    const selected:string[] = this.formGrp.value.conditions
+      .map((v, i) => v ? this.selectedProps[i] : null)
+      .filter(v => v !== null);
+
+    selected.forEach(item => {
+      this.filterByList.push({ label: this.selectedElement.data('name'), prop: item, oper: "", value: "" });
+    });
+  }  
+
+  removeItemGroupBy(i:number):any {
+    if( this.groupByList.length > i ) return this.groupByList.splice(i,1);
+  }
+  removeItemFilterBy(i:number):any {
+    if( this.filterByList.length > i ) return this.filterByList.splice(i,1);
+  }
 
   /////////////////////////////////////////////////////////////////
   // Graph Controllers

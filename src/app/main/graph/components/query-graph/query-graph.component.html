@@ -160,7 +160,10 @@
                     <mat-icon>fast_forward</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                        <mat-icon>refresh</mat-icon></a>
+                        <mat-icon>reply</mat-icon></a>
+                </li>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="reloadGraph()" matTooltip="reload Graph" matTooltipPosition="above">
+                    <mat-icon>reply_all</mat-icon></a>
                 </li>
             </ul>
             </div>

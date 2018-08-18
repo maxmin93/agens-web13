@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material';
 
-import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, Subscription, empty } from 'rxjs';
 import { map, filter, concatAll, share } from 'rxjs/operators';
 import * as _ from 'lodash';
 
@@ -229,7 +229,10 @@ export class AgensDataService {
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }  
 
-  grph_groupBy(gid:number, label:string, props:string):Observable<any> {
+  grph_groupBy(gid:number, list:any[]):Observable<any> {
+    if( list.length == 0 ) return empty();
+    let label:string = list[0]['label'];
+    let props:string = list[0]['props'];
     const url = `${this.api.grph}/groupby/${gid}?label=${label}&props=${props}`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );

@@ -428,7 +428,7 @@ return path;
     this.queryGraph.clear(false);   // clear canvas except labels
 
     // call API
-    let data$:Observable<any> = this._api.grph_groupBy(this.resultDto.gid, $event.label, $event.props);
+    let data$:Observable<any> = this._api.grph_groupBy(this.resultDto.gid, [ $event ]);
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
