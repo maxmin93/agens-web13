@@ -24,7 +24,7 @@
         <div id="sizeToggler" class="toggler border" onclick="sizeToggler()"><span></span></div>
     </div>
     <div id="tabComponent" class="col strech m-20 card">
-        <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="strech md-no-animation"
+        <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="mat-tab-vertical strech md-no-animation"
             (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
             <mat-tab label="Graph">
                 <!-- GRAPH(0) -->

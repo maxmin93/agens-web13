@@ -68,14 +68,14 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 /* flex 기본 설정값으로 col-side는 side의 너비값을 줄 경우, 
 반대쪽 div 에 col 주입한다. */
 
-.row { display: flex; }
-.col { display: flex; flex-direction: column; }
+.row, .col, .row-center, .row-end, .row-start { display: flex; }
+.col { flex-direction: column; }
 
-.row-center { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-}
+.row-start, .row-center, .row-end { align-items: center; }
+
+.row-start { justify-content: flex-start }
+.row-center { justify-content: space-between; }
+.row-end { justify-content: flex-end; }
 
 .row-side { margin-right: 1.25rem; }
 .col-side { margin-bottom: 1.875rem; }
@@ -89,9 +89,6 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
   position: relative;
 }
 
-// 빈 공란 
-.example-spacer { flex: 1 1 auto; }
-
 //  color 테마값
 
 mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; }
@@ -102,6 +99,8 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 /* margin 값으로  margin 값을 추가하고자 할 때, 
 클래스명은 "m-value" */
 
+.block { display: block; }
+
 .m-30 { margin-top: 1.875rem; }
 .m-24 { margin-top: 1.5625rem;}
 .m-20 { margin-top: 1.25rem; }
@@ -109,6 +108,7 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 
 .p-20 { padding: 1.25rem; }
 .p-10 { padding: .625rem; }
+.p-no { padding: 0 !important}
 
 .card, .border { border: 1px solid #ddd;  
   &.border-dotted { border-style: dotted; } 
@@ -124,6 +124,8 @@ ul.border {
   &.noborder { border: none }  
   > li { border-bottom: 1px solid #ddd; }
 }
+
+.noborder { border: none !important; }  
 
 .mat-menu-item, .sub-title { font-size: .895rem; color: #aeb1b4; } 
 
@@ -257,15 +259,19 @@ datatable의 세팅값은 각 태그에 존재함*/
 .ngx-datatable.material.multi-selection .datatable-body-row.active:hover, 
 .ngx-datatable.material.multi-selection .datatable-body-row.active:hover .datatable-row-group, 
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover, 
-.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group  {
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group, 
+.ngx-datatable .datatable-body .datatable-row-wrapper:hover, 
+.ngx-datatable .datatable-body .datatable-row-wrapper:focus {
   background: #f1f9f9;
   cursor: pointer;
 }
 
 .ngx-datatable.material.cell-selection .datatable-body-cell.active:focus, 
-.ngx-datatable.material.cell-selection .datatable-body-cell.active:focus .datatable-row-group { 
-  background: #f1f9f9;
-  color: #585858;
+.ngx-datatable.material.cell-selection .datatable-body-cell.active:focus .datatable-row-group,
+.ngx-datatable.material.cell-selection .datatable-body-cell:hover, 
+.ngx-datatable.material.cell-selection .datatable-body-cell:hover .datatable-row-group { 
+  background: transparent;
+  color: #585858; 
 }
 
 .ngx-datatable.material:not(.cell-selection) .datatable-body-row:hover, 
@@ -273,6 +279,7 @@ datatable의 세팅값은 각 태그에 존재함*/
   transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); 
   cursor: pointer;
 }
+
 
 .ngx-datatable.material .datatable-body .datatable-row-detail { 
   background: #f8f9f9; 
@@ -312,7 +319,6 @@ mat-chip-list {
 */
 
 form, input { 
-  width: 100%; 
   font-size: .875rem; 
   outline: none; 
 
@@ -363,7 +369,7 @@ form, input {
   background: #1bc9e4; 
 }
 
-.mat-tab-group { 
+.mat-tab-vertical.mat-tab-group { 
   .mat-tab-header {
     margin-top: 5px; 
     margin-right: 1.25rem; 
@@ -383,10 +389,10 @@ form, input {
       }
     }
   }
-  .mat-tab-body-wrapper { flex: 1; 
-    .mat-tab-body-content { overflow: hidden !important }
-  }
+  .mat-tab-body-content { overflow: hidden !important }
 }
+
+.mat-tab-body-wrapper { flex: 1; }
 
 #tabComponent .mat-tab-group { 
   flex-direction: row; 
@@ -419,7 +425,7 @@ form, input {
 .mat-subhead::before, 
 .slide h4::before,
 .title::before,
-.mat-tab-label-active::before  {
+.mat-tab-vertical .mat-tab-label-active::before  {
   content:'';
   background: #1bc9e4; 
   width: 8px; 
@@ -610,6 +616,17 @@ pre {
 ////////////////////////////////////
 // bottom sheets styles
 
+.mat-form-field-label-wrapper { 
+  top: -.95375em; 
+}
+
+.mat-bottom-sheet-container {
+  padding: 1rem 1.25rem !important; 
+  border-radius: .325rem .325rem 0 0; 
+  box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; 
+  font-size: .825rem; 
+}
+
 .sheet-cell-viewer {
   width: 800px;
   height: 600px;
@@ -623,4 +640,15 @@ pre {
 .sheet-label-style {
   width: 1200px;
   height: 600px;
+}
+
+
+.bar {
+  fill: steelblue;
+}
+
+.axis-title {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.5px;
 }

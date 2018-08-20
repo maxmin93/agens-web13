@@ -12,18 +12,20 @@
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
                 <ng-container *ngIf="btnStatus.showHideTitle">
-                    <div id="slide-toggle" class="slide border search-component">
+                    <div id="slide-toggle" class="slide border side-short-component">
                         <div class="col">
                             <h4>Label <strong>INFO</strong></h4>
                             <span class="search m-20">
-                                <mat-icon>search</mat-icon>
                                 <input
-                                class="border"
+                                class="border search"
                                 type='text'            
                                 placeholder='Type to filter label text...'
                                 (keyup)='updateFilterTitle($event)'/>
                             </span>
-                            <p><span>found elements = {{ labelSearchCount }}</span></p>
+                            <ul class="list m-10">
+                                <li class="side-margin row-end"><span>Found Elements </span> <strong>{{ labelSearchCount }}</strong></li>
+                            </ul>
+                            
                         </div>
                     </div>
                 </ng-container>
@@ -32,7 +34,7 @@
                 <ng-container *ngIf="!!selectedElement">
                     <div id="slide-toggle" class="slide border col">
                         <div class="row-center">
-                            <h4>DATA <strong>INFO</strong></h4>
+                            <h4>Data <strong>INFO</strong></h4>
                             <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
                             [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
                             </mat-slide-toggle>
@@ -50,9 +52,11 @@
 
                 <!-- 입력상자 : 최단 경로 -->
                 <ng-container *ngIf="btnStatus.shortestPath">
-                    <div id="slide-toggle" class="slide border col">
+                    <div id="slide-toggle" class="slide border col side-short-component">
                         <div class="row-center">
-                            <h4>find <strong>Shortest Path</strong></h4>
+                            <h4>Find <strong>Shortest Path</strong></h4>
+                            <mat-slide-toggle #slideShortestPathDirected [checked]="shortestPathOptions.directed" matTooltip="directed option">
+                            </mat-slide-toggle>
                         </div>
                         <ul class="list col strech border noborder m-10">
                             <li class="side-margin">
@@ -61,14 +65,12 @@
                             <li class="side-margin">
                                 <span>End Node</span><span>{{ shortestPathOptions.eid }}</span>
                             </li>
-                            <li class="side-margin">
-                                <mat-slide-toggle #slideShortestPathDirected [checked]="shortestPathOptions.directed" matTooltip="directed option">
-                                </mat-slide-toggle>
-                            </li>
                         </ul>
                         <span *ngIf="shortestPathOptions.distTo">dijkstra.distance = {{ shortestPathOptions.distTo }}</span>
-                        <button mat-raised-button color="primary" (click)="doFindShortestPath()">Search</button>
-                        <button mat-raised-button (click)="toggleFindShortestPath(false)">Close</button>
+                        <div class="row m-20">
+                            <button class="strech row-side" color="primary" (click)="doFindShortestPath()">Search</button>
+                            <button class="strech" (click)="toggleFindShortestPath(false)">Close</button>
+                        </div>
                     </div>
                 </ng-container>
             </nav>
