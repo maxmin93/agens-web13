@@ -80,7 +80,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 .row-side { margin-right: 1.25rem; }
 .col-side { margin-bottom: 1.875rem; }
 
-.wrap { flex-wrap: wrap}
+.wrap { flex-wrap: wrap }
 
 .strech { 
   width: 100%; 
@@ -369,24 +369,14 @@ form, input {
   background: #1bc9e4; 
 }
 
-.mat-tab-vertical.mat-tab-group { 
+.mat-tab-group { 
   .mat-tab-header {
-    margin-top: 5px; 
-    margin-right: 1.25rem; 
-    border: none; 
-    border-right: 1px solid #ccc; 
     .mat-tab-labels .mat-tab-label { 
       min-width: 6.5rem; 
       height: 3rem; 
       padding: 0 1rem; 
-      border: 1px solid #ccc; 
-      border-right: 0; 
-      border-top: 0; 
       font-size: 0.875rem;
-
-      &:first-child { 
-        border-top: 1px solid #ccc; 
-      }
+      flex: 1; 
     }
   }
   .mat-tab-body-content { overflow: hidden !important }
@@ -394,10 +384,26 @@ form, input {
 
 .mat-tab-body-wrapper { flex: 1; }
 
-#tabComponent .mat-tab-group { 
+.mat-tab-vertical.mat-tab-group { 
   flex-direction: row; 
   .mat-tab-labels { flex-direction: column; }
   .mat-ink-bar { display: none; }
+  .mat-tab-header {
+    margin-top: 5px; 
+    margin-right: 1.25rem;  
+    border: none; 
+    border-right: 1px solid #ccc; 
+    .mat-tab-labels .mat-tab-label {
+      border: 1px solid #ccc; 
+      border-right: 0; 
+      border-top: 0; 
+      flex: initial; 
+
+      &:first-child { 
+        border-top: 1px solid #ccc; 
+      }
+    }
+  }
 }
 
 /* CodeMirror

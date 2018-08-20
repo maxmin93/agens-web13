@@ -6,11 +6,12 @@
     height: 2.1875rem; 
     border-radius: 50%; 
     position: absolute; 
-    bottom: -1.09375rem;
+    bottom: -1.79375rem;
     right: 0; 
     left: 0; 
     margin: auto; 
     cursor: pointer;
+    z-index: 1;
     transition: all .5s ease-in-out; 
 
     &::before, &::after { 
