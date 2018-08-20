@@ -525,7 +525,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.labels
         .filter(val => val.type == 'nodes' && val.name == x.data['label'])
         .map(label => {
-          console.log('runGraphGroupBy:', x, label);
           x.scratch['_neighbors'] += label.targets;
           x.scratch['_style'] = label.scratch['_style'];
           x.scratch['_styleBak'] = label.scratch['_styleBak'];
