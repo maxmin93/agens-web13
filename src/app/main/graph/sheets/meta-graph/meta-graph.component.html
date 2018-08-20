@@ -64,7 +64,7 @@
                     <div class="json m-10" *ngIf="groupByList">
                         <ul>
                             <li *ngFor="let item of groupByList; let i = index" class="row-center p-10">
-                                <span>{{ item.label }}</span> : <span class="row wrap label-list">{{ item.props }}</span>
+                                <span>{{ item.label }}</span> : <span class="label-list" title= "{{ item.props }}" > {{ item.props }} </span>
                                 <button (click)="removeItemGroupBy(i)">Del</button>
                             </li>
                         </ul>
@@ -74,8 +74,8 @@
                     <div class="json m-10" *ngIf="filterByList">
                         <ul>
                             <li *ngFor="let item of filterByList; let i = index" class="row-center p-10">
-                                <span class="strech">{{ item.label }} </span>:
-                                <div class="row wrap strech label-list">
+                                <span>{{ item.label }} </span> :
+                                <div class="label-list">
                                     <span>{{ item.prop }} , </span><span> {{ item.oper }} , </span> <span> {{ item.value }} , </span>
                                 </div>
                                 <button (click)="removeItemFilterBy(i)">Del</button>

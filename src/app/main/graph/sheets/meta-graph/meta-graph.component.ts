@@ -166,7 +166,7 @@ export class MetaGraphComponent implements OnInit {
       .map((v, i) => v ? this.selectedProps[i] : null)
       .filter(v => v !== null);
 
-    this.groupByList.push({ label: this.selectedElement.data('name'), props: selected.join(',') });
+    this.groupByList.push({ label: this.selectedElement.data('name'), props: selected.join(', ') });
   }  
   addItemFilterBy() {
     const selected:string[] = this.formGrp.value.conditions
