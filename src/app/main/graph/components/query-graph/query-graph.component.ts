@@ -331,7 +331,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.btnStatus.metaGraph = false;
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
-      if( x ) this.runGraphGroupBy(x.groupBy);
+      if( x ) this.runFilterByGroupBy(x);
 
       // change Detection by force
       this._cd.detectChanges();
@@ -495,13 +495,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // graph Toolbar button controlls
   /////////////////////////////////////////////////////////////////
 
-  runGraphGroupBy(list: any[]){
+  runFilterByGroupBy(options: any){
 
     this.savePositions( this.dataGraph );
-    this.clear(false);   // clear canvas except labels
+    this.clear(false);   // false: clear canvas except labels
 
     // call API
-    let data$:Observable<any> = this._api.grph_groupBy(this.gid, list);
+    let data$:Observable<any> = this._api.grph_filterNgroupBy(this.gid, options);
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
@@ -516,7 +516,12 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
       (x:ILabel) => { 
-      this.tempGraph.labels.push( x );
+        this.labels
+        .filter(val => val.id == x.id)
+        .map(label => {
+          // console.log( 'labels:', x, label.scratch['_style'] );
+        });
+        this.tempGraph.labels.push( x );
       });
     data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {

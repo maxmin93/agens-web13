@@ -8,7 +8,7 @@ import { takeWhile } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IProperty } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 
 import * as CONFIG from '../../../../app.config';
@@ -41,6 +41,8 @@ export class MetaGraphComponent implements OnInit {
 
   groupByList: any[] = [];    // { label: "", props="a,b" }
   filterByList: any[] = [];   // { label: "", prop="a", oper="gt", value="10" };
+
+  filterOpers: string[] = ['eq', 'neq', 'gt', 'ge', 'lt', 'le', 'contains'];
 
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
@@ -86,7 +88,8 @@ export class MetaGraphComponent implements OnInit {
   }
 
   close(): void {
-    this._sheetRef.dismiss({ groupBy: this.groupByList, filterBy: this.filterByList });
+    let options:any = this.makeOptions(this.groupByList, this.filterByList);
+    this._sheetRef.dismiss( options );
     event.preventDefault();
   }
 
@@ -133,6 +136,7 @@ export class MetaGraphComponent implements OnInit {
     this.selectedElement = target;
     this.selectedLabel = this.findLabel(target);
     this.selectedProps = Object.keys(this.selectedElement.data('props')['propsCount']);
+                      // (this.selectedLabel) ? this.selectedLabel.properties : <IProperty[]>[];
     console.log( 'meta-graph.click:', this.selectedElement._private, this.selectedLabel);
 
     this.makeFormGroup(this.selectedProps);
@@ -161,12 +165,22 @@ export class MetaGraphComponent implements OnInit {
     (<FormArray> this.formGrp.controls.conditions).reset(false);
   }  
 
+  getPropType(key:string): string {
+    if( !this.selectedLabel ) return 'unknown';
+    let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == key);
+    return (info.length > 0) ? info[0].type : "unknown";
+  }
+
   addItemGroupBy() {
     const selected:string[] = this.formGrp.value.conditions
       .map((v, i) => v ? this.selectedProps[i] : null)
       .filter(v => v !== null);
 
-    this.groupByList.push({ label: this.selectedElement.data('name'), props: selected.join(', ') });
+    selected.forEach(item => {
+      let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
+      this.groupByList.push({ label: this.selectedElement.data('name'), prop: item
+            , type: (info.length > 0) ? info[0].type : "unknown" });
+    });
   }  
   addItemFilterBy() {
     const selected:string[] = this.formGrp.value.conditions
@@ -174,15 +188,41 @@ export class MetaGraphComponent implements OnInit {
       .filter(v => v !== null);
 
     selected.forEach(item => {
-      this.filterByList.push({ label: this.selectedElement.data('name'), prop: item, oper: "", value: "" });
+      let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
+      this.filterByList.push({ label: this.selectedElement.data('name'), prop: item, oper: "eq", value: ""
+            , type: (info.length > 0) ? info[0].type : "unknown" });
     });
-  }  
+  }
 
   removeItemGroupBy(i:number):any {
     if( this.groupByList.length > i ) return this.groupByList.splice(i,1);
   }
   removeItemFilterBy(i:number):any {
     if( this.filterByList.length > i ) return this.filterByList.splice(i,1);
+  }
+
+  makeOptions(gList: any[], fList: any[]):any {
+    let options: any = { groups: { }, filters: { } };
+
+    let _translate = function(xs, key, valFn ) {
+      return xs.reduce(function(rv, x) {
+        let value = valFn(x);
+        if( !rv.hasOwnProperty(x[key]) ){
+          rv[x[key]] = [ value ];
+          return rv;
+        } 
+        let dupArr = [];  // check duplicate value
+        if( Array.isArray(value) ) dupArr = rv[x[key]].filter(y => y[0] == value[0] );
+        else dupArr = rv[x[key]].filter(y => y == value )
+        if( !dupArr.length ) rv[x[key]].push( value );
+        return rv;
+      }, {});
+    };
+    options.groups = _translate( gList, 'label', x => x.prop );
+    options.filters = _translate( fList, 'label', x => [x.prop, x.oper, x.value] );
+
+    // console.log( options.groups, options.filters );
+    return options;
   }
 
   /////////////////////////////////////////////////////////////////
