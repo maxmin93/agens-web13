@@ -17,23 +17,23 @@ const EMPTY_LABEL: ILabel = {
   selector: 'app-input-create-label-dialog',
   template: `
     <h4>NEW-LABEL <strong>INPUT</strong></h4>
-    <p class="subtext">Create type informations for New-Label.</p>
-    <div mat-dialog-content>      
-      <form novalidate [formGroup]="labelForm" class="margin">
-        <mat-form-field class="block">
-          <mat-select name="labelType" [formControl]="labelTypeCtl" placeholder="Label Type" required>
+    <span class="subtitle p-no m-10">Create type informations for New-Label.</span>
+    <div class="col">      
+      <form novalidate [formGroup]="labelForm" class="strech col m-10">
+        <mat-form-field class="m-20">
+          <mat-select class="strech" name="labelType" [formControl]="labelTypeCtl" placeholder="Label Type" required>
             <mat-option *ngFor="let type of labelTypes" [value]="type">{{ type }}</mat-option>
           </mat-select>
         </mat-form-field>
         
-        <mat-form-field class="block">
-          <input matInput name="labelName" [formControl]="labelNameCtl" placeholder="Name" required>
-          <button mat-button *ngIf="labelNameCtl.value" matSuffix mat-icon-button aria-label="Clear" 
+        <mat-form-field>
+          <input matInput class="strech" name="labelName" [formControl]="labelNameCtl" placeholder="Name" required>
+          <button *ngIf="labelNameCtl.value" matSuffix aria-label="Clear" 
                 (click)="labelNameCtl.setValue('')">
             <mat-icon>close</mat-icon>
           </button>
           <mat-error *ngIf="labelNameCtl.hasError('pattern') && !labelNameCtl.hasError('required')">
-            Name has to <strong>start [a-zA-Z] char and length is 3~30</strong>
+            Name has to <strong>start [a-zA-Z] char and length is 3 ~ 30</strong>
           </mat-error>
           <div style="color:red;" *ngIf="isDuplicated && !labelNameCtl.dirty">
             <p>Please enter other name (same name is already been)(2)</p>
@@ -43,9 +43,9 @@ const EMPTY_LABEL: ILabel = {
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field class="block">
+        <mat-form-field>
           <input matInput [formControl]="labelDescCtl" placeholder="DESC">
-          <button mat-button *ngIf="labelDescCtl.value" matSuffix mat-icon-button aria-label="Clear" 
+          <button *ngIf="labelDescCtl.value" matSuffix aria-label="Clear" 
                   (click)="labelDescCtl.setValue('')">
             <mat-icon>close</mat-icon>
           </button>
@@ -55,10 +55,10 @@ const EMPTY_LABEL: ILabel = {
         </mat-form-field>
       </form>
     </div>
-    <div mat-dialog-actions>
-      <button mat-button (click)="onCancel()" tabindex="-1" class="btn">CANCEL</button>  
-      <button mat-button type="submit" class="btn btn-default" 
+    <div class="m-10 row-end">
+      <button mat-button type="submit"  
           [disabled]="!labelForm.valid" (click)="onSubmit()" tabindex="2">SUBMIT</button>
+      <button mat-button (click)="onCancel()" tabindex="-1" >CANCEL</button>  
       
     </div>  
     `,

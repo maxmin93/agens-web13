@@ -61,7 +61,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 .content { 
   height: calc(100% - 64px);
-  padding: 1.875rem; 
+  padding: 1.25rem; 
   padding-top: 1.25rem; 
 }
 
@@ -352,15 +352,6 @@ form, input {
     position: absolute; 
   }
 }
-.mat-form-field-appearance-legacy .mat-form-field-wrapper { 
-  padding-bottom: 0; 
-}
-
-.mat-form-field-appearance-legacy .mat-form-field-underline {
-  bottom: 0 !important; 
-}
-
-.mat-form-field.block { display: block; }
 
 /* tab 관련 스타일 변경 */
 
@@ -443,7 +434,7 @@ form, input {
 
 // dialog 관련 css 수정 
 // .mat-form-field-appearance-legacy .mat-form-field-underline { background: #ddd; }
-.mat-dialog-actions { flex-direction: row-reverse; }
+
 
 // sidenav css 
 .slide { 
@@ -479,6 +470,17 @@ form, input {
   }
 }
 
+// 
+
+ul.list li > span, span.subtitle { 
+  display: inline-block;
+  min-width: 60px; 
+  margin-right: 1.25rem; 
+  padding: .25rem; 
+  font-size: .75rem; 
+  color: #979a9c;
+}
+
 // list 
 
 ul.list {
@@ -489,15 +491,6 @@ ul.list {
   li {
     margin: 1.25rem 0; 
     padding: .625rem; 
-
-    > span { 
-      display: inline-block;
-      min-width: 60px; 
-      margin-right: 1.25rem; 
-      padding: .25rem; 
-      font-size: .75rem; 
-      color: #979a9c;
-    }
   }
 
   &.inline { width: initial; }
@@ -515,6 +508,11 @@ ul.list {
     &.col {
       padding-right: 0; 
     }
+  }
+
+  li.side-padding {
+    padding: 0 .625rem; 
+    margin: 0; 
   }
 
   &.icon {
@@ -548,7 +546,6 @@ ul.list {
 
 .card { 
   background: #fff; 
-  box-shadow: 0 0 1px rgba(0,0,0,0.3); 
   padding: 1.25rem; 
   border-radius: .325rem; 
 }
@@ -611,13 +608,9 @@ pre {
 
 .mat-progress-bar.mat-accent .mat-progress-bar-fill::after, 
 .mat-progress-bar.mat-accent .mat-progress-bar-fill::before, 
- { 
-  background: #1bc9e4 !important;
-}
 .mat-progress-bar.mat-accent .mat-progress-bar-background, 
-.mat-progress-bar.mat-accent .mat-progress-bar-buffer { 
-  background: #1bc9e483 !important; 
-}
+.mat-progress-bar.mat-accent .mat-progress-bar-buffer 
+ { background: #1bc9e4 !important; }
 
 ////////////////////////////////////
 // bottom sheets styles
@@ -626,11 +619,14 @@ pre {
   top: -.95375em; 
 }
 
+.mat-dialog-container {
+  box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; 
+}
+
 .mat-bottom-sheet-container {
   padding: 1rem 1.25rem !important; 
   border-radius: .325rem .325rem 0 0; 
   box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; 
-  font-size: .825rem; 
 }
 
 .sheet-cell-viewer {
@@ -647,7 +643,6 @@ pre {
   width: 1200px;
   height: 600px;
 }
-
 
 .bar {
   fill: steelblue;

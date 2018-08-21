@@ -70,13 +70,16 @@
             </div>
             <div class="col strech card">
                 <h4>SCHEM <strong>INFO</strong></h4>
-                <ul class="list m-10 strech border noborder">
+                <ul class="list col m-10 strech border noborder">
                     <li class="row-center"><span>TYPE </span> {{selectedLabel.type}}</li>
                     <li class="row-center"><span>ID </span> {{selectedLabel.id}}</li>
                     <li class="row-center"><span>NAME </span> {{selectedLabel.name}}</li>
                     <li class="row-center"><span>OWNER </span> {{selectedLabel.owner}}</li>
                     <li class="row-center"><span>SIZE </span> {{selectedLabel.size | number}}</li>
-                    <li class="row-center"><span>DESCRIPTION </span>"{{selectedLabel.desc}}"</li>
+                    <li class="row-center noborder side-margin"><span>DESCRIPTION </span></li>
+                    <li class="border side-margin strech">
+                        "{{selectedLabel.desc}}"
+                    </li>
                 </ul>
             </div>
         </div>  

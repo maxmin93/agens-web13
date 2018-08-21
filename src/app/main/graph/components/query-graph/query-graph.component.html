@@ -58,18 +58,31 @@
                             <mat-slide-toggle #slideShortestPathDirected [checked]="shortestPathOptions.directed" matTooltip="directed option">
                             </mat-slide-toggle>
                         </div>
-                        <ul class="list col strech border noborder m-10">
-                            <li class="side-margin">
-                                <span>Start Node</span><span>{{ shortestPathOptions.sid }}</span>
-                            </li>
-                            <li class="side-margin">
-                                <span>End Node</span><span>{{ shortestPathOptions.eid }}</span>
-                            </li>
-                        </ul>
-                        <span *ngIf="shortestPathOptions.distTo">dijkstra.distance = {{ shortestPathOptions.distTo }}</span>
-                        <div class="row m-20">
+                        <div class="row-center m-20">
+                            <ul class="list col strech">
+                                <li class="side-margin row-start">
+                                    <mat-icon class="row-side">adjust</mat-icon>
+                                    <div class="strech row-center border-bottom">
+                                        <span class="subtitle">Start Node</span>
+                                        <span>{{ shortestPathOptions.sid }}</span>
+                                    </div>
+                                </li>
+                                <li class="side-padding"><mat-icon>more_vert</mat-icon></li>
+                                <li class="side-margin row-start">
+                                    <mat-icon class="row-side">pin_drop</mat-icon>
+                                    <div class="strech row-center border-bottom">
+                                        <span class="subtitle">End Node</span>
+                                        <span>{{ shortestPathOptions.eid }}</span>
+                                    </div>
+                                </li>
+                            </ul>                            
+                        </div>
+                        <div class="row m-10">
                             <button class="strech row-side" color="primary" (click)="doFindShortestPath()">Search</button>
                             <button class="strech" (click)="toggleFindShortestPath(false)">Close</button>
+                        </div>
+                        <div class="row-center m-20 p-10 border">
+                            <span class="subtitle">Distance :</span><div *ngIf="shortestPathOptions.distTo"> <strong>{{ shortestPathOptions.distTo }}</strong></div>
                         </div>
                     </div>
                 </ng-container>
@@ -98,7 +111,7 @@
                 <li><a [ngClass]="{ 'checked': btnStatus.metaGraph }" id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" matTooltip="Search in result" matTooltipPosition="above">
                         <mat-icon>search</mat-icon></a>
                 </li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>web</mat-icon></a>
+                <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" matTooltip="LAYOUT" matTooltipPosition="above"><mat-icon>bubble_chart</mat-icon></a>
                     <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
                         <div td-menu-header>
                             <h4 class="mat-subhead">Layout <strong>Type</strong></h4>
@@ -126,7 +139,7 @@
                     </mat-menu>
                 </li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="centralityMenu" matTooltip="Centrality" matTooltipPosition="above">
-                    <mat-icon>surround_sound</mat-icon></a>
+                    <mat-icon>control_camera</mat-icon></a>
                     <mat-menu #centralityMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
                         <div td-menu-header>
                             <h4 class="mat-subhead">Centrality <strong>Methods</strong></h4>
@@ -150,13 +163,13 @@
                         <mat-icon>image</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'checked': btnStatus.connectedGroup }" (click)="toggleFindConnectedGroup()" matTooltip="find Connected Group" matTooltipPosition="above">
-                    <mat-icon>view_quilt</mat-icon></a>
+                    <mat-icon>group_work</mat-icon></a>
                 </li>
                 <li><a mat-button-toggle [ngClass]="{ 'checked': btnStatus.shortestPath }" #btnShortestPath (click)="toggleFindShortestPath()" matTooltip="find Shortest Path" matTooltipPosition="above">
-                    <mat-icon>timeline</mat-icon></a>
+                    <mat-icon>location_on</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'checked': btnStatus.editGraph }" (click)="openEditGraphSheet()" matTooltip="edit Graph" matTooltipPosition="above">
-                    <mat-icon>youtube_searched_for</mat-icon></a>
+                    <mat-icon>create</mat-icon></a>
                 </li>
                 <li><a [ngClass]="{ 'checked': btnStatus.timeLine }" (click)="playTimeline()" matTooltip="play Timeline" matTooltipPosition="above">
                     <mat-icon>fast_forward</mat-icon></a>
