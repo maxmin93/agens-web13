@@ -22,15 +22,15 @@ declare var $:any;
   template: `
 
 <h2 mat-dialog-title>
-  <div class="card__icon-group">
+  <div>
     <a matTooltip="Refresh" matTooltipPosition="above" (click)="loadProjects()"><mat-icon>refresh</mat-icon></a>  
   </div>
   User Projects <br/><small> select project and edit query</small>    
 </h2>
 
-<div mat-dialog-content>
-  <div class="example-container">
-    <div class="div__search wrapped-box-flex">
+<div>
+  <div>
+    <div class="wrapped-box-flex">
       <span><i class="fa fa-search" aria-hidden="true"></i><input
           type='text'          
           placeholder='Type to filter the title column...'
@@ -100,27 +100,6 @@ declare var $:any;
 </div>
 `,
 styles: [`
-
-  .card__icon-group { 
-    float: right; 
-  }
-  .card__icon-group a { 
-    display: inline-block; 
-    margin-left: 10px; 
-    color: #585858; 
-  }
-  .div__hisotry-table { 
-    padding: 0; 
-  }
-  .div__search {
-    padding: 0; margin-bottom: 20px; 
-  }
-  .div__search input { 
-    margin: 0;     
-  }
-  ngx-datatable { 
-    border-top: 1px solid #ccc; 
-  }
  
   `]
 })
