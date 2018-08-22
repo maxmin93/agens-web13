@@ -153,29 +153,27 @@
           'width':  function(e){ return agens.styles.nodeWidth(e); },
           'height': function(e){ return agens.styles.nodeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
-          'text-wrap':'wrap',
-          'text-max-width':'75px',
+          'text-wrap':'ellipsis',
+          'text-max-width':'40',
           'text-halign': 'center',    // text-halign: left, center, right
           'text-valign': 'center',    // text-valign: top, center, bottom
           'font-weight': 400,
-          'font-size': 12,
-          'min-zoomed-font-size': 6,  // not shown when less than this
+          'font-size': 10,
+          'font-family':"Noto Sans, Noto Sans Bold, sans-serif",
+          'min-zoomed-font-size': 5,  // not shown when less than this
           'text-opacity': 1,
+          'transition-duration':'.5s',
+          'transition-timing-function': 'ease-in-out'
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
         selector: 'node:selected',
         css: {
-          'background-color': 'white',
-          'color':'#68bdf6',
-          'target-arrow-color': '#a5abb6',
-          'source-arrow-color': '#a5abb6',
-          'line-color': '#a5abb6',
-          'border-style':'dashed',
-          'border-color': '#68bdf6',
-          'border-width':'3',
-          'color':'#68bdf6',
-          'z-index': 9
+          'border-style':'double',
+          'border-width':'6',
+          'z-index': 9,
+          'transition-duration':'.5s',
+          'transition-timing-function': 'ease-in-out'
         }}, {
         selector: 'node:locked',
         css: {
@@ -209,10 +207,9 @@
           'width':  function(e){ return agens.styles.edgeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
           'text-rotation':'autorotate',
-          'text-margin-y': -12,
           'line-style': 'solid',            // line-style: solid, dotted, dashed
           'curve-style': 'bezier',
-          'font-size': 12,
+          'font-size': 10,
           'target-arrow-shape': 'triangle',
           'source-arrow-shape': 'none'
         }}, {

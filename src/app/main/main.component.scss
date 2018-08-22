@@ -1,14 +1,9 @@
 mat-toolbar { 
-    background: #fff; 
-    width: calc(100% - 2.5rem);
+    background: #005aa8; 
     padding: 0 1.25rem; 
-    margin: auto; 
-    border-bottom-left-radius: .325rem;
-    border-bottom-right-radius: .325rem; 
-    box-shadow: 0 0 1px rgba(0,0,0,0.3); 
-    
     h1 { 
         font-size: 1.125rem; 
+        color: #fff; 
         
         small { 
             font-size: .75rem; 

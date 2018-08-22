@@ -69,7 +69,9 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 반대쪽 div 에 col 주입한다. */
 
 .row, .col, .row-center, .row-end, .row-start { display: flex; }
-.col { flex-direction: column; }
+.col, .col-end { flex-direction: column; }
+
+.col-end { align-items: flex-end}; 
 
 .row-start, .row-center, .row-end { align-items: center; }
 
@@ -93,7 +95,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; }
 .material-icons { font-size: 1.5rem !important; }
-.mat-button-toggle { color: #798694; }
+.mat-button-toggle { color: rgba(255,255,255,0.4); }
 .expand-cell { color: #585858; }
  
 /* margin 값으로  margin 값을 추가하고자 할 때, 
@@ -105,6 +107,8 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 .m-24 { margin-top: 1.5625rem;}
 .m-20 { margin-top: 1.25rem; }
 .m-10 { margin-top: .625rem; }
+
+.m-r-10 { margin-right: .625rem; }
 
 .p-20 { padding: 1.25rem; }
 .p-10 { padding: .625rem; }
@@ -127,7 +131,7 @@ ul.border {
 
 .noborder { border: none !important; }  
 
-.mat-menu-item, .sub-title { font-size: .895rem; color: #aeb1b4; } 
+.mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
 
 /* button 관련 정리로 
 추후 theme을 가진 button도 추가예정 */
@@ -164,17 +168,14 @@ a {
   .mat-button-toggle {
     display: flex; 
     &.mat-button-toggle-checked {
-      color: #282828;
+      color: #fff;
     }
   }
 }
 
-.mat-button-toggle-disabled {
-  background: #fff !important; 
-  color: #282828; 
-}
-.mat-button-toggle-disabled.mat-button-toggle-checked {
-  color: #ddd;
+.mat-button-toggle-disabled { background: transparent !important; }
+.mat-button-toggle-disabled.mat-button-toggle-checked { 
+  color: #ccc;
 }
 
 /* 기본 설정 datatable css 수정 
@@ -285,6 +286,11 @@ datatable의 세팅값은 각 태그에 존재함*/
   background: #f8f9f9; 
   padding: .4rem 1.25rem; 
   border: 1px dashed #eee; 
+}
+
+.ngx-datatable.material .datatable-footer .datatable-pager li.active a { 
+  background: #005aa8; 
+  color: #fff; 
 }
 
 /* 기본 graph canvas의 창 값으로
