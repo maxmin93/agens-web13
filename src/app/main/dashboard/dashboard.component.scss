@@ -20,3 +20,56 @@
 .cxtmenu-disabled {
   opacity: 0.333;
 }
+
+mat-icon { 
+  color: #005aa8; 
+}
+
+#dataInfo ul li span { 
+  background: #005aa8;
+  text-align: center; 
+  color: #fff; 
+  border-radius: .225rem; 
+}
+
+#schemaList {
+  .viewbox { 
+    width: 18.725rem;
+    .scroll-hide { width: 20rem; 
+      ul { width: 18.725rem; 
+        li { 
+          border-radius: .325rem; 
+
+          &:nth-child(1) { background: #005aa8}
+          &:nth-child(2) { background: #0063b0}
+          &:nth-child(3) { background: #6585C2}
+          &:nth-child(4) { background: #1898d7}
+          &:nth-child(5) { background: #44a3db}
+          &:nth-child(6) { background: #6fbee9}
+          
+          p {
+            max-width: 15.625rem; 
+            white-space: nowrap; 
+            text-overflow: ellipsis; 
+            overflow: hidden;
+            margin: 0;
+            margin-top: .425rem;                        
+            font-size: 1rem; 
+            color: #fff; 
+            &::first-letter { 
+              text-transform: capitalize; 
+            }
+          }
+          span { 
+            color: rgba(255,255,255,0.6); 
+          }
+
+          mat-icon { 
+            color: rgba(255,255,255,0.4); 
+          }
+        }
+      } 
+      
+    }
+  }  
+}
