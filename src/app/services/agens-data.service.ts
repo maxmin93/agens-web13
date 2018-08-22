@@ -224,10 +224,19 @@ export class AgensDataService {
   ////////////////////////////////////////////////
 
   grph_schema(gid:number):Observable<any> {
-    const url = `${this.api.grph}/schema?gid=${gid}`;
+    const url = `${this.api.grph}/schema/${gid}`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }  
+
+  grph_filterNgroupBy(gid:number, params:any):Observable<any> {
+    if( params['filters'].length == 0 && params['groups'].length == 0 ) return empty();
+    console.log( 'grph_filterNgroupBy:', params);
+
+    const url = `${this.api.grph}/filterby-groupby/${gid}`;
+    return this._http.post<any>(url, params, {headers: this.createAuthorizationHeader()})
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
+  }
 
   grph_groupBy(gid:number, list:any[]):Observable<any> {
     if( list.length == 0 ) return empty();
