@@ -333,8 +333,8 @@
   agens.graph.defaultSetting = {
     elements: { nodes: [], edges: [] },
     style: undefined,       // agens.graph.stylelist['dark'],
-    layout: { name: 'cose',
-        fit: true, padding: 100, boundingBox: undefined, 
+    layout: { name: 'preset',
+        fit: true, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){}, stop: function(){}

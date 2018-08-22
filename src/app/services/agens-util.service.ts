@@ -5,6 +5,8 @@ import { IGraph, IElement, ILabel } from '../models/agens-data-types';
 import * as d3 from 'd3';
 import * as CONFIG from '../app.config';
 
+declare var _ : any;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,9 +14,10 @@ export class AgensUtilService {
 
   // pallets : Node 와 Edge 라벨별 color 셋
   private colorIndex: number = 0;
-
   colors: any[] = colorPallets;
-  
+
+  private positions: Map<string,any> = new Map();
+
   constructor() { 
   }
 
@@ -67,6 +70,44 @@ export class AgensUtilService {
   }
   */
  
+  /////////////////////////////////////////////////////////////////
+  // Common Utilities : Position WeakMap
+  /////////////////////////////////////////////////////////////////
+  
+  hasPositions():boolean {
+    return (this.positions.size > 0) ? true : false;
+  }
+
+  resetPositions(){
+    this.positions = new Map<string,any>();
+  }
+
+  savePositions(cy:any){
+    // 초기화
+    this.positions = new Map<string,any>();
+    // save nodes' positions 
+    let nodes = cy.nodes();
+    nodes.forEach(x => {
+      let key = x.group()+'::'+x.id();
+      this.positions.set( key, _.clone( x.position() ) );
+    })
+  }
+
+  // 존재하는 position 은 반영하고 없는 nodes 는 반환해서 random 처리
+  loadPositions(cy:any):any[] {
+    let remains: any[] = [];
+    let nodes = cy.nodes();    
+    nodes.forEach(x => {
+      let key = x.group()+'::'+x.id();
+      if( this.positions.has( key ) ) {
+        x.position( 'x', this.positions.get( key )['x']);
+        x.position( 'y', this.positions.get( key )['y']);
+      }
+      else remains.push( x.id() );
+    });    
+    return remains;
+  }
+
   /////////////////////////////////////////////////////////////////
   // Common Utilities : Binning
   /////////////////////////////////////////////////////////////////

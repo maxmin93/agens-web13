@@ -158,16 +158,13 @@ return path;
   // query-graph Canvas의 초기화 작업 완료 이벤트
   // ==> Visible 상태이면 layout 적용
   initCallbackData(isVisible:boolean){
-    console.log('initCallbackData ==>', isVisible);
-    if( isVisible ) this.queryGraph.graphChangeLayout('random');
-    else this.queryGraph.todo$.next({ cmd: 'changeLayout', param: 'cose' });
-
+    if( isVisible ) this.queryGraph.graphPresetLayout();
+    else this.queryGraph.todo$.next({ cmd: 'changeLayout', param: 'random' });
     // change Detection by force
     this._cd.detectChanges();
   }
+  // stat-graph Canvas의 초기화 작업 완료 이벤트
   initCallbackStat(isVisible:boolean){
-    console.log('initCallbackStat =', isVisible);
-
     // change Detection by force
     this._cd.detectChanges();
   }

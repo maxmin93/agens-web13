@@ -42,7 +42,7 @@ export class MetaGraphComponent implements OnInit {
   groupByList: any[] = [];    // { label: "", props="a,b" }
   filterByList: any[] = [];   // { label: "", prop="a", oper="gt", value="10" };
 
-  filterOpers: string[] = ['eq', 'neq', 'gt', 'ge', 'lt', 'le', 'contains'];
+  filterOpers: string[] = ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'contains', 'notContains', 'startsWith', 'endsWith'];
 
   // material elements
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;

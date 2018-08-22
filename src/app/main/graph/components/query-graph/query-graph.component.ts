@@ -159,6 +159,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // 결과들만 삭제 : runQuery 할 때 사용
   clear(option:boolean=true){
+    if( this.cy.elements().size() > 0 ) this._util.savePositions( this.cy );
+
     // 그래프 비우고
     this.cy.elements().remove();
     // 그래프 라벨 칩리스트 비우고
@@ -233,14 +235,40 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 20);
   }
 
+  graphPresetLayout(){
+    if( this._util.hasPositions() ){
+      this.toggleProgressBar(true);
+      let remains:any[] = this._util.loadPositions(this.cy);
+
+      let layoutOption = {
+        name: 'random',
+        fit: true, padding: 50, boundingBox: undefined, 
+        nodeDimensionsIncludeLabels: true, randomize: false,
+        animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
+        ready: () => {}, stop: () => this.toggleProgressBar(false)
+      };
+      // rest random layout
+      let elements = this.cy.nodes().filter(x => remains.includes(x.id()));
+      elements.layout(layoutOption).run();
+      
+      if( elements.empty() ){
+        this.cy.fit( this.cy.elements(), 50);
+        this.toggleProgressBar(false);
+      }
+    }
+    else{
+      this.graphChangeLayout('random');
+    }
+  }
+
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
-    if( this.isVisible ) 
-      this.cy.$api.changeLayout(layout, {
-        "padding": 50
-        , "ready": () => this.toggleProgressBar(true)
-        , "stop": () => this.toggleProgressBar(false)
-      });
+    this.toggleProgressBar(true);
+    this.cy.$api.changeLayout(layout, {
+      "padding": 50
+      , "ready": () => {}
+      , "stop": () => this.toggleProgressBar(false)
+    });
   }
 
   /////////////////////////////////////////////////////////////////
@@ -478,7 +506,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // enable 모드이면 start_id, end_id 리셋
     if( this.btnStatus.connectedGroup ) {
-      let groups:any[] = this.cy.elements().components();
+      let groups:any[] = this.cy.elements(':visible').components();
       groups.forEach((grp,idx) => {
         this.cy.$api.grouping(grp.nodes(), 'group#'+idx);
       });
@@ -496,6 +524,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   runFilterByGroupBy(options: any){
+
+    this._util.savePositions( this.cy );
 
     this.savePositions( this.dataGraph );
     this.clear(false);   // false: clear canvas except labels
