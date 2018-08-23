@@ -337,7 +337,7 @@ return path;
 
         // send data to Canvas
         this.queryGraph.setData(this.resultGraph);
-        this.queryGraph.initCanvas();
+        this.queryGraph.initCanvas(false);
 
         // send data to Table 
         this.queryTable.setData(this.resultRecord);
@@ -478,7 +478,7 @@ return path;
         //     return label.type == 'edges' && ele.data['label'] == label.name;
         //   });
 
-        this.queryGraph.initCanvas();
+        this.queryGraph.initCanvas(true);
         // this.queryGraph.graphChangeLayout('cose');
       });
 

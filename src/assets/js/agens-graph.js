@@ -170,7 +170,8 @@
         selector: 'node:selected',
         css: {
           'border-style':'double',
-          'border-width':'6',
+          'border-width':'12',
+          'border-color': 'red',
           'z-index': 9,
           'transition-duration':'.5s',
           'transition-timing-function': 'ease-in-out'

@@ -31,6 +31,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isVisible: boolean = false;
   isLoading: boolean = false;
+  isTempGraph: boolean = false;
 
   selectedOption: string = undefined;
   btnStatus: any = { 
@@ -55,6 +56,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   tempGraph: IGraph = undefined;
 
   selectedElement: any = undefined;  
+  selectedLabel: ILabel = undefined;
+  displayedLabelColumns: string[] = ['propName', 'propType', 'propCnt'];
+
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
 
   shortestPathOptions:any = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
@@ -117,6 +121,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // graph canvas 클릭 콜백 함수
   cyCanvasCallback():void {
     this.selectedElement = undefined;
+    this.selectedLabel = undefined;
   }
 
   // graph elements 클릭 콜백 함수
@@ -177,9 +182,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   addEdge( ele:IEdge ){ this.cy.add( ele ); }
 
   // 데이터 불러오고 최초 적용되는 작업들 
-  initCanvas(){
+  initCanvas(isTempGraph:boolean){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
+    this.isTempGraph = isTempGraph;
 
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
@@ -198,7 +204,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   reloadGraph(){
     if( !this.dataGraph ) return;
     
-    this.clear(false);    
+    this.clear(false);
+    this.isTempGraph = false;
+
     this.dataGraph.nodes.forEach( x => { 
       let ele = this.cy.add( x );
       if( x.scratch.hasOwnProperty('_position') ) ele.position( _.clone( x.scratch['_position'] ) );
@@ -228,11 +236,20 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clickGraphLabelChip( labelType:string, labelName:string ): void {
+    this.selectedElement = undefined;
     this.cy.elements(':selected').unselect();
+
+    this.labels.forEach(x => {
+      if( x.type == labelType && x.name == labelName){
+        this.selectedLabel = x;
+        return false;
+      }
+    });
+
     setTimeout(()=>{
       let group = (labelType == 'edges') ? 'edge' : 'node';
       this.cy.elements(`${group}[label='${labelName}']`).select();
-    }, 20);
+    }, 10);
   }
 
   graphPresetLayout(){
@@ -377,7 +394,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     const bottomSheetRef = this._sheet.open(LabelStyleComponent, {
       ariaLabel: 'Label Style',
       panelClass: 'sheet-label-style',
-      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
+      data: { "dataGraph": (this.isTempGraph) ? this.tempGraph : this.dataGraph
+              , "metaGraph": this.metaGraph, "labels": this.labels }
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {
@@ -528,7 +546,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this._util.savePositions( this.cy );
 
     this.savePositions( this.dataGraph );
-    this.clear(false);   // false: clear canvas except labels
+    this.clear(false);   // false: clear canvas except labels    
 
     // call API
     let data$:Observable<any> = this._api.grph_filterNgroupBy(this.gid, options);
@@ -589,7 +607,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         //     return label.type == 'edges' && ele.data['label'] == label.name;
         //   });
 
-        this.initCanvas();
+        this.initCanvas(true);
         // this.queryGraph.graphChangeLayout('cose');
       });
 
