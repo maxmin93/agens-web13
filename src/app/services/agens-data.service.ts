@@ -258,7 +258,11 @@ export class AgensDataService {
 
   graph_findConnectedGroup(gid:number):Observable<IDoubleListDto> {
     const url = `${this.api.grph}/findcgroup/${gid}`;
+    return this._http.get<IDoubleListDto>(url, {headers: this.createAuthorizationHeader()});
+  }
 
+  graph_findCycles(gid:number):Observable<IDoubleListDto> {
+    const url = `${this.api.grph}/findcycles/${gid}`;
     return this._http.get<IDoubleListDto>(url, {headers: this.createAuthorizationHeader()});
   }
 

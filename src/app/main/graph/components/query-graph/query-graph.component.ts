@@ -41,6 +41,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     neighbors: false,         // 이웃노드 하일라이팅
     connectedGroup: false,
     timeLine: false,
+    findCycles: false,        // 사이클 디텍션
     editGraph: false,
     megaGraph: false,
     labelStyle: false
@@ -62,6 +63,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
 
   shortestPathOptions:any = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
+  grph_data: string[][] = [];
 
   // material elements
   @ViewChild('btnShortestPath') public btnShortestPath: MatButtonToggle;
@@ -534,6 +536,40 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       parents.forEach(target => {
         this.cy.$api.degrouping(target);
       });
+    }
+  }
+
+  toggleFindCycles(option:boolean=undefined){
+    if( !option ) this.btnStatus.findCycles = !this.btnStatus.findCycles;
+    else this.btnStatus.findCycles = option;
+
+    // enable 모드이면 start_id, end_id 리셋
+    if( this.btnStatus.findCycles ) {
+      this.grph_data = [];
+      this._api.graph_findCycles(this.gid).subscribe(
+        (x:IDoubleListDto) => {
+          if( x.result ) this.grph_data = x.result;
+          this._cd.detectChanges();
+        }
+      )
+    }
+    else {
+      this.grph_data = [];
+    }
+  }
+
+  onClickCyclePath(i){
+    this.cy.elements(':selected').unselect();
+    if( this.grph_data.length == 0 ) return;
+
+    let sid:string = undefined;
+    for( const vid of this.grph_data[i] ){
+      this.cy.getElementById(vid).select();
+      if( sid ){
+        this.cy.edges(`[source='${sid}'][target='${vid}']`).select();
+        console.log( `[source='${sid}'][target='${vid}']`, this.cy.edges(`[source='${sid}'][target='${vid}']`) );
+      }
+      sid = String(vid);
     }
   }
 

@@ -57,9 +57,10 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   editor: any = undefined;
   // CodeMirror Editor : initial value
   query:string =
-`match path=(c:customer)-[]->(:"order")-[]->(p:product)-[]-(t:category)
+`match path1=(c:customer)-[]->(:"order")-[]->(p:product)-[]-(t:category)
 where c.id in ['CENTC','NORTS','SPECD','GROSR','THEBI','FRANR'] and t.id in [4,8,7]
-return path;
+match path2=(:category)-[]->(customer)
+return path1, path2;
 `;
 // `match path=(c:customer)-[]->(o:"order")-[]->(p:product)-[]->()
 // return path limit 20;
