@@ -564,7 +564,7 @@
       // 새로운 label타입의 edge에 대한 connectedNodes 찾기
       // 1) 새로운 label 타입의 edges (uniqLabels에 없는)
       let connectedEdges = node.connectedEdges().filter(function(ele, i){
-        return uniqLabels.indexOf(ele.data('label')) < 0;
+        return ele.visible() && uniqLabels.indexOf(ele.data('label')) < 0;
       });
       // 2) edge에 연결된 node collection을 merge (중복제거)
       for( let i=0; i<connectedEdges.size(); i+=1 ){

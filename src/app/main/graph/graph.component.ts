@@ -106,9 +106,11 @@ return path1, path2;
     // CodeMirror : get mime type
     var mime = 'application/x-cypher-query';
     this.editor = new CodeMirror.fromTextArea( this.queryEditor.nativeElement, {
+      // keyMap: "sublime",
+      indentUnit: 4,
       mode: mime,
       indentWithTabs: false,
-      smartIndent: false,
+      smartIndent: true,
       lineNumbers: true,
       styleActiveLine: true,
       matchBrackets: true,
@@ -118,6 +120,25 @@ return path1, path2;
     // CodeMirror : initial value
     this.editor.setValue( this.query );
     this.editor.setSize('100%', '60px');
+    
+    this.installCodeMirrorAddons();
+    this.editor.setOption("extraKeys", {
+      // Tab: function(cm) {
+      //   var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+      //   cm.replaceSelection(spaces);
+      // },
+      "Tab": "insertTab",
+      "Shift-Tab": "indentLess",
+      "Alt-Enter": "insertLineAfter",
+      "Shift-Alt-Enter": "insertLineBefore",  
+      "Ctrl-/": "toggleComment",      
+      // function(cm) {    // 
+      //   console.log(cm);
+      //   var pos = cm.getCursor();
+      //   cm.setCursor({ line: pos.line, ch: 0 });
+      //   cm.lineComment(pos.line, pos.line);
+      // }
+    });
 
     //
     // ** NOTE: 이거 안하면 이 아래쪽에 Canvas 영역에서 마우스 포커스 miss-position 문제 발생!!
@@ -127,6 +148,63 @@ return path1, path2;
       // console.log('this.editor is keyup:', e.keyCode );
       if( e.keyCode == 13 ) agens.cy.resize();
     });      
+  }
+
+  private installCodeMirrorAddons(){
+    var cmds = CodeMirror.commands;
+    var Pos = CodeMirror.Pos;
+
+    function insertLine(cm, above) {
+      if (cm.isReadOnly()) return CodeMirror.Pass
+      cm.operation(function() {
+        var len = cm.listSelections().length, newSelection = [], last = -1;
+        for (var i = 0; i < len; i++) {
+          var head = cm.listSelections()[i].head;
+          if (head.line <= last) continue;
+          var at = Pos(head.line + (above ? 0 : 1), 0);
+          cm.replaceRange("\n", at, null, "+insertLine");
+          cm.indentLine(at.line, null, true);
+          newSelection.push({head: at, anchor: at});
+          last = head.line + 1;
+        }
+        cm.setSelections(newSelection);
+      });
+      cm.execCommand("indentAuto");
+    }
+
+    cmds.insertLineAfter = function(cm) { return insertLine(cm, false); };
+    cmds.insertLineBefore = function(cm) { return insertLine(cm, true); };
+
+    /////////////////////////////////////////////////////////////////////
+    // addon/comment/comment.js
+
+    cmds.toggleComment = function(cm) {
+      let ranges = cm.listSelections();
+      for (let i = ranges.length - 1; i >= 0; i--) {
+        let from = ranges[i].from(), to = ranges[i].to();
+        console.log(from, to);
+        for(let j = from.line; j <= to.line; j++ ){
+          if( j != from.line || j != to.line ){
+            if( j == from.line && from.ch == cm.getLine(j).length - 1 ) continue;
+            if( j == to.line && to.ch == 0 ) continue;
+          }
+          let line = cm.getLine(j).trim();
+          // do uncomment
+          if( line.startsWith('--') ) {
+            line = line.substring(2, line.length).trim();
+            console.log( 'uncomment:', j, line);
+          }
+          // do comment 
+          else {
+            line = '-- '+line;
+            console.log( 'docomment:', j, line);
+          }
+          cm.replaceRange( line, {"line": j, "ch": 0}, {"line": j, "ch": cm.getLine(j).length })
+        }
+        cm.setCursor(to);
+      }  
+    };
+    
   }
 
   tabChanged($event){
@@ -218,6 +296,20 @@ return path1, path2;
   // Editor Controllers
   /////////////////////////////////////////////////////////////////
 
+  // 에디터 선택 라인만 실행할 경우 외에는 전체 반환
+  getEditorSelection():string {
+    let ranges = this.editor.listSelections();
+    let selection:string = "";
+    for (let i = ranges.length - 1; i >= 0; i--) {
+      let from = ranges[i].from(), to = ranges[i].to();
+      if( from.line == to.line && from.ch == to.ch ) selection = this.editor.getValue();
+      else selection = this.editor.getRange(from, to);
+    }
+    console.log( 'editor query:', selection );
+    return selection;
+  }
+
+  // 주석라인 제외하고 전달
   makeupSql(sql:string):string {
     let newLines:string[] = [];
     sql = sql.replace(/\r?\n/g, '||');
@@ -241,8 +333,8 @@ return path1, path2;
 
     this.queryResult.toggleTimer(true);
     this.isLoading = true;
-
-    let sql:string = this.makeupSql(<string> this.editor.getValue());
+    
+    let sql:string = this.makeupSql(<string> this.getEditorSelection() );
     if( sql.length < 5 ) return;
 
     // 이전 결과들 비우고
