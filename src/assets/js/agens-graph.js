@@ -154,7 +154,7 @@
           'height': function(e){ return agens.styles.nodeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
           'text-wrap':'ellipsis',
-          'text-max-width':'40',
+          'text-max-width':'80px',
           'text-halign': 'center',    // text-halign: left, center, right
           'text-valign': 'center',    // text-valign: top, center, bottom
           'font-weight': 400,
