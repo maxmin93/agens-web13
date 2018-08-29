@@ -86,6 +86,14 @@ export class IonDateSliderComponent implements OnChanges {
       }
   }
 
+  labelFn(val):string {
+    return 'val::'+val;
+  }
+
+  toFormat(val):string {
+    return (val) ? moment(val).format(this.format) : '';
+  }
+
   update(data) {
       let val = moment(data, this.format).valueOf();
       jQuery(this.inputElem).data("ionRangeSlider").update({ "from": val });

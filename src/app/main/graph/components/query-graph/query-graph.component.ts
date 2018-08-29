@@ -486,6 +486,15 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  clearFindShortestPath(){
+    this.shortestPathOptions = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
+    // cancel selected and highlights
+    if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
+    this.cy.elements(':selected').unselect();
+
+    this._cd.detectChanges();
+  }
+
   toggleFindShortestPath(option:boolean=undefined){
     if( !option ) this.btnStatus.shortestPath = !this.btnStatus.shortestPath;
     else this.btnStatus.shortestPath = option;
@@ -493,9 +502,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // enable 모드이면 options 리셋
     if( this.btnStatus.shortestPath ){
       this.shortestPathOptions = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
-      this.selectedOption = 'shortestPath';
     }
-    else this.selectedOption = undefined;
+    this._cd.detectChanges();
   }
 
   selectFindShortestPath(target:any){

@@ -1,6 +1,8 @@
 <button mat-button (click)="doPlay()"><mat-icon>play_arrow</mat-icon>Play</button>
 <button mat-button (click)="doStop()"><mat-icon>stop</mat-icon>Stop</button>
 <div class="range-slider">
+  <span>{{ toFormat(this.min) }}</span>
   <!-- <input id="timelineSlider" type="text" class="js-range-slider" value="" /> -->
-  <mat-slider #sliderElement></mat-slider>
+  <mat-slider #sliderElement [thumbLabel]="true" [displayWith]="labelFn"></mat-slider>
+  <span>{{ toFormat(this.max) }}</span>
 </div>
