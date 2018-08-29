@@ -192,12 +192,10 @@ return path1, path2;
           // do uncomment
           if( line.startsWith('--') ) {
             line = line.substring(2, line.length).trim();
-            console.log( 'uncomment:', j, line);
           }
           // do comment 
           else {
             line = '-- '+line;
-            console.log( 'docomment:', j, line);
           }
           cm.replaceRange( line, {"line": j, "ch": 0}, {"line": j, "ch": cm.getLine(j).length })
         }
