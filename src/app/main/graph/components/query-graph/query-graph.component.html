@@ -171,7 +171,7 @@
                         </div>
                         <div class="row m-10">
                             <button class="strech row-side" color="primary" (click)="doFindShortestPath()">Search</button>
-                            <button class="strech" (click)="toggleFindShortestPath(false)">Close</button>
+                            <button class="strech" (click)="clearFindShortestPath()">Clear</button>
                         </div>
                         <div class="row-center m-20 p-10 border">
                             <span class="subtitle">Distance :</span><div *ngIf="shortestPathOptions.distTo"> <strong>{{ shortestPathOptions.distTo }}</strong></div>
