@@ -10,6 +10,7 @@
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a></li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</a></li>
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a></li>
+                <li><a id="sizeToggler" onclick="sizeToggler()">EXPAND</a></li>
             </ul>
         </div>
         <!-- REQUEST : cypher query -->
@@ -21,7 +22,6 @@
 
         <!-- RESULT : progress-bar & message -->
         <app-query-result #queryResult class="edit-size col"></app-query-result>
-        <div id="sizeToggler" class="toggler border" onclick="sizeToggler()"><span></span></div>
     </div>
     <div id="tabComponent" class="col strech m-20 card">
         <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="mat-tab-vertical strech md-no-animation"

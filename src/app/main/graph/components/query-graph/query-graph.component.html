@@ -59,25 +59,29 @@
                         <ul class="list col strech border noborder m-10">
                             <li class="side-margin"><span>Group</span>{{ selectedLabel.type }} (cnt={{ selectedLabel.size }})</li>
                             <li class="side-margin"><span>Name</span>{{ selectedLabel.name }}</li>
-                            <li class="col strech side-margin">
+                            <li class="side-margin noborder">
                                 <span>Properties</span>
                                 <!-- <div class="json strech m-10"><pre [innerHtml]="selectedLabel.properties | prettyjson:3"></pre></div> -->
-                                <table mat-table [dataSource]="selectedLabel.properties" class="mat-elevation-z8">
-                                    <ng-container matColumnDef="propName">
-                                        <th mat-header-cell *matHeaderCellDef> Name </th>
-                                        <td mat-cell *matCellDef="let prop"> {{prop.key}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="propType">
-                                        <th mat-header-cell *matHeaderCellDef> Type </th>
-                                        <td mat-cell *matCellDef="let prop"> {{prop.type}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="propCnt">
-                                        <th mat-header-cell *matHeaderCellDef> Count </th>
-                                        <td mat-cell *matCellDef="let prop"> {{prop.size}} </td>
-                                    </ng-container>
-                                    <tr mat-header-row *matHeaderRowDef="displayedLabelColumns"></tr>
-                                    <tr mat-row *matRowDef="let row; columns : displayedLabelColumns"></tr>
-                                </table>
+                            </li>
+                            <li class="side-margin strech border p-no">
+                                <div class="strech overflow-y">
+                                    <table mat-table [dataSource]="selectedLabel.properties">
+                                        <ng-container matColumnDef="propName">
+                                            <th mat-header-cell *matHeaderCellDef> Name </th>
+                                            <td mat-cell *matCellDef="let prop"> {{prop.key}} </td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="propType">
+                                            <th mat-header-cell *matHeaderCellDef> Type </th>
+                                            <td mat-cell *matCellDef="let prop"> {{prop.type}} </td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="propCnt">
+                                            <th mat-header-cell *matHeaderCellDef> Count </th>
+                                            <td mat-cell *matCellDef="let prop"> {{prop.size}} </td>
+                                        </ng-container>
+                                        <tr mat-header-row *matHeaderRowDef="displayedLabelColumns"></tr>
+                                        <tr mat-row *matRowDef="let row; columns : displayedLabelColumns"></tr>
+                                    </table>
+                                </div>
                             </li>
                         </ul>
                     </div>

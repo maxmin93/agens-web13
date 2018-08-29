@@ -54,7 +54,7 @@ ul, html, body, material-app, input, textarea, .mat-menu-item, pre, .mat-tab-lab
 // Custom style for loading elements without height
 
 .will-load { min-height: 80px; }
-
+table { width: 100%; }
 
 /* 최초 기본 콘텐츠의 사이즈로써 
 header값이 변경될 경우 px의 header 높이값과 동일하게 변경해야한다. */
@@ -89,6 +89,10 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
   height: 100%; 
   flex: 1; 
   position: relative;
+}
+
+.overflow-y { 
+  overflow-y: auto; 
 }
 
 //  color 테마값
@@ -431,7 +435,7 @@ form, input {
 .title::before,
 .mat-tab-vertical .mat-tab-label-active::before  {
   content:'';
-  background: #1bc9e4; 
+  background: #005aa8; 
   width: 8px; 
   height: 8px; 
   display: inline-block; 

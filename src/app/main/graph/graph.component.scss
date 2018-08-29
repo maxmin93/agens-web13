@@ -1,37 +1,4 @@
-#queryCard { position: relative; }
-
-.toggler { 
-    background: #fff; 
-    width: 2.1875rem; 
-    height: 2.1875rem; 
-    border-radius: 50%; 
-    position: absolute; 
-    bottom: -1.79375rem;
-    right: 0; 
-    left: 0; 
-    margin: auto; 
-    cursor: pointer;
-    z-index: 1;
-    transition: all .5s ease-in-out; 
-
-    &::before, &::after { 
-        content:'';
-        background: #ccc;
-        width: 0.4375rem; 
-        height: 0.125rem; 
-        display: block;
-        transition: all .5s ease-in-out;  
-    }
-
-    &::before { transform: translate(0.6875rem, 1.0625rem) rotate(45deg) }
-    &::after { transform: translate(0.9375rem, 0.9375rem) rotate(-45deg) }
-
-    &:hover {
-        background: #1bc9e4; 
-
-        &::before, &::after { background: #fff }
-    }
-
-    &.on::before { transform: translate(0.6875rem, 0.9375rem) rotate(-45deg) }
-    &.on::after { transform: translate(0.9375rem, 0.8125rem) rotate(45deg) }
+#queryCard  ul li { 
+    color: rgb(136, 139, 143);
+    &:hover { color: #242424}
 }

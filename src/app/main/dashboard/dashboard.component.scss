@@ -39,13 +39,15 @@ mat-icon {
       ul { width: 18.725rem; 
         li { 
           border-radius: .325rem; 
+          background: #fff; 
+          border: 1px solid #ccc; 
 
-          &:nth-child(1) { background: #005aa8}
-          &:nth-child(2) { background: #0063b0}
-          &:nth-child(3) { background: #6585C2}
-          &:nth-child(4) { background: #1898d7}
-          &:nth-child(5) { background: #44a3db}
-          &:nth-child(6) { background: #6fbee9}
+          // &:nth-child(1) { background: #005aa8}
+          // &:nth-child(2) { background: #0063b0}
+          // &:nth-child(3) { background: #6585C2}
+          // &:nth-child(4) { background: #1898d7}
+          // &:nth-child(5) { background: #44a3db}
+          // &:nth-child(6) { background: #6fbee9}
           
           p {
             max-width: 15.625rem; 
@@ -55,22 +57,21 @@ mat-icon {
             margin: 0;
             margin-top: .425rem;                        
             font-size: 1rem; 
-            color: #fff; 
+            color: #4d4d4d; 
             &::first-letter { 
               text-transform: capitalize; 
             }
           }
           span { 
             font-size: .625rem; 
-            color: rgba(255,255,255,0.6); 
+            color: #ccc; 
           }
 
           mat-icon { 
-            color: rgba(255,255,255,0.4); 
+            color: #005aa8; 
           }
         }
       } 
-      
     }
   }  
 }
