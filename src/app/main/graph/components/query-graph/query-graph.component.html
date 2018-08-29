@@ -99,6 +99,45 @@
                     </div>
                 </ng-container>
 
+                <!-- 입력상자 : 타임라인 timeLine -->
+                <ng-container *ngIf="btnStatus.timeLine">
+                    <div id="slide-toggle-timeline" class="slide border col side-short-component">
+                        <!-- [style.visibility]="btnStatus.timeLine ? 'visible' : 'hidden'"> -->
+                        <div class="row-center">
+                            <h4>Play <strong>Timeline</strong></h4>
+                        </div>
+                        <div class="col m-20">
+                            
+                            <mat-form-field>
+                                <mat-select placeholder="select Label">
+                                    <mat-option *ngFor="let food of foods" [value]="food.value">
+                                    {{food.viewValue}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            
+                            <mat-form-field>
+                                <mat-select placeholder="select Property">
+                                    <mat-option *ngFor="let food of foods" [value]="food.value">
+                                    {{food.viewValue}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            
+                             <ion-date-slider #timelineSlider
+                                [current]="2018-02-01"
+                                [grid]="true"
+                                [values]="timeline_data"
+                                [disable]="false"
+                                [interval]="2000"
+                                (onChange)="onChangeTimelineSlider($event)"
+                                (onUpdate)="onUpdateTimelineSlider($event)"
+                                (onFinish)="onUpdateTimelineSlider($event)"></ion-date-slider>
+                            <!-- <mat-slider></mat-slider> -->
+                        </div>
+                    </div>
+                </ng-container>
+
                 <!-- 입력상자 : 최단 경로 -->
                 <ng-container *ngIf="btnStatus.shortestPath">
                     <div id="slide-toggle" class="slide border col side-short-component">
@@ -225,8 +264,8 @@
                 <!-- <li><a [ngClass]="{ 'checked': btnStatus.editGraph }" (click)="openEditGraphSheet()" matTooltip="edit Graph" matTooltipPosition="above">
                     <mat-icon>create</mat-icon></a></li> -->
 
-                <li><a [ngClass]="{ 'checked': btnStatus.timeLine }" (click)="playTimeline()" matTooltip="play Timeline" matTooltipPosition="above">
-                    <mat-icon>fast_forward</mat-icon></a></li>
+                    <li><a [ngClass]="{ 'checked': btnStatus.timeLine }" (click)="toggleTimeline()" matTooltip="play Timeline" matTooltipPosition="above">
+                        <mat-icon>fast_forward</mat-icon></a></li>	                   
 
                 <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
                     <mat-icon>reply</mat-icon></a></li>
