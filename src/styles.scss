@@ -299,6 +299,7 @@ datatable의 세팅값은 각 태그에 존재함*/
 
 div.graph-canvas { 
   max-width: 100%; 
+  overflow: hidden;
   position: relative;
   z-index: 10;
 
