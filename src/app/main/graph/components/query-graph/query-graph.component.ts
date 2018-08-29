@@ -7,6 +7,7 @@ import { filter } from 'rxjs/operators';
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
 import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
+import { IonDateSliderComponent } from '../ion-date-slider/ion-date-slider.component';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -19,6 +20,7 @@ import { IGraphDto, IDoubleListDto } from '../../../../models/agens-response-typ
 import * as CONFIG from '../../../../app.config';
 import { delayWhen } from 'rxjs/operators';
 
+declare var jQuery: any;
 declare var _: any;
 declare var agens: any;
 
@@ -40,7 +42,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     shortestPath: false,      // 경로검색 사용여부 
     neighbors: false,         // 이웃노드 하일라이팅
     connectedGroup: false,
-    timeLine: false,
+    timeLine: false,          // 타임라인
     findCycles: false,        // 사이클 디텍션
     editGraph: false,
     megaGraph: false,
@@ -64,6 +66,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   shortestPathOptions:any = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
   grph_data: string[][] = [];
+  
+  timeline_data: string[] = [];
+  foods: any[] = [
+    {value: 'steak-0', viewValue: 'Steak'},
+    {value: 'pizza-1', viewValue: 'Pizza'},
+    {value: 'tacos-2', viewValue: 'Tacos'}
+  ];
 
   // material elements
   @ViewChild('btnShortestPath') public btnShortestPath: MatButtonToggle;
@@ -71,6 +80,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
+  @ViewChild('timelineSlider') timelineSlider: IonDateSliderComponent;
 
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
   todo$:Subject<any> = new Subject();
@@ -107,6 +117,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       // change Detection by force
       this._cd.detectChanges();
     });
+
+    // timeline slider initialization
+    jQuery("#timelineSlider").ionRangeSlider();
   }
 
   setData(dataGraph:IGraph){
@@ -574,6 +587,41 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /////////////////////////////////////////////////////////////////
+  // Toolbar : Timeline controlls
+  /////////////////////////////////////////////////////////////////
+
+  toggleTimeline(option:boolean=undefined){
+    if( !option ) this.btnStatus.timeLine = !this.btnStatus.timeLine;
+    else this.btnStatus.timeLine = option;
+
+    // enable 모드이면 start_id, end_id 리셋
+    if( this.btnStatus.timeLine ) {
+      // this.timeline_data = this.cy.nodes().map((ele) => {
+      //   return ele.data('prop').hasOwnProperty('date') ? ele.data('prop')['date'] : null;
+      // }).filter(x => !!x);
+      this.timeline_data = ['2018-01-01', '2018-02-01', '2018-03-01', '2018-04-01', '2018-05-01', '2018-06-01'];
+      // jQuery("#timelineSlider").ionRangeSlider();
+      
+      Promise.resolve(null).then(()=>{ 
+        this._cd.detectChanges();
+      });
+    }
+    else {
+      this.timeline_data = [];
+    }
+  }
+
+  onChangeTimelineSlider(event) {
+    console.log("Slider changed:", event);
+  }
+  onUpdateTimelineSlider(event) {
+    console.log("Slider updated:", event);
+  }
+  setTimelineSliderValue( value ) {
+    this.timelineSlider.update( value );
+  }
+
+  /////////////////////////////////////////////////////////////////
   // graph Toolbar button controlls
   /////////////////////////////////////////////////////////////////
 
@@ -647,5 +695,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         // this.queryGraph.graphChangeLayout('cose');
       });
 
-  }  
+  }
+  
+  
 }

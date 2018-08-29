@@ -49,6 +49,7 @@ import { MetaGraphComponent } from './main/graph/sheets/meta-graph/meta-graph.co
 import { CellViewerComponent } from './main/graph/sheets/cell-viewer/cell-viewer.component';
 import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style.component';
 import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.component';
+import { IonDateSliderComponent } from './main/graph/components/ion-date-slider/ion-date-slider.component';
 
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
@@ -75,6 +76,7 @@ import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.co
     CellViewerComponent,
     LabelStyleComponent,
     EditGraphComponent,
+    IonDateSliderComponent,
     StatGraphComponent,
 
     // LabelStyleSettingDialog,
@@ -128,7 +130,8 @@ import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.co
     LabelStyleComponent,
     MetaGraphComponent,
     CellViewerComponent,
-    EditGraphComponent
+    EditGraphComponent,
+    IonDateSliderComponent
   ],
   bootstrap: [ AppComponent ]
 })
