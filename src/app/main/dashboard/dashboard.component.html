@@ -5,11 +5,11 @@
                 <div class="row-start">
                     <mat-icon class="m-r-10">data_usage</mat-icon><h4>DATA <strong>SOURCE</strong></h4>
                 </div>                    
-                <p class="sub-title">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
-                <ul class="list textover border noborder">
-                    <li title={{infos.uri}}><span> URL</span>{{infos.uri}}</li>
-                    <li title={{infos.name}}><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
-                    <li title={{infos.desc}}><span> DESC</span>{{infos.desc}}</li>
+                <p class="sub-title p-10">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
+                <ul class="list textover">
+                    <li title={{infos.uri}} class="p-no"><span> URL</span>{{infos.uri}}</li>
+                    <li title={{infos.name}} class="p-no"><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
+                    <li title={{infos.desc}} class="p-no"><span> DESC</span>{{infos.desc}}</li>
                 </ul>
                 <!--
                 <div class="card-dash-number">
@@ -53,16 +53,16 @@
                 </ngx-datatable>
             </div> 
         </div>
-        <div class="right-side row strech">
-            <div class="col strech card row-side">            
-                <div class="row-start">
+        <div class="right-side row strech" id="dashboard-canvas">
+            <div class="col strech row-side">
+                <div class="canvas-title row-start">
                     <mat-icon class="m-r-10">bubble_chart</mat-icon><h4>SCHEMA <strong>GRAPH</strong></h4>
-                </div>  
-                <div class="row strech m-20">
-                    <div id="div-canvas" #divCanvas class="graph-canvas strech border"></div>
+                </div>
+                <div class="row strech">
+                    <div id="div-canvas" #divCanvas class="graph-canvas strech card p-no"></div>
                     <div class="viewbox">
                         <div class="scroll-hide">
-                            <ul class="list icon border border-left-no">
+                            <ul class="list icon">
                                 <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
                                 <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
                                 <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
@@ -74,60 +74,73 @@
                     </div>
                 </div>
             </div>
-            <div class="col strech border-bottom" id="schemaList">
-                <h4 class="p-20 border-bottom">
-                    <div class="row-start"><mat-icon class="m-r-10">info</mat-icon> <h4>SCHEMA <strong>INFO</strong></h4></div>
-                    <span class="block sub-title m-10">AgensBrowser visualizes data as graphs and tables for easier analyzing of data.</span>
-                </h4>
-                <div class="viewbox col">
-                    <div class="scroll-hide">
-                        <ul class="list">
-                            <li class="row-center">
-                                <div class="strech">
-                                    <span>TYPE</span> 
-                                    <p>{{selectedLabel.type}}</p>
-                                </div>
-                                <mat-icon>check_circle_outline</mat-icon>
-                            </li>
-                            <li class="row-center">
-                                <div class="strech">
-                                    <span>ID</span> 
-                                    <p>{{selectedLabel.id}}</p>
-                                </div>
-                                <mat-icon>check_circle_outline</mat-icon>
-                            </li>
-                            <li class="row-center">
-                                <div class="strech">
-                                    <span>NAME</span> 
-                                    <p>{{selectedLabel.name}}</p>                                    
-                                </div>
-                                <mat-icon>check_circle_outline</mat-icon>
-                            </li>
-                            <li class="row-center">
-                                <div class="strech">
-                                    <span>OWNER </span> 
-                                    <p>{{selectedLabel.owner}}</p>
-                                </div>
-                                <mat-icon>check_circle_outline</mat-icon>
-                            </li>
-                            <li class="row-center">
-                                <div class="strech">
-                                    <span>SIZE </span> 
-                                    <p>{{selectedLabel.size | number}}</p>
-                                </div>
-                                <mat-icon>check_circle_outline</mat-icon>
-                            </li>
-                            <li class="row-center">
-                                <div class="strech">
-                                    <span>DESCRIPTION </span>
-                                    <p>"{{selectedLabel.desc}}"</p>
-                                </div>
-                                <mat-icon>check_circle_outline</mat-icon>
-                            </li>
-                        </ul>
+            <div class="col strech">
+                <div class="card col strech" id="schemaList">
+                    <h4>
+                        <div class="row-start"><mat-icon class="m-r-10">info</mat-icon> <h4>SCHEMA <strong>INFO</strong></h4></div>
+                    </h4>
+                    <span class="block sub-title m-10 p-10">AgensBrowser visualizes data as graphs and tables for easier analyzing of data.</span>
+                    <ul class="list">
+                        <li class="row-center p-no">
+                            <div class="row-center">
+                                <span class="subtitle">TYPE</span> 
+                            </div>                            
+                            <div>{{selectedLabel.type}}</div>
+                        </li>
+                        <li class="row-center p-no">
+                            <div class="row-center">
+                                <span class="subtitle">ID</span> 
+                            </div>
+                            <div>{{selectedLabel.id}}</div>
+                        </li>
+                        <li class="row-center p-no">
+                            <div class="row-center">
+                                <span class="subtitle">NAME</span> 
+                            </div>
+                            <div>{{selectedLabel.name}}</div>                                    
+                        </li>
+                        <li class="row-center p-no">
+                            <div class="row-center">
+                                <span class="subtitle">OWNER </span> 
+                            </div>
+                            <div>{{selectedLabel.owner}}</div>
+                        </li>
+                        <li class="row-center p-no">
+                            <div class="row-center">
+                                <span class="subtitle">SIZE </span> 
+                            </div>
+                            <div>{{selectedLabel.size | number}}</div>
+                        </li>
+                        <li class="row-center p-no">
+                            <div class="row-center">
+                                <span class="subtitle">DESC </span>
+                            </div>
+                            <div>"{{selectedLabel.desc}}"</div>
+                        </li>
+                    </ul>
+                </div>
+            </div> 
+
+            <!-- <div class="col strech card row-side">            
+                <div class="row-start">
+                    <mat-icon class="m-r-10">bubble_chart</mat-icon><h4>SCHEMA <strong>GRAPH</strong></h4>
+                </div>  
+                <div class="row strech m-20">
+                    <div id="div-canvas" #divCanvas class="graph-canvas strech"></div>
+                    <div class="viewbox">
+                        <div class="scroll-hide">
+                            <ul class="list icon">
+                                <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
+                                <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
+                                <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
+                                <li><a matTooltip="Delete" matTooltipPosition="above"><mat-icon>delete_outline</mat-icon></a></li>
+                                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                                    <mat-icon>refresh</mat-icon></a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>  
     </div>
 </div>

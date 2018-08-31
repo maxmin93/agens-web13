@@ -1,31 +1,32 @@
+<div id="graphTable" class="col strech">
+    <div class="row strech card p-no" >
+        <ngx-datatable #recordTable  class="material strech col"
+            [limit]="9" [reorderable]="reorderable" [scrollbarH]="true"
+            [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
+            [headerHeight]="48" [footerHeight]="48" [rowHeight]="auto"
+            [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)"
+            >
 
-  <div class="row strech">
-    <ngx-datatable #recordTable  class="material strech row-side col"
-        [limit]="9" [reorderable]="reorderable" [scrollbarH]="true"
-        [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
-        [headerHeight]="48" [footerHeight]="48" [rowHeight]="auto"
-        [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)"
-        >
+            <ngx-datatable-column name="Index" [width]="60" [canAutoResize]="false" [sortable]="false">
+                <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
+                    <span>{{ rowIndex }}</span>
+                </ng-template>
+            </ngx-datatable-column>
 
-        <ngx-datatable-column name="Index" [width]="60" [canAutoResize]="false" [sortable]="false">
-            <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
-                <span>{{ rowIndex }}</span>
-            </ng-template>
-        </ngx-datatable-column>
+            <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false">
+                <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
+                    <span>{{col.name}}</span>
+                </ng-template>
+                <ng-template let-rowIndex="rowIndex" let-column="col" let-row="row" ngx-datatable-cell-template>
+                    <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0">
+                        {{ row[col.name] | json }}
+                    </span>
+                    <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0">
+                        {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
+                    </span>
+                </ng-template>
+            </ngx-datatable-column>
 
-        <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false">
-            <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
-                <span>{{col.name}}</span>
-            </ng-template>
-            <ng-template let-rowIndex="rowIndex" let-column="col" let-row="row" ngx-datatable-cell-template>
-                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0">
-                    {{ row[col.name] | json }}
-                </span>
-                <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0">
-                    {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
-                </span>
-            </ng-template>
-        </ngx-datatable-column>
-
-    </ngx-datatable>
+        </ngx-datatable>
+    </div>
 </div>

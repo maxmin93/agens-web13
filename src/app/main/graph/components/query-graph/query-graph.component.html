@@ -5,14 +5,14 @@
     </div>
     <!-- Graph content -->
     <div class="row strech">
-        <div class="strech">
-            <div id="graph-canvas" class="graph-canvas strech border" #divCanvas 
+        <div class="strech card p-no">
+            <div id="graph-canvas" class="graph-canvas strech" #divCanvas 
                 [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"></div>
             <!-- graph element info Box -->
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
                 <ng-container *ngIf="btnStatus.showHideTitle">
-                    <div id="slide-toggle" class="slide border side-short-component">
+                    <div id="slide-toggle" class="slide side-short-component">
                         <div class="col">
                             <h4>find <strong>Title</strong></h4>
                             <span class="search m-20">
@@ -22,8 +22,8 @@
                                 placeholder='Type to filter label text...'
                                 (keyup)='updateFilterTitle($event)'/>
                             </span>
-                            <ul class="list m-10">
-                                <li class="side-margin row-end"><span>Found Elements </span> <strong>{{ labelSearchCount }}</strong></li>
+                            <ul class="list m-20">
+                                <li class="side-margin row-end p-no"><span>Found Elements </span> <strong>{{ labelSearchCount }}</strong></li>
                             </ul>
                             
                         </div>
@@ -32,7 +32,7 @@
 
                 <!-- 출력상자 : Node/Edge 상세 정보 -->
                 <ng-container *ngIf="!!selectedElement">
-                    <div id="slide-toggle" class="slide border col">
+                    <div id="slide-toggle" class="slide col">
                         <div class="row-center">
                             <h4><strong>{{ selectedElement.group() || uppercase }}</strong> info.</h4>
                             <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
@@ -52,7 +52,7 @@
 
                 <!-- 출력상자 : Label 상세 정보 -->
                 <ng-container *ngIf="!!selectedLabel && !selectedElement">
-                    <div id="slide-toggle" class="slide border col">
+                    <div id="slide-toggle" class="slide col">
                         <div class="row-center">
                             <h4><strong>Label</strong> info.</h4>
                         </div>
@@ -89,14 +89,14 @@
 
                 <!-- 입력상자 : CycleDetection -->
                 <ng-container *ngIf="btnStatus.findCycles">
-                    <div id="slide-toggle" class="slide border col side-short-component">
+                    <div id="slide-toggle" class="slide col side-short-component">
                         <div class="row-center">
                             <h4>Find <strong>Cycles</strong></h4>
                         </div>
-                        <div class="row-center m-20">
-                            <ul class="list col strech">
-                                <li class="" *ngFor="let row of grph_data; let i = index">
-                                    <a href="javascript:void(0)" (click)="onClickCyclePath(i)"> {{ row.join('->') }} </a>
+                        <div>
+                            <ul>
+                                <li class="border m-20 p-10" *ngFor="let row of grph_data; let i = index">
+                                    <a href="javascript:void(0)" (click)="onClickCyclePath(i)"> {{ row.join(' > ') }} </a>
                                 </li>
                             </ul>
                         </div>
@@ -105,7 +105,7 @@
 
                 <!-- 입력상자 : 타임라인 timeLine -->
                 <ng-container *ngIf="btnStatus.timeLine">
-                    <div id="slide-toggle-timeline" class="slide border col side-short-component">
+                    <div id="slide-toggle-timeline" class="slide col side-short-component">
                         <!-- [style.visibility]="btnStatus.timeLine ? 'visible' : 'hidden'"> -->
                         <div class="row-center">
                             <h4>Play <strong>Timeline</strong></h4>
@@ -144,7 +144,7 @@
 
                 <!-- 입력상자 : 최단 경로 -->
                 <ng-container *ngIf="btnStatus.shortestPath">
-                    <div id="slide-toggle" class="slide border col side-short-component">
+                    <div id="slide-toggle" class="slide col side-short-component">
                         <div class="row-center">
                             <h4>Find <strong>Shortest Path</strong></h4>
                             <mat-slide-toggle #slideShortestPathDirected [checked]="shortestPathOptions.directed" matTooltip="directed option">
@@ -191,9 +191,9 @@
             </mat-chip-list>
         </div>
         <!-- Graph.Meta : toolbar -->
-        <div id="agens-graph-toolbar" class="viewbox border">
+        <div id="agens-graph-toolbar" class="viewbox">
             <div class="scroll-hide">
-            <ul class="list icon border noborder">
+            <ul class="list icon">
                 <li><a class="checked" [ngClass]="{ 'checked': btnStatus.showHideTitle }" id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="above">
                     <mat-icon>label</mat-icon></a></li>
 

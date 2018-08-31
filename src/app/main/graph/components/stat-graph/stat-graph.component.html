@@ -7,15 +7,15 @@
     <!-- Graph content -->
     <div class="row strech">
         <div class="row row-side strech">
-            <div class="strech">
-                <div id="statistics-canvas" #divCanvas class="graph-canvas strech border" 
+            <div class="strech card p-no">
+                <div id="statistics-canvas" #divCanvas class="graph-canvas strech" 
                     [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
                 </div>
             </div>            
             <!-- Graph.Meta : toolbar -->
-            <div id="agens-graph-toolbar" class="viewbox border border-left-no theme">
+            <div id="agens-graph-toolbar" class="viewbox theme">
                 <div class="slide-hide">
-                    <ul class="list icon border noborder">
+                    <ul class="list icon">
                         <li>
                             <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above"><mat-icon>refresh</mat-icon></a>
                         </li>
@@ -24,13 +24,13 @@
             </div>
         </div> 
         <div class="col strech">
-            <div id="div-d3-chart" #divD3Chart class="col-side strech border p-20">
+            <div id="div-d3-chart" #divD3Chart class="col-side strech p-20 card">
                 <h5 class="title"><strong>CHART</strong></h5>
                 <div class="row-center strech">
                     <svg id="svg-d3-chart" width="600" height="150"></svg>
                 </div>
             </div>
-            <div class="strech border p-20">
+            <div class="strech p-20 card">
                 <h5 class="title"><strong>LINE</strong></h5>
             </div>
         </div>

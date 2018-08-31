@@ -5,73 +5,34 @@
   max-width: 34%; 
 }
 
-.right-side { 
-  width: 66%; 
-
-  .row-side { 
-    flex: 3; 
-  }
+.right-side { width: 66%; 
+  .row-side { flex: 3; }
 }
-
 
 // :host /deep/ { }
 
 /* you can set the disabled style how you like on the text/icon */
-.cxtmenu-disabled {
-  opacity: 0.333;
+.cxtmenu-disabled { opacity: 0.333;}
+
+.canvas-title { 
+  position: absolute; 
+  top: 1.25rem; 
+  left: 1.25rem; 
+  z-index: 1000;
 }
 
-mat-icon { 
-  color: #005aa8; 
-}
+.viewbox { height: auto; }
 
-#dataInfo ul li span { 
-  background: #005aa8;
+#dataInfo ul li span, #schemaList ul li span { 
+  background: linear-gradient(to right, rgb(0,90,168), rgba(0,90,168,.7));
+  // background: #005aa8; 
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  border-radius: .225rem; 
   text-align: center; 
   color: #fff; 
-  border-radius: .225rem; 
 }
 
-#schemaList {
-  .viewbox { 
-    width: 18.725rem;
-    .scroll-hide { width: 20rem; 
-      ul { width: 18.725rem; 
-        li { 
-          border-radius: .325rem; 
-          background: #fff; 
-          border: 1px solid #ccc; 
 
-          // &:nth-child(1) { background: #005aa8}
-          // &:nth-child(2) { background: #0063b0}
-          // &:nth-child(3) { background: #6585C2}
-          // &:nth-child(4) { background: #1898d7}
-          // &:nth-child(5) { background: #44a3db}
-          // &:nth-child(6) { background: #6fbee9}
-          
-          p {
-            max-width: 15.625rem; 
-            white-space: nowrap; 
-            text-overflow: ellipsis; 
-            overflow: hidden;
-            margin: 0;
-            margin-top: .425rem;                        
-            font-size: 1rem; 
-            color: #4d4d4d; 
-            &::first-letter { 
-              text-transform: capitalize; 
-            }
-          }
-          span { 
-            font-size: .625rem; 
-            color: #ccc; 
-          }
 
-          mat-icon { 
-            color: #005aa8; 
-          }
-        }
-      } 
-    }
-  }  
-}
+
+ 

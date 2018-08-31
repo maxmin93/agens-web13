@@ -40,6 +40,7 @@ html, body, material-app  {
 
 h1, h2, h3, h4, h5, h6 {   
   font-weight: 400; 
+  text-transform: uppercase; 
   color: #242424;
 }
 
@@ -80,7 +81,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 .row-end { justify-content: flex-end; }
 
 .row-side { margin-right: 1.25rem; }
-.col-side { margin-bottom: 1.875rem; }
+.col-side { margin-bottom: 1.25rem; }
 
 .wrap { flex-wrap: wrap }
 
@@ -97,7 +98,7 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 
 //  color 테마값
 
-mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; }
+mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; }
 .material-icons { font-size: 1.5rem !important; }
 .mat-button-toggle { color: rgba(255,255,255,0.4); }
 .expand-cell { color: #585858; }
@@ -116,9 +117,9 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 
 .p-20 { padding: 1.25rem; }
 .p-10 { padding: .625rem; }
-.p-no { padding: 0 !important}
+.p-no, .mat-tab-header { padding: 0 !important }
 
-.card, .border { border: 1px solid #ddd;  
+.border { border: 1px solid #ddd;  
   &.border-dotted { border-style: dotted; } 
   &.border-dashed { border-style: dashed; }
 }
@@ -126,6 +127,7 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #afc1c1; 
 .border-bottom { border-bottom: 1px solid #ddd; }
 
 .border-left-no { border-left: none; }
+.border-right-no { border-right: none; }
 .border-top-no { border-top: none; }
 
 ul.border {
@@ -144,10 +146,13 @@ a {
   display: inline-flex; 
   text-decoration: none; 
   color: inherit; 
-  cursor: pointer; 
+  cursor: pointer;  
 
   &.checked { 
-    background: #dfdfdf; 
+    background:#6585C2; 
+    mat-icon { 
+      color: #fff !important; 
+    }
   }
 }
 
@@ -309,14 +314,19 @@ div.graph-canvas {
 
   // zoom 버튼 위치수정 
   div.cy-panzoom { 
-    top: 0.9375rem; 
-    left: 0.9375rem; 
+    top: 1.25rem; 
+    left: 1.25rem; 
     // canvas 반응형높이값을위해 설정
     + div {
       width: 100% !important; 
       height: 100% !important; 
     } 
   }
+}
+
+#dashboard-canvas div.cy-panzoom { 
+  top: 4.6875rem; 
+  left: 2.1875rem; 
 }
 
 mat-chip-list {
@@ -381,7 +391,6 @@ form, input {
       flex: 1; 
     }
   }
-  .mat-tab-body-content { overflow: hidden !important }
 }
 
 .mat-tab-body-wrapper { flex: 1; }
@@ -391,19 +400,11 @@ form, input {
   .mat-tab-labels { flex-direction: column; }
   .mat-ink-bar { display: none; }
   .mat-tab-header {
-    margin-top: 5px; 
-    margin-right: 1.25rem;  
-    border: none; 
-    border-right: 1px solid #ccc; 
+    margin: 2px; 
+    margin-right: 1.25rem; 
+    border: none;  
     .mat-tab-labels .mat-tab-label {
-      border: 1px solid #ccc; 
-      border-right: 0; 
-      border-top: 0; 
       flex: initial; 
-
-      &:first-child { 
-        border-top: 1px solid #ccc; 
-      }
     }
   }
 }
@@ -455,19 +456,26 @@ form, input {
   margin: auto; 
   padding: 1.25rem; 
   top: 0; 
-  right: 1.25rem; 
+  right: 6.25rem; 
   bottom: 0; 
   position: absolute; 
   z-index: 22;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  border-radius: .325rem; 
 }
 
 /* slide 숨기는 component 
 사이즈를 조정할 수 있다*/ 
 
 .viewbox {
-  width: 3.125rem;   
-  border-left: 0; 
+  position: absolute; 
+  top: 1.25rem; 
+  right: 1.25rem; 
+  width: 3.425rem;   
   overflow: hidden;
+  z-index: 1000;
+  height: calc(586px - 2.5rem); 
+  border-left: 1px dashed #eee; 
 
   .scroll-hide {
     width: 80px; 
@@ -475,8 +483,10 @@ form, input {
     overflow-y: scroll; 
     
     ul { 
-      width: 3.125rem;
+      width: 3.425rem;
       height: inherit;  
+
+      mat-icon { color: #6585C2; }
     }
   }
 }
@@ -502,6 +512,9 @@ ul.list {
   li {
     margin: 1.25rem 0; 
     padding: .625rem; 
+    &:last-child { 
+      margin-bottom: 0; 
+    }
   }
 
   &.inline { width: initial; }
@@ -548,6 +561,7 @@ ul.list {
         justify-content: center; 
         align-items: center; 
         min-height: 3.125rem; 
+        
       }
     }
   }
@@ -555,10 +569,12 @@ ul.list {
 
 // card 
 
-.card { 
+.card, .mat-tab-header { 
   background: #fff; 
   padding: 1.25rem; 
   border-radius: .325rem; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  overflow: hidden;
 }
 
 // json 
@@ -622,6 +638,16 @@ pre {
 .mat-progress-bar.mat-accent .mat-progress-bar-background, 
 .mat-progress-bar.mat-accent .mat-progress-bar-buffer 
  { background: #1bc9e4 !important; }
+
+#graphCard, #graphTable { 
+  position: relative; 
+  padding: 2px; 
+}
+
+ #progressBarQueryGraph, #progressBarStatGraph { 
+   position: absolute; 
+   top: 0; 
+ }
 
 ////////////////////////////////////
 // bottom sheets styles

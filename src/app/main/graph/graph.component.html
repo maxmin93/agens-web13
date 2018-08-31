@@ -1,7 +1,7 @@
 <div id="top" class="content col">
 
   <!-- editor -->
-    <div id="queryCard" class="col border-bottom edit-size card">
+    <div id="queryCard" class="col edit-size card">
         <div class="row-center">
             <h4>QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small></h4>
             <ul class="row icon list inline">
@@ -23,7 +23,7 @@
         <!-- RESULT : progress-bar & message -->
         <app-query-result #queryResult class="edit-size col"></app-query-result>
     </div>
-    <div id="tabComponent" class="col strech m-20 card">
+    <div id="tabComponent" class="col strech m-20">
         <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="mat-tab-vertical strech md-no-animation"
             (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
             <mat-tab label="Graph">
