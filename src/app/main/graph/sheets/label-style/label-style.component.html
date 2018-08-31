@@ -12,8 +12,8 @@
             </div>
              <!-- Graph.Meta : toolbar -->
             <div class="row">
-                <div id="agens-graph-toolbar" class="viewbox border strech theme">                    
-                    <ul class="list icon border noborder">
+                <div id="agens-graph-toolbar" class="viewbox strech theme">                    
+                    <ul class="list icon">
                         <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
                                 <mat-icon>refresh</mat-icon></a></li>
                         <li><a (click)="restoreStyles()" matTooltip="Style restore" matTooltipPosition="above">
@@ -53,7 +53,7 @@
                             (change)="onChangeStyleWidth($event)">
                 </mat-slider>
             </div>
-            <div class="border m-20 p-20">    
+            <div class="border m-20 p-20" style="padding-bottom: 0">    
                 <h5 class="title"><strong>TITLE </strong></h5>
                 <mat-form-field class="strech row-center">
                   <mat-select name="labelName" [formControl]="labelNameCtl" [value]="selectedStyle.title"

@@ -13,7 +13,7 @@
                 <nav>
                 <!-- 출력상자 : 상세 정보 -->
                 <ng-container *ngIf="!!selectedElement">
-                    <div id="slide-toggle" class="slide border col">
+                    <div id="slide-toggle" class="slide col">
                         <div class="row-center">
                             <h4>Label <strong>info.</strong></h4>
                         </div>
@@ -24,7 +24,7 @@
                                 <span><span class="p-10 block">Properties ({{selectedProps.length}})</span></span>
                                 <div class="json strech border" *ngIf="selectedProps">
                                     <!-- <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()"> -->
-                                    <form [formGroup]="formGrp" class="">
+                                    <form [formGroup]="formGrp" class="label-info-slide">
                                         <label class="row-center p-10 border-bottom" formArrayName="conditions" *ngFor="let prop of formGrp.controls.conditions.controls; let i = index">
                                             {{ selectedProps[i] }} ({{ getPropType(selectedProps[i]) | lowercase }}) <input type="checkbox" [formControlName]="i"> 
                                         </label>
@@ -44,8 +44,8 @@
             </div>
              <!-- Graph.Meta : toolbar -->
             <div class="row">
-                <div id="agens-graph-toolbar" class="viewbox border strech theme">                    
-                    <ul class="list icon border noborder">
+                <div id="agens-graph-toolbar" class="viewbox strech theme">                    
+                    <ul class="list icon">
                         <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
                                 <mat-icon>refresh</mat-icon></a></li>
                         <li><a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
@@ -62,9 +62,9 @@
             <mat-tab-group class="strech border p-10">
                 <mat-tab label="Group By col">
                     <div class="json m-10" *ngIf="groupByList">
-                        <ul>
+                        <ul class="list border noborder">
                             <li *ngFor="let item of groupByList; let i = index" class="row-center p-10">
-                                <span>{{ item.label }}</span> :: 
+                                <span>{{ item.label }}</span> 
                                 <span class="label-list" title= "{{ item.prop }}" > {{ item.prop }} ({{ item.type | lowercase }})</span>
                                 <button (click)="removeItemGroupBy(i)">Del</button>
                             </li>
