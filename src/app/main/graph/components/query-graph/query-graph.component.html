@@ -113,22 +113,34 @@
                         <div class="col m-20">
                             
                             <mat-form-field>
-                                <mat-select placeholder="select Label">
-                                    <mat-option *ngFor="let food of foods" [value]="food.value">
-                                    {{food.viewValue}}
+                                <mat-select placeholder="select Label" 
+                                    [formControl]="timelineLabelCtl">
+                                    <mat-option *ngFor="let label of labels" [value]="label">
+                                    {{label.name}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
                             
                             <mat-form-field>
-                                <mat-select placeholder="select Property">
-                                    <mat-option *ngFor="let food of foods" [value]="food.value">
-                                    {{food.viewValue}}
+                                <mat-select placeholder="select Property"
+                                    [formControl]="timelinePropertyCtl" (selectionChange)="onChangeTimelineProperty($event)">
+                                    <mat-option *ngFor="let prop of timelineLabelCtl.value.properties" [value]="prop">
+                                    {{prop.key}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            
-                             <ion-date-slider #timelineSlider
+                            <mat-form-field>
+                                <input matInput type="text" placeholder="Check sample" value=""
+                                    [formControl]="timelineSampleCtl">
+                            </mat-form-field>
+    
+                            <mat-form-field>
+                                <input matInput type="text" placeholder="Date format" value="YYYY-MM-DD"
+                                    [formControl]="timelineFormatCtl" (input)="onChangeTimelineFormat($event.target.value)">
+                            </mat-form-field>
+                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="setTimelineData()">Set Timeline</button>
+
+                            <ion-date-slider #timelineSlider
                                 [current]="2018-02-01"
                                 [grid]="true"
                                 [values]="timeline_data"
