@@ -49,7 +49,7 @@ import { MetaGraphComponent } from './main/graph/sheets/meta-graph/meta-graph.co
 import { CellViewerComponent } from './main/graph/sheets/cell-viewer/cell-viewer.component';
 import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style.component';
 import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.component';
-import { IonDateSliderComponent } from './main/graph/components/ion-date-slider/ion-date-slider.component';
+import { TimelineSliderComponent } from './main/graph/components/timeline-slider/timeline-slider.component';
 
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
@@ -76,7 +76,7 @@ import { IonDateSliderComponent } from './main/graph/components/ion-date-slider/
     CellViewerComponent,
     LabelStyleComponent,
     EditGraphComponent,
-    IonDateSliderComponent,
+    TimelineSliderComponent,
     StatGraphComponent,
 
     // LabelStyleSettingDialog,
@@ -131,7 +131,7 @@ import { IonDateSliderComponent } from './main/graph/components/ion-date-slider/
     MetaGraphComponent,
     CellViewerComponent,
     EditGraphComponent,
-    IonDateSliderComponent
+    TimelineSliderComponent
   ],
   bootstrap: [ AppComponent ]
 })

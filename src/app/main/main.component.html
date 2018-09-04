@@ -6,7 +6,7 @@
     </h1>
     <mat-button-toggle-group #btnMenuGroup="matButtonToggleGroup" [value]="currentPath">
         <mat-button-toggle #btnMenuMain value="/" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
-            <a>DASHBOARD</a>
+            <a>SCHEMA</a>
         </mat-button-toggle>
         <mat-button-toggle #btnMenuGraph value="/graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']">
             <a>GRAPH</a>

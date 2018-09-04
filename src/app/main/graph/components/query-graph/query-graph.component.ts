@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
-import { MatDialog, MatButtonToggle, MatSlideToggle, MatBottomSheet } from '@angular/material';
+import { MatDialog, MatButtonToggle, MatButton, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -7,7 +7,7 @@ import { filter } from 'rxjs/operators';
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
 import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
-import { IonDateSliderComponent } from '../ion-date-slider/ion-date-slider.component';
+import { TimelineSliderComponent } from '../timeline-slider/timeline-slider.component';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -19,6 +19,9 @@ import { IGraphDto, IDoubleListDto } from '../../../../models/agens-response-typ
 
 import * as CONFIG from '../../../../app.config';
 import { delayWhen } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
+
+import * as moment from 'moment';
 
 declare var jQuery: any;
 declare var _: any;
@@ -67,12 +70,12 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   shortestPathOptions:any = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
   grph_data: string[][] = [];
   
+  timelineLabelCtl: FormControl;
+  timelinePropertyCtl: FormControl;
+  timelineFormatCtl: FormControl;
+  timelineSampleCtl: FormControl;
+  timelineDisabled: boolean = true;
   timeline_data: string[] = [];
-  foods: any[] = [
-    {value: 'steak-0', viewValue: 'Steak'},
-    {value: 'pizza-1', viewValue: 'Pizza'},
-    {value: 'tacos-2', viewValue: 'Tacos'}
-  ];
 
   // material elements
   @ViewChild('btnShortestPath') public btnShortestPath: MatButtonToggle;
@@ -80,7 +83,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
-  @ViewChild('timelineSlider') timelineSlider: IonDateSliderComponent;
+  @ViewChild('timelineSlider') timelineSlider: TimelineSliderComponent;
+  @ViewChild('btnSetTimeline') public btnSetTimeline: MatButton;
 
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
   todo$:Subject<any> = new Subject();
@@ -607,9 +611,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       // this.timeline_data = this.cy.nodes().map((ele) => {
       //   return ele.data('prop').hasOwnProperty('date') ? ele.data('prop')['date'] : null;
       // }).filter(x => !!x);
-      this.timeline_data = ['2018-01-01', '2018-02-01', '2018-03-01', '2018-04-01', '2018-05-01', '2018-06-01'];
+      // this.timeline_data = ['2018-01-01', '2018-02-01', '2018-03-01', '2018-04-01', '2018-05-01', '2018-06-01'];
       // jQuery("#timelineSlider").ionRangeSlider();
       
+      this.initTimeline();
       Promise.resolve(null).then(()=>{ 
         this._cd.detectChanges();
       });
@@ -619,11 +624,107 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  onChangeTimelineSlider(event) {
-    console.log("Slider changed:", event);
+  initTimeline(){
+    this.timelineDisabled = true;
+    if( this.labels.length > 0 ){
+      this.timelineLabelCtl = new FormControl(this.labels[0], []);
+      this.timelinePropertyCtl = new FormControl( (this.timelineLabelCtl.value).properties[0], [] );
+      this.timelineSampleCtl = new FormControl( {value: 
+        this.getTimelineSample( this.labels[0].name, this.labels[0].properties[0].key ), disabled: true}, [] );
+    }
+    else{
+      this.timelineLabelCtl = new FormControl( {value: { name: "" }, disabled: true} , []);
+      this.timelinePropertyCtl = new FormControl( {value: { key: "" }, disabled: true}, [] );
+      this.timelineSampleCtl = new FormControl( {value: '', disabled: true}, [] );
+    }
+    this.timelineFormatCtl = new FormControl( "YYYY-MM-DD", []);
+    
+    this.timeline_data = [];
+  }
+  onChangeTimelineFormat(value){
+    let sample = this.getTimelineSample(this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value.key);
+    if( sample != '' && moment(sample, value, true ).isValid() )
+      this.timelineDisabled = false;
+    else this.timelineDisabled = true;
+    this._cd.detectChanges();
+  }  
+  onChangeTimelineProperty(event){
+    // console.log( 'onChangeTimelineProperty:', event.value );
+    if( event.value.type != 'STRING' ) this.timelineFormatCtl.disable({onlySelf:true});
+    else this.timelineFormatCtl.enable({onlySelf:false});
+
+    let sample = this.getTimelineSample(this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value.key);
+    this.timelineSampleCtl.setValue( sample, {emitEvent: false} );
+
+    if( sample != '' && moment(sample, this.timelineFormatCtl.value, true ).isValid() )
+      this.timelineDisabled = false;
+    else this.timelineDisabled = true;
+    this._cd.detectChanges();
+  }
+  getTimelineSample(labelName, propKey): string{
+    if( !labelName || !propKey ) return '';
+
+    let eles = this.cy.elements().filter(e => {
+      return e.data('label') == labelName;
+    });
+    if( eles.nonempty() ){
+      let data = eles.map(e => { 
+        return (e.data('props').hasOwnProperty( propKey )) 
+                ? e.data('props')[ propKey ] : null; 
+        }).filter(v => v != null);
+      if( data.length > 0 ) return <string> data[0];
+    }
+    return '';
+  }
+  setTimelineData(){
+    this.timeline_data = this.cy.nodes().map(e => { 
+      return (e.data('props').hasOwnProperty( this.timelinePropertyCtl.value.key )) 
+              ? e.data('props')[ this.timelinePropertyCtl.value.key ] : null; 
+      }).filter(v => v != null);
+  }
+  
+  onControlTimelineSlider(event) {
+    console.log("Slider control:", event);
+    if( !event ) return;
+
+    if( event == 'play' ){
+      this.cy.elements(':selected').unselect();
+      this.cy.elements().style('visibility','hidden');
+    }
+    else if( event == 'stop' ){
+      this.cy.elements(':selected').unselect();
+      this.cy.elements().style('visibility','visible');
+    }
+  }
+  onChangeTimelineSlider(event) {    
+    if( !event ) return;
+
+    let labelName = this.timelineLabelCtl.value.name;
+    let propKey = this.timelinePropertyCtl.value.key;
+    let targets = this.cy.elements().filter(e => {
+      return e.data('label') == labelName && e.data('props').hasOwnProperty(propKey)
+              && e.data('props')[propKey] == event;
+    });
+    this.cy.elements(':selected').unselect();
+    targets.select();
+
+    let visibleElements = this.cy.collection();
+    targets.forEach(e => {
+      visibleElements = visibleElements.union(e);
+      visibleElements = visibleElements.union( e.neighborhood() );
+      visibleElements = visibleElements.union( visibleElements.neighborhood() );
+      visibleElements = visibleElements.union( visibleElements.edgesWith(visibleElements) );
+    });
+    visibleElements.style('visibility','visible');
+    // visibleElements.animate({ style: { 'visibility': 'visible' }, duration: 500 });
+    let restElements = this.cy.elements().difference( visibleElements );
+    restElements.style('visibility','hidden');
+    // restElements.animate({ style: { 'visibility': 'hidden' }, duration: 200 });
+    console.log("Slider changed:", event, visibleElements.size(), restElements.size());
   }
   onUpdateTimelineSlider(event) {
     console.log("Slider updated:", event);
+    if( !event ) return;
   }
   setTimelineSliderValue( value ) {
     this.timelineSlider.update( value );

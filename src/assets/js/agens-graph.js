@@ -295,6 +295,20 @@
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s'
         }},{
+        /// timeline shown
+        selector: '.timeline-shown',
+        css: {
+          'visibility': 'visible',
+          'transition-property': 'visibility',
+          'transition-duration': '0.2s'
+        }},{
+        /// timeline hidden
+        selector: '.timeline-hidden',
+        css: {
+          'visibility': 'hidden',
+          'transition-property': 'visibility',
+          'transition-duration': '0.4s'
+        }},{
         /// 엣지 드래그한 후 선택한 노드의 변화
         selector: '.edgehandles-hover',
         css: {

@@ -1,0 +1,18 @@
+<button mat-button [disabled]="btnPlayDisabled" (click)="doPlay()">
+  <mat-icon [style.color]="btnPlayDisabled ? '#afafaf' : '#303F9F'">play_arrow</mat-icon>Play
+</button>
+<button mat-button [disabled]="btnPauseDisabled" (click)="doPause()">
+  <mat-icon [style.color]="btnPauseDisabled ? '#afafaf' : '#303F9F'">pause</mat-icon>
+  <span *ngIf="!isPaused">Pause</span><span *ngIf="isPaused">Resume</span>
+</button>
+<button mat-button [disabled]="btnStopDisabled" (click)="doStop()">
+  <mat-icon [style.color]="btnStopDisabled ? '#afafaf' : '#303F9F'">stop</mat-icon>Stop
+</button>
+<div class="range-slider">
+  <span>{{ this.min }}</span>
+  <mat-slider #sliderElement [thumbLabel]="true" [displayWith]="toFormat" tickInterval="auto"
+    (change)="onChangeSlider($event)" (input)="onInputSlider($event)"
+    [(ngModel)]="_value" [disabled]="sliderDisabled" [min]="_min" [max]="_max"
+  ></mat-slider>
+  <span>{{ this.max }}</span>
+</div>

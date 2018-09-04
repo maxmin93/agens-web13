@@ -124,30 +124,39 @@
                         <div class="col m-20">
                             
                             <mat-form-field>
-                                <mat-select placeholder="select Label">
-                                    <mat-option *ngFor="let food of foods" [value]="food.value">
-                                    {{food.viewValue}}
+                                <mat-select placeholder="select Label" 
+                                    [formControl]="timelineLabelCtl">
+                                    <mat-option *ngFor="let label of labels" [value]="label">
+                                    {{label.name}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
                             
                             <mat-form-field>
-                                <mat-select placeholder="select Property">
-                                    <mat-option *ngFor="let food of foods" [value]="food.value">
-                                    {{food.viewValue}}
+                                <mat-select placeholder="select Property"
+                                    [formControl]="timelinePropertyCtl" (selectionChange)="onChangeTimelineProperty($event)">
+                                    <mat-option *ngFor="let prop of timelineLabelCtl.value.properties" [value]="prop">
+                                    {{prop.key}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            
-                             <ion-date-slider #timelineSlider
-                                [current]="2018-02-01"
-                                [grid]="true"
+                            <mat-form-field>
+                                <input matInput type="text" placeholder="Check sample" value=""
+                                    [formControl]="timelineSampleCtl">
+                            </mat-form-field>
+    
+                            <mat-form-field>
+                                <input matInput type="text" placeholder="Date format" value="YYYY-MM-DD"
+                                    [formControl]="timelineFormatCtl" (input)="onChangeTimelineFormat($event.target.value)">
+                            </mat-form-field>
+                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="setTimelineData()">Set Timeline</button>
+
+                            <timeline-slider #timelineSlider
                                 [values]="timeline_data"
-                                [disable]="false"
-                                [interval]="2000"
+                                [interval]="3000"
                                 (onChange)="onChangeTimelineSlider($event)"
                                 (onUpdate)="onUpdateTimelineSlider($event)"
-                                (onFinish)="onUpdateTimelineSlider($event)"></ion-date-slider>
+                                (onControl)="onControlTimelineSlider($event)"></timeline-slider>
                             <!-- <mat-slider></mat-slider> -->
                         </div>
                     </div>
@@ -220,7 +229,7 @@
                             <h4 class="mat-subhead">Layout <strong>Type</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('random')">Random</button>
+                            <button mat-menu-item (click)="graphChangeLayout('random')">Random (default)</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('grid')">Grid</button>
                         <mat-divider></mat-divider>
@@ -230,15 +239,15 @@
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('cola')">Cola</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose')">Cose(nodes.size &lt; 400)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('cose')">Cose</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">Cose-Bilkent(very slow)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('dagre')">Dagre(hierachy)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('dagre')">Dagre (hierachy)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('klay')">Klay</button>
+                            <button mat-menu-item (click)="graphChangeLayout('klay')">Klay (hierachy)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('euler')">Euler</button>
+                            <button mat-menu-item (click)="graphChangeLayout('euler')">Euler (very fast)</button>
                     </mat-menu>
                 </li>
 
