@@ -59,44 +59,40 @@
             </div>
         </div>    
         <div class="col strech">
-            <mat-tab-group class="strech border p-10">
-                <mat-tab label="Group By col">
-                    <div class="json m-10" *ngIf="groupByList">
-                        <ul class="list border noborder">
-                            <li *ngFor="let item of groupByList; let i = index" class="row-center p-10">
-                                <span>{{ item.label }}</span> 
-                                <span class="label-list" title= "{{ item.prop }}" > {{ item.prop }} ({{ item.type | lowercase }})</span>
-                                <button (click)="removeItemGroupBy(i)">Del</button>
-                            </li>
-                        </ul>
-                    </div>
-                </mat-tab>
-                <mat-tab label="Filter By col">
-                    <div class="json m-10" *ngIf="filterByList">
-                        <ul>
-                            <li *ngFor="let item of filterByList; let i = index" class="row-center p-10">
-                                <span>{{ item.label }}</span> ::
-                                <div class="label-list">
-                                    <span>{{ item.prop }} ({{ item.type | lowercase }})</span><br /> 
-                                    <span>
-                                        <select name="fOper" [(ngModel)]="item.oper">
-                                            <option *ngFor="let oper of filterOpers" [value]="oper">{{ oper }}</option>
-                                        </select>
-                                    </span> &nbsp; &nbsp;
-                                    <span>
-                                        <input name="fValue" [(ngModel)]="item.value" required style="width: 50px">
-                                    </span>
-                                </div>
-                                <button (click)="removeItemFilterBy(i)">Del</button>
-                            </li>
-                        </ul>
-                    </div>
-                </mat-tab>
-            </mat-tab-group>                
-            <div class="col m-20">
-                <button class="strech" mat-raised-button color="primary" [disabled]="groupByList.length == 0 && filterByList.length == 0"
-                (click)="close()">Reload</button>
-            </div>                
+          <div class="json m-10" *ngIf="filterByList">
+            <h5 class="title"><strong>filterBy List </strong></h5>
+            <ul>
+              <li *ngFor="let item of filterByList; let i = index" class="row-center p-10">
+                <span>{{ item.label }}</span> ::
+                <div class="label-list">
+                  <span>{{ item.prop }} ({{ item.type | lowercase }})</span><br /> 
+                  <span>
+                    <select name="fOper" [(ngModel)]="item.oper">
+                      <option *ngFor="let oper of filterOpers" [value]="oper">{{ oper }}</option>
+                    </select>
+                  </span> &nbsp; &nbsp;
+                  <span>
+                    <input name="fValue" [(ngModel)]="item.value" required style="width: 50px">
+                  </span>
+                </div>
+                <button (click)="removeItemFilterBy(i)">Del</button>
+              </li>
+            </ul>
+          </div>
+          <div class="json m-10" *ngIf="groupByList">
+            <h5 class="title"><strong>groupBy List</strong></h5>
+            <ul class="list border noborder">
+              <li *ngFor="let item of groupByList; let i = index" class="row-center p-10">
+                <span>{{ item.label }}</span> 
+                <span class="label-list" title= "{{ item.prop }}" > {{ item.prop }} ({{ item.type | lowercase }})</span>
+                <button (click)="removeItemGroupBy(i)">Del</button>
+              </li>
+            </ul>
+          </div>
+          <div class="col m-20">
+              <button class="strech" mat-raised-button color="primary" [disabled]="groupByList.length == 0 && filterByList.length == 0"
+              (click)="close()">Reload</button>
+          </div>                
         </div>        
     </div>
 </div>
