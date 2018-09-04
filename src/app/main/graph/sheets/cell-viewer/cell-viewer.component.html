@@ -1,29 +1,41 @@
-    <div class="row strech">
-      <div class="col strech border p-20">
-          <div class="row-center">
-              <h4 class="title">CELL <strong>VALUE</strong> </h4>
-          </div>
-          <!-- " *ngIf="isJsonCell" -->
-          <div id="tableCell" #tableCell class="json strech m-20">
-              
-              <div class="scrollbar">
-                  <!-- 
-                      JSON Pretty formatter
-                      https://www.npmjs.com/package/angular2-prettyjson
-                  -->            
-                  
-                  <pre id="cellValue" [innerHtml]="cellValue | prettyjson:3"></pre>
-              </div>    
-          </div>
-      </div>
-      <div class="viewbox theme">
-          <div class="scroll-hide">
-              <ul class="list icon border border-left-no">
-                  <li><a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above">
-                      <mat-icon>bookmarks</mat-icon></a></li>
-                  <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
-                      <mat-icon>close</mat-icon></a></li>
-              </ul>
-          </div>
-      </div>
-  </div>
+<div class="row strech">
+    <div class="col strech p-20">
+        <div class="row-center">
+            <h4 class="title">CELL <strong>VALUE</strong> </h4>
+            <ul class="sheet btn-group">
+                <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                    <mat-icon>close</mat-icon></a></li>
+            </ul>
+        </div>
+        <!-- " *ngIf="isJsonCell" -->
+        <div id="tableCell" #tableCell class="json strech m-20 p-20 border">
+            <div class="scrollbar">
+                <!-- 
+                    JSON Pretty formatter
+                    https://www.npmjs.com/package/angular2-prettyjson
+                -->            
+                
+                <pre id="cellValue" [innerHtml]="cellValue | prettyjson:3"></pre>
+            </div> 
+            <div class="viewbox">
+                <div class="scroll-hide">
+                    <ul class="list icon">
+                        <li><a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above">
+                            <mat-icon>file_copy</mat-icon></a></li>
+                    </ul>
+                </div>
+            </div>   
+        </div>
+    </div>
+    <!-- <div class="viewbox theme">
+        <div class="scroll-hide">
+            <ul class="list icon">
+                <li><a (click)="copyCellValue()" matTooltip="Copy to clipboard" matTooltipPosition="above">
+                    <mat-icon>bookmarks</mat-icon></a></li>
+                <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                    <mat-icon>close</mat-icon></a></li>
+            </ul>
+        </div>
+    </div> -->
+</div>
+

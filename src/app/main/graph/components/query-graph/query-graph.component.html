@@ -14,18 +14,29 @@
                 <ng-container *ngIf="btnStatus.showHideTitle">
                     <div id="slide-toggle" class="slide side-short-component">
                         <div class="col">
-                            <h4>find <strong>Title</strong></h4>
-                            <span class="search m-20">
-                                <input
-                                class="border search"
-                                type='text'            
-                                placeholder='Type to filter label text...'
-                                (keyup)='updateFilterTitle($event)'/>
-                            </span>
-                            <ul class="list m-20">
-                                <li class="side-margin row-end p-no"><span>Found Elements </span> <strong>{{ labelSearchCount }}</strong></li>
+                            <h4>find <strong>Title</strong></h4>                           
+
+                            <ul class="list col strech m-20">
+                                    <li class="side-margin row-start">
+                                        <mat-icon class="row-side">search</mat-icon>
+                                        <!-- <div class="strech row-center border-bottom">
+                                            <span class="subtitle">Start Node</span>
+                                            <span>{{ shortestPathOptions.sid }}</span>
+                                        </div> -->
+                                        <label class="search strech">
+                                            <input
+                                            class="border search"
+                                            type='text'            
+                                            placeholder='Type to filter label text...'
+                                            (keyup)='updateFilterTitle($event)'/>
+                                        </label>
+                                    </li>
                             </ul>
-                            
+
+                            <div class="row-center m-20 p-10 border">
+                                <span class="subtitle">Found Elements :</span><strong>{{ labelSearchCount }}</strong>
+                            </div>
+
                         </div>
                     </div>
                 </ng-container>
@@ -63,7 +74,7 @@
                                 <span>Properties</span>
                                 <!-- <div class="json strech m-10"><pre [innerHtml]="selectedLabel.properties | prettyjson:3"></pre></div> -->
                             </li>
-                            <li class="side-margin strech border p-no overflow-y">
+                            <li class="side-margin strech border-top p-no overflow-y">
                                 <div>
                                     <table mat-table [dataSource]="selectedLabel.properties">
                                         <ng-container matColumnDef="propName">
@@ -151,16 +162,16 @@
                             </mat-slide-toggle>
                         </div>
                         <div class="row-center m-20">
-                            <ul class="list col strech">
-                                <li class="side-margin row-start">
+                            <ul class="col strech m-10">
+                                <li class="row-start">
                                     <mat-icon class="row-side">adjust</mat-icon>
                                     <div class="strech row-center border-bottom">
                                         <span class="subtitle">Start Node</span>
                                         <span>{{ shortestPathOptions.sid }}</span>
                                     </div>
                                 </li>
-                                <li class="side-padding"><mat-icon>more_vert</mat-icon></li>
-                                <li class="side-margin row-start">
+                                <li class="m-10 row-start"><mat-icon>more_vert</mat-icon></li>
+                                <li class="m-10 row-start">
                                     <mat-icon class="row-side">pin_drop</mat-icon>
                                     <div class="strech row-center border-bottom">
                                         <span class="subtitle">End Node</span>
@@ -169,9 +180,9 @@
                                 </li>
                             </ul>                            
                         </div>
-                        <div class="row m-10">
-                            <button class="strech row-side" color="primary" (click)="doFindShortestPath()">Search</button>
-                            <button class="strech" (click)="clearFindShortestPath()">Clear</button>
+                        <div class="row-end m-20">
+                            <button class="btn btn-icon m-r-10" color="primary" (click)="doFindShortestPath()"><mat-icon class="m-r-10">search</mat-icon>search</button>
+                            <button class="btn btn-icon" (click)="clearFindShortestPath()"><mat-icon>refresh</mat-icon></button>
                         </div>
                         <div class="row-center m-20 p-10 border">
                             <span class="subtitle">Distance :</span><div *ngIf="shortestPathOptions.distTo"> <strong>{{ shortestPathOptions.distTo }}</strong></div>
