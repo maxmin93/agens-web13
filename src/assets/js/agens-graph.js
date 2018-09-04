@@ -153,10 +153,12 @@
           'width':  function(e){ return agens.styles.nodeWidth(e); },
           'height': function(e){ return agens.styles.nodeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
-          'text-wrap':'ellipsis',
-          'text-max-width':'80px',
+          'text-wrap': 'wrap',
+          'text-max-width': '80px',
           'text-halign': 'center',    // text-halign: left, center, right
           'text-valign': 'center',    // text-valign: top, center, bottom
+          'text-outline-width': 1,
+          'text-outline-color': 'black',
           'font-weight': 400,
           'font-size': 10,
           'font-family':"Noto Sans, Noto Sans Bold, sans-serif",
@@ -245,6 +247,7 @@
         // meta-graph 에서 사용할 스타일 : width와 color는 그대로 사용
         selector: '.meta',
         css: {
+          'text-wrap': 'wrap',    // wrap 이어야만 '\n' 등의 특수문자가 먹힘!!
           'label': function(e){ return agens.styles.metaLabel(e); },
           'visibility': 'visible',
           'opacity': function(e){ return agens.styles.visibility(e) == 'visible' ? 1.0 : 0.3 ; },

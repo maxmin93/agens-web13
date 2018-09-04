@@ -155,6 +155,7 @@ export class MetaGraphComponent implements OnInit {
   // 참고 : Angular create checkbox array dynamically
   // https://coryrylan.com/blog/creating-a-dynamic-checkbox-list-in-angular
   makeFormGroup(props:string[]){
+    props.unshift( '$ALL' );
     const controls = props.map(k => new FormControl(false));
     this.formGrp = this.formBuilder.group({
       conditions: new FormArray(controls)
@@ -167,6 +168,7 @@ export class MetaGraphComponent implements OnInit {
 
   getPropType(key:string): string {
     if( !this.selectedLabel ) return 'unknown';
+    if( key == '$ALL' ) return 'for groupBy';
     let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == key);
     return (info.length > 0) ? info[0].type : "unknown";
   }
@@ -179,7 +181,7 @@ export class MetaGraphComponent implements OnInit {
     selected.forEach(item => {
       let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
       this.groupByList.push({ label: this.selectedElement.data('name'), prop: item
-            , type: (info.length > 0) ? info[0].type : "unknown" });
+            , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
     });
   }  
   addItemFilterBy() {
@@ -188,9 +190,11 @@ export class MetaGraphComponent implements OnInit {
       .filter(v => v !== null);
 
     selected.forEach(item => {
+      if( item == '$ALL' ) return true;
       let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
-      this.filterByList.push({ label: this.selectedElement.data('name'), prop: item, oper: "eq", value: ""
-            , type: (info.length > 0) ? info[0].type : "unknown" });
+      this.filterByList.push({ label: this.selectedElement.data('name'), prop: item
+            , oper: "eq", value: ""
+            , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
     });
   }
 
@@ -221,6 +225,10 @@ export class MetaGraphComponent implements OnInit {
     options.groups = _translate( gList, 'label', x => x.prop );
     options.filters = _translate( fList, 'label', x => [x.prop, x.oper, x.value] );
 
+    // groupBy 에 '$ALL'이 있으면 다른 prop 들 무시하고 그것만 남기기
+    Object.keys(options.groups).forEach( key => {
+      if( options.groups[key].includes('$ALL') ) options.groups[key] = [ '$ALL' ];
+    });
     // console.log( options.groups, options.filters );
     return options;
   }
