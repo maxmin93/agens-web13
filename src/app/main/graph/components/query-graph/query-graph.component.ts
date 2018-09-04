@@ -204,10 +204,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   initCanvas(isTempGraph:boolean){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
-    this.isTempGraph = isTempGraph;
 
+    this.isTempGraph = isTempGraph;
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.fit( this.cy.elements(), 50);
+    // this._cd.detectChanges();
+    // Promise.resolve(null).then(() => {
+    //   this.cy.fit( this.cy.elements(), 50);
+    // });
 
     // 완료 상태를 상위 graph.component 에 알려주기 (& layout 적용)
     this.initDone.emit(this.isVisible);
@@ -222,18 +225,22 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   reloadGraph(){
     if( !this.dataGraph ) return;
+
+    if( this._util.hasPositions() ){
+      this.clear(false);
+      this.isTempGraph = false;
+  
+      this.dataGraph.nodes.forEach( x => { 
+        let ele = this.cy.add( x );
+        if( x.scratch.hasOwnProperty('_position') ) ele.position( _.clone( x.scratch['_position'] ) );
+      });
+      this.dataGraph.edges.forEach( x => { 
+        this.cy.add( x ) 
+      });
+      this.labels = [...this.dataGraph.labels];
+      this._cd.detectChanges();
+    }
     
-    this.clear(false);
-    this.isTempGraph = false;
-
-    this.dataGraph.nodes.forEach( x => { 
-      let ele = this.cy.add( x );
-      if( x.scratch.hasOwnProperty('_position') ) ele.position( _.clone( x.scratch['_position'] ) );
-    });
-    this.dataGraph.edges.forEach( x => { 
-      this.cy.add( x ) 
-    });
-
     this.refreshCanvas();
   }
 
@@ -278,19 +285,18 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
       let layoutOption = {
         name: 'random',
-        fit: true, padding: 50, boundingBox: undefined, 
+        fit: false, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
-        ready: () => {}, stop: () => this.toggleProgressBar(false)
+        ready: () => {}, stop: () => { this.toggleProgressBar(false); }
       };
       // rest random layout
       let elements = this.cy.nodes().filter(x => remains.includes(x.id()));
-      elements.layout(layoutOption).run();
-      
-      if( elements.empty() ){
+      elements.layout(layoutOption).run();     
+            
+      setTimeout(()=>{
         this.cy.fit( this.cy.elements(), 50);
-        this.toggleProgressBar(false);
-      }
+      }, 100);
     }
     else{
       this.graphChangeLayout('random');
@@ -760,7 +766,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         this.labels
         .filter(val => val.id == x.id)
         .map(label => {
-          // console.log( 'labels:', x, label.scratch['_style'] );
+          x.scratch['_style'] = _.cloneDeep( label.scratch['_style'] );
+          console.log( 'labels:', x.scratch['_style'], label.scratch['_style'] );
         });
         this.tempGraph.labels.push( x );
       });
@@ -799,7 +806,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         //   (ele:IElement, label:ILabel) => {
         //     return label.type == 'edges' && ele.data['label'] == label.name;
         //   });
-
+        this.labels = [...this.tempGraph.labels];
         this.initCanvas(true);
         // this.queryGraph.graphChangeLayout('cose');
       });
