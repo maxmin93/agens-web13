@@ -1,10 +1,23 @@
-.row-side { flex: 2.5; }
+.row-side { flex: 2; }
+.viewbox { height: auto; }
 
-.label-list { 
-    width: 150px; 
-    overflow: hidden;
-    text-overflow: ellipsis; 
-    white-space: nowrap; 
+p { 
+    display: flex; 
+    justify-content: center; 
+    align-content: center; 
+    font-size: .925rem; 
+    margin: 0; 
+    margin-top: .325rem; 
+    color: #4d4d4d; 
+    span { 
+        display: inline-block; 
+        min-width: 45px; 
+        margin-left: .625rem; 
+        padding: .125rem .325rem; 
+        border: 1px solid #ccc; 
+        border-radius: .225rem; 
+        text-align: center; 
+        font-size: 65%; 
+    }
 }
-
 

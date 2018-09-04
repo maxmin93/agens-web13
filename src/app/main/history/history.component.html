@@ -4,14 +4,13 @@
           <h4>HISTORY <strong>QUERY LOGS</strong></h4>  
           <div class="row-center">
             <a matTooltip="Refresh" matTooltipPosition="above" (click)="reload()"><mat-icon>refresh</mat-icon></a>
-            <span class="search">
-              <mat-icon>search</mat-icon>
+            <div class="search">
               <input
-                class="border"
+                class="border input-lg"
                 type='text'            
                 placeholder='Type to filter the userIP column...'
                 (keyup)='updateFilter($event)'/>
-            </span>
+            </div>
           </div>
         </div>
         <div class="col m-20 strech">

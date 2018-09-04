@@ -5,94 +5,102 @@
     </div>
 
     <!-- Graph content -->
-    <div class="row strech">
-        <div class="row strech row-side">
-            <div class="col strech">
-                <!-- graph canvas -->
-                <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
-                <nav>
-                <!-- 출력상자 : 상세 정보 -->
-                <ng-container *ngIf="!!selectedElement">
-                    <div id="slide-toggle" class="slide col">
-                        <div class="row-center">
-                            <h4>Label <strong>info.</strong></h4>
+    <div class="col strech p-20">
+        <div class="row-center">
+            <h4 class="title">Search in <strong>Result</strong></h4>
+            <ul class="sheet btn-group">
+                <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                    <mat-icon>close</mat-icon></a></li>
+            </ul>
+        </div>
+        <div class="row strech m-20">
+            <div class="row strech row-side">
+                <div class="col strech">
+                    <!-- graph canvas -->
+                    <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
+                    <nav>
+                    <!-- 출력상자 : 상세 정보 -->
+                    <ng-container *ngIf="!!selectedElement">
+                        <div id="slide-toggle" class="slide slide-no-icon col">
+                            <div class="row-center">
+                                <h4>Label <strong>info.</strong></h4>
+                            </div>
+                            <ul class="list col strech border noborder m-10 last-border-no">
+                                <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [count={{ selectedElement.data('size') }}]</li>
+                                <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                                <li class="col strech side-margin noborder p-no">
+                                    <span><span class="p-10 block">Properties ({{selectedProps.length}})</span></span>
+                                    <div class="json strech border" *ngIf="selectedProps">
+                                        <!-- <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()"> -->
+                                        <form [formGroup]="formGrp" class="label-info-slide">
+                                            <label class="row-center p-10 border-bottom" formArrayName="conditions" *ngFor="let prop of formGrp.controls.conditions.controls; let i = index">
+                                                {{ selectedProps[i] }} ({{ getPropType(selectedProps[i]) | lowercase }}) <input type="checkbox" [formControlName]="i"> 
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="row-end m-20">
+                                        <button class="btn m-r-10" (click)="addItemGroupBy()"><mat-icon class="m-r-10">add</mat-icon>GroupBy</button>
+                                        <button class="btn m-r-10" (click)="addItemFilterBy()"><mat-icon class="m-r-10">add</mat-icon>FilterBy</button>
+                                        <button class="btn btn-icon" (click)="resetChecked()"><mat-icon>refresh</mat-icon></button>  
+                                    </div>
+                                    
+                                </li>
+                            </ul>
                         </div>
-                        <ul class="list col strech border noborder m-10">
-                            <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [count={{ selectedElement.data('size') }}]</li>
-                            <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
-                            <li class="col strech side-margin noborder p-no">
-                                <span><span class="p-10 block">Properties ({{selectedProps.length}})</span></span>
-                                <div class="json strech border" *ngIf="selectedProps">
-                                    <!-- <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()"> -->
-                                    <form [formGroup]="formGrp" class="label-info-slide">
-                                        <label class="row-center p-10 border-bottom" formArrayName="conditions" *ngFor="let prop of formGrp.controls.conditions.controls; let i = index">
-                                            {{ selectedProps[i] }} ({{ getPropType(selectedProps[i]) | lowercase }}) <input type="checkbox" [formControlName]="i"> 
-                                        </label>
-                                    </form>
+                    </ng-container>
+                    </nav>
+                </div>
+                
+            </div>    
+            <div class="col strech">
+                <div class="col strech">
+                    <h5 class="title"><strong>filter By List </strong></h5>
+                    <div *ngIf="filterByList" class="strech overflow-y border m-10">
+                        <ul class="last-border-no">
+                            <li *ngFor="let item of filterByList; let i = index" class="border-bottom p-20 col">
+                                <div class="row-center">
+                                    <div>
+                                        <span class="sub-title">{{ item.label }}</span>
+                                        <p>{{ item.prop }} <span>{{ item.type | lowercase }}</span></p>
+                                    </div>
+                                    <button class="btn btn-icon" (click)="removeItemFilterBy(i)"><mat-icon>delete_outline</mat-icon></button>
                                 </div>
-                                <div class="row m-20">
-                                    <button class="row-side strech" (click)="addItemGroupBy()">Add groupBy</button>
-                                    <button class="row-side strech" (click)="addItemFilterBy()">Add filterBy</button>
-                                    <button class="strech" (click)="resetChecked()">reset</button>  
+                                <div class="col m-10 m-b-10">
+                                    <div class="m-10 row-center row-bottom">
+                                        <span class="sub-title strech">title</span>
+                                        <select name="fOper" [(ngModel)]="item.oper" class="strech">
+                                            <option *ngFor="let oper of filterOpers" [value]="oper">{{ oper }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="m-10 row-center row-bottom">
+                                        <span class="sub-title strech">title</span>
+                                        <input class="strech" strechname="fValue" [(ngModel)]="item.value" required type="text">
+                                    </div>
                                 </div>
-                                
                             </li>
                         </ul>
                     </div>
-                </ng-container>
-                </nav>
-            </div>
-             <!-- Graph.Meta : toolbar -->
-            <div class="row">
-                <div id="agens-graph-toolbar" class="viewbox strech theme">                    
-                    <ul class="list icon">
-                        <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                                <mat-icon>refresh</mat-icon></a></li>
-                        <li><a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
-                                <mat-icon>unfold_more</mat-icon></a></li>
-                        <li><a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
-                                <mat-icon>unfold_less</mat-icon></a></li>
-                        <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
-                                <mat-icon>close</mat-icon></a></li>
-                    </ul>
                 </div>
-            </div>
-        </div>    
-        <div class="col strech">
-          <div class="json m-10" *ngIf="filterByList">
-            <h5 class="title"><strong>filterBy List </strong></h5>
-            <ul>
-              <li *ngFor="let item of filterByList; let i = index" class="row-center p-10">
-                <span>{{ item.label }}</span> ::
-                <div class="label-list">
-                  <span>{{ item.prop }} ({{ item.type | lowercase }})</span><br /> 
-                  <span>
-                    <select name="fOper" [(ngModel)]="item.oper">
-                      <option *ngFor="let oper of filterOpers" [value]="oper">{{ oper }}</option>
-                    </select>
-                  </span> &nbsp; &nbsp;
-                  <span>
-                    <input name="fValue" [(ngModel)]="item.value" required style="width: 50px">
-                  </span>
+                <div class="col strech m-20">
+                    <h5 class="title"><strong>groupBy List</strong></h5>
+                    <div class="m-10 border strech overflow-y" *ngIf="groupByList">
+                        <ul class="last-border-no">
+                            <li *ngFor="let item of groupByList; let i = index" class="row-center p-20 border-bottom">
+                                <div>
+                                    <span class="sub-title">{{ item.label }}</span> 
+                                    <p title= "{{ item.prop }}" > {{ item.prop }} <span>{{ item.type | lowercase }}</span></p>
+                                </div>
+                                <button class="btn btn-icon" (click)="removeItemGroupBy(i)"><mat-icon>delete_outline</mat-icon></button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <button (click)="removeItemFilterBy(i)">Del</button>
-              </li>
-            </ul>
-          </div>
-          <div class="json m-10" *ngIf="groupByList">
-            <h5 class="title"><strong>groupBy List</strong></h5>
-            <ul class="list border noborder">
-              <li *ngFor="let item of groupByList; let i = index" class="row-center p-10">
-                <span>{{ item.label }}</span> 
-                <span class="label-list" title= "{{ item.prop }}" > {{ item.prop }} ({{ item.type | lowercase }})</span>
-                <button (click)="removeItemGroupBy(i)">Del</button>
-              </li>
-            </ul>
-          </div>
-          <div class="col m-20">
-              <button class="strech" mat-raised-button color="primary" [disabled]="groupByList.length == 0 && filterByList.length == 0"
-              (click)="close()">Reload</button>
-          </div>                
-        </div>        
+                <div class="col m-20">
+                    <button class="strech" mat-raised-button color="primary" [disabled]="groupByList.length == 0 && filterByList.length == 0"
+                    (click)="close()">Reload</button>
+                </div>                
+            </div>   
+        </div>
+             
     </div>
 </div>
