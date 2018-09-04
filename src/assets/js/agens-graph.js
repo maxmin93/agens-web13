@@ -534,7 +534,6 @@
       if( options && options.hasOwnProperty('padding') ) layoutOption.padding = options.padding;
       if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
       if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
-      console.log( 'cy.$api.changeLayout:', layout, layoutOption);
 
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);

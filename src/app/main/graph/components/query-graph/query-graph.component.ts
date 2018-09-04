@@ -767,7 +767,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         .filter(val => val.id == x.id)
         .map(label => {
           x.scratch['_style'] = _.cloneDeep( label.scratch['_style'] );
-          console.log( 'labels:', x.scratch['_style'], label.scratch['_style'] );
         });
         this.tempGraph.labels.push( x );
       });

@@ -49,7 +49,7 @@
                             </mat-slide-toggle>
                         </div>
                         <ul class="list col strech border noborder m-10">
-                            <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ selectedElement.id() }}]</li>
+                            <li class="side-margin"><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
                             <li class="side-margin"><span>Name</span>{{ selectedElement.data('name') }}</li>
                             <li class="col strech side-margin">
                                 <span>Data</span>

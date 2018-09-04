@@ -231,7 +231,7 @@ export class AgensDataService {
 
   grph_filterNgroupBy(gid:number, params:any):Observable<any> {
     if( params['filters'].length == 0 && params['groups'].length == 0 ) return empty();
-    console.log( 'grph_filterNgroupBy:', params);
+    // console.log( 'grph_filterNgroupBy:', params);
 
     const url = `${this.api.grph}/filterby-groupby/${gid}`;
     return this._http.post<any>(url, params, {headers: this.createAuthorizationHeader()})

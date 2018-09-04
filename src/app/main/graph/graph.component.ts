@@ -303,7 +303,7 @@ return path1, path2;
       if( from.line == to.line && from.ch == to.ch ) selection = this.editor.getValue();
       else selection = this.editor.getRange(from, to);
     }
-    console.log( 'editor query:', selection );
+    // console.log( 'editor query:', selection );
     return selection;
   }
 
