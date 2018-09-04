@@ -12,7 +12,6 @@ export class TimelineSliderComponent implements OnInit {
 
   private initialized = false;
 
-  private isPlayed:boolean = false;
   private isPaused:boolean = false;
   private btnPlayDisabled:boolean = true;
   private btnPauseDisabled:boolean = true;
@@ -27,7 +26,7 @@ export class TimelineSliderComponent implements OnInit {
 
   // current value, min & max
   private _value: any;
-  get value():any { return this._value ? this.toFormat(this._value) : undefined; }  
+  get value():any { return this.initialized ? this.toFormat(this._value) : undefined; }  
   private _min:any;
   get min():any { return this.initialized ? this.toFormat(this._min) : undefined; }
   private _max:any;
@@ -42,7 +41,6 @@ export class TimelineSliderComponent implements OnInit {
 
     this.intervalId = undefined;
     this.intervalCount = 0;
-    this.isPlayed = false;
     this.isPaused = false;
 
     this.disable = true;
@@ -78,7 +76,7 @@ export class TimelineSliderComponent implements OnInit {
   @Input() set disable(b:boolean){    
     this.btnPlayDisabled = b;
     this.btnPauseDisabled = true;
-    this.btnStopDisabled = true;
+    this.btnStopDisabled = false;
     this.sliderDisabled = b;
   }
 
@@ -89,7 +87,7 @@ export class TimelineSliderComponent implements OnInit {
   private inverseOffset:any = 0;
 
   // @Output() onStart: EventEmitter<any> = new EventEmitter<any>();
-  @Output() onInput: EventEmitter<any> = new EventEmitter<any>();
+  @Output() onControl: EventEmitter<any> = new EventEmitter<any>();
   @Output() onChange: EventEmitter<any> = new EventEmitter<any>();
   @Output() onUpdate: EventEmitter<any> = new EventEmitter<any>();
 
@@ -125,22 +123,24 @@ export class TimelineSliderComponent implements OnInit {
   }
 
   onInputSlider( event ){
-    this.onInput.emit( this.toFormat(event.value) );
+    this.btnStopDisabled = false;
+    this.onChange.emit( this.toFormat(event.value) );
   }
-
   onChangeSlider( event ){
+    this.btnStopDisabled = false;
     this.onChange.emit( this.toFormat(event.value) );
   }
 
   doPlay(){
     if( !this._values || this._values.length == 0 ) return;
-    this.isPlayed = true;
     this.isPaused = false;
     this.btnPlayDisabled = true;
     this.btnPauseDisabled = false;
     this.btnStopDisabled = false;
     this.sliderDisabled = true;
     this.sliderElement.thumbLabel = true;
+    
+    this.onControl.emit('play');   // canvas clear before play timeline
 
     this.intervalCount = 0;
     this.intervalId = setInterval(()=>{
@@ -158,14 +158,16 @@ export class TimelineSliderComponent implements OnInit {
 
   doPause(){
     this.isPaused = !this.isPaused;
+    if( this.isPaused ) this.onControl.emit('paused');
+    else this.onControl.emit('resumed');
   }
 
   doStop(){
+    this.onControl.emit('stop');
     if( this.intervalId ){
       clearInterval(this.intervalId);
       this.intervalId = undefined;
     }
-    this.isPlayed = false;
     this.isPaused = false;
     this.btnPlayDisabled = false;
     this.btnPauseDisabled = true;

@@ -145,7 +145,7 @@
                                 [interval]="3000"
                                 (onChange)="onChangeTimelineSlider($event)"
                                 (onUpdate)="onUpdateTimelineSlider($event)"
-                                (onInput)="onUpdateTimelineSlider($event)"></timeline-slider>
+                                (onControl)="onControlTimelineSlider($event)"></timeline-slider>
                             <!-- <mat-slider></mat-slider> -->
                         </div>
                     </div>
@@ -218,7 +218,7 @@
                             <h4 class="mat-subhead">Layout <strong>Type</strong></h4>
                         </div>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('random')">Random</button>
+                            <button mat-menu-item (click)="graphChangeLayout('random')">Random (default)</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('grid')">Grid</button>
                         <mat-divider></mat-divider>
@@ -228,15 +228,15 @@
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('cola')">Cola</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('cose')">Cose(nodes.size &lt; 400)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('cose')">Cose</button>
                         <mat-divider></mat-divider>
                             <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">Cose-Bilkent(very slow)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('dagre')">Dagre(hierachy)</button>
+                            <button mat-menu-item (click)="graphChangeLayout('dagre')">Dagre (hierachy)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('klay')">Klay</button>
+                            <button mat-menu-item (click)="graphChangeLayout('klay')">Klay (hierachy)</button>
                         <mat-divider></mat-divider>
-                            <button mat-menu-item (click)="graphChangeLayout('euler')">Euler</button>
+                            <button mat-menu-item (click)="graphChangeLayout('euler')">Euler (very fast)</button>
                     </mat-menu>
                 </li>
 

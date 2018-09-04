@@ -683,11 +683,48 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       }).filter(v => v != null);
   }
   
-  onChangeTimelineSlider(event) {
-    console.log("Slider changed:", event);
+  onControlTimelineSlider(event) {
+    console.log("Slider control:", event);
+    if( !event ) return;
+
+    if( event == 'play' ){
+      this.cy.elements(':selected').unselect();
+      this.cy.elements().style('visibility','hidden');
+    }
+    else if( event == 'stop' ){
+      this.cy.elements(':selected').unselect();
+      this.cy.elements().style('visibility','visible');
+    }
+  }
+  onChangeTimelineSlider(event) {    
+    if( !event ) return;
+
+    let labelName = this.timelineLabelCtl.value.name;
+    let propKey = this.timelinePropertyCtl.value.key;
+    let targets = this.cy.elements().filter(e => {
+      return e.data('label') == labelName && e.data('props').hasOwnProperty(propKey)
+              && e.data('props')[propKey] == event;
+    });
+    this.cy.elements(':selected').unselect();
+    targets.select();
+
+    let visibleElements = this.cy.collection();
+    targets.forEach(e => {
+      visibleElements = visibleElements.union(e);
+      visibleElements = visibleElements.union( e.neighborhood() );
+      visibleElements = visibleElements.union( visibleElements.neighborhood() );
+      visibleElements = visibleElements.union( visibleElements.edgesWith(visibleElements) );
+    });
+    visibleElements.style('visibility','visible');
+    // visibleElements.animate({ style: { 'visibility': 'visible' }, duration: 500 });
+    let restElements = this.cy.elements().difference( visibleElements );
+    restElements.style('visibility','hidden');
+    // restElements.animate({ style: { 'visibility': 'hidden' }, duration: 200 });
+    console.log("Slider changed:", event, visibleElements.size(), restElements.size());
   }
   onUpdateTimelineSlider(event) {
     console.log("Slider updated:", event);
+    if( !event ) return;
   }
   setTimelineSliderValue( value ) {
     this.timelineSlider.update( value );

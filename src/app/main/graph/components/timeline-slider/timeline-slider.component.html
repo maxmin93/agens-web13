@@ -3,7 +3,7 @@
 </button>
 <button mat-button [disabled]="btnPauseDisabled" (click)="doPause()">
   <mat-icon [style.color]="btnPauseDisabled ? '#afafaf' : '#303F9F'">pause</mat-icon>
-  <span *ngIf="!isPaused">Pause</span><span *ngIf="isPaused">Continue</span>
+  <span *ngIf="!isPaused">Pause</span><span *ngIf="isPaused">Resume</span>
 </button>
 <button mat-button [disabled]="btnStopDisabled" (click)="doStop()">
   <mat-icon [style.color]="btnStopDisabled ? '#afafaf' : '#303F9F'">stop</mat-icon>Stop
