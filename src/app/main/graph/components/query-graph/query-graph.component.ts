@@ -7,7 +7,7 @@ import { filter } from 'rxjs/operators';
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
 import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
-import { IonDateSliderComponent } from '../ion-date-slider/ion-date-slider.component';
+import { TimelineSliderComponent } from '../timeline-slider/timeline-slider.component';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -83,7 +83,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
-  @ViewChild('timelineSlider') timelineSlider: IonDateSliderComponent;
+  @ViewChild('timelineSlider') timelineSlider: TimelineSliderComponent;
   @ViewChild('btnSetTimeline') public btnSetTimeline: MatButton;
 
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();

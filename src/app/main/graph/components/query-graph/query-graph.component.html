@@ -140,15 +140,12 @@
                             </mat-form-field>
                             <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="setTimelineData()">Set Timeline</button>
 
-                            <ion-date-slider #timelineSlider
-                                [current]="2018-02-01"
-                                [grid]="true"
+                            <timeline-slider #timelineSlider
                                 [values]="timeline_data"
-                                [disable]="false"
-                                [interval]="2000"
+                                [interval]="3000"
                                 (onChange)="onChangeTimelineSlider($event)"
                                 (onUpdate)="onUpdateTimelineSlider($event)"
-                                (onFinish)="onUpdateTimelineSlider($event)"></ion-date-slider>
+                                (onInput)="onUpdateTimelineSlider($event)"></timeline-slider>
                             <!-- <mat-slider></mat-slider> -->
                         </div>
                     </div>
