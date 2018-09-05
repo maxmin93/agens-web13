@@ -50,6 +50,7 @@ import { CellViewerComponent } from './main/graph/sheets/cell-viewer/cell-viewer
 import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style.component';
 import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.component';
 import { TimelineSliderComponent } from './main/graph/components/timeline-slider/timeline-slider.component';
+import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
 
 // import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
 // import { ImageExportDialog } from './main/graph/image-export.dialog';
@@ -77,6 +78,7 @@ import { TimelineSliderComponent } from './main/graph/components/timeline-slider
     LabelStyleComponent,
     EditGraphComponent,
     TimelineSliderComponent,
+    PlpyEditorComponent,
     StatGraphComponent,
 
     // LabelStyleSettingDialog,

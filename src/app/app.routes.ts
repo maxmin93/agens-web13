@@ -5,6 +5,7 @@ import { LoginComponent } from './login/login.component';
 
 import { MainComponent } from './main/main.component';
 import { DashboardComponent } from './main/dashboard/dashboard.component';
+import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
 import { GraphComponent } from './main/graph/graph.component';
 import { HistoryComponent } from './main/history/history.component';
 
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path: '', component: MainComponent, canActivate: [AuthGuardService]
     , children: [
       { path: '', component: DashboardComponent }
+      ,{ path: 'pyeditor', component: PlpyEditorComponent }
       ,{ path: 'graph', component: GraphComponent }
       ,{ path: 'history', component: HistoryComponent }
     ]},

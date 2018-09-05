@@ -8,6 +8,9 @@
         <mat-button-toggle #btnMenuMain value="/" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
             <a>SCHEMA</a>
         </mat-button-toggle>
+        <mat-button-toggle #btnMenuPyeditor value="/pyeditor" disabled="{{ currentMenu=='pyeditor' }}" [routerLink]="['/pyeditor']">
+            <a>PL/Python</a>
+        </mat-button-toggle>
         <mat-button-toggle #btnMenuGraph value="/graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']">
             <a>GRAPH</a>
         </mat-button-toggle>

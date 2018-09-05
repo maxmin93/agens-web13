@@ -20,6 +20,7 @@ export class MainComponent implements OnInit, AfterViewInit {
   
   // @ViewChild('btnMenuGroup') public btnMenuGroup: matButtonToggleGroup;
   @ViewChild('btnMenuMain') public btnMenuMain: MatButtonToggle;
+  @ViewChild('btnMenuPyeditor') public btnMenuPyeditor: MatButtonToggle;
   @ViewChild('btnMenuGraph') public btnMenuGraph: MatButtonToggle;
   @ViewChild('btnMenuHistory') public btnMenuHistory: MatButtonToggle;
 
