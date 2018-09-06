@@ -52,6 +52,7 @@ export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
   public project: any = undefined;
 
   // controll whether make buttons to able or disable
+  isExpanded: boolean = false;
   isLoading: boolean = false;
   // CodeMirror Handler
   editor: any = undefined;
@@ -87,6 +88,7 @@ return path1, path2;
 
   constructor(    
     private _cd: ChangeDetectorRef,
+    private _el: ElementRef,
     private _router: Router,
     public dialog: MatDialog,    
     private _api: AgensDataService,
@@ -106,12 +108,13 @@ return path1, path2;
     // CodeMirror : get mime type
     var mime = 'application/x-cypher-query';
     this.editor = new CodeMirror.fromTextArea( this.queryEditor.nativeElement, {
-      // keyMap: "sublime",
-      indentUnit: 4,
       mode: mime,
+      keyMap: "sublime",
+      lineNumbers: true,
+      tabSize: 4,
+      indentUnit: 4,
       indentWithTabs: false,
       smartIndent: true,
-      lineNumbers: true,
       styleActiveLine: true,
       matchBrackets: true,
       autofocus: true,
@@ -120,27 +123,14 @@ return path1, path2;
     // CodeMirror : initial value
     this.editor.setValue( this.query );
     this.editor.setSize('100%', '100px');
-    
+
+    // toggleComment 만 안되서 기능 구현
     this.installCodeMirrorAddons();
     this.editor.setOption("extraKeys", {
-      // Tab: function(cm) {
-      //   var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-      //   cm.replaceSelection(spaces);
-      // },
-      "Tab": "insertTab",
-      "Shift-Tab": "indentLess",
-      "Alt-Enter": "insertLineAfter",
-      "Shift-Alt-Enter": "insertLineBefore",  
-      "Ctrl-/": "toggleComment",      
-      // function(cm) {    // 
-      //   console.log(cm);
-      //   var pos = cm.getCursor();
-      //   cm.setCursor({ line: pos.line, ch: 0 });
-      //   cm.lineComment(pos.line, pos.line);
-      // }
+      "Ctrl-/": "toggleSqlComment"
     });
 
-    //
+    // 
     // ** NOTE: 이거 안하면 이 아래쪽에 Canvas 영역에서 마우스 포커스 miss-position 문제 발생!!
     //
     // keyup event
@@ -153,36 +143,12 @@ return path1, path2;
   private installCodeMirrorAddons(){
     var cmds = CodeMirror.commands;
     var Pos = CodeMirror.Pos;
-
-    function insertLine(cm, above) {
-      if (cm.isReadOnly()) return CodeMirror.Pass
-      cm.operation(function() {
-        var len = cm.listSelections().length, newSelection = [], last = -1;
-        for (var i = 0; i < len; i++) {
-          var head = cm.listSelections()[i].head;
-          if (head.line <= last) continue;
-          var at = Pos(head.line + (above ? 0 : 1), 0);
-          cm.replaceRange("\n", at, null, "+insertLine");
-          cm.indentLine(at.line, null, true);
-          newSelection.push({head: at, anchor: at});
-          last = head.line + 1;
-        }
-        cm.setSelections(newSelection);
-      });
-      cm.execCommand("indentAuto");
-    }
-
-    cmds.insertLineAfter = function(cm) { return insertLine(cm, false); };
-    cmds.insertLineBefore = function(cm) { return insertLine(cm, true); };
-
     /////////////////////////////////////////////////////////////////////
     // addon/comment/comment.js
-
-    cmds.toggleComment = function(cm) {
+    cmds.toggleSqlComment = function(cm) {
       let ranges = cm.listSelections();
       for (let i = ranges.length - 1; i >= 0; i--) {
         let from = ranges[i].from(), to = ranges[i].to();
-        console.log(from, to);
         for(let j = from.line; j <= to.line; j++ ){
           if( j != from.line || j != to.line ){
             if( j == from.line && from.ch == cm.getLine(j).length - 1 ) continue;
@@ -201,8 +167,7 @@ return path1, path2;
         }
         cm.setCursor(to);
       }  
-    };
-    
+    };    
   }
 
   tabChanged($event){
@@ -244,6 +209,17 @@ return path1, path2;
   initCallbackStat(isVisible:boolean){
     // change Detection by force
     this._cd.detectChanges();
+  }
+
+  toggleExpandEditor(){
+    this.isExpanded = !this.isExpanded;
+
+    // toggle off : canvas resize (안그러면 위치 인식 못해서 클릭 안됨)
+    if( !this.isExpanded && agens.cy ){
+      setTimeout(()=> {
+        agens.cy.resize();
+      },50);
+    }
   }
 
   /////////////////////////////////////////////////////////////////

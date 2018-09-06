@@ -15,6 +15,7 @@
                     [columnMode]="'force'" [limit]="10"
                     [rows]='tablePlpyRows' [columns]="tablePlpyColumns"
                     [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'"
+                    [selected]="selected" [selectionType]="'single'" (select)='onSelect($event)'
                     >
                     <!-- <ngx-datatable-column name="TYPE"></ngx-datatable-column>
                     <ngx-datatable-column name="ID"></ngx-datatable-column>
