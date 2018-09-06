@@ -119,7 +119,7 @@ return path1, path2;
     });
     // CodeMirror : initial value
     this.editor.setValue( this.query );
-    this.editor.setSize('100%', '60px');
+    this.editor.setSize('100%', '100px');
     
     this.installCodeMirrorAddons();
     this.editor.setOption("extraKeys", {

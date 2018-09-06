@@ -138,7 +138,7 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; 
 
 .p-20 { padding: 1.25rem; }
 .p-10 { padding: .625rem; }
-.p-no, .mat-tab-vertical .mat-tab-header { padding: 0 !important }
+.p-no, .mat-tab-vertical .mat-tab-header, .CodeMirror-lines { padding: 0 !important }
 
 .border { border: 1px solid #ddd !important;   
   &.border-dotted { border-style: dotted; } 
@@ -156,6 +156,11 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; 
 ul.border.noborder, .noborder { border: none !important; }  
 
 .mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
+
+.mat-standard-chip { 
+  border-radius: .225rem !important; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
 
 /* button 관련 정리로 
 추후 theme을 가진 button도 추가예정 */
@@ -441,7 +446,7 @@ select {
     .mat-tab-labels .mat-tab-label { 
       min-width: 6.5rem; 
       height: 3rem; 
-      padding: 0 1rem; 
+      padding: 0 .625rem; 
       font-size: 0.875rem;
       flex: 1; 
     }
@@ -452,16 +457,49 @@ select {
 
 .mat-tab-vertical.mat-tab-group { 
   flex-direction: row; 
-  .mat-tab-labels { flex-direction: column; }
+  .mat-tab-header { border-radius: .325rem 0 0 .325rem; }
+  .mat-tab-labels { 
+    height: 100%; 
+    flex-direction: column; 
+    .mat-tab-label {
+      position: relative;
+      min-width: 4rem;
+      height: initial; 
+      border-right: 1px solid #ddd; 
+      flex: 1; 
+      
+      &:last-child { border-bottom: 0; }
+      &::before { 
+        content:'';
+        display: block; 
+        background: #005aa8; 
+        width: 2px; 
+        height: 0;
+        position: absolute; 
+        right: 0; 
+        top: 0; 
+        bottom: 0; 
+        margin: auto; 
+        transition: all .3s ease-in-out; 
+      }
+
+      &.mat-tab-label-active { 
+        &::before {
+          height: 100%;
+        }
+      }
+      
+      
+    }
+  }
   .mat-ink-bar { display: none; }
   .mat-tab-header {
     margin: 2px; 
     margin-right: 1.25rem; 
     border: none;  
-    .mat-tab-labels .mat-tab-label {
-      flex: initial; 
-    }
   }
+
+  
 }
 
 /* CodeMirror
@@ -488,8 +526,7 @@ select {
 .empty-row::before, 
 .mat-subhead::before, 
 .slide h4::before,
-.title::before,
-.mat-tab-vertical .mat-tab-label-active::before  {
+.title::before  {
   content:'';
   background: #005aa8; 
   width: 8px; 
@@ -559,7 +596,7 @@ select {
     width: 100%; 
     height: 100%; 
     background: #fff; 
-    filter: blur(15px); 
+    opacity: .5;
     z-index: -1;
   }
 }
@@ -643,7 +680,7 @@ ul.list {
 
 // card 
 
-.card, .mat-tab-vertical .mat-tab-header { 
+.card { 
   background: #fff; 
   padding: 1.25rem; 
   border-radius: .325rem; 

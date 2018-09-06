@@ -88,6 +88,10 @@
       if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
       return '55px';
     },
+    nodeWidthSelect: function(e){
+      if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
+      return '75px';
+    },
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.bc;
@@ -158,25 +162,28 @@
           'text-halign': 'center',    // text-halign: left, center, right
           'text-valign': 'center',    // text-valign: top, center, bottom
           'text-outline-width': 1,
-          'text-outline-color': 'black',
+          'text-outline-color': function(e){ return agens.styles.nodeBColor(e); },
           'font-weight': 400,
           'font-size': 10,
           'font-family':"Noto Sans, Noto Sans Bold, sans-serif",
           'min-zoomed-font-size': 5,  // not shown when less than this
           'text-opacity': 1,
+          'transition-property': 'width, height, border-style, border-width, background-color, text-outline-color, color',
           'transition-duration':'.5s',
-          'transition-timing-function': 'ease-in-out'
+          'transition-timing-function': 'ease-out-cubic'
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
         selector: 'node:selected',
         css: {
+          'background-color': '#fff', 
+          'width': 60,
+          'height': 60,
           'border-style':'double',
-          'border-width':'12',
-          'border-color': 'red',
+          'border-width':'5',
+          'text-outline-color':'white', 
+          'color': function(e){ return agens.styles.edgeDColor(e); },
           'z-index': 9,
-          'transition-duration':'.5s',
-          'transition-timing-function': 'ease-in-out'
         }}, {
         selector: 'node:locked',
         css: {
@@ -214,20 +221,23 @@
           'curve-style': 'bezier',
           'font-size': 10,
           'target-arrow-shape': 'triangle',
-          'source-arrow-shape': 'none'
+          'source-arrow-shape': 'none',
+          'transition-property': 'width, target-arrow-color, line-color, source-arrow-color, color',
+          'transition-duration':'.5s',
+          'transition-timing-function': 'ease-out-cubic'
         }}, {
         /// 엣지만 클릭했을 경우 변화
         selector: 'edge:selected',             
         css: {
           'opacity': 1,
-          'width': 10,
-          'line-style': 'dashed',            // line-style: solid, dotted, dashed
+          'width': 14,
+          'line-style': 'solid',            // line-style: solid, dotted, dashed
           'line-color': '#83878d',
           'target-arrow-color': '#83878d',
           'source-arrow-color': '#83878d',
-          'text-margin-y': -15,
-          'text-outline-width': 2,
-          'text-outline-color': 'white',
+          'text-outline-width': 1,
+          'text-outline-color': '#83878d',
+          'color':'white', 
           'z-index': 9
         }}, {
         /// 엣지를 잠궜을 때 변화
@@ -260,16 +270,13 @@
         // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
         selector: 'node.highlighted',      
         css: {
-          'background-color': '#ffffff',
-          'width':'65px',
-          'height':'65px',
-          'color':'#5fa9dc',
-          'line-color': '#a5abb6',
-          'border-style':'solid',
-          'border-color': '#5fa9dc',
-          'border-width': 4,
-          'transition-property': 'background-color, line-color, target-arrow-color',
-          'transition-duration': '0.2s',
+          'background-color': '#fff', 
+          'width': 60,
+          'height': 60,
+          'border-style':'double',
+          'border-width':'5',
+          'text-outline-color':'white', 
+          'color': function(e){ return agens.styles.edgeDColor(e); },
           'z-index': 99
         }},{
         selector: 'edge.highlighted',
