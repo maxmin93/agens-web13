@@ -266,4 +266,16 @@ export class AgensDataService {
     return this._http.get<IDoubleListDto>(url, {headers: this.createAuthorizationHeader()});
   }
 
+  //////////////////////////////////////////////////////
+
+  core_pgproc_list():Observable<any> {
+    const url = `${this.api.core}/pgproc/list`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
+  }
+
+  core_pgproc_detail(pid:string):Observable<any> {
+    const url = `${this.api.core}/pgproc/${pid}`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
+  }
+
 }

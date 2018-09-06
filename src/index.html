@@ -29,28 +29,6 @@
         <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
     </div>    
   </app-root>
-  <script>
-  
-  function sizeToggler(){
-    let toggler = document.getElementById('sizeToggler')
-    toggler.classList.toggle('on')
-    
-    if( toggler.classList.contains('on') ){
-      document.getElementById('tabComponent').style.flex = "0"
-      document.querySelectorAll('.edit-size').forEach( editSize => {
-        editSize.classList.add('strech')
-      })
-    } else {
-      document.getElementById('tabComponent').style.flex = "1"
-      document.querySelectorAll('.edit-size').forEach( editSize => {
-        editSize.classList.remove('strech')
-      })
-      // toggle off : canvas resize (안그러면 위치 인식 못해서 클릭 안됨)
-      if( agens.cy ) agens.cy.resize();
-    }
-  }
-
-  </script>  
 </body>
 
 </html>
