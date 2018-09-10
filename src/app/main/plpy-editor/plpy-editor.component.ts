@@ -38,6 +38,8 @@ export class PlpyEditorComponent implements OnInit {
   editor: any = undefined;
   // CodeMirror Editor : initial value
   pycode:string = '';
+  // SQL statement: create or replace function ...
+  functionScript:string = '';
 
   // 출력: 테이블 labels
   tempRows: any[] = [];
@@ -51,6 +53,8 @@ export class PlpyEditorComponent implements OnInit {
   selectedPlpy: any = undefined;
   selected: any[] = [];            // for ngx-datatable selector
   
+  sqlMessage:string = '';
+
   // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
   @ViewChild('tablePlpy') tablePlpy: DatatableComponent;   
   @ViewChild('progressBar') progressBar: ElementRef;
@@ -115,6 +119,8 @@ export class PlpyEditorComponent implements OnInit {
       },
       () => {
         if( this.tempRows ) this.tablePlpyRows = [...this.tempRows];
+        this.sqlMessage = `function list : count = ${this.tablePlpyRows.length}`;
+        this._cd.detectChanges();
       }
     );
   }
@@ -129,6 +135,8 @@ export class PlpyEditorComponent implements OnInit {
       },
       () => {
         if( this.selectedPlpy ) this.makePlpySource( this.selectedPlpy );
+        this.sqlMessage = `source-load : oid=${this.selectedPlpy.id} (${this.selectedPlpy.type}/${this.selectedPlpy.lang})`;
+        this._cd.detectChanges();
       }
     );
   }
@@ -137,17 +145,26 @@ export class PlpyEditorComponent implements OnInit {
     // console.log( 'makePlpySource:', row );
     if( !row.hasOwnProperty('source') ) this.editor.setValue( 'no source' );
 
-    let source:string = 
+    let source:string = this.trimNewline(row.source);
+    this.editor.setValue( source );
+
+    this.functionScript = 
 `CREATE OR REPLACE FUNCTION "${row.name}" (
   ${row.args_type}
 ) RETURNS
   ${row.rtn_type}
 AS $$
-  ${row.source}
+${source}
 $$ LANGUAGE ${row.lang};
 `;
-    this.editor.setValue( row.source );
-    this._cd.detectChanges();
+  }
+
+  // pg catalog 에서 내보낸 source 앞뒤로 '\n' 붙어 있는데 이를 제거
+  trimNewline(str:string):string {
+    if( str.length <= 2 ) return str.trim();
+    if( str.startsWith('\n') ) str = str.substring(1);
+    if( str.endsWith('\n') ) str = str.substring(0, str.length-2);
+    return str;
   }
 
   /////////////////////////////////////////////

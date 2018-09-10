@@ -17,12 +17,12 @@
                     [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'"
                     [selected]="selected" [selectionType]="'single'" (select)='onSelect($event)'
                     >
-                    <!-- <ngx-datatable-column name="TYPE"></ngx-datatable-column>
-                    <ngx-datatable-column name="ID"></ngx-datatable-column>
-                    <ngx-datatable-column name="NAME"></ngx-datatable-column>
-                    <ngx-datatable-column name="SIZE"></ngx-datatable-column> -->
                 </ngx-datatable>
-            </div> 
+                <mat-form-field class="example-full-width">
+                    <textarea matInput placeholder="SQL Messages" disabled
+                        [value]="sqlMessage"></textarea>
+                  </mat-form-field>
+          </div> 
         </div>
         <div class="right-side row strech" id="dashboard-canvas">
             <div class="col strech row-side card">
@@ -30,15 +30,33 @@
                     <mat-icon class="m-r-10">bubble_chart</mat-icon><h4>PL/Python <strong>Editor</strong></h4>
                 </div>
                 <div class="col strech m-20">
-
                     <!-- CodeMirror: Python editor -->
                     <form class="col edit-size strech">
+
+                        <mat-form-field class="example-full-width">
+                          <input matInput placeholder="Name" 
+                              [value]="selectedPlpy ? selectedPlpy.name : ''" />
+                        </mat-form-field>
+                        <mat-form-field class="example-full-width">
+                          <input matInput placeholder="Arguments" 
+                              [value]="selectedPlpy ? selectedPlpy.args_type : ''" />
+                        </mat-form-field>
+                        <mat-form-field class="example-full-width">
+                          <input matInput placeholder="Return" 
+                              [value]="selectedPlpy ? selectedPlpy.rtn_type : ''" />
+                        </mat-form-field>
+                        <mat-form-field class="example-full-width">
+                          <textarea matInput placeholder="Leave a comment" 
+                              [value]="selectedPlpy ? selectedPlpy.desc : ''"></textarea>
+                        </mat-form-field>
+  
                         <textarea
                         id="plpy-editor" #plpyEditor type="text" name="plpy" class="strech"
-                        (change)="pycode=plpyEditor.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
+                        (change)="pycode=plpyEditor.value">
+                        </textarea>
                     </form>
 
-                    <!-- <div class="viewbox">
+                    <div class="viewbox">
                         <div class="scroll-hide">
                             <ul class="list icon">
                                 <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
@@ -49,10 +67,11 @@
                                     <mat-icon>refresh</mat-icon></a></li>
                             </ul>
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
-            <div class="col strech card">
+
+            <!-- <div class="col strech card">
                 <div class="col strech" id="schemaList">
                     <h4>
                         <div class="row-start"><mat-icon class="m-r-10">info</mat-icon> <h4>PL/Python <strong>Help</strong></h4></div>
@@ -73,7 +92,7 @@
                         </li>
                     </ul>
                 </div>
-            </div> 
+            </div>  -->
 
         </div>  
     </div>
