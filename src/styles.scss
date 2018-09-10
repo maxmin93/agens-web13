@@ -89,6 +89,8 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
 .row-center { justify-content: space-between; }
 .row-end { justify-content: flex-end; }
 
+.row-middle { justify-content: center; }
+
 .row-start, .row-center, .row-end { align-items: center; }
 .row-start.row-bottom, .row-center.row-bottom, .row-end.row-bottom { align-items: flex-end; }
 .col-end { align-items: flex-end }; 
@@ -149,15 +151,15 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; 
 .border-right-no { border-right: none; }
 .border-top-no { border-top: none; }
 .border-bottom-no { border-bottom: none; }
-
 ul.border.noborder, .noborder { border: none !important; }  
-
 .mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
 
 .mat-standard-chip { 
   border-radius: .225rem !important; 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
+
+.z-10 { z-index: 10; }
 
 /* button 관련 정리로 
 추후 theme을 가진 button도 추가예정 */
@@ -199,6 +201,13 @@ a {
   &.btn-icon { 
     min-width: 44px; 
   }
+}
+
+.card-expand-btn { 
+  background-color: #fff; 
+  border-radius: 0 0 .225rem .225rem; 
+  padding: 0 .625rem; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
 .mat-button, .mat-fab, .mat-flat-button, 
@@ -462,27 +471,31 @@ select {
       position: relative;
       min-width: 4rem;
       height: initial; 
-      border-right: 1px solid #ddd; 
+      opacity: 1; 
       flex: 1; 
+      z-index: 10;
+      padding-left: .825rem; 
       
       &:last-child { border-bottom: 0; }
-      &::before { 
+      &::after { 
         content:'';
         display: block; 
-        background: #005aa8; 
-        width: 2px; 
-        height: 0;
+        background: #f9f9f9; 
+        width: 100%; 
+        height: 100%;
         position: absolute; 
         right: 0; 
         top: 0; 
         bottom: 0; 
         margin: auto; 
         transition: all .3s ease-in-out; 
+        z-index: -1; 
       }
 
       &.mat-tab-label-active { 
-        &::before {
-          height: 100%;
+        &::after {
+          background: #fff; 
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
       }
       
@@ -491,8 +504,6 @@ select {
   }
   .mat-ink-bar { display: none; }
   .mat-tab-header {
-    margin: 2px; 
-    margin-right: 1.25rem; 
     border: none;  
   }
 
@@ -505,16 +516,19 @@ select {
 .CodeMirror { 
   flex: 1; 
   font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
-  font-size: 16px;      // .825rem;
+  font-size: .905rem;      // .825rem;
   font-weight: 400; 
-  border-top: 1px solid #eee; 
-  border-bottom: 1px solid #eee; 
+  // border-top: 1px solid #eee; 
+  // border-bottom: 1px solid #eee; 
   line-height: 1.3;
 }
 
-.CodeMirror pre { padding: 0 1.25rem; }
-.CodeMirror-linenumbers { padding: 0 8px; }
+.CodeMirror pre { padding: .05rem .625rem !important; }
+.CodeMirror-linenumber { padding: .05rem 4px !important; text-align: center; }
 .CodeMirror-gutter-wrapper { left: -36px !important; }
+.CodeMirror-code > div[style="position: relative;"] { transition: all .2s ease-in-out;  }
+.CodeMirror-activeline { background-color: rgba(101,133,194,0.1) !important; }
+.cm-s-idea .CodeMirror-activeline-background { background-color: transparent !important; }
 
 // Dropdown menu  
 .mat-subhead { 
@@ -753,7 +767,6 @@ pre {
 
 #graphCard, #graphTable { 
   position: relative; 
-  padding: 2px; 
 }
 
  #progressBarQueryGraph, #progressBarStatGraph { 

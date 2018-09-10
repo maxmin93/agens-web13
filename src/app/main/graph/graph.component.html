@@ -1,37 +1,41 @@
 <div id="top" class="content col">
 
   <!-- editor -->
-    <div id="queryCard" class="col edit-size card" [ngClass]="{'strech':isExpanded}">
-        <div class="row-center">
-            <h4>QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small>
-              <button mat-icon-button (click)="toggleExpandEditor()"
-                [matTooltip]="isExpanded ? 'compress':'expand'" matTooltipPosition="after"
-                >
-                <!-- [style.background-color]="isExpanded ? '#afafaf' : '#303F9F'" -->
-                <mat-icon *ngIf="!isExpanded">expand_more</mat-icon>
-                <mat-icon [style.color]="'red'" *ngIf="isExpanded">expand_less</mat-icon>
-              </button>
-            </h4>
-            <ul class="row icon list inline">
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</a></li>
-                <li><a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</a></li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a></li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</a></li>
-                <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a></li>
-            </ul>
+    <div id="queryCard" [ngClass]="{'strech':isExpanded}" class="row-center edit-size card strech">
+        <div class="col strech">
+            <div class="row-center">
+                <h4 class="row-center">
+                    <span class="m-r-20">QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small></span>
+                </h4>
+                <ul class="row icon list inline">
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</a></li>
+                    <li><a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</a></li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a></li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</a></li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a></li>
+                </ul>
+            </div>
+            <!-- REQUEST : cypher query -->
+            <form class="col m-20 edit-size border" [ngClass]="{'strech':isExpanded}">
+                <textarea
+                id="agensQuery" #queryEditor type="text" name="query"
+                (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
+            </form>
+            <!-- RESULT : progress-bar & message -->
+            <app-query-result #queryResult class="edit-size col" [ngClass]="{'strech':isExpanded}"></app-query-result>
         </div>
-        <!-- REQUEST : cypher query -->
-        <form class="col m-20 edit-size border" [ngClass]="{'strech':isExpanded}">
-            <textarea
-            id="agensQuery" #queryEditor type="text" name="query"
-            (change)="query=agensQuery.value" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
-        </form>
-
-        <!-- RESULT : progress-bar & message -->
-        <app-query-result #queryResult class="edit-size col" [ngClass]="{'strech':isExpanded}"></app-query-result>
     </div>
-    <div id="tabComponent" class="col strech m-20" [style.flex]="isExpanded ? 0 : 1">
-        <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="mat-tab-vertical strech md-no-animation"
+    <div class="row row-middle">
+        <a (click)="toggleExpandEditor()" class="card-expand-btn"
+            [matTooltip]="isExpanded ? 'compress':'expand'" matTooltipPosition="above"
+            >
+            <!-- [style.background-color]="isExpanded ? '#afafaf' : '#303F9F'" -->
+            <mat-icon *ngIf="!isExpanded">expand_more</mat-icon>
+            <mat-icon [style.color]="'red'" *ngIf="isExpanded">expand_less</mat-icon>
+        </a>
+    </div>
+    <div id="tabComponent" class="col strech m-10 card p-no" [style.flex]="isExpanded ? 0 : 1"> 
+        <mat-tab-group #resultTapGroup [selectedIndex]="currentTabIndex" class="mat-tab-vertical strech md-no-animation" disableRipple
             (selectedTabChange)="tabChanged($event)" (animationDone)="tabAnimationDone()">
             <mat-tab label="Graph">
                 <!-- GRAPH(0) -->

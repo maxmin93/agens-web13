@@ -169,7 +169,7 @@
           'min-zoomed-font-size': 5,  // not shown when less than this
           'text-opacity': 1,
           'transition-property': 'width, height, border-style, border-width, background-color, text-outline-color, color',
-          'transition-duration':'.5s',
+          'transition-duration':'.3s',
           'transition-timing-function': 'ease-out-cubic'
         }},{
         /// 선택한 노드의 변화 
@@ -223,7 +223,7 @@
           'target-arrow-shape': 'triangle',
           'source-arrow-shape': 'none',
           'transition-property': 'width, target-arrow-color, line-color, source-arrow-color, color',
-          'transition-duration':'.5s',
+          'transition-duration':'.3s',
           'transition-timing-function': 'ease-out-cubic'
         }}, {
         /// 엣지만 클릭했을 경우 변화
