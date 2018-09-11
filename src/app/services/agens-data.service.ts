@@ -268,6 +268,11 @@ export class AgensDataService {
 
   //////////////////////////////////////////////////////
 
+  core_pglang_list():Observable<any> {
+    const url = `${this.api.core}/pglang/list`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
+  }
+
   core_pgproc_list():Observable<any> {
     const url = `${this.api.core}/pgproc/list`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});

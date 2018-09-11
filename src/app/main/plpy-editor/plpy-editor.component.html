@@ -33,18 +33,31 @@
                     <!-- CodeMirror: Python editor -->
                     <form class="col edit-size strech">
 
-                        <mat-form-field class="example-full-width">
+                      <span>
+                        <mat-form-field style="width:45%">
                           <input matInput placeholder="Name" 
                               [value]="selectedPlpy ? selectedPlpy.name : ''" />
                         </mat-form-field>
-                        <mat-form-field class="example-full-width">
-                          <input matInput placeholder="Arguments" 
+                        <span>&nbsp;&nbsp;</span>
+                        <mat-form-field style="width:35%">
+                          <mat-select placeholder="Language" [value]="selectedPlpy ? selectedPlpy.lang : ''">
+                            <mat-option *ngFor="let lang of pglangs" [value]="lang">
+                              {{lang}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </span>
+                      <span>
+                        <mat-form-field style="width:45%">
+                          <input matInput placeholder="Arguments &lt;name,type&gt;" 
                               [value]="selectedPlpy ? selectedPlpy.args_type : ''" />
                         </mat-form-field>
-                        <mat-form-field class="example-full-width">
-                          <input matInput placeholder="Return" 
+                        <span>&nbsp;&nbsp;</span>
+                        <mat-form-field style="width:45%">
+                          <input matInput placeholder="Return &lt;type&gt;" 
                               [value]="selectedPlpy ? selectedPlpy.rtn_type : ''" />
                         </mat-form-field>
+                      </span>
                         <mat-form-field class="example-full-width">
                           <textarea matInput placeholder="Leave a comment" 
                               [value]="selectedPlpy ? selectedPlpy.desc : ''"></textarea>

@@ -27,6 +27,9 @@ declare var CodeMirror: any;
 })
 export class PlpyEditorComponent implements OnInit {
 
+  // pg langs list
+  pglangs: string[] = [];
+
   private handlers: Array<Subscription> = [
     undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined
   ];
@@ -96,6 +99,7 @@ export class PlpyEditorComponent implements OnInit {
 
   ngAfterViewInit() {
     this.loadPlpyList();
+    this.loadPglangList();
   }
 
   clearSubscriptions(){
@@ -106,6 +110,21 @@ export class PlpyEditorComponent implements OnInit {
   }
 
   /////////////////////////////////////////////
+
+  loadPglangList(){
+    this.pglangs = [];
+    this._api.core_pglang_list().subscribe(
+      x => {
+        this.pglangs = x;
+      },
+      err => {
+        console.log( 'pglang/list ==> error' );
+      },
+      () => {
+        this._cd.detectChanges();
+      }
+    );
+  }
 
   loadPlpyList(){
     this.tempRows = [];
