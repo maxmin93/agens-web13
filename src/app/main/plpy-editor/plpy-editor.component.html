@@ -14,12 +14,12 @@
                 <ngx-datatable #tablePlpy class="material m-20 strech"
                     [columnMode]="'force'" [limit]="10"
                     [rows]='tablePlpyRows' [columns]="tablePlpyColumns"
-                    [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'"
+                    [headerHeight]="40" [footerHeight]="40" [rowHeight]="40"
                     [selected]="selected" [selectionType]="'single'" (select)='onSelect($event)'
                     >
                 </ngx-datatable>
                 <mat-form-field class="example-full-width">
-                    <textarea matInput placeholder="SQL Messages" disabled
+                    <textarea matInput placeholder="SQL Messages" readonly="true"
                         [value]="sqlMessage"></textarea>
                   </mat-form-field>
           </div> 
@@ -31,53 +31,59 @@
                 </div>
                 <div class="col strech m-20">
                     <!-- CodeMirror: Python editor -->
-                    <form class="col edit-size strech">
+                    <form novalidate [formGroup]="procFormGrp" class="col edit-size strech">
 
                       <span>
                         <mat-form-field style="width:45%">
-                          <input matInput placeholder="Name" 
-                              [value]="selectedPlpy ? selectedPlpy.name : ''" />
+                          <input matInput placeholder="Name" [formControl]="procNameCtl" required />
+                          <mat-error *ngIf="procNameCtl.hasError('pattern') || procNameCtl.hasError('required')">
+                            Name has to <strong>start [a-zA-Z] char and length is 3~50</strong>
+                          </mat-error>
                         </mat-form-field>
                         <span>&nbsp;&nbsp;</span>
                         <mat-form-field style="width:35%">
-                          <mat-select placeholder="Language" [value]="selectedPlpy ? selectedPlpy.lang : ''">
+                          <mat-select [formControl]="procLangCtl" placeholder="Language" required>
                             <mat-option *ngFor="let lang of pglangs" [value]="lang">
                               {{lang}}
                             </mat-option>
                           </mat-select>
                         </mat-form-field>
                       </span>
+
                       <span>
                         <mat-form-field style="width:45%">
-                          <input matInput placeholder="Arguments &lt;name,type&gt;" 
-                              [value]="selectedPlpy ? selectedPlpy.args_type : ''" />
+                          <input matInput [formControl]="procArgsCtl" placeholder="Arguments &lt;name,type&gt;" />
+                          <mat-error *ngIf="procArgsCtl.hasError('pattern')">
+                            Wrong arguments pattern: ex) a integer, b integer
+                          </mat-error>
                         </mat-form-field>
                         <span>&nbsp;&nbsp;</span>
                         <mat-form-field style="width:45%">
-                          <input matInput placeholder="Return &lt;type&gt;" 
-                              [value]="selectedPlpy ? selectedPlpy.rtn_type : ''" />
+                          <input matInput [formControl]="procRtnCtl" placeholder="Return &lt;type&gt;" />
                         </mat-form-field>
                       </span>
-                        <mat-form-field class="example-full-width">
-                          <textarea matInput placeholder="Leave a comment" 
-                              [value]="selectedPlpy ? selectedPlpy.desc : ''"></textarea>
-                        </mat-form-field>
-  
-                        <textarea
-                        id="plpy-editor" #plpyEditor type="text" name="plpy" class="strech"
-                        (change)="pycode=plpyEditor.value">
-                        </textarea>
-                    </form>
+
+                      <mat-form-field class="example-full-width">
+                        <textarea matInput [formControl]="procDescCtl" placeholder="Leave a comment"></textarea>
+                        <mat-error *ngIf="procDescCtl.hasError('maxlength')">
+                          Length of description has to be less than {{ MAX_DESC_SIZE }}
+                        </mat-error>
+                    </mat-form-field>
+
+                      <textarea
+                      id="plpy-editor" #plpyEditor type="text" name="plpy" class="strech">
+                      </textarea>
+                      <mat-error *ngIf="editor.getValue().trim().length == 0">
+                        Source must be not empty!
+                      </mat-error>
+                  </form> 
 
                     <div class="viewbox">
                         <div class="scroll-hide">
                             <ul class="list icon">
-                                <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
-                                <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
-                                <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
-                                <li><a matTooltip="Delete" matTooltipPosition="above"><mat-icon>delete_outline</mat-icon></a></li>
-                                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                                    <mat-icon>refresh</mat-icon></a></li>
+                                <li><a matTooltip="New" (click)="newPlpy()" matTooltipPosition="before"><mat-icon>create</mat-icon></a></li>
+                                <li><a matTooltip="Save" (click)="savePlpy()" matTooltipPosition="before"><mat-icon>save</mat-icon></a></li>
+                                <li><a matTooltip="Delete" (click)="deletePlpy()" matTooltipPosition="before"><mat-icon>delete_outline</mat-icon></a></li>
                             </ul>
                         </div>
                     </div>

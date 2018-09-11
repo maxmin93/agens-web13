@@ -1,6 +1,7 @@
 import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, } from '@angular/router';
+import { NgForm, FormGroup, FormControl, Validators } from '@angular/forms';
 
 import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -20,6 +21,8 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IRecord, IColumn, IRow,
 
 declare var CodeMirror: any;
 
+const MAX_DESC_SIZE:number = 255;
+
 @Component({
   selector: 'app-plpy-editor',
   templateUrl: './plpy-editor.component.html',
@@ -31,7 +34,7 @@ export class PlpyEditorComponent implements OnInit {
   pglangs: string[] = [];
 
   private handlers: Array<Subscription> = [
-    undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined
+    undefined, undefined, undefined, undefined
   ];
   public project: any = undefined;
 
@@ -39,8 +42,6 @@ export class PlpyEditorComponent implements OnInit {
   isLoading: boolean = false;
   // CodeMirror Handler
   editor: any = undefined;
-  // CodeMirror Editor : initial value
-  pycode:string = '';
   // SQL statement: create or replace function ...
   functionScript:string = '';
 
@@ -62,6 +63,19 @@ export class PlpyEditorComponent implements OnInit {
   @ViewChild('tablePlpy') tablePlpy: DatatableComponent;   
   @ViewChild('progressBar') progressBar: ElementRef;
   @ViewChild('plpyEditor', {read: ElementRef}) plpyEditor: ElementRef;
+
+  @ViewChild('formName', {read: ElementRef}) plpyName: ElementRef;
+  @ViewChild('formLang', {read: ElementRef}) plpyLang: ElementRef;
+  @ViewChild('formArgs', {read: ElementRef}) plpyArgs: ElementRef;
+  @ViewChild('formRtn', {read: ElementRef}) plpyRtn: ElementRef;
+  @ViewChild('formDesc', {read: ElementRef}) plpyDesc: ElementRef;
+
+  procFormGrp: FormGroup;
+  procNameCtl: FormControl;
+  procLangCtl: FormControl;
+  procArgsCtl: FormControl;
+  procRtnCtl: FormControl;
+  procDescCtl: FormControl;
 
   constructor(    
     private _cd: ChangeDetectorRef,
@@ -90,7 +104,24 @@ export class PlpyEditorComponent implements OnInit {
       theme: 'idea'
     });
     // CodeMirror : initial value
-    this.editor.setValue( this.pycode );
+    this.editor.setValue( '' );
+
+    // Form Controls
+    this.procNameCtl = new FormControl('', [ 
+      Validators.required, Validators.pattern(/^[a-zA-Z]{1}[a-zA-Z0-9_]{2,42}$/)
+    ]);
+    this.procLangCtl = new FormControl('', [Validators.required]);
+    this.procArgsCtl = new FormControl('', []); //Validators.pattern(/^(\w+)[ ]+(\w+)([,]{1}[ ]*(\w+)[ ]+(\w+))*$/)
+    this.procRtnCtl = new FormControl('', [Validators.required]);
+    this.procDescCtl = new FormControl('', [Validators.maxLength(MAX_DESC_SIZE)]);
+
+    this.procFormGrp = new FormGroup({
+      name: this.procNameCtl,
+      lang: this.procLangCtl,
+      args_type: this.procArgsCtl,
+      rtn_type: this.procRtnCtl,
+      desc: this.procDescCtl
+    });    
   }
 
   ngOnDestroy(){
@@ -109,11 +140,18 @@ export class PlpyEditorComponent implements OnInit {
     });
   }
 
+  onSelect({ selected }) {    // same to this.selected
+    let row = selected.length > 0 ? selected[0] : undefined;
+    if( !row || !row.hasOwnProperty('id') ) return;
+
+    this.loadPlpyDetail( row.id );
+  }
+
   /////////////////////////////////////////////
 
   loadPglangList(){
     this.pglangs = [];
-    this._api.core_pglang_list().subscribe(
+    this.handlers[0] = this._api.core_pglang_list().subscribe(
       x => {
         this.pglangs = x;
       },
@@ -129,7 +167,7 @@ export class PlpyEditorComponent implements OnInit {
   loadPlpyList(){
     this.tempRows = [];
     this.tablePlpyRows = [];
-    this._api.core_pgproc_list().subscribe(
+    this.handlers[1] = this._api.core_pgproc_list().subscribe(
       x => {
         this.tempRows = x;
       },
@@ -145,54 +183,98 @@ export class PlpyEditorComponent implements OnInit {
   }
 
   loadPlpyDetail(pid:string){
-    this._api.core_pgproc_detail(pid).subscribe(
+    this.handlers[2] = this._api.core_pgproc_detail(pid).subscribe(
       x => {
         this.selectedPlpy = x;
+        this.selectedPlpy.source = this.trimNewline(x.source);
+
+        this.procNameCtl.setValue( x.name );
+        this.procLangCtl.setValue( x.lang );
+        this.procArgsCtl.setValue( x.args_type );
+        this.procRtnCtl.setValue( x.rtn_type );
+        this.procDescCtl.setValue( x.desc );
+        this.editor.setValue( this.selectedPlpy.source );
       },
       err => {
         console.log( 'pgproc/list ==> error' );
       },
       () => {
-        if( this.selectedPlpy ) this.makePlpySource( this.selectedPlpy );
         this.sqlMessage = `source-load : oid=${this.selectedPlpy.id} (${this.selectedPlpy.type}/${this.selectedPlpy.lang})`;
         this._cd.detectChanges();
       }
     );
   }
   
-  makePlpySource( row:any ){
-    // console.log( 'makePlpySource:', row );
-    if( !row.hasOwnProperty('source') ) this.editor.setValue( 'no source' );
-
-    let source:string = this.trimNewline(row.source);
-    this.editor.setValue( source );
-
-    this.functionScript = 
-`CREATE OR REPLACE FUNCTION "${row.name}" (
-  ${row.args_type}
-) RETURNS
-  ${row.rtn_type}
-AS $$
-${source}
-$$ LANGUAGE ${row.lang};
-`;
-  }
-
   // pg catalog 에서 내보낸 source 앞뒤로 '\n' 붙어 있는데 이를 제거
   trimNewline(str:string):string {
-    if( str.length <= 2 ) return str.trim();
-    if( str.startsWith('\n') ) str = str.substring(1);
-    if( str.endsWith('\n') ) str = str.substring(0, str.length-2);
+    if( str.length <= 2 ) str = str.trim();
+    else{ 
+      
+      if( str.startsWith('\n') ) str = str.substring(1);
+      if( str.endsWith('\n') ) str = str.substring(0, str.length-2);
+    }
     return str;
   }
 
   /////////////////////////////////////////////
 
-  onSelect({ selected }) {    // same to this.selected
-    let row = selected.length > 0 ? selected[0] : undefined;
-    if( !row || !row.hasOwnProperty('id') ) return;
+  newPlpy(){
+    this.selectedPlpy = undefined;
 
-    this.loadPlpyDetail( row.id );
+    this.procNameCtl.setValue('');
+    let langs = this.pglangs.filter(x=>x.startsWith('plpython'));
+    this.procLangCtl.setValue( langs.length > 0 ? langs[0] : '' );
+    this.procArgsCtl.setValue('');
+    this.procRtnCtl.setValue('');
+    this.procDescCtl.setValue('');
+    this.editor.setValue('');
   }
 
+  savePlpy(){
+    let newPlpy = this.procFormGrp.getRawValue();    
+    newPlpy.id = this.selectedPlpy ? this.selectedPlpy.id : '-1';
+    newPlpy.name = newPlpy.name.trim();
+    newPlpy.type = this.selectedPlpy ? this.selectedPlpy.type : 'normal';
+    newPlpy.args_type = newPlpy.args_type.trim();
+    newPlpy.rtn_type = newPlpy.rtn_type.trim();
+    newPlpy.desc = newPlpy.desc.trim();
+    // 
+    // **NOTE: source 양쪽에 \n 이 없으면 SQL 실행시 unindent error 발생함!!
+    // 
+    newPlpy.source = this.trimNewline( this.editor.getValue() );
+
+    // invalid case
+    if( this.procFormGrp.invalid || this.editor.getValue().trim().length <= 2 ){
+      console.log( 'savePlpy invalid:', this.procFormGrp.invalid, newPlpy.source.trim().length, newPlpy );
+      return;
+    } 
+
+    this.handlers[3] = this._api.core_pgproc_save( newPlpy ).subscribe(
+      x => {
+        console.log( 'pgproc/save:', x );
+      },
+      err => {
+        console.log( 'pgproc/save ==> error', err );
+      },
+      () => {
+        this._cd.detectChanges();
+      }
+    );
+  }
+
+  deletePlpy(){
+    if( !this.selectedPlpy ) return;
+    this.handlers[4] = this._api.core_pgproc_delete(this.selectedPlpy).subscribe(
+      x => {
+        console.log( 'pgproc/delete:', x );
+      },
+      err => {
+        console.log( 'pgproc/delete ==> error', err );
+      },
+      () => {
+        this._cd.detectChanges();
+      }
+    );
+  }
+  
 }

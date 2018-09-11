@@ -283,4 +283,14 @@ export class AgensDataService {
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
   }
 
+  core_pgproc_save(proc:any):Observable<IResponseDto> {
+    const url = `${this.api.core}/pgproc/save`;
+    return this._http.post<any>(url, proc, {headers: this.createAuthorizationHeader()});
+  }
+
+  core_pgproc_delete(proc:any):Observable<IResponseDto> {
+    const url = `${this.api.core}/pgproc/delete`;
+    return this._http.post<any>(url, proc, {headers: this.createAuthorizationHeader()});
+  }
+
 }
