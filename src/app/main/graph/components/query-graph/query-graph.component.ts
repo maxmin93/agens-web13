@@ -109,6 +109,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         hideNodeTitle: true,        // hide nodes' title
         hideEdgeTitle: true,        // hide edges' title
     });
+    this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
   }
 
   ngOnDestroy(){

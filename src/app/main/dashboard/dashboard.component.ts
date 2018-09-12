@@ -43,7 +43,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // cytoscape 객체
   private cy:any = null;
-  
+
+  // 선택 버튼: edge, delete
+  btnStatus:any = { edge: false, delete: false };
+  private counterNew:number = 1;
+
   // call API
   handlers:Subscription[] = [undefined, undefined, undefined, undefined, undefined, undefined];
   datasource: IDatasource = undefined;
@@ -106,6 +110,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         hideNodeTitle: false,       // hide nodes' title
         hideEdgeTitle: false,       // hide edges' title
     });
+    agens.cy = this.cy;
+
+    this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
   }
 
   ngOnDestroy(){
@@ -114,21 +121,26 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.cy.on('tap', (e) => { 
-      if( e.target === this.cy ) this.cyCanvasCallback();
+      if( e.target === this.cy ) this.cyCanvasCallback(e);
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
       // change Detection by force
       this._cd.detectChanges();
     });
+
+    this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
+      let { position } = event;
+      console.log( 'ehcomplete:', position, sourceNode, targetNode, addedEles );
+    });
+
     Promise.resolve(null).then(() => {
       this.cy.$api.qtipFn = this.cyQtipMenuCallback;
     });
-
+/*
     // Cytoscape 바탕화면 qTip menu
     let tooltip = this.cy.qtip({
       content: function(e){ 
-        console.log( 'qtip.content:', e );
         let html:string = `<div class="hide-me"><h4><strong>Menu</strong></h4><hr/><ul>`;
-        html += `<li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipFn('addNode','all')")>create new NODE</a></li>`;
+        html += `<li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipFn('newNode')")>create new NODE</a></li>`;
         html += `</ul></div>`;
         return html;
       },
@@ -138,16 +150,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
       events: { visible: (event, api) => { $('.qtip').click(() => { $('.qtip').hide(); }); }}
     });
-
+*/
     // schemaData
     this.callCoreSchema();
-
-    // qTip
-  }
-
-  qtipMenuClick(){
-    console.log('qtipMenuClick!!', this.cy._private.container);
-
   }
 
   /////////////////////////////////////////////////////////////////
@@ -155,18 +160,20 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   // graph canvas 클릭 콜백 함수
-  cyCanvasCallback():void {
+  cyCanvasCallback(e):void {
   }
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
+    console.log( target );
     this.cy.elements(':selected').unselect();
     this.selectFromGraph(target.id());
   }
 
   // Qtip 메뉴 선택 콜백 함수
-  cyQtipMenuCallback(target:any, value:any):void {
-    console.log( 'cyQtipMenuCallback:', target, value);
+  cyQtipMenuCallback(value:any):void {
+    console.log( 'cyQtipMenuCallback:', value, agens.cy.scratch('_position') );
+    // this.createNode();
   }
 
   //////////////////////////////////////////////
@@ -219,6 +226,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   refreshCanvas(){
     this.cy.resize();
     this.cy.fit( this.cy.elements(), 50);
+
+    this.btnStatus = { edge: false, delete: false };
+    this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
   }
 
   //////////////////////////////////////////////
@@ -524,4 +534,75 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  ////////////////////////////////////////////////////////
+  // 유용한 커서 타입: 'context-menu', 'move', 'copy', 'wait', 'zoom-in', 'zoom-out'
+
+  createNode(){
+    let boundingBox = this.cy.elements().boundingBox();
+    let position:any = {
+      x: Math.floor(Math.random() * (boundingBox.x2 - boundingBox.x1 + 1)) + boundingBox.x1,
+      y: Math.floor(Math.random() * (boundingBox.y2 - boundingBox.y1 + 1)) + boundingBox.y1,
+    }
+    let ele = this.cy.add( {
+      group: 'nodes',
+      data: {
+        id: agens.graph.makeid(),
+        label: 'none',
+        name: 'new '+(++this.counterNew),
+        props: {},
+        size: 1
+      },
+      scratch: { _style: { color: this._util.nextColor(), width: '40px', title: 'name' }},
+      position: position,
+      classes: 'new'
+    });
+    ele.style('label', ele.data('name'));
+  }
+
+  toggleEditEdge(option:boolean=undefined){
+    if( option ) this.btnStatus.edge = option;
+    else this.btnStatus.edge = !this.btnStatus.edge;
+
+    if( this.btnStatus.edge ){
+      // this.toggleDeleteElement(false);
+      this.cy.$api.edge.enable();
+      // this.cy.$api.edge.enableDrawMode();
+      this.divCanvas.nativeElement.style.cursor = 'cell';     // PLUS
+    }else{
+      this.cy.$api.edge.disableDrawMode();
+      this.cy.$api.edge.disable();
+      // this.cy.nodes('.eh-handle').removeClass('eh-handle');
+      this.divCanvas.nativeElement.style.cursor = 'pointer';  // Default
+    }
+  }
+
+  toggleDeleteElement(option:boolean=undefined){
+    if( option ) this.btnStatus.delete = option;
+    else this.btnStatus.delete = !this.btnStatus.delete;
+    if( this.btnStatus.edge ){
+      // this.toggleEditEdge(false);
+      this.divCanvas.nativeElement.style.cursor = 'not-allowed';   // Forbidden
+    }else{
+      this.divCanvas.nativeElement.style.cursor = 'pointer';  // Default
+    }
+  }
+
+  ///////////////////////////////////////////////////////////
+
+/*
+ALTER LABEL
+
+ALTER [ IF EXISTS ] VLABEL label_name RENAME TO new_name
+ALTER [ IF EXISTS ] VLABEL label_name OWNER TO new_owner
+ALTER [ IF EXISTS ] VLABEL label_name SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN }
+ALTER [ IF EXISTS ] VLABEL label_name SET TABLESPACE new_tablespace
+ALTER [ IF EXISTS ] VLABEL label_name CLUSTER ON idxname
+ALTER [ IF EXISTS ] VLABEL label_name SET WITHOUT CLUSTER
+ALTER [ IF EXISTS ] VLABEL label_name SET LOGGED
+ALTER [ IF EXISTS ] VLABEL label_name SET UNLOGGED
+ALTER [ IF EXISTS ] VLABEL label_name INHERIT parent_label
+ALTER [ IF EXISTS ] VLABEL label_name NO INHERIT parent_label
+ALTER [ IF EXISTS ] VLABEL label_name DISABLE INDEX
+
+*/  
 }

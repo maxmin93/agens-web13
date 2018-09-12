@@ -171,6 +171,12 @@
           'transition-property': 'width, height, border-style, border-width, background-color, text-outline-color, color',
           'transition-duration':'.3s',
           'transition-timing-function': 'ease-out-cubic'
+        }}, {
+        selector: 'node.new',
+        css: {
+          'border-width': 6,
+          'border-color':'#FF5959',
+          'border-style': 'dotted'
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
@@ -225,6 +231,14 @@
           'transition-property': 'width, target-arrow-color, line-color, source-arrow-color, color',
           'transition-duration':'.3s',
           'transition-timing-function': 'ease-out-cubic'
+        }}, {
+          selector: 'edge.new',
+          css: {
+            'width': 6,
+            'line-style': 'dotted',
+            'line-color':'#FF5959',
+            'target-arrow-color': '#FF5959',
+            'source-arrow-color': '#FF5959'
         }}, {
         /// 엣지만 클릭했을 경우 변화
         selector: 'edge:selected',             
@@ -318,34 +332,46 @@
           'visibility': 'hidden',
           'transition-property': 'visibility',
           'transition-duration': '0.4s'
-        }},{
-        /// 엣지 드래그한 후 선택한 노드의 변화
-        selector: '.edgehandles-hover',
+        }},
+
+        // some style for the extension
+        {
+        selector: '.eh-handle',
         css: {
-          'background-color': '#d80001'
+          'background-color': 'red',
+          'width': 12,
+          'height': 12,
+          'shape': 'ellipse',
+          'overlay-opacity': 0,
+          'border-width': 12, // makes the handle easier to hit
+          'border-opacity': 0
         }},{
-        /// 선택된 노드의 드래그시 변화  
-        selector: '.edgehandles-source',
+        selector: '.eh-hover',
         css: {
-          'border-width': 10,
-          'border-color': '#d80001',
-          'background-color':'#d80001',
-          'text-outline-color': '#d80001',
+          'background-color': 'red'
         }},{
-        /// 엣지연결할 타겟의 노드변화          
-        selector: '.edgehandles-target',   
+        selector: '.eh-source',
         css: {
-          'border-color': 'white',
-          'text-outline-color': '#d80001',
+          'border-width': 2,
+          'border-color': 'red'
         }},{
-        /// 선택된 노드에 연결될 엣지의 예상변화
-        selector: '.edgehandles-preview, .edgehandles-ghost-edge', 
+        selector: '.eh-target',
         css: {
-          'line-color': '#d80001',
-          'target-arrow-color': '#d80001',
-          'source-arrow-color': '#d80001',
-        }
-      }
+          'border-width': 2,
+          'border-color': 'red'
+        }},{
+        selector: '.eh-preview, .eh-ghost-edge',
+        css: {
+          'background-color': 'red',
+          'line-color': 'red',
+          'target-arrow-color': 'red',
+          'source-arrow-color': 'red'
+        }},{
+        selector: '.eh-ghost-edge.eh-preview-active',
+        css: {
+          'opacity': 0
+        }}        
+        
     ]
   };
       
@@ -478,7 +504,7 @@
 
     // 마우스가 찍힌 위치를 저장 (해당 위치에 노드 등을 생성할 때 사용)
     cy.on('cxttapstart', function(e){
-      cy.scratch('_cxtPosition', e.cyPosition);
+      cy.scratch('_position', e.position);
     });
 
     // ** 여기서는 공통의 탭이벤트만 처리
@@ -557,8 +583,16 @@
         edgeType: function( sourceNode, targetNode ){ return 'flat'; },
         loopAllowed: function( node ){ return false; },
         nodeLoopOffset: -50,
+        edgeParams: function( sourceNode, targetNode, i ){
+          return { classes: 'new'};
+        },
       });
     cy.$api.edge.disable();
+    // **참고 https://github.com/cytoscape/cytoscape.js-edgehandles
+    // cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
+    //   let { position } = event;   
+    //   // ...
+    // });      
 
     cy.$api.unre = cy.undoRedo({
         isDebug: false, // Debug mode for console messages

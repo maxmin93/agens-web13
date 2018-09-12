@@ -63,11 +63,11 @@
                     <div class="viewbox">
                         <div class="scroll-hide">
                             <ul class="list icon">
-                                <li><a matTooltip="Create" matTooltipPosition="above" (click)="openInputCreateLabelDialog()"><mat-icon>add</mat-icon></a></li>
-                                <li><a matTooltip="Edit" matTooltipPosition="above"><mat-icon>edit</mat-icon></a></li>
-                                <li><a matTooltip="Expand" matTooltipPosition="above"><mat-icon>control_camera</mat-icon></a></li>
-                                <li><a matTooltip="Delete" matTooltipPosition="above"><mat-icon>delete_outline</mat-icon></a></li>
-                                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                                <li><a (click)="createNode()" matTooltip="create NODE" matTooltipPosition="before"><mat-icon>add</mat-icon></a></li>
+                                <li><a [ngClass]="{'checked':btnStatus.edge}" (click)="toggleEditEdge()" matTooltip="edit Schema" matTooltipPosition="before"><mat-icon>edit</mat-icon></a></li>
+                                <li><a [ngClass]="{'checked':btnStatus.delete}" (click)="toggleDeleteElement()" matTooltip="Delete" matTooltipPosition="before"><mat-icon>delete_outline</mat-icon></a></li>
+                                <li><a (click)="saveSchema()" matTooltip="Save changes" matTooltipPosition="before"><mat-icon>save_alt</mat-icon></a></li>
+                                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="before">
                                     <mat-icon>refresh</mat-icon></a></li>
                             </ul>
                         </div>
