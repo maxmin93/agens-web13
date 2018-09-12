@@ -88,16 +88,21 @@ export class QueryTableComponent implements OnInit {
   //   console.log('recordSort =>', col);
   // }
 
-  onSelect(event) {
-    // console.log('Event: select', event, this.selected);
-    this.openBottomSheet();
+  // onSelect(event) {
+  //   console.log('Event: select', this.recordColumns, this.selected);
+  //   this.openBottomSheet();
+  // }
+
+  onSelectCell(col:IColumn, cell:any) {
+    console.log('select-cell:', col, cell);
+    this.openBottomSheet(col, cell);
   }
 
-  openBottomSheet(): void {
+  openBottomSheet(col:IColumn, cell:any): void {
     const bottomSheetRef = this._sheet.open(CellViewerComponent, {
       ariaLabel: 'Json viewer',
       panelClass: 'sheet-cell-viewer',
-      data: (this.selected) ? this.selected[0] : null
+      data: { type: col.type, value: cell }
     });
 
     bottomSheetRef.afterDismissed().subscribe(() => {

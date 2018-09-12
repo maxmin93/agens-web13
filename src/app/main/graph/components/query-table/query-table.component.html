@@ -1,11 +1,12 @@
 <div id="graphTable" class="col strech">
     <div class="row strech" >
-        <ngx-datatable #recordTable  class="material strech col"
-            [limit]="9" [reorderable]="reorderable" [scrollbarH]="true"
+        <ngx-datatable #recordTable  class="material selection-cell strech col"
+            [limit]="10" [reorderable]="reorderable" [scrollbarH]="true"
             [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
-            [headerHeight]="48" [footerHeight]="48" [rowHeight]="auto"
-            [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)"
+            [headerHeight]="40" [footerHeight]="40" [rowHeight]="40"
             >
+            <!-- // selection-cell 이 작동하지 않음. 예제는 되는데.. -->
+            <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
             <ngx-datatable-column name="Index" [width]="60" [canAutoResize]="false" [sortable]="false">
                 <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
@@ -18,10 +19,12 @@
                     <span>{{col.name}}</span>
                 </ng-template>
                 <ng-template let-rowIndex="rowIndex" let-column="col" let-row="row" ngx-datatable-cell-template>
-                    <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0">
+                    <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0"
+                      (click)="onSelectCell(col, row[col.name])">
                         {{ row[col.name] | json }}
                     </span>
-                    <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0">
+                    <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0"
+                      (click)="onSelectCell(col, row[col.name])">
                         {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
                     </span>
                 </ng-template>

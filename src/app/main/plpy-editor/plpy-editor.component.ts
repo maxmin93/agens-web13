@@ -164,7 +164,7 @@ export class PlpyEditorComponent implements OnInit {
     );
   }
 
-  loadPlpyList(){
+  loadPlpyList(msgFlag=true){
     this.tempRows = [];
     this.tablePlpyRows = [];
     this.handlers[1] = this._api.core_pgproc_list().subscribe(
@@ -176,7 +176,7 @@ export class PlpyEditorComponent implements OnInit {
       },
       () => {
         if( this.tempRows ) this.tablePlpyRows = [...this.tempRows];
-        this.sqlMessage = `function list : count = ${this.tablePlpyRows.length}`;
+        if( msgFlag ) this.sqlMessage = `functions.count = ${this.tablePlpyRows.length}`;
         this._cd.detectChanges();
       }
     );
@@ -186,7 +186,7 @@ export class PlpyEditorComponent implements OnInit {
     this.handlers[2] = this._api.core_pgproc_detail(pid).subscribe(
       x => {
         this.selectedPlpy = x;
-        this.selectedPlpy.source = this.trimNewline(x.source);
+        this.selectedPlpy.source = this.recursiveTrim(x.source);
 
         this.procNameCtl.setValue( x.name );
         this.procLangCtl.setValue( x.lang );
@@ -198,20 +198,32 @@ export class PlpyEditorComponent implements OnInit {
       err => {
         console.log( 'pgproc/list ==> error' );
       },
-      () => {
-        this.sqlMessage = `source-load : oid=${this.selectedPlpy.id} (${this.selectedPlpy.type}/${this.selectedPlpy.lang})`;
-        this._cd.detectChanges();
-      }
     );
   }
   
+  // 최대 10회 반복 : 공백 라인 지우기
+  recursiveTrim(str:string):string{
+    let temp = this.trimBlankLine( str );
+    for( var _i=0; _i<10; _i+=1 ){
+      if( temp == str ) break;
+      str = temp;
+      temp = this.trimBlankLine( str );
+    }
+    return temp;
+  }
+
   // pg catalog 에서 내보낸 source 앞뒤로 '\n' 붙어 있는데 이를 제거
-  trimNewline(str:string):string {
+  trimBlankLine(str:string):string {
     if( str.length <= 2 ) str = str.trim();
     else{ 
-      
-      if( str.startsWith('\n') ) str = str.substring(1);
-      if( str.endsWith('\n') ) str = str.substring(0, str.length-2);
+      if( str.indexOf('\n') >= 0 ){
+        let firstLine = str.substring(0, str.indexOf('\n')+1 ).trim();
+        if( firstLine.length == 0 ) str = str.substring( str.indexOf('\n')+1 );
+      }
+      if( str.lastIndexOf('\n') >= 0 ){
+        let lastLine = str.substring( str.lastIndexOf('\n')+1 ).trim();
+        if( lastLine.length == 0 ) str = str.substring( 0, str.lastIndexOf('\n') );
+      }
     }
     return str;
   }
@@ -241,7 +253,7 @@ export class PlpyEditorComponent implements OnInit {
     // 
     // **NOTE: source 양쪽에 \n 이 없으면 SQL 실행시 unindent error 발생함!!
     // 
-    newPlpy.source = this.trimNewline( this.editor.getValue() );
+    newPlpy.source = this.recursiveTrim( this.editor.getValue() );
 
     // invalid case
     if( this.procFormGrp.invalid || this.editor.getValue().trim().length <= 2 ){
@@ -251,12 +263,13 @@ export class PlpyEditorComponent implements OnInit {
 
     this.handlers[3] = this._api.core_pgproc_save( newPlpy ).subscribe(
       x => {
-        console.log( 'pgproc/save:', x );
+        this.sqlMessage = x.state +': '+ x.message;
       },
       err => {
         console.log( 'pgproc/save ==> error', err );
       },
       () => {
+        this.loadPlpyList(false);
         this._cd.detectChanges();
       }
     );
@@ -266,12 +279,13 @@ export class PlpyEditorComponent implements OnInit {
     if( !this.selectedPlpy ) return;
     this.handlers[4] = this._api.core_pgproc_delete(this.selectedPlpy).subscribe(
       x => {
-        console.log( 'pgproc/delete:', x );
+        this.sqlMessage = x.state +': '+ x.message;
       },
       err => {
         console.log( 'pgproc/delete ==> error', err );
       },
       () => {
+        this.loadPlpyList(false);
         this._cd.detectChanges();
       }
     );

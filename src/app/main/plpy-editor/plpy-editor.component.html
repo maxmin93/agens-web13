@@ -19,7 +19,7 @@
                     >
                 </ngx-datatable>
                 <mat-form-field class="example-full-width">
-                    <textarea matInput placeholder="SQL Messages" readonly="true"
+                    <textarea matInput placeholder="SQL Messages" readonly="true" mat-autosize="false"
                         [value]="sqlMessage"></textarea>
                   </mat-form-field>
           </div> 
@@ -64,7 +64,8 @@
                       </span>
 
                       <mat-form-field class="example-full-width">
-                        <textarea matInput [formControl]="procDescCtl" placeholder="Leave a comment"></textarea>
+                        <textarea matInput [formControl]="procDescCtl" placeholder="Leave a comment"
+                          mat-autosize="false"></textarea>
                         <mat-error *ngIf="procDescCtl.hasError('maxlength')">
                           Length of description has to be less than {{ MAX_DESC_SIZE }}
                         </mat-error>
