@@ -45,7 +45,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   private cy:any = null;
 
   // 선택 버튼: edge, delete
-  btnStatus:any = { edge: false, delete: false };
+  btnStatus:any = { edge: false, delete: false, save: false };
   private counterNew:number = 1;
 
   // call API
@@ -227,7 +227,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.cy.resize();
     this.cy.fit( this.cy.elements(), 50);
 
-    this.btnStatus = { edge: false, delete: false };
+    this.btnStatus = { edge: false, delete: false, save: false };
     this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
   }
 
@@ -564,27 +564,34 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     else this.btnStatus.edge = !this.btnStatus.edge;
 
     if( this.btnStatus.edge ){
-      // this.toggleDeleteElement(false);
+      this.btnStatus.delete = false;
       this.cy.$api.edge.enable();
       // this.cy.$api.edge.enableDrawMode();
       this.divCanvas.nativeElement.style.cursor = 'cell';     // PLUS
     }else{
-      this.cy.$api.edge.disableDrawMode();
       this.cy.$api.edge.disable();
-      // this.cy.nodes('.eh-handle').removeClass('eh-handle');
       this.divCanvas.nativeElement.style.cursor = 'pointer';  // Default
+
+      Promise.resolve(null).then(()=>{
+        this.cy.nodes('.eh-handle').removeClass('eh-handle');
+      });
     }
   }
 
   toggleDeleteElement(option:boolean=undefined){
     if( option ) this.btnStatus.delete = option;
     else this.btnStatus.delete = !this.btnStatus.delete;
-    if( this.btnStatus.edge ){
-      // this.toggleEditEdge(false);
-      this.divCanvas.nativeElement.style.cursor = 'not-allowed';   // Forbidden
+
+    if( this.btnStatus.delete ){
+      this.btnStatus.edge = false;
+      this.divCanvas.nativeElement.style.cursor = 'not-allowed';   // or no-drop
     }else{
       this.divCanvas.nativeElement.style.cursor = 'pointer';  // Default
     }
+  }
+
+  saveElement(){
+    console.log('saveEle:', this.btnStatus.save);
   }
 
   ///////////////////////////////////////////////////////////
