@@ -34,13 +34,13 @@ export interface ILabel {
   name: string;
   owner: string;
   desc: string;
+  volume?: string;
   size: number;
-  properties: Array<IProperty>;
-  sources: Array<string>;   // source_neighbors
-  targets: Array<string>;   // target_neighbors
+  properties?: Array<IProperty>;
+  sources?: Array<string>;   // source_neighbors
+  targets?: Array<string>;   // target_neighbors
 
   scratch: {
-    size_not_empty?: number;
     is_dirty?: boolean;
     _style?: IStyle;          // styles (user property appended after API call)
   };

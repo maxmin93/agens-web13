@@ -19,19 +19,20 @@ import { InputCreateLabelDialog } from './dialogs/input-create-label.dialog';
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IEnd } from '../../models/agens-data-types'
-import { IResponseDto } from '../../models/agens-response-types';
+import { IResponseDto, ILabelDto } from '../../models/agens-response-types';
 import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
 import * as CONFIG from '../../app.config';
 import { ISchemaDto } from '../../models/agens-response-types';
 
 import * as d3 from 'd3';
+import { FormControl, Validators } from '@angular/forms';
 
 declare var $: any;
 declare var agens: any;
 
 const EMPTY_LABEL: ILabel = { 
   group: 'labels', id: '', type: '', name: '', owner: '', desc: '', size: 0
-  , properties: [], sources: [], targets: [], scratch: { size_not_empty: 0, is_dirty: true }
+  , properties: [], sources: [], targets: [], scratch: { is_dirty: true }
 };
 
 @Component({
@@ -46,7 +47,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // 선택 버튼: edge, delete
   btnStatus:any = { edge: false, delete: false, save: false };
-  private counterNew:number = 1;
+  private counterNew:number = 0;
 
   // call API
   handlers:Subscription[] = [undefined, undefined, undefined, undefined, undefined, undefined];
@@ -66,13 +67,18 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   deletedLabel: ILabel = null;  // from ConfirmDeleteLabelDialog
   createdLabel: ILabel = null;  // from CreateLabelInputDialog
 
+  labelNameCtl: FormControl;
+  labelOwnerCtl: FormControl;
+  labelDescCtl: FormControl;
+
   // 출력: 테이블 labels
-  tableLabelsRows: Array<ILabel> = new Array<ILabel>();
-  tableLabelsColumns: Array<any> = [
-    { name: 'TYPE', prop: 'type' },
+  tableLabelsRows: ILabel[] = [];
+  tableLabelsColumns: any[] = [
+    { name: 'Type', prop: 'type' },
     { name: 'ID', prop: 'id' },
-    { name: 'NAME', prop: 'name' },
-    { name: 'SIZE', prop: 'size' },
+    { name: 'Name', prop: 'name' },
+    { name: 'Size', prop: 'size' },
+    { name: 'Volume', prop: 'volume' },
   ];
 
   // 출력: 테이블 label의 properties
@@ -127,9 +133,45 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       this._cd.detectChanges();
     });
 
+    // edge 생성 이벤트
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
       let { position } = event;
-      console.log( 'ehcomplete:', position, sourceNode, targetNode, addedEles );
+      this.cy.elements(':selected').unselect();
+      let edge:any = addedEles.nonempty() ? addedEles.first() : undefined;
+      if( edge ){
+        this.handlers[4] = this.createLabelOnDB('edges').subscribe(
+          x => {
+            edge._private.data['label'] = x.label.type;
+            edge._private.data['id'] = x.label.id;
+            edge._private.data['name'] = x.label.name;
+            edge._private.data['size'] = x.label.size;
+            edge._private.data['props'] = {
+              id: x.label.id,
+              name: x.label.name,
+              owner: x.label.owner,
+              is_dirty: true,
+              desc: x.label.desc,
+              size: x.label.size
+            };
+            edge._private.scratch['_style'] = {
+              color: undefined, width: '2px', title: 'name'
+            };
+            edge.style('label', edge._private.data['name']);
+            edge.select();
+
+            // table에 추가하고 refresh
+            this.btnStatus.save = false;
+            this.selectedLabel = x.label;
+            this.labels.push(<ILabel>x.label);
+            this.tableLabelsRows = [...this.labels];
+    
+            console.log('createEdge:', edge._private);
+          },
+          err => {
+            console.log('ERROR createEdge:', err, edge);
+          }
+        );
+      }
     });
 
     Promise.resolve(null).then(() => {
@@ -161,13 +203,24 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // graph canvas 클릭 콜백 함수
   cyCanvasCallback(e):void {
+    // delete 모드인 경우 해제
+    if( this.btnStatus.delete ){
+      this.toggleDeleteElement(false);
+    }
+    this.cy.elements(':selected').unselect();
+    this.selectedLabel = undefined;
   }
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log( target );
     this.cy.elements(':selected').unselect();
-    this.selectFromGraph(target.id());
+    
+    // delete 모드인 경우 confirmDeleteLabel 다이얼로그 띄우기
+    if( this.btnStatus.delete ){
+      let temp = this.labels.filter(x => x.id == target.id() && x.type == target.group());
+      if( temp.length > 0 ) this.openConfirmDeleteLabelDialog(temp[0]);
+    }
+    else this.selectFromGraph(target.id());
   }
 
   // Qtip 메뉴 선택 콜백 함수
@@ -303,11 +356,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   showTable(){
     this.tableLabelsRows = [...this.labels];
+    this.selectedLabel = undefined;
 
     // graph에 select 처리
     if( this.labels.length > 0 ){
-      this.selectedLabel = this.tableLabelsRows[0];
-      this.selectFromTable(this.selectedLabel);
+      // this.selectedLabel = this.tableLabelsRows[0];
+      // this.tableLabels.selected = [ this.tableLabelsRows[0] ];
+      // this.selectFromTable(this.selectedLabel);
     }    
   }
 
@@ -387,13 +442,28 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   ////////////////////////////////////////////////////////
 
+  changeLabelValues(event){
+    console.log( 'changeLabelValues:', event.id, event.value, this.selectedLabel );
+    if( this.selectedLabel ) this.btnStatus.save = true;
+  }
+
   // 클릭된 element 해당하는 label 정보를 화면에 연결하기
   selectFromGraph(id:string):ILabel {
     // console.log( 'clicked id=', id.valueOf());
+    let index:number = -1;
     for( let label of this.tableLabelsRows ){
+      index += 1;
       if( label.id === id ) {
-        this.selectedLabel = label;         // 라벨 정보창으로
-        this.tablePropertiesRows = label.properties;  // 라벨 속성 테이블로
+        // 다른 라벨 선택시 btnStatus.save 비활성화
+        if( !this.selectedLabel || label.id !== this.selectedLabel.id ){
+          this.btnStatus.save = false;
+          this.tableLabels.offset = Math.floor( index / this.tableLabels.limit );
+          this.tableLabels.selected = [ label ];
+
+          this.selectedLabel = label;         // 라벨 정보창으로
+          this.tablePropertiesRows = label.properties;  // 라벨 속성 테이블로
+          this._cd.detectChanges();
+        } 
 
         // this._angulartics2.eventTrack.next({ action: 'graphSelect', properties: { category: 'main', label: label.type+'.'+label.name }});
         return label;
@@ -471,7 +541,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     }
 
     this.tablePropertiesRows = [];
-    this.selectedLabel = EMPTY_LABEL;
+    this.selectedLabel = undefined;   // EMPTY_LABEL;
   }
 
   /////////////////////////////////////////////////////////////////
@@ -492,7 +562,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       this._api.core_command_create_label(result).subscribe(
         dto => {
           this._api.setResponses(<IResponseDto>dto);
-          if( dto.state == CONFIG.StateType.SUCCESS ) this.createLabelUpdate(dto.label);
+          if( dto.state == CONFIG.StateType.SUCCESS ) this.addCreatedLabel(dto.label);
         },
         err => {
           console.log( 'schema.createLabel: ERROR=', err instanceof HttpErrorResponse, err.error );
@@ -506,9 +576,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  createLabelUpdate(target:ILabel){
+  addCreatedLabel(target:ILabel){
     this.createdLabel = target;
-    console.log('createLabelUpdate:', target);
+    console.log('addCreatedLabel:', target);
 
     // table에 추가하고 refresh    
     this.selectedLabel = target;
@@ -534,29 +604,53 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  createLabelOnDB(type:string):Observable<ILabelDto> {
+    let newName:string = 'new_label_'+(++this.counterNew);
+    while( this.labels.filter(x => x.name == newName).length > 0 ){
+      newName = 'new_label_'+(++this.counterNew);
+    }
+    return this._api.core_create_label(type, newName);
+  }
+
   ////////////////////////////////////////////////////////
   // 유용한 커서 타입: 'context-menu', 'move', 'copy', 'wait', 'zoom-in', 'zoom-out'
 
   createNode(){
-    let boundingBox = this.cy.elements().boundingBox();
-    let position:any = {
-      x: Math.floor(Math.random() * (boundingBox.x2 - boundingBox.x1 + 1)) + boundingBox.x1,
-      y: Math.floor(Math.random() * (boundingBox.y2 - boundingBox.y1 + 1)) + boundingBox.y1,
-    }
-    let ele = this.cy.add( {
-      group: 'nodes',
-      data: {
-        id: agens.graph.makeid(),
-        label: 'none',
-        name: 'new '+(++this.counterNew),
-        props: {},
-        size: 1
+    this.cy.elements(':selected').unselect();
+
+    this.handlers[4] = this.createLabelOnDB('nodes').subscribe(
+      (x:ILabelDto) => {
+        let boundingBox = this.cy.elements().boundingBox();
+        let position:any = {
+          x: Math.floor(Math.random() * (boundingBox.x2 - boundingBox.x1 + 1)) + boundingBox.x1,
+          y: Math.floor(Math.random() * (boundingBox.y2 - boundingBox.y1 + 1)) + boundingBox.y1,
+        }
+        let ele = this.cy.add( {
+          group: 'nodes',
+          data: {
+            id: x.label.id,
+            label: x.label.type,
+            name: x.label.name,
+            size: x.label.size,
+            props: {}
+          },
+          scratch: { _style: { color: this._util.nextColor(), width: '40px', title: 'name' }},
+          position: position,
+          classes: 'new'
+        });
+        ele.style('label', ele.data('name'));
+        ele.select();
+
+        // table에 추가하고 refresh
+        this.btnStatus.save = false;
+        this.selectedLabel = x.label;
+        this.labels.push(<ILabel>x.label);
+        this.tableLabelsRows = [...this.labels];
       },
-      scratch: { _style: { color: this._util.nextColor(), width: '40px', title: 'name' }},
-      position: position,
-      classes: 'new'
-    });
-    ele.style('label', ele.data('name'));
+      err => {
+        console.log('ERROR createNode:', err);
+      }      
+    );
   }
 
   toggleEditEdge(option:boolean=undefined){
@@ -591,14 +685,16 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   saveElement(){
-    console.log('saveEle:', this.btnStatus.save);
+    console.log('saveEle:', this.selectedLabel.type, this.selectedLabel.id,
+      this.labelNameCtl.value, this.labelOwnerCtl.value, this.labelDescCtl.value );
   }
 
   ///////////////////////////////////////////////////////////
 
 /*
-ALTER LABEL
+https://bitnine.net/wp-content/uploads/2016/11/AgensGraph_Quick_Guide.pdf
 
+<ALTER LABEL>
 ALTER [ IF EXISTS ] VLABEL label_name RENAME TO new_name
 ALTER [ IF EXISTS ] VLABEL label_name OWNER TO new_owner
 ALTER [ IF EXISTS ] VLABEL label_name SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN }
@@ -610,6 +706,5 @@ ALTER [ IF EXISTS ] VLABEL label_name SET UNLOGGED
 ALTER [ IF EXISTS ] VLABEL label_name INHERIT parent_label
 ALTER [ IF EXISTS ] VLABEL label_name NO INHERIT parent_label
 ALTER [ IF EXISTS ] VLABEL label_name DISABLE INDEX
-
 */  
 }

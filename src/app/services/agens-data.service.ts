@@ -173,7 +173,7 @@ export class AgensDataService {
 
     let params:HttpParams = new HttpParams();
     params = params.append('type', CONFIG.RequestType.DROP);                   // DROP
-    if( target.type === 'NODE' ) params = params.append('command', 'vlabel');  // if NODE
+    if( target.type === 'nodes' ) params = params.append('command', 'vlabel');  // if NODE
     else params = params.append('command', 'elabel');                          // else EDGE
     params = params.append('target', target.name);                             // target
     params = params.append('options', target.desc);                            // label.desc
@@ -187,12 +187,46 @@ export class AgensDataService {
 
     let params:HttpParams = new HttpParams();
     params = params.append('type', CONFIG.RequestType.CREATE);                 // CREATE
-    if( target.type === 'NODE' ) params = params.append('command', 'vlabel');  // if NODE
+    if( target.type === 'nodes' ) params = params.append('command', 'vlabel');  // if NODE
     else params = params.append('command', 'elabel');                          // else EDGE
     params = params.append('target', target.name);                             // target
     params = params.append('options', target.desc);                            // label.desc
     
     console.log( `core_command_create_label => ${params.toString()}`);
+    return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
+  core_create_label(type:string, name:string):Observable<ILabelDto> {
+    let params:HttpParams = new HttpParams();
+    params = params.append('type', CONFIG.RequestType.CREATE);           // CREATE
+    if( type === 'nodes' ) params = params.append('command', 'vlabel');  // VLABEL
+    else params = params.append('command', 'elabel');                    // or ELABEL
+    params = params.append('target', name);                              // <name>
+    
+    const url = `${this.api.core}/command`;
+    return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
+  core_drop_label(type:string, name:string):Observable<ILabelDto> {
+    let params:HttpParams = new HttpParams();
+    params = params.append('type', CONFIG.RequestType.DROP);              // DROP
+    if( type === 'nodes' ) params = params.append('command', 'vlabel');   // VLABEL
+    else params = params.append('command', 'elabel');                     // or ELABEL
+    params = params.append('target', name);                               // <name>
+    
+    const url = `${this.api.core}/command`;
+    return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
+  core_rename_label(type:string, oldName:string, newName:string):Observable<ILabelDto> {
+    let params:HttpParams = new HttpParams();
+    params = params.append('type', CONFIG.RequestType.RENAME);            // ALTER ~ RENAME
+    if( type === 'nodes' ) params = params.append('command', 'vlabel');   // VLABEL
+    else params = params.append('command', 'elabel');                     // or ELABEL
+    params = params.append('target', oldName);                            // <oldName>
+    params = params.append('options', newName);                           // <newName>
+    
+    const url = `${this.api.core}/command`;
     return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
   }
 

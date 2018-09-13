@@ -35,18 +35,19 @@
                     [selected]="selectedLabels" [selectionType]="'single'"
                     (select)="onSelectTableLabels($event)"
                     >
-                    <ngx-datatable-column name="TYPE"></ngx-datatable-column>
-                    <ngx-datatable-column name="ID"></ngx-datatable-column>
-                    <ngx-datatable-column name="NAME"></ngx-datatable-column>
-                    <ngx-datatable-column name="SIZE">
+                    <ngx-datatable-column name="Type" [width]="40"></ngx-datatable-column>
+                    <ngx-datatable-column name="ID" [width]="20"></ngx-datatable-column>
+                    <ngx-datatable-column name="Name" ></ngx-datatable-column>
+                    <ngx-datatable-column name="Size" [width]="40">
                         <ng-template let-row="row" ngx-datatable-cell-template>
                             <span>{{row.size | number}}</span>
                         </ng-template>
                     </ngx-datatable-column>
-                    <ngx-datatable-column name="Remove" [sortable]="false">
+                    <!-- <ngx-datatable-column name="Volume" [width]="40"></ngx-datatable-column> -->
+                    <ngx-datatable-column name="Delete" [width]="20" [sortable]="false">
                         <ng-template let-row="row" ngx-datatable-cell-template>
                             <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
-                                Remove
+                                <mat-icon>delete</mat-icon>
                             </a>
                         </ng-template>
                     </ngx-datatable-column>            
@@ -66,7 +67,6 @@
                                 <li><a (click)="createNode()" matTooltip="create NODE" matTooltipPosition="before"><mat-icon>add</mat-icon></a></li>
                                 <li><a [ngClass]="{'checked':btnStatus.edge}" (click)="toggleEditEdge()" matTooltip="edit Schema" matTooltipPosition="before"><mat-icon>edit</mat-icon></a></li>
                                 <li><a [ngClass]="{'checked':btnStatus.delete}" (click)="toggleDeleteElement()" matTooltip="Delete" matTooltipPosition="before"><mat-icon>delete_outline</mat-icon></a></li>
-                                <li><a (click)="saveSchema()" matTooltip="Save changes" matTooltipPosition="before"><mat-icon>save_alt</mat-icon></a></li>
                                 <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="before">
                                     <mat-icon>refresh</mat-icon></a></li>
                             </ul>
@@ -76,48 +76,42 @@
             </div>
             <div class="col strech">
                 <div class="card col strech" id="schemaList">
-                    <h4>
-                        <div class="row-start"><mat-icon class="m-r-10">info</mat-icon> <h4>SCHEMA <strong>INFO</strong></h4></div>
-                    </h4>
-                    <span class="block sub-title m-10 p-10">AgensBrowser visualizes data as graphs and tables for easier analyzing of data.</span>
-                    <ul class="list">
-                        <li class="row-center p-no">
-                            <div class="row-center">
-                                <span class="subtitle">TYPE</span> 
-                            </div>                            
-                            <div>{{selectedLabel.type}}</div>
-                        </li>
-                        <li class="row-center p-no">
-                            <div class="row-center">
-                                <span class="subtitle">ID</span> 
-                            </div>
-                            <div>{{selectedLabel.id}}</div>
-                        </li>
-                        <li class="row-center p-no">
-                            <div class="row-center">
-                                <span class="subtitle">NAME</span> 
-                            </div>
-                            <div>{{selectedLabel.name}}</div>                                    
-                        </li>
-                        <li class="row-center p-no">
-                            <div class="row-center">
-                                <span class="subtitle">OWNER </span> 
-                            </div>
-                            <div>{{selectedLabel.owner}}</div>
-                        </li>
-                        <li class="row-center p-no">
-                            <div class="row-center">
-                                <span class="subtitle">SIZE </span> 
-                            </div>
-                            <div>{{selectedLabel.size | number}}</div>
-                        </li>
-                        <li class="row-center p-no">
-                            <div class="row-center">
-                                <span class="subtitle">DESC </span>
-                            </div>
-                            <div>"{{selectedLabel.desc}}"</div>
-                        </li>
-                    </ul>
+                  <h4>
+                      <div class="row-start"><mat-icon class="m-r-10">info</mat-icon> <h4>Label <strong>Info.</strong></h4></div>
+                  </h4>
+                  <form class="list">
+                    <mat-form-field class="row-center p-no">
+                      <input matInput placeholder="Label TYPE" readonly="true" 
+                        [value]="selectedLabel ? selectedLabel.type : ''">
+                    </mat-form-field>
+                    <mat-form-field class="row-center p-no">
+                      <input matInput placeholder="Label ID" readonly="true" 
+                        [value]="selectedLabel ? selectedLabel.id : ''">
+                    </mat-form-field>
+                    <mat-form-field class="row-center p-no">
+                      <input matInput id="labelNameCtl" placeholder="Label NAME" required
+                        (change)="changeLabelValues($event.target)" style="border: 2px solid red"
+                        [value]="selectedLabel ? selectedLabel.name : ''" >
+                    </mat-form-field>
+                    <mat-form-field class="row-center p-no">
+                      <input matInput placeholder="Label OWNER" readonly="true" 
+                        [value]="selectedLabel ? selectedLabel.owner : ''">
+                    </mat-form-field>
+                    <mat-form-field class="row-center p-no">
+                      <input matInput placeholder="Label SIZE" readonly="true" 
+                        [value]="selectedLabel ? selectedLabel.size : ''">
+                    </mat-form-field>
+                    <mat-form-field class="row-center p-no">
+                      <input matInput placeholder="Label VOLUME" readonly="true" 
+                        [value]="selectedLabel ? selectedLabel.volume : ''">
+                    </mat-form-field>
+                    <mat-form-field class="row-center p-no">
+                      <textarea matInput id="labelDescCtl" placeholder="Label DESCRIPTION"
+                        matTextareaAutosize matAutosizeMinRows=3 matAutosizeMaxRows=3
+                        (change)="changeLabelValues($event.target)" style="border: 2px solid black"
+                        [value]="selectedLabel ? selectedLabel.desc : ''"></textarea>
+                    </mat-form-field>
+                  </form>
                 </div>
                 <button #btnSave mat-raised-button (click)="saveElement()" color="primary" [disabled]="!btnStatus.save">
                     <mat-icon [style.color]="btnStatus.save ? '#303F9F':'#afafaf' ">save_alt</mat-icon>

@@ -174,9 +174,9 @@
         }}, {
         selector: 'node.new',
         css: {
-          'border-width': 6,
+          'border-width': 4,
           'border-color':'#FF5959',
-          'border-style': 'dotted'
+          'border-style': 'dashed'
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
@@ -223,6 +223,7 @@
           'width':  function(e){ return agens.styles.edgeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
           'text-rotation':'autorotate',
+          'text-valign': 'top',             // **Not Working at EDGE: top, center, bottom
           'line-style': 'solid',            // line-style: solid, dotted, dashed
           'curve-style': 'bezier',
           'font-size': 10,

@@ -14,7 +14,7 @@ import { ILabel } from '../../../models/agens-data-types';
           <input matInput placeholder="TYPE" readonly value="{{data.type}}">
         </mat-form-field>
         <mat-form-field>
-          <input matInput placeholder="OID" readonly value="{{data.oid}}">
+          <input matInput placeholder="ID" readonly value="{{data.id}}">
         </mat-form-field>
         <mat-form-field class="m-10">
           <input matInput placeholder="NAME" readonly value="{{data.name}}">

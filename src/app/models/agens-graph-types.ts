@@ -12,7 +12,6 @@ export class Label implements ILabel {
   owner: string = '';
   desc: string = '';
   size: number = 0;
-  size_not_empty: number = 0;
   is_dirty: boolean = true;
   properties: Array<IProperty> = new Array<IProperty>();
   sources: Array<string> = new Array<string>();   // source_neighbors
