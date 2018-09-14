@@ -3,8 +3,8 @@ import { ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-import { Observable, of, from, Subject, Subscription, concat, forkJoin } from 'rxjs';
-import { map, filter, concatAll } from 'rxjs/operators';
+import { Observable, empty, interval, Subscription, concat } from 'rxjs';
+import { map, filter, concatAll, tap } from 'rxjs/operators';
 
 import * as _ from 'lodash';
 
@@ -67,10 +67,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   deletedLabel: ILabel = null;  // from ConfirmDeleteLabelDialog
   createdLabel: ILabel = null;  // from CreateLabelInputDialog
 
-  labelNameCtl: FormControl;
-  labelOwnerCtl: FormControl;
-  labelDescCtl: FormControl;
-
   // 출력: 테이블 labels
   tableLabelsRows: ILabel[] = [];
   tableLabelsColumns: any[] = [
@@ -94,6 +90,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     
   @ViewChild('progressBar') progressBar: ElementRef;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
+  @ViewChild('labelNameCtl', {read: ElementRef}) labelNameCtl: ElementRef;
+  @ViewChild('labelDescCtl', {read: ElementRef}) labelDescCtl: ElementRef;
 
   constructor(
     private _router: Router,
@@ -443,7 +441,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   ////////////////////////////////////////////////////////
 
   changeLabelValues(event){
-    console.log( 'changeLabelValues:', event.id, event.value, this.selectedLabel );
     if( this.selectedLabel ) this.btnStatus.save = true;
   }
 
@@ -684,9 +681,29 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  // update LABEL info. (alter label)
   saveElement(){
-    console.log('saveEle:', this.selectedLabel.type, this.selectedLabel.id,
-      this.labelNameCtl.value, this.labelOwnerCtl.value, this.labelDescCtl.value );
+    let name$:Observable<ILabelDto> = empty();
+    let desc$:Observable<ILabelDto> = empty();
+    // update Desc : comment on label
+    if( this.labelDescCtl.nativeElement.value != ''
+        && this.selectedLabel.desc != this.labelDescCtl.nativeElement.value ){
+      console.log('updateComment:', this.selectedLabel.type, this.selectedLabel.name,
+        this.labelDescCtl.nativeElement.value );
+      desc$ = this._api.core_comment_label(this.selectedLabel.type, 
+                    this.selectedLabel.name, this.labelDescCtl.nativeElement.value);
+    }
+    // update Name : alter label rename
+    if( this.labelNameCtl.nativeElement.value != ''
+        && this.selectedLabel.name != this.labelNameCtl.nativeElement.value ){
+      console.log('alterLabel:', this.selectedLabel.type, this.selectedLabel.name,
+        this.labelNameCtl.nativeElement.value );
+      name$ = this._api.core_rename_label(this.selectedLabel.type, 
+        this.selectedLabel.name, this.labelNameCtl.nativeElement.value);
+    }
+    concat( desc$, name$ ).pipe(tap(x => console.log)).subscribe( x => {
+      console.log( 'forkJoin:', x );
+    }, err => { console.log('error:', err); }, () => { console.log('completed!!'); });
   }
 
   ///////////////////////////////////////////////////////////

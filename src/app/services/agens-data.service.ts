@@ -230,6 +230,18 @@ export class AgensDataService {
     return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
   }
 
+  core_comment_label(type:string, name:string, desc:string):Observable<ILabelDto> {
+    let params:HttpParams = new HttpParams();
+    params = params.append('type', CONFIG.RequestType.COMMENT);           // COMMENT ON
+    if( type === 'nodes' ) params = params.append('command', 'vlabel');   // VLABEL
+    else params = params.append('command', 'elabel');                     // or ELABEL
+    params = params.append('target', name);                               // <name>
+    params = params.append('options', desc);                              // <desc>
+    
+    const url = `${this.api.core}/command`;
+    return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
+  }
+
   mngr_project_detail(id):Observable<IProject> {
     const url = `${this.api.mngr}/projects/${id}`;
     return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});

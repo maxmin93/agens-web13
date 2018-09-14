@@ -4,7 +4,7 @@
             <div class="card" id="dataInfo">
                 <div class="row-start">
                     <mat-icon class="m-r-10">data_usage</mat-icon><h4>DATA <strong>SOURCE</strong></h4>
-                </div>                    
+                </div>
                 <p class="sub-title p-10">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
                 <ul class="list textover">
                     <li title={{infos.uri}} class="p-no"><span> URL</span>{{infos.uri}}</li>
@@ -27,7 +27,6 @@
                 <div class="row-start">
                     <mat-icon class="m-r-10">bookmarks</mat-icon><h4>LABEL <strong>LIST</strong></h4>
                 </div>
-                
                 <ngx-datatable #tableLabels class="material m-20 strech"
                     [columnMode]="'force'" [limit]="8"
                     [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
@@ -57,8 +56,9 @@
         <div class="right-side row strech" id="dashboard-canvas">
             <div class="col strech row-side">
                 <div class="canvas-title row-start">
-                    <mat-icon class="m-r-10">bubble_chart</mat-icon><h4>SCHEMA <strong>GRAPH</strong></h4>
+                  <mat-icon class="m-r-10">bubble_chart</mat-icon><h4>SCHEMA <strong>GRAPH</strong></h4>
                 </div>
+                <p class="sub-title p-10">If there is no real data, the edge(relation between nodes) may not be visible.</p>
                 <div class="row strech">
                     <div id="div-canvas" #divCanvas class="graph-canvas strech card p-no"></div>
                     <div class="viewbox">
@@ -89,8 +89,8 @@
                         [value]="selectedLabel ? selectedLabel.id : ''">
                     </mat-form-field>
                     <mat-form-field class="row-center p-no">
-                      <input matInput id="labelNameCtl" placeholder="Label NAME" required
-                        (change)="changeLabelValues($event.target)" style="border: 2px solid red"
+                      <input matInput #labelNameCtl placeholder="Label NAME" required
+                        (keyup)="changeLabelValues($event.target)" style="border: 2px solid red"
                         [value]="selectedLabel ? selectedLabel.name : ''" >
                     </mat-form-field>
                     <mat-form-field class="row-center p-no">
@@ -106,9 +106,9 @@
                         [value]="selectedLabel ? selectedLabel.volume : ''">
                     </mat-form-field>
                     <mat-form-field class="row-center p-no">
-                      <textarea matInput id="labelDescCtl" placeholder="Label DESCRIPTION"
+                      <textarea matInput #labelDescCtl placeholder="Label DESCRIPTION"
                         matTextareaAutosize matAutosizeMinRows=3 matAutosizeMaxRows=3
-                        (change)="changeLabelValues($event.target)" style="border: 2px solid black"
+                        (keyup)="changeLabelValues($event.target)" style="border: 2px solid black"
                         [value]="selectedLabel ? selectedLabel.desc : ''"></textarea>
                     </mat-form-field>
                   </form>

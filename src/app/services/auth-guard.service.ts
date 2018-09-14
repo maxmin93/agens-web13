@@ -28,7 +28,6 @@ export class AuthGuardService implements CanActivate {
       }
     },
     err => {
-      console.log( 'auth.valid[0]:', err instanceof HttpErrorResponse, err.error );
       this._api.setResponses(<IResponseDto>{
         group: 'auth.connect',
         state: err.statusText,
