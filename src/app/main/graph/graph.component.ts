@@ -653,7 +653,6 @@ return path1, path2;
   }
 
   uploadFile(event){
-    console.log('uploadFile.before:', event.target.files[0]); // outputs the first file
     let fileItem:File = event.target.files[0];
     this.handlers[9] = this._api.fileUpload( fileItem ).subscribe(
       x => {
@@ -661,14 +660,9 @@ return path1, path2;
         // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
         if( x.type === HttpEventType.UploadProgress) {
           // calculate the progress percentage
-          const percentDone = Math.round(100 * event.loaded / event.total);
-          console.log('uploadFile.progress:', percentDone);
+          const percentDone = Math.round(100 * ( x.loaded / x.total ) );
+          console.log(`uploadFile.progress: ${percentDone}%`);
         } 
-        else if (event instanceof HttpResponse) {
-          // Close the progress-stream if we get an answer form the API
-          // The upload is complete
-          console.log('uploadFile.after:', x);
-        }
       },
       err => {
         console.log('uploadFile.error:', err);

@@ -359,7 +359,8 @@ export class AgensDataService {
     }
 
     const req = new HttpRequest('POST', url, formData, {
-      headers: new HttpHeaders({ 'Content-Type': 'multipart/form-data', 'Authorization': this.getSSID() }),
+      // **NOTE: 이거 필요 없음1! ==> 'Content-Type': 'multipart/form-data'
+      headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
       reportProgress: true // for progress data
     });
     return this._http.request(req);
