@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Router, } from '@angular/router';
 
 // materials
@@ -46,7 +46,7 @@ declare var agens: any;
 export class GraphComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private handlers: Array<Subscription> = [
-    undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined
+    undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined
   ];
   private subscription_meta: Subscription = undefined;
   public project: any = undefined;
@@ -652,5 +652,30 @@ return path1, path2;
     return data;
   }
 
-
+  uploadFile(event){
+    console.log('uploadFile.before:', event.target.files[0]); // outputs the first file
+    let fileItem:File = event.target.files[0];
+    this.handlers[9] = this._api.fileUpload( fileItem ).subscribe(
+      x => {
+        // progress return 
+        // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
+        if( x.type === HttpEventType.UploadProgress) {
+          // calculate the progress percentage
+          const percentDone = Math.round(100 * event.loaded / event.total);
+          console.log('uploadFile.progress:', percentDone);
+        } 
+        else if (event instanceof HttpResponse) {
+          // Close the progress-stream if we get an answer form the API
+          // The upload is complete
+          console.log('uploadFile.after:', x);
+        }
+      },
+      err => {
+        console.log('uploadFile.error:', err);
+      },
+      () => {
+        console.log('uploadFile.complete: total!!', fileItem.name );
+      }
+    );
+  }
 }

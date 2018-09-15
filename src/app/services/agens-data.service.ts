@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material';
 
 import { Observable, Subject, BehaviorSubject, Subscription, empty } from 'rxjs';
@@ -22,6 +22,7 @@ export class AgensDataService {
     mngr: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_MNGR_API}`,
     auth: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_AUTH_API}`,
     grph: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_GRPH_API}`,
+    file: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_FILE_API}`,
   };
 
   private lastResponse$ = new Subject<IResponseDto>();
@@ -40,7 +41,8 @@ export class AgensDataService {
         core: 'http://127.0.0.1:8085/'+CONFIG.AGENS_CORE_API,
         mngr: 'http://127.0.0.1:8085/'+CONFIG.AGENS_MNGR_API,
         auth: 'http://127.0.0.1:8085/'+CONFIG.AGENS_AUTH_API,
-        grph: 'http://127.0.0.1:8085/'+CONFIG.AGENS_GRPH_API
+        grph: 'http://127.0.0.1:8085/'+CONFIG.AGENS_GRPH_API,
+        file: 'http://127.0.0.1:8085/'+CONFIG.AGENS_FILE_API,
       };
     }
 
@@ -337,6 +339,34 @@ export class AgensDataService {
   core_pgproc_delete(proc:any):Observable<IResponseDto> {
     const url = `${this.api.core}/pgproc/delete`;
     return this._http.post<any>(url, proc, {headers: this.createAuthorizationHeader()});
+  }
+
+  //////////////////////////////////////////////////////
+  // **참고
+  // https://www.codingforentrepreneurs.com/blog/file-upload-with-angular/
+  // https://malcoded.com/posts/angular-file-upload-component-with-express
+
+  fileUpload(fileItem:File, extraData?:object):any{
+    const url = `${this.api.file}/upload`;
+    const formData: FormData = new FormData();
+
+    formData.append('file', fileItem, fileItem.name);
+    if (extraData) {
+      for(let key in extraData){
+        // iterate and set other form data
+        formData.append(key, extraData[key])
+      }
+    }
+
+    const req = new HttpRequest('POST', url, formData, {
+      headers: new HttpHeaders({ 'Content-Type': 'multipart/form-data', 'Authorization': this.getSSID() }),
+      reportProgress: true // for progress data
+    });
+    return this._http.request(req);
+  }
+
+  fileDownload(url): Observable<any>{
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
   }
 
 }

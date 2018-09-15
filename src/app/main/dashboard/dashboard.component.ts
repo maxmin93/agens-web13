@@ -134,42 +134,54 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     // edge 생성 이벤트
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
       let { position } = event;
-      this.cy.elements(':selected').unselect();
+      this.cy.elements(':selected').unselect();      
+      
       let edge:any = addedEles.nonempty() ? addedEles.first() : undefined;
-      if( edge ){
-        this.handlers[4] = this.createLabelOnDB('edges').subscribe(
-          x => {
-            edge._private.data['label'] = x.label.type;
-            edge._private.data['id'] = x.label.id;
-            edge._private.data['name'] = x.label.name;
-            edge._private.data['size'] = x.label.size;
-            edge._private.data['props'] = {
-              id: x.label.id,
-              name: x.label.name,
-              owner: x.label.owner,
-              is_dirty: true,
-              desc: x.label.desc,
-              size: x.label.size
-            };
-            edge._private.scratch['_style'] = {
-              color: undefined, width: '2px', title: 'name'
-            };
-            edge.style('label', edge._private.data['name']);
-            edge.select();
+      let sourceV = edge ? edge.source(): undefined;
+      let targetV = edge ? edge.target(): undefined;
+      this.cy.remove( addedEles );      // remove oldEdge having temporary id
 
-            // table에 추가하고 refresh
-            this.btnStatus.save = false;
-            this.selectedLabel = x.label;
-            this.labels.push(<ILabel>x.label);
-            this.tableLabelsRows = [...this.labels];
-    
-            console.log('createEdge:', edge._private);
-          },
-          err => {
-            console.log('ERROR createEdge:', err, edge);
+      this.handlers[4] = this.createLabelOnDB('edges').subscribe(          
+        x => {
+          // **NOTE: edge의 id를 변경하면 rendering error 발생!!
+          // ==> 새로운 edge를 생성하고, addedEdge는 삭제
+          //     edge._private.data['id'] = x.label.id;   // cy error
+
+          if( sourceV && targetV ){
+            let newE = this.cy.add({    // add newEdge having right id from DB
+              group: 'edges',
+              data: {
+                id: x.label.id,
+                label: x.label.type,
+                name: x.label.name,
+                size: x.label.size,
+                source: sourceV.id(),
+                target: targetV.id(),
+                props: {
+                  id: x.label.id,
+                  name: x.label.name,
+                  owner: x.label.owner,
+                  is_dirty: true,
+                  desc: x.label.desc,
+                  size: x.label.size                  
+                }
+              },
+              scratch: { _style: { color: undefined, width: '2px', title: 'name' }},
+              classes: 'new'
+            });
+            newE.style('label', edge._private.data['name']);
+            newE.select();
           }
-        );
-      }
+          // table에 추가하고 refresh
+          this.btnStatus.save = false;
+          this.selectedLabel = x.label;
+          this.labels.push(<ILabel>x.label);
+          this.tableLabelsRows = [...this.labels];  
+        },
+        err => {
+          console.log('ERROR createEdge:', err, edge);
+        }
+      );
     });
 
     Promise.resolve(null).then(() => {
@@ -523,7 +535,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   deleteLabelUpdate(target:ILabel){
     this.deletedLabel = target;
-    console.log('deleteLabelUpdate:', target);
 
     // canvas 에서 삭제
     this.cy.elements().getElementById(target.id).remove();
@@ -688,21 +699,34 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     // update Desc : comment on label
     if( this.labelDescCtl.nativeElement.value != ''
         && this.selectedLabel.desc != this.labelDescCtl.nativeElement.value ){
-      console.log('updateComment:', this.selectedLabel.type, this.selectedLabel.name,
-        this.labelDescCtl.nativeElement.value );
       desc$ = this._api.core_comment_label(this.selectedLabel.type, 
                     this.selectedLabel.name, this.labelDescCtl.nativeElement.value);
     }
     // update Name : alter label rename
     if( this.labelNameCtl.nativeElement.value != ''
         && this.selectedLabel.name != this.labelNameCtl.nativeElement.value ){
-      console.log('alterLabel:', this.selectedLabel.type, this.selectedLabel.name,
-        this.labelNameCtl.nativeElement.value );
       name$ = this._api.core_rename_label(this.selectedLabel.type, 
         this.selectedLabel.name, this.labelNameCtl.nativeElement.value);
     }
+    // **NOTE: empty 일 경우에는 subscribe 되지 않는다 (필터링 필요없음)
     concat( desc$, name$ ).pipe(tap(x => console.log)).subscribe( x => {
-      console.log( 'forkJoin:', x );
+      if( !x.label ) return;
+      let targetsRow = this.tableLabelsRows.filter(y => y.id == x.label.id && y.type == x.label.type );
+      let targetsEle = this.cy.getElementById(x.label.id);
+      // update information
+      if( x.request && x.request.type )
+        switch( x.request.type ){
+          case CONFIG.RequestType.COMMENT:
+              targetsRow.forEach(y => { y.desc = x.label.desc; });
+              targetsEle.forEach(y => { y._private.data['props']['desc'] = x.label.desc; });
+              break;
+          case CONFIG.RequestType.RENAME: 
+              targetsRow.forEach(y => { y.name = x.label.name; });
+              targetsEle.forEach(y => { y._private.data['props']['name'] = x.label.name;
+                                        y._private.data['name'] = x.label.name;
+              });
+              break;
+        }      
     }, err => { console.log('error:', err); }, () => { console.log('completed!!'); });
   }
 

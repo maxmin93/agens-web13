@@ -11,9 +11,11 @@
                     <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</a></li>
                     <li><a [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</a></li>
                     <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a></li>
-                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">IMPORT</a></li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="uploader.click()">IMPORT</a></li>
+                    <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">LOAD</a></li>
                     <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a></li>
                 </ul>
+                <input hidden type="file" #uploader (change)="uploadFile($event)"/>
             </div>
             <!-- REQUEST : cypher query -->
             <form class="col m-20 edit-size border" [ngClass]="{'strech':isExpanded}">
