@@ -33,6 +33,7 @@ import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 import { LabelStyleSettingDialog } from './dialogs/label-style-setting.dialog';
 import { ImageExportDialog } from './dialogs/image-export.dialog';
+import { analyzeFileForInjectables } from '@angular/compiler';
 
 declare var CodeMirror: any;
 declare var agens: any;
@@ -654,21 +655,29 @@ return path1, path2;
 
   uploadFile(event){
     let fileItem:File = event.target.files[0];
+    let fileExt = undefined
+    if( fileItem.name.lastIndexOf('.') >= 0 ) 
+      fileExt = fileItem.name.substring(fileItem.name.lastIndexOf('.')).toLowerCase();
+    if( !fileExt || (fileExt != '.graphson' && fileExt != '.json' && fileExt != '.graphml' && fileExt != '.xml') ){
+      // error message
+      this.queryResult.setMessage(StateType.WARNING, `**NOTE: importable file types are graphml(xml), graphson(json)`);
+      return;
+    }
+
     this.handlers[9] = this._api.fileUpload( fileItem ).subscribe(
       x => {
         // progress return 
         // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
         if( x.type === HttpEventType.UploadProgress) {
-          // calculate the progress percentage
           const percentDone = Math.round(100 * ( x.loaded / x.total ) );
-          console.log(`uploadFile.progress: ${percentDone}%`);
+          if( percentDone ) this.queryResult.setMessage(StateType.PENDING, `upload.progress: ${percentDone}%` );
         } 
       },
       err => {
-        console.log('uploadFile.error:', err);
+        this.queryResult.setMessage(StateType.FAIL, 'upload.FAIL: '+JSON.stringify(err) );
       },
       () => {
-        console.log('uploadFile.complete: total!!', fileItem.name );
+        this.queryResult.setMessage(StateType.SUCCESS, 'upload.complete: '+fileItem.name );
       }
     );
   }

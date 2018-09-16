@@ -15,7 +15,8 @@
                     <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">LOAD</a></li>
                     <li><a [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a></li>
                 </ul>
-                <input hidden type="file" #uploader (change)="uploadFile($event)"/>
+                <input hidden type="file" #uploader (change)="uploadFile($event)" />
+                  <!-- accept="text/xml,application/json"/> --> <!-- only graphml, graphson -->
             </div>
             <!-- REQUEST : cypher query -->
             <form class="col m-20 edit-size border" [ngClass]="{'strech':isExpanded}">
