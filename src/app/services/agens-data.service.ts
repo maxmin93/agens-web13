@@ -374,4 +374,24 @@ export class AgensDataService {
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
   }
 
+  importFile(fileItem:File, extraData?:object):any{
+    const url = `${this.api.file}/import`;
+    const formData: FormData = new FormData();
+
+    formData.append('file', fileItem, fileItem.name);
+    if (extraData) {
+      for(let key in extraData){
+        // iterate and set other form data
+        formData.append(key, extraData[key])
+      }
+    }
+
+    const req = new HttpRequest('POST', url, formData, {
+      // **NOTE: 이거 필요 없음! 오류만 발생함 ==> 'Content-Type': 'multipart/form-data'
+      headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
+      reportProgress: true // for progress data
+    });
+    return this._http.request(req);
+  }
+  
 }
