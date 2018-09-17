@@ -1,44 +1,50 @@
    
 <!-- GRAPH -->
-<div id="graphCard" class="col strech p-20">
+<div id="graphCard" class="col flex-1 p20">
   <div id="progressBarMetaGraph" #progressBar style='visibility:hidden;'>
       <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
   </div>
 
   <!-- Graph content -->
-  <div class="row strech">
-    <div class="row strech row-side">
-      <div class="col strech">
+  <div class="row flex-1">
+    <div class="row flex-1">
+      <div class="col flex-1">
         <!-- graph canvas -->
-        <div id="meta-canvas" class="graph-canvas strech border" #divCanvas></div>
+        <div id="meta-canvas" class="graph-canvas flex-1 border" #divCanvas></div>
       </div>
         <!-- Graph.Meta : toolbar -->
       <div class="row">
-        <div id="agens-graph-toolbar" class="viewbox strech theme">                    
-          <ul class="list icon">
-            <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                    <mat-icon>refresh</mat-icon></a></li>
-            <li><a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
-                    <mat-icon>unfold_more</mat-icon></a></li>
-            <li><a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
-                    <mat-icon>unfold_less</mat-icon></a></li>
-            <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
-                    <mat-icon>close</mat-icon></a></li>
-          </ul>
+        <div id="agens-graph-toolbar" class="box-view flex-1 theme">                    
+          <div class="box-view">
+            <div class="box-scroll">
+              <div class="box-content">
+                <div class="btn-group btn-group-h">
+                  <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
+                          <mat-icon>refresh</mat-icon></a>
+                  <a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
+                          <mat-icon>unfold_more</mat-icon></a>
+                  <a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
+                          <mat-icon>unfold_less</mat-icon></a>
+                  <a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                          <mat-icon>close</mat-icon></a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>    
-    <div class="col strech">
-      <div class="col strech border p-20">    
+    <div class="col flex-1">
+      <div class="col flex-1 border p20">    
         
         <mat-form-field class="col">
-          <input class="strech" name="eleName" matInput placeholder="Selected" [(ngModel)]="ele_name">
+          <input class="flex-1" name="eleName" matInput placeholder="Selected" [(ngModel)]="ele_name">
         </mat-form-field>
 
-        <form [formGroup]="options" class="m-20">
+        <form [formGroup]="options" class="mt20">
           <label class="row-center">Hide required marker<mat-checkbox formControlName="hideRequired"></mat-checkbox></label>
           
-          <div class="m-20">
+          <div class="mt20">
             <label>Float label : </label><br/>
             <mat-radio-group formControlName="floatLabel" class="col">
               <mat-radio-button class="m-20" value="auto">Auto</mat-radio-button>
@@ -48,25 +54,25 @@
           </div>
         </form>
 
-        <mat-form-field class="m-10"
+        <mat-form-field class="mt10"
             [hideRequiredMarker]="options.value.hideRequired"
             [floatLabel]="options.value.floatLabel">
           <input matInput placeholder="Simple placeholder" required>
         </mat-form-field>
 
-        <mat-form-field [floatLabel]="options.value.floatLabel" class="m-10">
+        <mat-form-field [floatLabel]="options.value.floatLabel" class="mt10">
           <mat-label>Both a label and a placeholder</mat-label>
           <input matInput placeholder="Simple placeholder">
         </mat-form-field>
 
-        <mat-form-field class="m-10"
+        <mat-form-field class="mt10"
             [hideRequiredMarker]="options.value.hideRequired"
             [floatLabel]="options.value.floatLabel">
           <mat-select required>
             <mat-option>-- None --</mat-option>
             <mat-option value="option">Option</mat-option>
           </mat-select>
-          <mat-label class="row-start"><mat-icon>favorite</mat-icon> <span> <b> Fancy </b><i> label</i></span></mat-label>
+          <mat-label class="row row-l"><mat-icon>favorite</mat-icon> <span> <b> Fancy </b><i> label</i></span></mat-label>
         </mat-form-field>
       </div>
     </div>

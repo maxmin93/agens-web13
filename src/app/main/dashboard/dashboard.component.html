@@ -1,16 +1,24 @@
 <div id="top" class="content col">
-    <div class="row strech">
-        <div class="left-side row-side col">
-            <div class="card" id="dataInfo">
-                <div class="row-start">
-                    <mat-icon class="m-r-10">data_usage</mat-icon><h4>DATA <strong>SOURCE</strong></h4>
+    <div class="row flex-1">
+        
+        <div class="col flex-1 mr20" id="dataSourceLabel">
+
+            <!-- /////////////////////////////  
+                data source card 
+            ///////////////////////////// -->
+
+            <div class="card col mb20" id="dataInfo">
+                <div class="card-header">
+                    <h4 class="row row-m"><mat-icon class="mr10">data_usage</mat-icon>DATA <strong> SOURCE</strong></h4>
+                    <p>AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
                 </div>
-                <p class="sub-title p-10">AgensBrowser visualizes data as graphs and tables for easier, enhanced understanding and analyzing of data.</p>
-                <ul class="list textover">
-                    <li title={{infos.uri}} class="p-no"><span> URL</span>{{infos.uri}}</li>
-                    <li title={{infos.name}} class="p-no"><span> NAME</span>{{infos.name}} (owner: '{{infos.owner}}')</li>
-                    <li title={{infos.desc}} class="p-no"><span> DESC</span>{{infos.desc}}</li>
-                </ul>
+                <div class="card-content">
+                    <ul class="list">
+                        <li title={{infos.uri}}><span class="property-name"> URL</span><p class="property-value">{{infos.uri}}</p></li>
+                        <li title={{infos.name}}><span class="property-name"> NAME</span><p class="property-value">{{infos.name}} (owner: '{{infos.owner}}')</p></li>
+                        <li title={{infos.desc}}><span class="property-name"> DESC</span><p class="property-value">{{infos.desc}}</p></li>
+                    </ul>
+                </div>
                 <!--
                 <div class="card-dash-number">
                     <p><span>Total NodeTypes</span><b>{{ infos.nodes_size_total }} ({{ infos.nodes_size_data }})</b></p>
@@ -18,106 +26,132 @@
                 </div>
                 -->
             </div>
-    
-            <div #progressBar style='visibility:hidden;'>
-                <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
-            </div>
-    
-            <div class="m-20 col strech card">       
-                <div class="row-start">
-                    <mat-icon class="m-r-10">bookmarks</mat-icon><h4>LABEL <strong>LIST</strong></h4>
+            
+            <!-- /////////////////////////////
+                label list card 
+                ///////////////////////////// -->
+                
+            <div class="card col flex-1">                    
+                <div class="card-header">
+                    <h4 class="row row-m"><mat-icon class="mr10">bookmarks</mat-icon>LABEL <strong> LIST</strong></h4>
+                    <div #progressBar style='visibility:hidden;'>
+                        <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+                    </div>
                 </div>
-                <ngx-datatable #tableLabels class="material m-20 strech"
-                    [columnMode]="'force'" [limit]="8"
-                    [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
-                    [footerHeight]="48" [rowHeight]="'auto'"
-                    [selected]="selectedLabels" [selectionType]="'single'"
-                    (select)="onSelectTableLabels($event)"
-                    >
-                    <ngx-datatable-column name="Type" [width]="40"></ngx-datatable-column>
-                    <ngx-datatable-column name="ID" [width]="20"></ngx-datatable-column>
-                    <ngx-datatable-column name="Name" ></ngx-datatable-column>
-                    <ngx-datatable-column name="Size" [width]="40">
-                        <ng-template let-row="row" ngx-datatable-cell-template>
-                            <span>{{row.size | number}}</span>
-                        </ng-template>
-                    </ngx-datatable-column>
-                    <!-- <ngx-datatable-column name="Volume" [width]="40"></ngx-datatable-column> -->
-                    <ngx-datatable-column name="Delete" [width]="20" [sortable]="false">
-                        <ng-template let-row="row" ngx-datatable-cell-template>
-                            <a (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
-                                <mat-icon>delete</mat-icon>
-                            </a>
-                        </ng-template>
-                    </ngx-datatable-column>            
-                </ngx-datatable>
+                <div class="card-content">
+                    <ngx-datatable #tableLabels class="material flex-1"
+                        [columnMode]="'force'" [limit]="8"
+                        [rows]='tableLabelsRows' [columns]='tableLabelsColumns'
+                        [footerHeight]="48" [rowHeight]="'auto'"
+                        [selected]="selectedLabels" [selectionType]="'single'"
+                        (select)="onSelectTableLabels($event)"
+                        >
+                        <ngx-datatable-column name="Type" [width]="40"></ngx-datatable-column>
+                        <ngx-datatable-column name="ID" [width]="20"></ngx-datatable-column>
+                        <ngx-datatable-column name="Name" ></ngx-datatable-column>
+                        <ngx-datatable-column name="Size" [width]="40">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                <span>{{row.size | number}}</span>
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <!-- <ngx-datatable-column name="Volume" [width]="40"></ngx-datatable-column> -->
+                        <ngx-datatable-column name="Delete" [width]="20" [sortable]="false">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                <a class="btn btn-link" (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
+                                    <mat-icon>delete</mat-icon>
+                                </a>
+                            </ng-template>
+                        </ngx-datatable-column>            
+                    </ngx-datatable>
+                </div>
             </div> 
         </div>
-        <div class="right-side row strech" id="dashboard-canvas">
-            <div class="col strech row-side">
-                <div class="canvas-title row-start">
-                  <mat-icon class="m-r-10">bubble_chart</mat-icon><h4>SCHEMA <strong>GRAPH</strong></h4>
+
+        <div class="row flex-3" id="dashboard-canvas">
+
+            <!-- /////////////////////////////
+                graph card 
+            ///////////////////////////// -->
+
+            <div class="row flex-2 card card-space-no mr20">
+                <div class="card-header pos-abs">
+                    <h4 class="row row-m"><mat-icon class="mr10">bubble_chart</mat-icon>SCHEMA <strong> GRAPH</strong></h4>
+                    <p>If there is no real data,<br/>the edge(relation between nodes) may not be visible.</p>
                 </div>
-                <p class="sub-title p-10">If there is no real data, the edge(relation between nodes) may not be visible.</p>
-                <div class="row strech">
-                    <div id="div-canvas" #divCanvas class="graph-canvas strech card p-no"></div>
-                    <div class="viewbox">
-                        <div class="scroll-hide">
-                            <ul class="list icon">
-                                <li><a (click)="createNode()" matTooltip="create NODE" matTooltipPosition="before"><mat-icon>add</mat-icon></a></li>
-                                <li><a [ngClass]="{'checked':btnStatus.edge}" (click)="toggleEditEdge()" matTooltip="edit Schema" matTooltipPosition="before"><mat-icon>edit</mat-icon></a></li>
-                                <li><a [ngClass]="{'checked':btnStatus.delete}" (click)="toggleDeleteElement()" matTooltip="Delete" matTooltipPosition="before"><mat-icon>delete_outline</mat-icon></a></li>
-                                <li><a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="before">
-                                    <mat-icon>refresh</mat-icon></a></li>
-                            </ul>
+                <div class="card-content row flex-1">
+                    <div id="div-canvas" #divCanvas class="graph-canvas flex-1"></div>
+                </div>
+                <div class="box-view">
+                    <div class="box-scroll">
+                        <div class="box-content">
+                            <div class="btn-group btn-group-v">
+                                <a class="btn btn-icon" (click)="createNode()" matTooltip="create NODE" matTooltipPosition="before"><mat-icon>add</mat-icon></a>
+                                <a class="btn btn-icon" [ngClass]="{'checked':btnStatus.edge}" (click)="toggleEditEdge()" matTooltip="edit Schema" matTooltipPosition="before"><mat-icon>edit</mat-icon></a>
+                                <a class="btn btn-icon" [ngClass]="{'checked':btnStatus.delete}" (click)="toggleDeleteElement()" matTooltip="Delete" matTooltipPosition="before"><mat-icon>delete_outline</mat-icon></a>
+                                <a class="btn btn-icon" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="before"><mat-icon>refresh</mat-icon></a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col strech">
-                <div class="card col strech" id="schemaList">
-                  <h4>
-                      <div class="row-start"><mat-icon class="m-r-10">info</mat-icon> <h4>Label <strong>Info.</strong></h4></div>
-                  </h4>
-                  <form class="list">
-                    <mat-form-field class="row-center p-no">
-                      <input matInput placeholder="Label TYPE" readonly="true" 
-                        [value]="selectedLabel ? selectedLabel.type : ''">
-                    </mat-form-field>
-                    <mat-form-field class="row-center p-no">
-                      <input matInput placeholder="Label ID" readonly="true" 
-                        [value]="selectedLabel ? selectedLabel.id : ''">
-                    </mat-form-field>
-                    <mat-form-field class="row-center p-no">
-                      <input matInput #labelNameCtl placeholder="Label NAME" required
-                        (keyup)="changeLabelValues($event.target)" style="border: 2px solid red"
-                        [value]="selectedLabel ? selectedLabel.name : ''" >
-                    </mat-form-field>
-                    <mat-form-field class="row-center p-no">
-                      <input matInput placeholder="Label OWNER" readonly="true" 
-                        [value]="selectedLabel ? selectedLabel.owner : ''">
-                    </mat-form-field>
-                    <mat-form-field class="row-center p-no">
-                      <input matInput placeholder="Label SIZE" readonly="true" 
-                        [value]="selectedLabel ? selectedLabel.size : ''">
-                    </mat-form-field>
-                    <mat-form-field class="row-center p-no">
-                      <input matInput placeholder="Label VOLUME" readonly="true" 
-                        [value]="selectedLabel ? selectedLabel.volume : ''">
-                    </mat-form-field>
-                    <mat-form-field class="row-center p-no">
-                      <textarea matInput #labelDescCtl placeholder="Label DESCRIPTION"
-                        matTextareaAutosize matAutosizeMinRows=3 matAutosizeMaxRows=3
-                        (keyup)="changeLabelValues($event.target)" style="border: 2px solid black"
-                        [value]="selectedLabel ? selectedLabel.desc : ''"></textarea>
-                    </mat-form-field>
-                  </form>
-                </div>
-                <button #btnSave mat-raised-button (click)="saveElement()" color="primary" [disabled]="!btnStatus.save">
-                    <mat-icon [style.color]="btnStatus.save ? '#303F9F':'#afafaf' ">save_alt</mat-icon>
-                    &nbsp;&nbsp;<Strong>Save</Strong></button>
-            </div> 
 
+            <!-- /////////////////////////////
+                label info card
+            ///////////////////////////// -->
+
+            <div class="col flex-1">
+                <div class="card col flex-1" id="schemaList">
+                    <div class="card-header">
+                        <h4 class="row row-m"><mat-icon class="mr10">info</mat-icon>Label <strong> Info.</strong></h4>
+                    </div>
+                    <div class="card-content">
+                        <form class="col">
+                            <mat-form-field>
+                                <input matInput placeholder="Label TYPE" readonly="true" 
+                                [value]="selectedLabel ? selectedLabel.type : ''">
+                            </mat-form-field>
+                            <mat-form-field >
+                                <input matInput placeholder="Label ID" readonly="true" 
+                                [value]="selectedLabel ? selectedLabel.id : ''">
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput #labelNameCtl placeholder="Label NAME" required
+                                (keyup)="changeLabelValues($event.target)" 
+                                [value]="selectedLabel ? selectedLabel.name : ''" >
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput placeholder="Label OWNER" readonly="true" 
+                                [value]="selectedLabel ? selectedLabel.owner : ''">
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput placeholder="Label SIZE" readonly="true" 
+                                [value]="selectedLabel ? selectedLabel.size : ''">
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput placeholder="Label VOLUME" readonly="true" 
+                                [value]="selectedLabel ? selectedLabel.volume : ''">
+                            </mat-form-field>
+                            <!-- <mat-form-field>
+                                <textarea matInput #labelDescCtl placeholder="Label DESCRIPTION"
+                                matTextareaAutosize matAutosizeMinRows=3 matAutosizeMaxRows=5
+                                (keyup)="changeLabelValues($event.target)" style="border: 2px solid black"
+                                [value]="selectedLabel ? selectedLabel.desc : ''"></textarea>
+                            </mat-form-field> -->
+                            <mat-form-field>
+                                <textarea matInput #labelDescCtl placeholder="Label DESCRIPTION"
+                                matTextareaAutosize matAutosizeMaxRows=5
+                                (keyup)="changeLabelValues($event.target)" 
+                                [value]="selectedLabel ? selectedLabel.desc : ''"></textarea>
+                            </mat-form-field>
+                        </form>
+                    </div>
+                    <div class="card-footer col">
+                        <button #btnSave mat-raised-button (click)="saveElement()" color="primary" [disabled]="!btnStatus.save">
+                            <mat-icon class="mr10" [style.color]="btnStatus.save ? '#303F9F':'#afafaf' ">save</mat-icon><Strong>SAVE</Strong>
+                        </button>
+                    </div>
+                </div>
+            </div> 
         </div>  
     </div>
 </div>

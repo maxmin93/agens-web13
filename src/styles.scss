@@ -42,7 +42,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1, h2, h3, h4, h5, h6, 
-ul, html, body, material-app, input, textarea, 
+ul, html, body, material-app, input, textarea, p,
 .mat-menu-item, pre, .mat-tab-label { 
   margin: 0; 
   padding: 0; 
@@ -65,10 +65,6 @@ ul, html, body, material-app, input, textarea,
 // table 
 
 table { width: 100%; }
-tr.mat-header-row { height: 2.5rem !important; }
-tr.mat-footer-row, tr.mat-row, .label-info-slide label { height: 3rem !important; }
-tr.mat-footer-row, tr.mat-row, .label-info-slide label, .mat-cell, .mat-footer-cell { font-size: .825rem !important; }
-tbody tr:last-child td { border-bottom: 0 !important; }
 
 /* 최초 기본 콘텐츠의 사이즈로써 
 header값이 변경될 경우 px의 header 높이값과 동일하게 변경해야한다. */
@@ -79,170 +75,574 @@ header값이 변경될 경우 px의 header 높이값과 동일하게 변경해�
   padding-top: 1.25rem; 
 }
 
-/* flex 기본 설정값으로 col-side는 side의 너비값을 줄 경우, 
-반대쪽 div 에 col 주입한다. */
+/* ---------------------------------------------
+flex 관련 css 값으로 
+row 는 horizontal, col 은 vertical로써 
+l 은 left, r 은 right, c 는 center, t 는 top, m 은 middle, b 는 bottom 입니다.
+space 는 콘텐츠를 양 사이드로 분할시킵니다. (3개이상일 경우 왼쪽 중앙 오른쪽으로 3분할 됩니다.) 
+flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다. 
+--------------------------------------------- */
 
-.row, .col, .row-center, .row-end, .row-start, .btn-group { display: flex; }
-.col, .col-end, .btn-group-vertical { flex-direction: column; }
+.row, .col { display: flex; }
+.col { flex-direction: column; }
 
-.row-start { justify-content: flex-start }
-.row-center { justify-content: space-between; }
-.row-end { justify-content: flex-end; }
+.row-l, .col-t { justify-content: flex-start; }
+.row-r, .col-r { justify-content: flex-end; }
+.row-c, .col-c { justify-content: center;  }
+.row-space, .col-space {justify-content: space-between; }
 
-.row-middle { justify-content: center; }
+.row-t, .col-t { align-items: flex-start; }
+.row-m, .col-m { align-items: center; }
+.row-b, .col-b { align-items: flex-end; }
 
-.row-start, .row-center, .row-end { align-items: center; }
-.row-start.row-bottom, .row-center.row-bottom, .row-end.row-bottom { align-items: flex-end; }
-.col-end { align-items: flex-end }; 
-
-.row-side { margin-right: 1.25rem; }
-.col-side { margin-bottom: 1.25rem; }
-
-.wrap { flex-wrap: wrap }
-.overflow-y { overflow-y: auto; }
-
-.strech { 
+.flex-1, .flex-2, .flex-3, 
+.flex-4, .flex-5, .flex-6 { 
   width: 100%; 
   height: 100%; 
-  flex: 1; 
   position: relative;
 }
 
-.position-rel { position: relative; }
-.position-abs { position: absolute; }
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.flex-3 { flex: 3; }
+.flex-4 { flex: 4; }
+.flex-5 { flex: 5; }
+.flex-6 { flex: 6; }
 
-//  color 테마값
+.wrap { flex-wrap: wrap; }
 
-mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; }
-.material-icons { font-size: 1.5rem !important; }
-.mat-button-toggle { color: rgba(255,255,255,0.4); }
-.expand-cell { color: #585858; }
+
+// position ---------------------------------------------
+
+.pos-rel { position: relative; }
+.pos-abs { position: absolute; }
+
+.overflow-y { overflow-y: auto;}; 
+
  
-/* margin 값으로  margin 값을 추가하고자 할 때, 
-클래스명은 "m-value" */
+// margin 및 padding ---------------------------------------------
 
 .block { display: block; }
+.in-block { display: inline-block; }
 
-.m-30 { margin-top: 1.875rem; }
-.m-24 { margin-top: 1.5625rem; }
-.m-20 { margin-top: 1.25rem; }
-.m-10 { margin-top: .625rem; }
 .m-no { margin: 0 !important; }
 
-.m-b-20 {margin-bottom: 1.25rem; }
-.m-b-10 {margin-bottom: .625rem; }
+.m10 { margin: .625rem; }
+.m20 { margin: 1.25rem; }
 
-.m-r-20 { margin-right: 1.25rem; }
-.m-r-10 { margin-right: .625rem; }
+.mt30 { margin-top: 1.875rem; }
+.mt25 { margin-top: 1.5625rem; }
+.mt20 { margin-top: 1.25rem; }
+.mt10 { margin-top: .625rem; }
 
-.p-20 { padding: 1.25rem; }
-.p-10 { padding: .625rem; }
-.p-no, .mat-tab-vertical .mat-tab-header, .CodeMirror-lines { padding: 0 !important }
+.mr20 { margin-right: 1.25rem; }
+.mr10 { margin-right: .625rem; }
 
-.border { border: 1px solid #ddd !important;   
-  &.border-dotted { border-style: dotted; } 
-  &.border-dashed { border-style: dashed; }
-  &.border-radius { border-radius: .225rem; }
+.mb20 { margin-bottom: 1.25rem; }
+.mb10 { margin-bottom: .625rem; }
+
+.mr20 { margin-right: 1.25rem; }
+.mr10 { margin-right: .625rem; }
+
+.p-no { padding: 0 !important; }
+
+.p20 { padding: 1.25rem; }
+.p10 { padding: .625rem !important; }
+.p5 { padding: .325rem !important; }
+
+.pt20 { padding-top: 1.25rem; }
+.pt10 { padding-top: .625rem; }
+
+.pb20 { padding-bottom: 1.25rem; }
+
+// border 값 설정 ---------------------------------------------
+
+.border { border: 1px solid #ddd;
+  &.dot { border-style: dotted; } 
+  &.dash { border-style: dashed; }
+  &.radi { border-radius: .225rem; }
 }
-.border-top { border-top: 1px solid #ddd; }
-.border-bottom, ul.border > li { border-bottom: 1px solid #ddd; }
 
-.border-left-no { border-left: none; }
-.border-right-no { border-right: none; }
-.border-top-no { border-top: none; }
-.border-bottom-no { border-bottom: none; }
-ul.border.noborder, .noborder { border: none !important; }  
-.mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
+.border-top { border-top: 1px solid #ddd; }
+.border-right { border-right: 1px solid #ddd; }
+.border-bottom { border-bottom: 1px solid #ddd; }
+.border-left { border-left: 1px solid #ddd; }
+
+.border-no { border: 0 !important; }
+
+
+/* button 관련 정리로 --------------------------------------------- 
+------------------------------------------------------------------------------------------*/
+
+
+.btn-group { 
+  display: flex; 
+  align-items: center; 
+
+  .btn.btn-link { margin: 0 1.25rem; 
+    &:last-child { margin-right: 0; }
+  }
+}
+
+.btn-group.btn-group-v { 
+  flex-direction: column; 
+
+}
+
+.btn { 
+  display: inline-flex; 
+  min-width: 5rem; 
+  height: 45px; 
+  line-height: 45px; 
+  padding: 0 .625rem; 
+  white-space: nowrap; 
+  border: 1px solid transparent; 
+  text-decoration: none; 
+  text-align: center; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: .875rem;  
+  color: inherit; 
+  cursor: pointer;  
+
+  &.checked { 
+    background:#6585C2; 
+    mat-icon { color: #fff !important; }
+  }
+}
+
+.btn.btn-link { 
+  min-width: 0; 
+  padding: 0; 
+  line-height: initial; 
+  height: initial; 
+}
+
+.btn.btn-icon { 
+  width: 45px;
+  min-width: initial;  
+  height: 45px; 
+  padding: 0; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.btn.btn-disabled { }
+
+// list 값 설정
+
+.list { 
+  li { 
+    padding: .625rem 0; 
+    display: flex; 
+    align-items: center; 
+  }
+}
+
+.property-name { 
+  background: linear-gradient(to right, rgb(0,90,168), rgba(0,90,168,.7));
+  min-width: 3.75rem; 
+  margin-right: 1rem; 
+  padding: .375rem .5rem; 
+  display: inline-block; 
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  border-radius: .225rem; 
+  text-align: center; 
+  font-size: .825rem; 
+  color: #fff; 
+  &.error {
+    background: linear-gradient(to right, #ea614a, #ecaba0)
+  }
+}
+
+.property-value { 
+  max-width: 32.5rem; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+  overflow: hidden;
+  font-size: .875rem; 
+  color: rgba(0, 0, 0, 0.75); 
+}
+
+/* ---------------------------------------------
+기본 graph canvas의 창 값으로
+좌우 정렬일 경우, 각 html에는 좌측의 사이즈를 
+해당 scss파일에서 설정가능 
+---------------------------------------------*/
+
+div.graph-canvas { 
+  max-width: 100%; 
+  // overflow: hidden;
+  position: relative;
+  z-index: 10;
+
+  // zoom 버튼 위치수정 
+  div.cy-panzoom { 
+    top: 10rem; 
+    left: 1.25rem; 
+    // canvas 반응형높이값을위해 설정
+    + div {
+      width: 100% !important; 
+      height: 100% !important; 
+    } 
+  }
+}
+
+
+// form input ---------------------------------------------
+
+form, input, textarea, select { 
+  font-size: .875rem !important; 
+  outline: none; 
+  overflow: hidden;
+  border: none;
+  outline: none;  
+  resize: none; 
+}
+
+select { 
+  width: 100%; 
+  padding: .325rem; 
+  border-bottom: 1px solid #ddd; 
+}
+
+input { 
+  padding: .325rem; 
+}
+
+// Dropdown menu ---------------------------------------------
+
+.mat-subhead { 
+  display: inline-block;
+  padding: 1rem; 
+}
+
+// 텍스트 타이틀 옆에 붙는 before ---------------------------------------------
+
+.expand-cell::before, 
+.empty-row::before, 
+.mat-subhead::before, 
+.sidebar h4::before,
+.title::before  {
+  content:'';
+  background: #005aa8; 
+  width: 8px; 
+  height: 8px; 
+  display: inline-block; 
+  border-radius: 50%; 
+  margin-right: .75rem; 
+}
+
+// sidenav css ---------------------------------------------
+
+.sidebar { 
+  background: #fff; 
+  width: 21.875rem; 
+  height: calc(100% - 2.5rem); 
+  padding: 1.25rem; 
+  border-radius: .225rem; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  z-index: 100;
+  position: absolute; 
+}
+
+/* ---------------------------------------------
+  scroll을 숨기는 box component로써 
+  box-view 안에 넓은 box-scroll 넣은뒤, 
+  다시 box-scroll 내부에 box-view의 너비값 만큼의 box-content를 넣으면 
+  scroll이 없는 box를 만들 수 있다 
+--------------------------------------------- */ 
+
+.box-view {
+  background: #f9f9f9; 
+  width: 45px;   
+  height: 100%;
+  overflow: hidden;
+  z-index: 1000;
+  box-shadow: inset 1px 0 2px rgba(0,0,0,0.25); 
+
+  .box-scroll {
+    width: 5rem; 
+    height: inherit; 
+    overflow-y: scroll; 
+    overflow-x: hidden; 
+    
+    .box-content { 
+      width: 45px;
+      height: inherit;  
+    }
+  }
+}
+
+// card ---------------------------------------------
+
+.card { 
+  background: #fff; 
+  padding: 1.25rem; 
+  border-radius: .225rem; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  overflow: hidden;
+
+  &.card-space-no {
+    padding: 0; 
+  }
+}
+
+.card-header {
+  margin-bottom: 1.25rem; 
+  p {
+    margin-top: 1rem; 
+    font-size: 95%; 
+    color: #979a9c; 
+  }
+  strong { 
+    padding: 0 .25rem;
+  }
+}
+
+.card-content {
+  width: 100%; 
+  height: 100%; 
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.card-footer {}
+
+//////////////////////////////////////////////////////////////////////////
+
+#progressBarQueryGraph, #progressBarStatGraph { 
+  position: absolute; 
+  top: 0; 
+}
+
+.sheet-cell-viewer {
+  width: 600px;
+  height: 650px;
+}
+
+.sheet-meta-graph, .sheet-label-style {
+  width: 1200px;
+  height: 650px;
+}
+//////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+// svg 변경 css 
+
+.bar {
+  fill: steelblue;
+}
+
+.axis-title {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.5px;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+/* CodeMirror library 변경 css */
+
+.CodeMirror { 
+  flex: 1; 
+  font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
+  font-size: .905rem; // .825rem;
+  font-weight: 400; 
+  line-height: 1.3;
+}
+
+.CodeMirror pre { padding: .05rem .625rem !important; }
+.CodeMirror-lines { padding: 0 !important; }
+.CodeMirror-linenumber { padding: .05rem 4px !important; text-align: center; }
+.CodeMirror-gutter-wrapper { left: -36px !important; }
+.CodeMirror-code > div[style="position: relative;"] { transition: all .2s ease-in-out;  }
+.CodeMirror-activeline { background-color: rgba(101,133,194,0.1) !important; }
+.cm-s-idea .CodeMirror-activeline-background { background-color: transparent !important; }
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+/* Json library 변경 css */
+
+.json { overflow-y: auto; }
+
+pre {
+  white-space: pre-wrap; 
+  line-height: 1.5rem; 
+  font-size: .825rem; 
+
+  .string::before, 
+  .number::before, 
+  .boolean::before, 
+  .null::before {
+    display: inline-block; 
+    margin-right: 4px; 
+    padding: 1px 4px; 
+    border-radius: .225rem;
+    line-height: 1rem;  
+    font-size: .515rem; 
+    color: white; 
+  }
+
+  .key { color: #4d4d4d; }
+  .string { color: #15d3b2;
+    &::before { content:'string';
+      background-color: #15d3b2; 
+    }
+  }
+  .number { color: #1bc9e4; 
+    &::before { content:'number';
+      background-color: #1bc9e4; 
+    }
+  }
+  .boolean { color: #e62454; 
+    &::before { content:'boolean';
+      background-color: #e62454; 
+    }
+  }
+  .null { color: #2e3c56; 
+    &::before { content:'null';
+      background-color: #2e3c56; 
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+// angular material css 변경 공간 
+
+
+// bottom sheets styles ---------------------------------------------
+
+.mat-form-field-label-wrapper { top: -.95375em; }
+.mat-dialog-container { box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; }
+
+.mat-bottom-sheet-container {
+  padding: 0 !important; 
+  border-radius: .325rem .325rem 0 0; 
+  box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; 
+}
+
+
+// spinner ---------------------------------------------
+
+.mat-progress-bar.mat-accent .mat-progress-bar-fill::after, 
+.mat-progress-bar.mat-accent .mat-progress-bar-fill::before, 
+.mat-progress-bar.mat-accent .mat-progress-bar-background, 
+.mat-progress-bar.mat-accent .mat-progress-bar-buffer 
+ { background: #1bc9e4 !important; }
+
+ .cdk-global-overlay-wrapper { width: 100%; }
+ .mat-slider-horizontal { height: 38px !important; }
+
+
+// tab ---------------------------------------------
+
+.mat-form-field-appearance-legacy .mat-form-field-underline {
+  background-color: #ddd !important; 
+}
+
+
+// tab ---------------------------------------------
+
+.mat-tab-group.mat-primary .mat-ink-bar, 
+.mat-tab-nav-bar.mat-primary .mat-ink-bar {
+  background: #1bc9e4; 
+}
+
+.mat-tab-body-content { overflow: initial; }
+
+.mat-tab-group { 
+  .mat-tab-header {
+    .mat-tab-labels .mat-tab-label { 
+      min-width: 6.5rem; 
+      height: 3rem; 
+      padding: 0 .625rem; 
+      font-size: 0.875rem;
+      flex: 1; 
+    }
+  }
+}
+
+.mat-tab-body-wrapper { flex: 1; }
+
+.mat-tab-vertical.mat-tab-group { 
+  height: 100%; 
+  flex-direction: row; 
+  .mat-tab-header { border-radius: .325rem 0 0 .325rem; }
+  .mat-tab-labels { 
+    height: 100%; 
+    flex-direction: column; 
+    .mat-tab-label {
+      position: relative;
+      min-width: 4rem;
+      height: initial; 
+      opacity: 1; 
+      flex: 1; 
+      z-index: 10;
+      padding-left: .825rem; 
+      
+      &:last-child { border-bottom: 0; }
+      &::after { 
+        content:'';
+        display: block; 
+        background: #f9f9f9; 
+        width: 100%; 
+        height: 100%;
+        position: absolute; 
+        right: 0; 
+        top: 0; 
+        bottom: 0; 
+        margin: auto; 
+        transition: all .3s ease-in-out; 
+        z-index: -1; 
+      }
+
+      &.mat-tab-label-active { 
+        &::after {
+          background: #fff; 
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+      }
+    }
+  }
+  .mat-ink-bar { display: none; }
+  .mat-tab-header { border: none; }
+}
+
+
+// chip ---------------------------------------------
+
+mat-chip-list {
+  position: absolute; 
+  bottom: 1.25rem; 
+  left: 1.25rem; 
+  z-index: 32;
+}
 
 .mat-standard-chip { 
   border-radius: .225rem !important; 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-.z-10 { z-index: 10; }
 
-/* button 관련 정리로 
-추후 theme을 가진 button도 추가예정 */
-
-a { 
-  display: inline-flex; 
-  text-decoration: none; 
-  color: inherit; 
-  cursor: pointer;  
-
-  &.checked { 
-    background:#6585C2; 
-    mat-icon { 
-      color: #fff !important; 
-    }
-  }
-}
-
-.btn { 
-  background: transparent; 
-  min-width: 90px; 
-  height: 44px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 0 .625rem; 
-  border: none; 
-  border-radius: .225rem; 
-  outline: none; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  font-size: .625rem; 
-  text-transform: uppercase; 
-  cursor: pointer;
-
-  mat-icon { 
-    color: #6585C2; 
-  }
-
-  &.btn-icon { 
-    min-width: 44px; 
-  }
-}
-
-.card-expand-btn { 
-  background-color: #fff; 
-  border-radius: 0 0 .225rem .225rem; 
-  padding: 0 .625rem; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-.mat-button, .mat-fab, .mat-flat-button, 
-.mat-icon-button, .mat-mini-fab, 
-.mat-raised-button, .mat-stroked-button {
-  font-size: .75rem; 
-  padding: 0 1rem !important; 
-  min-width: 88rem; 
-}
-
-.mat-button-toggle-group, 
-.mat-button-toggle-standalone,
-.ngx-datatable.material {
-  box-shadow: none !important; 
-  font-size: .8125rem; 
-}
-
-.mat-button-toggle-group { 
-  height: 100%; 
-  .mat-button-toggle {
-    display: flex; 
-    &.mat-button-toggle-checked {
-      background: transparent !important; 
-      color: #fff;
-    }
-  }
-}
-
-.mat-button-toggle-disabled { background: transparent !important; }
-.mat-button-toggle-disabled.mat-button-toggle-checked { 
-  color: #ccc;
-}
-
-/* 기본 설정 datatable css 수정 
-datatable의 세팅값은 각 태그에 존재함*/
+// datatable css ---------------------------------------------
 
 .ngx-datatable.material { 
   display: flex; 
@@ -299,9 +699,9 @@ datatable의 세팅값은 각 태그에 존재함*/
         padding: 0 .375rem; 
         margin: .375rem .1875rem; 
         i { 
-          font-size: 1.25rem !important; 
           line-height: 1.25rem !important; 
           padding: 0 .375rem !important; 
+          font-size: 1.25rem !important; 
         }
       }
     }
@@ -344,7 +744,6 @@ datatable의 세팅값은 각 태그에 존재함*/
   cursor: pointer;
 }
 
-
 .ngx-datatable.material .datatable-body .datatable-row-detail { 
   background: #f8f9f9; 
   padding: .4rem 1.25rem; 
@@ -356,458 +755,50 @@ datatable의 세팅값은 각 태그에 존재함*/
   color: #fff; 
 }
 
-/* 기본 graph canvas의 창 값으로
-좌우 정렬일 경우, 각 html에는 좌측의 사이즈를 
-해당 scss파일에서 설정가능 */
 
-div.graph-canvas { 
-  max-width: 100%; 
-  overflow: hidden;
-  position: relative;
-  z-index: 10;
+// button css ---------------------------------------------
 
-  // zoom 버튼 위치수정 
-  div.cy-panzoom { 
-    top: 1.25rem; 
-    left: 1.25rem; 
-    // canvas 반응형높이값을위해 설정
-    + div {
-      width: 100% !important; 
-      height: 100% !important; 
-    } 
-  }
-}
-
-#dashboard-canvas div.cy-panzoom { 
-  top: 4.6875rem; 
-  left: 2.1875rem; 
-}
-
-mat-chip-list {
-  position: absolute; 
-  bottom: 1.25rem; 
-  left: 1.25rem; 
-  z-index: 32;
-}
-
-/* 각 페이지의 기본 input 값 설정 
-*/
-
-form, input { 
-  font-size: .875rem; 
-  outline: none; 
-
-  textarea {
-    width: 100%; 
-    padding-top: 1px; 
-    overflow: hidden;
-    border: none;
-    outline: none;  
-    resize: none; 
-  }
-
-  &[type="text"] {
-    width: 100%; 
-    padding: .325rem; 
-    border: none; 
-    border-bottom: 1px solid #ddd; 
-    outline: none; 
-  }
-}
-
-select { 
-  width: 100%; 
-  padding: .325rem; 
-  border: none; 
-  border-bottom: 1px solid #ddd; 
-  outline: none; 
-}
-
-.search {
-  position: relative; 
-
-  input {
-    width: 100%; 
-    font-size: .75rem; 
-    color: #848484; 
-
-    &.input-lg { 
-      min-width: 20rem; 
-    }
-  }
-
-}
-
-/* tab 관련 스타일 변경 */
-
-.mat-tab-group.mat-primary .mat-ink-bar, 
-.mat-tab-nav-bar.mat-primary .mat-ink-bar {
-  background: #1bc9e4; 
-}
-
-.mat-tab-body-content { overflow: initial; }
-
-.mat-tab-group { 
-  .mat-tab-header {
-    .mat-tab-labels .mat-tab-label { 
-      min-width: 6.5rem; 
-      height: 3rem; 
-      padding: 0 .625rem; 
-      font-size: 0.875rem;
-      flex: 1; 
-    }
-  }
-}
-
-.mat-tab-body-wrapper { flex: 1; }
-
-.mat-tab-vertical.mat-tab-group { 
-  flex-direction: row; 
-  .mat-tab-header { border-radius: .325rem 0 0 .325rem; }
-  .mat-tab-labels { 
-    height: 100%; 
-    flex-direction: column; 
-    .mat-tab-label {
-      position: relative;
-      min-width: 4rem;
-      height: initial; 
-      opacity: 1; 
-      flex: 1; 
-      z-index: 10;
-      padding-left: .825rem; 
-      
-      &:last-child { border-bottom: 0; }
-      &::after { 
-        content:'';
-        display: block; 
-        background: #f9f9f9; 
-        width: 100%; 
-        height: 100%;
-        position: absolute; 
-        right: 0; 
-        top: 0; 
-        bottom: 0; 
-        margin: auto; 
-        transition: all .3s ease-in-out; 
-        z-index: -1; 
-      }
-
-      &.mat-tab-label-active { 
-        &::after {
-          background: #fff; 
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-      }
-      
-      
-    }
-  }
-  .mat-ink-bar { display: none; }
-  .mat-tab-header {
-    border: none;  
-  }
-
-  
-}
-
-/* CodeMirror
-*/
-
-.CodeMirror { 
-  flex: 1; 
-  font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
-  font-size: .905rem;      // .825rem;
-  font-weight: 400; 
-  // border-top: 1px solid #eee; 
-  // border-bottom: 1px solid #eee; 
-  line-height: 1.3;
-}
-
-.CodeMirror pre { padding: .05rem .625rem !important; }
-.CodeMirror-linenumber { padding: .05rem 4px !important; text-align: center; }
-.CodeMirror-gutter-wrapper { left: -36px !important; }
-.CodeMirror-code > div[style="position: relative;"] { transition: all .2s ease-in-out;  }
-.CodeMirror-activeline { background-color: rgba(101,133,194,0.1) !important; }
-.cm-s-idea .CodeMirror-activeline-background { background-color: transparent !important; }
-
-// Dropdown menu  
-.mat-subhead { 
-  display: inline-block;
-  padding: 1rem; 
-}
-
-// 텍스트 타이틀 옆에 붙는 before
-.expand-cell::before, 
-.empty-row::before, 
-.mat-subhead::before, 
-.slide h4::before,
-.title::before  {
-  content:'';
-  background: #005aa8; 
-  width: 8px; 
-  height: 8px; 
-  display: inline-block; 
-  border-radius: 50%; 
-  margin-right: .75rem; 
-}
-
-// dialog 관련 css 수정 
-// .mat-form-field-appearance-legacy .mat-form-field-underline { background: #ddd; }
-
-
-// sidenav css 
-.slide { 
-  background: #fff; 
-  width: 21.875rem; 
-  height: calc(100% - 2.5rem); 
-  margin: auto; 
-  padding: 1.25rem; 
-  top: 0; 
-  right: 6.25rem; 
-  bottom: 0; 
-  position: absolute; 
-  z-index: 22;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  border-radius: .325rem; 
-  &.slide-no-icon { 
-    right: 1.25rem; 
-  }
-}
-
-.mat-slider-horizontal { height: 38px !important; }
-
-/* slide 숨기는 component 
-사이즈를 조정할 수 있다*/ 
-
-.viewbox {
-  position: absolute; 
-  top: 1.25rem; 
-  right: 1.25rem; 
-  width: 3.425rem;   
-  overflow: hidden;
-  z-index: 1000;
-  height: calc(100% - 2.5rem);
-  border-left: 1px dashed #eee; 
-
-  .scroll-hide {
-    width: 80px; 
-    height: 100%; 
-    overflow-y: scroll; 
-    
-    ul { 
-      width: 3.425rem;
-      height: inherit;  
-
-      mat-icon { color: #6585C2; }
-    }
-  }
-
-  &::before { 
-    content:''; 
-    display: block; 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: #fff; 
-    opacity: .5;
-    z-index: -1;
-  }
-}
-
-// 
-
-ul.last-border-no li:last-child { border-bottom: none; }
-
-ul.list li > span, span.subtitle { 
-  display: inline-block;
-  min-width: 60px; 
-  margin-right: 1.25rem; 
-  padding: .25rem; 
+.mat-button, .mat-fab, .mat-flat-button, 
+.mat-icon-button, .mat-mini-fab, 
+.mat-raised-button, .mat-stroked-button {
   font-size: .75rem; 
-  color: #979a9c;
+  padding: 0 1rem !important; 
+  min-width: 88rem; 
 }
 
-// list 
+.mat-button-toggle-group, 
+.mat-button-toggle-standalone,
+.ngx-datatable.material {
+  box-shadow: none !important; 
+  font-size: .8125rem; 
+}
 
-ul.list {
-  width: 100%;
-  font-size: .875rem; 
-  color: #4d4d4d; 
-  
-  li {
-    margin: 1.25rem 0; 
-    padding: .625rem; 
-    &:first-child { margin-top: .625rem; }
-    &:last-child { margin-bottom: 0; }
-  }
-
-  &.inline { width: initial; }
-
-  &.textover > li {
-    max-width: 43.75rem; 
-    overflow: hidden; 
-    white-space: nowrap; 
-    text-overflow: ellipsis; 
-  }
-
-  li.side-margin { 
-    padding: .625rem; 
-    margin: 0;
-    &.col {
-      padding-right: 0; 
-    }
-  }
-
-  li.side-padding {
-    padding: 0 .625rem; 
-    margin: 0; 
-  }
-
-  &.icon {
-
-    &.row > li {
-      margin: 0 1.875rem; 
-      padding: 0; 
-      a { min-height: 0; }
-    }
-
-    &.palette > li {
-      margin: 0 .625rem;
-      padding: 0; 
-    }
-
-    > li { 
-      margin: 0; 
-      padding: 0; 
-      font-size: 90%; 
-      a { 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        min-height: 3.125rem; 
-        
-      }
+.mat-button-toggle-group { 
+  height: 100%; 
+  .mat-button-toggle {
+    display: flex; 
+    &.mat-button-toggle-checked {
+      background: transparent !important; 
+      color: #fff;
     }
   }
 }
 
-// card 
+.mat-button-toggle-disabled { background: transparent !important; }
+.mat-button-toggle-disabled.mat-button-toggle-checked { color: #ccc; }
 
-.card { 
-  background: #fff; 
-  padding: 1.25rem; 
-  border-radius: .325rem; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  overflow: hidden;
-}
 
-// json 
-.json { overflow-y: auto; }
+// table css ---------------------------------------------
 
-pre {
-  white-space: pre-wrap; 
-  line-height: 1.5rem; 
-  font-size: .825rem; 
+tr.mat-header-row { height: 2.5rem !important; }
+tr.mat-footer-row, tr.mat-row, .label-info-slide label { height: 3rem !important; }
+tr.mat-footer-row, tr.mat-row, .label-info-slide label, .mat-cell, .mat-footer-cell { font-size: .825rem !important; }
+tbody tr:last-child td { border-bottom: 0 !important; }
 
-  .string::before, .number::before, .boolean::before, .null::before {
-    display: inline-block; 
-    margin-right: 4px; 
-    padding: 1px 4px; 
-    border-radius: .225rem;
-    line-height: 1rem;  
-    font-size: .515rem; 
-    color: white; 
-  }
-  .key {
-    color: #4d4d4d;        
-  }
-  .string { 
-    color: #15d3b2;
-    &::before { 
-        content:'string';
-        background-color: #15d3b2; 
-    }
-  }
-  .number { 
-      color: #1bc9e4; 
-      &::before { 
-          content:'number';
-          background-color: #1bc9e4; 
-      }
-  }
-  .boolean { 
-      color: #e62454; 
-      &::before { 
-          content:'boolean';
-          background-color: #e62454; 
-      }
-  }
-  .null { 
-      color: #2e3c56; 
-      &::before { 
-          content:'null';
-          background-color: #2e3c56; 
-      }
-  }
-}
+mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; }
+.material-icons { font-size: 1.5rem !important; }
+.mat-button-toggle { color: rgba(255,255,255,0.4); }
+.expand-cell { color: #585858; }
+.mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
 
-.cdk-global-overlay-wrapper { 
-  width: 100%; 
-}
-
-// spinner 
-
-.mat-progress-bar.mat-accent .mat-progress-bar-fill::after, 
-.mat-progress-bar.mat-accent .mat-progress-bar-fill::before, 
-.mat-progress-bar.mat-accent .mat-progress-bar-background, 
-.mat-progress-bar.mat-accent .mat-progress-bar-buffer 
- { background: #1bc9e4 !important; }
-
-#graphCard, #graphTable { 
-  position: relative; 
-}
-
- #progressBarQueryGraph, #progressBarStatGraph { 
-   position: absolute; 
-   top: 0; 
- }
-
-////////////////////////////////////
-// bottom sheets styles
-
-.mat-form-field-label-wrapper { top: -.95375em; }
-.mat-dialog-container { box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; }
-
-.mat-bottom-sheet-container {
-  padding: 0 !important; 
-  border-radius: .325rem .325rem 0 0; 
-  box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; 
-}
-
-.sheet-cell-viewer {
-  width: 600px;
-  height: 650px;
-}
-
-.sheet-meta-graph {
-  width: 1200px;
-  height: 650px;
-}
-
-.sheet-label-style {
-  width: 1200px;
-  height: 650px;
-}
-
-.bar {
-  fill: steelblue;
-}
-
-.axis-title {
-  fill: none;
-  stroke: black;
-  stroke-width: 0.5px;
-}
-
+ //////////////////////////////////////////////////////////////////////////

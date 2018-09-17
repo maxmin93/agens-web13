@@ -8,8 +8,13 @@
   color: '#585858';
 }
 
+#graphCard { overflow: hidden; }
+
+.sidebar { top: 1.25rem; right: 1.25rem; }
+
 .side-short-component { 
   height: auto; 
   top: 20px; 
+  right: 20px; 
   bottom: initial; 
 }

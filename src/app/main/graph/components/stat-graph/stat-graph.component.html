@@ -1,37 +1,37 @@
-<div id="graphCard" class="col strech">
+<div id="graphCard" class="col flex-1">
   
     <div id="progressBarStatGraph" #progressBar style='visibility:hidden;'>
         <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
     </div>
 
     <!-- Graph content -->
-    <div class="row strech">
-        <div class="row row-side strech">
-            <div class="strech card p-no">
-                <div id="statistics-canvas" #divCanvas class="graph-canvas strech" 
+    <div class="row flex-1 p20">
+        <div class="row flex-1 mr20 border">
+            <div class="col flex-1">
+                <div id="statistics-canvas" #divCanvas class="graph-canvas flex-1" 
                     [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue">
                 </div>
             </div>            
             <!-- Graph.Meta : toolbar -->
-            <div id="agens-graph-toolbar" class="viewbox theme">
-                <div class="slide-hide">
-                    <ul class="list icon">
-                        <li>
-                            <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above"><mat-icon>refresh</mat-icon></a>
-                        </li>
+            <div id="agens-graph-toolbar" class="box-view">
+                <div class="box-scroll">
+                    <ul class="box-content">
+                        <div class="btn-group btn-group-v">
+                            <a class="btn btn-icon" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above"><mat-icon>refresh</mat-icon></a>
+                        </div>
                     </ul>
                 </div>
             </div>
         </div> 
-        <div class="col strech">
-            <div id="div-d3-chart" #divD3Chart class="col-side strech p-20 card">
-                <h5 class="title"><strong>CHART</strong></h5>
-                <div class="row-center strech">
+        <div class="col flex-1">
+            <div id="div-d3-chart" #divD3Chart class="col flex-1 border p20">
+                <h5><strong>CHART</strong></h5>
+                <div>
                     <svg id="svg-d3-chart" width="600" height="150"></svg>
                 </div>
             </div>
-            <div class="strech p-20 card">
-                <h5 class="title"><strong>LINE</strong></h5>
+            <div class="col flex-1 border p20 mt20">
+                <h5><strong>LINE</strong></h5>
             </div>
         </div>
     </div>

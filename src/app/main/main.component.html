@@ -1,29 +1,30 @@
 <!-- menu toolbar -->
-<mat-toolbar id="appToolbar" class="row-center">   
+<mat-toolbar id="appToolbar" class="row row-space">   
+    
     <h1>
         <!-- {{ productTitle }} -->
         AGENSBROWSER <small>WEB 1.3</small>
     </h1>
+    
     <mat-button-toggle-group #btnMenuGroup="matButtonToggleGroup" [value]="currentPath">
         <mat-button-toggle #btnMenuMain value="/" disabled="{{ currentMenu=='main' }}" [routerLink]="['/']">
-            <a>SCHEMA</a>
+            <a class="btn">SCHEMA</a>
         </mat-button-toggle>
         <mat-button-toggle #btnMenuPyeditor value="/pyeditor" disabled="{{ currentMenu=='pyeditor' }}" [routerLink]="['/pyeditor']">
-            <a>PL/Python</a>
+            <a class="btn">PL/Python</a>
         </mat-button-toggle>
         <mat-button-toggle #btnMenuGraph value="/graph" disabled="{{ currentMenu=='graph' }}" [routerLink]="['/graph']">
-            <a>GRAPH</a>
+            <a class="btn">GRAPH</a>
         </mat-button-toggle>
         <mat-button-toggle #btnMenuHistory value="/history" disabled="{{ currentMenu=='history' }}" [routerLink]="['/history']">
-            <a>HISTORY</a>
+            <a class="btn">HISTORY</a>
         </mat-button-toggle>
         <mat-button-toggle value="show help-documents" matTooltipPosition="above" > 
-            <a href="http://bitnine.net/documentation/" target="_new">DOCUMENTS</a>
+            <a class="btn" href="http://bitnine.net/documentation/" target="_new">DOCUMENTS</a>
         </mat-button-toggle>
         <mat-button-toggle>
-            <a matTooltip="Homepage" matTooltipPosition="above" href="http://bitnine.net/" target="_new"><mat-icon>home</mat-icon></a>
+            <a class="btn btn-link" matTooltip="Homepage" matTooltipPosition="above" href="http://bitnine.net/" target="_new"><mat-icon>home</mat-icon></a>
         </mat-button-toggle>
-        
     </mat-button-toggle-group>
     <!-- <button id="button-logout" mat-button (click)="logout()">logout</button> -->
 
