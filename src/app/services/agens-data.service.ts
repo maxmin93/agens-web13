@@ -346,6 +346,10 @@ export class AgensDataService {
   // https://www.codingforentrepreneurs.com/blog/file-upload-with-angular/
   // https://malcoded.com/posts/angular-file-upload-component-with-express
 
+  // graphson type: json, "application/json"
+  // graphml type: xml, "text/xml"
+  // gryo type: kryo, ""                      <== kryo는 내부에서만 쓰고 json, xml 만 사용
+
   fileUpload(fileItem:File, extraData?:object):any{
     const url = `${this.api.file}/upload`;
     const formData: FormData = new FormData();
@@ -359,7 +363,7 @@ export class AgensDataService {
     }
 
     const req = new HttpRequest('POST', url, formData, {
-      // **NOTE: 이거 필요 없음1! ==> 'Content-Type': 'multipart/form-data'
+      // **NOTE: 이거 필요 없음! 오류만 발생함 ==> 'Content-Type': 'multipart/form-data'
       headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
       reportProgress: true // for progress data
     });
@@ -370,4 +374,24 @@ export class AgensDataService {
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
   }
 
+  importFile(fileItem:File, extraData?:object):any{
+    const url = `${this.api.file}/import`;
+    const formData: FormData = new FormData();
+
+    formData.append('file', fileItem, fileItem.name);
+    if (extraData) {
+      for(let key in extraData){
+        // iterate and set other form data
+        formData.append(key, extraData[key])
+      }
+    }
+
+    const req = new HttpRequest('POST', url, formData, {
+      // **NOTE: 이거 필요 없음! 오류만 발생함 ==> 'Content-Type': 'multipart/form-data'
+      headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
+      reportProgress: true // for progress data
+    });
+    return this._http.request(req);
+  }
+  
 }

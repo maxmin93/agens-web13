@@ -10,8 +10,8 @@ import { DatatableComponent } from '@swimlane/ngx-datatable';
 import { PrettyJsonModule } from 'angular2-prettyjson';
 
 import * as _ from 'lodash';
-import { Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Observable, Subscription, of } from 'rxjs';
+import { filter, share, concatAll } from 'rxjs/operators';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
@@ -33,6 +33,7 @@ import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 import { LabelStyleSettingDialog } from './dialogs/label-style-setting.dialog';
 import { ImageExportDialog } from './dialogs/image-export.dialog';
+import { analyzeFileForInjectables } from '@angular/compiler';
 
 declare var CodeMirror: any;
 declare var agens: any;
@@ -659,17 +660,99 @@ return path1, path2;
         // progress return 
         // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
         if( x.type === HttpEventType.UploadProgress) {
-          // calculate the progress percentage
           const percentDone = Math.round(100 * ( x.loaded / x.total ) );
-          console.log(`uploadFile.progress: ${percentDone}%`);
+          if( percentDone ) this.queryResult.setMessage(StateType.PENDING, `upload.progress: ${percentDone}%` );
         } 
       },
       err => {
-        console.log('uploadFile.error:', err);
+        this.queryResult.setMessage(StateType.FAIL, 'upload.FAIL: '+JSON.stringify(err) );
       },
       () => {
-        console.log('uploadFile.complete: total!!', fileItem.name );
+        this.queryResult.setMessage(StateType.SUCCESS, 'upload.complete: '+fileItem.name );
       }
     );
+  }
+
+  importFile(event){
+    let fileItem:File = event.target.files[0];
+    let fileExt = undefined
+    if( fileItem.name.lastIndexOf('.') >= 0 ) 
+      fileExt = fileItem.name.substring(fileItem.name.lastIndexOf('.')).toLowerCase();
+    if( !fileExt || (fileExt != '.graphson' && fileExt != '.json' && fileExt != '.graphml' && fileExt != '.xml') ){
+      // error message
+      this.queryResult.setMessage(StateType.WARNING, `**NOTE: importable file types are graphml(xml), graphson(json)`);
+      return;
+    }
+
+    this.handlers[9] = this._api.importFile( fileItem ).subscribe(
+      x => {
+        // progress return 
+        // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
+        if( x.type === HttpEventType.UploadProgress) {
+          const percentDone = Math.round(100 * ( x.loaded / x.total ) );
+          if( percentDone ) this.queryResult.setMessage(StateType.PENDING, `import.progress: ${percentDone}%` );
+        }
+        else if (x instanceof HttpResponse) {
+          console.log('File is completely uploaded!', fileItem.name);
+          if( x.body ) this.parseGraphDto( of(x.body).pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() ) );
+        }
+      },
+      err => {
+        this.queryResult.setMessage(StateType.FAIL, 'import.FAIL: '+JSON.stringify(err) );
+      },
+      () => {
+        this.queryResult.setMessage(StateType.SUCCESS, 'import.complete: '+fileItem.name );
+      }
+    );
+  }
+
+  parseGraphDto( data$:Observable<any> ){
+
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`graph_dto receiving : gid=${x.gid}`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.resultTemp = x;
+        this.resultTemp.labels = new Array<ILabel>();
+        this.resultTemp.nodes = new Array<INode>();
+        this.resultTemp.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+        this.resultTemp.labels.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        // setNeighbors from this.resultGraph.labels;
+        x.scratch['_neighbors'] = new Array<string>();
+        // this.resultGraph.labels
+        //   .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
+        //   .map(label => {
+        //     x.scratch['_neighbors'] += label.targets;
+        //     x.scratch['_style'] = label.scratch['_style'];
+        //     x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        //   });
+        this.resultTemp.nodes.push( x );
+        this.queryGraph.addNode( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        // this.resultGraph.labels
+        // .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
+        // .map(label => {
+        //   x.scratch['_style'] = label.scratch['_style'];
+        //   x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        // });
+        this.resultTemp.edges.push( x );
+        this.queryGraph.addEdge( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        this.queryGraph.initCanvas(true);
+        // this.queryGraph.graphChangeLayout('cose');
+      });
+
   }
 }
