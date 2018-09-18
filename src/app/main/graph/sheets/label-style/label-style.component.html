@@ -4,22 +4,22 @@
         <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
     </div>
     <!-- Graph content -->
-    <div class="col flex-1 p20 ">
-        <div class="row row-space">
+    <div class="col flex-1 p20 sheet-bottom">
+        <div class="row row-space row-m">
             <h4>Styling by <strong>label</strong></h4>
             <ul class="sheet btn-group">
-                <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                <li><a class="btn btn-link" (click)="close()" matTooltip="Close" matTooltipPosition="above">
                     <mat-icon>close</mat-icon></a></li>
             </ul>
         </div>
-        <div class="row flex-1 mt20">
-            <div class="row flex-3 mr20 border">
+        <div class="row flex-1 mt10">
+            <div class="row flex-5 mr20 border">
                 <div class="col flex-1">
                     <div id="meta-canvas" class="graph-canvas flex-1" #divCanvas></div>
                 </div>
                     <!-- Graph.Meta : toolbar -->
                 <div class="row">
-                    <div id="agens-graph-toolbar" class="box-view flex-1">                    
+                    <div id="agens-graph-toolbar" class="box-view shadow-none flex-1">                    
                         <div class="box-scroll">
                             <div class="box-content">
                                 <div class="btn-group btn-group-v">
@@ -55,7 +55,7 @@
                         <h6 class="row row-space">Select Color : <span>rgb(255,255,255)</span></h6>
                     </div>
                 </div>
-                <div class="border mt20 p20 row row-space row-m">
+                <div class="border mt20 p-side row row-space row-m">
                     <h5 class="mr20"><strong>SIZE </strong></h5>
                     <mat-slider name="labelSize" class="flex-1 p-no" [formControl]="labelSizeCtl"
                                 [min]="labelSizeRange.min" [max]="labelSizeRange.max" [step]="labelSizeRange.step" 
@@ -63,9 +63,9 @@
                                 (change)="onChangeStyleWidth($event)">
                     </mat-slider>
                 </div>
-                <div class="border mt20 p20" style="padding-bottom: 0">    
-                    <h5><strong>TITLE </strong></h5>
-                    <mat-form-field class="flex-1 row-center">
+                <div class="border mt20 pl20 pr20 row row-space row-m">    
+                    <h5 class="mr20"><strong>TITLE </strong></h5>
+                    <mat-form-field class="flex-1">
                         <mat-select name="labelName" [formControl]="labelNameCtl" [value]="selectedStyle.title"
                                     (selectionChange)="onChangeStyleTitle($event)" required>
                         <mat-option value="_null_">_NONE_</mat-option>
@@ -73,7 +73,7 @@
                         </mat-select>
                     </mat-form-field>                
                 </div>
-                <div class="mt20 col flex-1"><button mat-raised-button color="primary" [disabled]="!selectedElement || !isChanged" 
+                <div class="mt20 col"><button mat-raised-button color="primary" [disabled]="!selectedElement || !isChanged" 
                         (click)="close()">Apply</button></div>
         </div>
        

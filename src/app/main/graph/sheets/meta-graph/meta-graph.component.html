@@ -9,11 +9,11 @@
         <div class="row row-m row-space">
             <h4 class="title">Search in <strong>Result</strong></h4>
             <ul class="sheet btn-group">
-                <li><a (click)="close()" matTooltip="Close" matTooltipPosition="above">
+                <li><a class="btn btn-link" (click)="close()" matTooltip="Close" matTooltipPosition="above">
                     <mat-icon>close</mat-icon></a></li>
             </ul>
         </div>
-        <div class="row flex-1 mt20">
+        <div class="row flex-1 mt10">
             <div class="row flex-3 mr20">
                 <div class="col flex-1">
                     <!-- graph canvas -->
@@ -23,12 +23,12 @@
                     <ng-container *ngIf="!!selectedElement">
                         <div id="slide-toggle" class="sidebar col">
                             <h4>Label <strong>info.</strong></h4>
-                            <ul class="col flex-1">
-                                <li class="row row-m row-space mb10"><span>Label</span> {{ selectedElement.data('label') }} [count={{ selectedElement.data('size') }}]</li>
-                                <li class="row row-m row-space mb10"><span>Name</span> {{ selectedElement.data('name') }}</li>
+                            <ul class="property-list col flex-1 mt10">
+                                <li class="row row-m row-space"><span>Label</span> {{ selectedElement.data('label') }} [count={{ selectedElement.data('size') }}]</li>
+                                <li class="row row-m row-space"><span>Name</span> {{ selectedElement.data('name') }}</li>
                                 <li class="col flex-1">
-                                    <span class="row row-m row-space mb10">Properties <span>({{selectedProps.length}})</span></span>
-                                    <div class="json flex-1 border" *ngIf="selectedProps">
+                                    <span class="row row-m row-space mb5">Properties <span>({{selectedProps.length}})</span></span>
+                                    <div class="json-box flex-1 p-no" *ngIf="selectedProps">
                                         <!-- <form [formGroup]="formGrp" (ngSubmit)="submitFormGroup()"> -->
                                         <form [formGroup]="formGrp" class="label-info-slide">
                                             <label class="row row-m row-space p10 border-bottom" formArrayName="conditions" *ngFor="let prop of formGrp.controls.conditions.controls; let i = index">
@@ -38,10 +38,10 @@
                                     </div>
                                 </li>
                             </ul>
-                            <div class="row mt10">
-                                <button class="btn mr10 flex-1" (click)="addItemGroupBy()"><mat-icon class="mr10">add</mat-icon>GroupBy</button>
-                                <button class="btn mr10 flex-1" (click)="addItemFilterBy()"><mat-icon class="mr10">add</mat-icon>FilterBy</button>
-                                <button class="btn btn-icon flex-1" (click)="resetChecked()"><mat-icon>refresh</mat-icon></button>  
+                            <div class="btn-group side-l mt10 row-r">
+                                <a class="btn btn-fill" (click)="addItemGroupBy()">+ Group</a>
+                                <a class="btn btn-fill" (click)="addItemFilterBy()">+ Filter</a>
+                                <a class="btn btn-icon btn-fill" (click)="resetChecked()"><mat-icon>refresh</mat-icon></a>  
                             </div>
                         </div>
                     </ng-container>

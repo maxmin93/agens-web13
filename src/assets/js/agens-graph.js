@@ -95,12 +95,12 @@
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.bc;
-      return '#d3d3d3';
+      return '#eee';
     },
     edgeDColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.dc;
-      return '#d3d3d3';
+      return '#eee';
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
