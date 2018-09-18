@@ -175,8 +175,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           // table에 추가하고 refresh
           this.btnStatus.save = false;
           this.selectedLabel = x.label;
+          this.labelNameCtl.nativeElement.focus();      // setFocus
+
           this.labels.push(<ILabel>x.label);
           this.tableLabelsRows = [...this.labels];  
+          this._cd.detectChanges();
         },
         err => {
           console.log('ERROR createEdge:', err, edge);
@@ -469,8 +472,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           this.tableLabels.offset = Math.floor( index / this.tableLabels.limit );
           this.tableLabels.selected = [ label ];
 
-          this.selectedLabel = label;         // 라벨 정보창으로
+          this.selectedLabel = label;                   // 라벨 정보창으로
           this.tablePropertiesRows = label.properties;  // 라벨 속성 테이블로
+          this.labelNameCtl.nativeElement.focus();      // setFocus
           this._cd.detectChanges();
         } 
 
@@ -652,8 +656,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         // table에 추가하고 refresh
         this.btnStatus.save = false;
         this.selectedLabel = x.label;
+        this.labelNameCtl.nativeElement.focus();      // setFocus
+
         this.labels.push(<ILabel>x.label);
         this.tableLabelsRows = [...this.labels];
+        this._cd.detectChanges();
       },
       err => {
         console.log('ERROR createNode:', err);
