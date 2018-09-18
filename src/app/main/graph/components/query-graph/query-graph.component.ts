@@ -598,7 +598,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cy.getElementById(vid).select();
       if( sid ){
         this.cy.edges(`[source='${sid}'][target='${vid}']`).select();
-        console.log( `[source='${sid}'][target='${vid}']`, this.cy.edges(`[source='${sid}'][target='${vid}']`) );
       }
       sid = String(vid);
     }

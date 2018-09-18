@@ -40,7 +40,6 @@ import { AgensGraphService } from './services/agens-graph.service';
 
 // // Dialogs
 import { ConfirmDeleteLabelDialog } from './main/dashboard/dialogs/confirm-delete-label.dialog';
-import { InputCreateLabelDialog } from './main/dashboard/dialogs/input-create-label.dialog';
 import { QueryResultComponent } from './main/graph/components/query-result/query-result.component';
 import { QueryGraphComponent } from './main/graph/components/query-graph/query-graph.component';
 import { QueryTableComponent } from './main/graph/components/query-table/query-table.component';
@@ -68,7 +67,6 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
     HistoryComponent,
 
     ConfirmDeleteLabelDialog,
-    InputCreateLabelDialog,
 
     QueryResultComponent,
     MetaGraphComponent,
@@ -121,7 +119,6 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
   // additional providers needed for this module
   entryComponents: [ 
     ConfirmDeleteLabelDialog,
-    InputCreateLabelDialog,
     
     // LabelStyleSettingDialog,
     // ImageExportDialog,

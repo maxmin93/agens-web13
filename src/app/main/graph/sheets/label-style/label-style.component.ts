@@ -265,7 +265,6 @@ export class LabelStyleComponent implements OnInit {
 
   // opacity 로 반영 
   onChangeStyleVisible($event){
-    console.log('onChangeStyleVisible', $event);
     // this.selectedStyle.visible = $event.value;   // [(ngModel)]로 연결
     this.selectedElement._private.scratch._style.visible = this.selectedStyle.visible;
     // visible=false 가 node 라면 connectedEdge 들도 visible=false 가 되어야 함

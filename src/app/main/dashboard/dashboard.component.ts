@@ -14,7 +14,6 @@ import { DatatableComponent } from '@swimlane/ngx-datatable';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 import { ConfirmDeleteLabelDialog } from './dialogs/confirm-delete-label.dialog';
-import { InputCreateLabelDialog } from './dialogs/input-create-label.dialog';
 
 import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
@@ -559,62 +558,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
   // Create Label Controllers
   /////////////////////////////////////////////////////////////////
-
-  openInputCreateLabelDialog(): void {
-    let dialogRef = this.dialog.open( InputCreateLabelDialog, {
-      width: '400px',
-      data: this.tableLabelsRows
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      // console.log('CreateLabelInputDialog was closed:', result );
-      if( result === null ) return;
-
-      // CREATE label 위한 API 호출
-      this._api.core_command_create_label(result).subscribe(
-        dto => {
-          this._api.setResponses(<IResponseDto>dto);
-          if( dto.state == CONFIG.StateType.SUCCESS ) this.addCreatedLabel(dto.label);
-        },
-        err => {
-          console.log( 'schema.createLabel: ERROR=', err instanceof HttpErrorResponse, err.error );
-          this._api.setResponses(<IResponseDto>{
-            group: 'schema.createLabel',
-            state: err.statusText,
-            message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
-          });
-        }
-      );
-    });
-  }
-
-  addCreatedLabel(target:ILabel){
-    this.createdLabel = target;
-    console.log('addCreatedLabel:', target);
-
-    // table에 추가하고 refresh    
-    this.selectedLabel = target;
-    this.labels.push(<ILabel>target);
-    this.tableLabelsRows = [...this.labels];
-    
-    // graph에 추가 (node이면 그냥 추가, but edge는 추가 안함)
-    if( target.type === 'nodes' ){
-      if( this.cy.$api.view !== undefined ) this.cy.$api.view.removeHighlights();
-      this.cy.elements(':selected').unselect();
-      this.cy.center();
-      let ele = this.cy.add({
-        group: 'nodes',
-        schema: { id: target.id, labels: ['NODE'], name: target.name, size: 0, props: target.properties },
-        selectable: true, selected: true
-      });
-      // nodes 개수 증가
-      this.infos['nodes_size_total'] += 1;
-    }
-    else{
-      // edges 개수 증가
-      this.infos['edges_size_total'] += 1;
-    }
-  }
 
   createLabelOnDB(type:string):Observable<ILabelDto> {
     let newName:string = 'new_label_'+(++this.counterNew);

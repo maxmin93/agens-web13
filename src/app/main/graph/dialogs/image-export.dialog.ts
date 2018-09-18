@@ -67,7 +67,7 @@ import { MatInputModule } from '@angular/material/input';
     }
 
     .div__export-image-box { 
-      background-color: #eee; 
+      background-color: #8e8e8e; 
       flex-basis: 300px;  
       margin-right: 20px; 
       padding: 20px; 
