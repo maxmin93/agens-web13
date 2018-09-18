@@ -13,7 +13,7 @@ import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
 import { AgensGraphService } from '../../../../services/agens-graph.service';
 
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd, IProperty } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IGraphDto, IDoubleListDto } from '../../../../models/agens-response-types';
 
@@ -146,8 +146,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("data-graph.tap:", target._private);
-
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
@@ -184,7 +182,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // 결과들만 삭제 : runQuery 할 때 사용
   clear(option:boolean=true){
-    if( this.cy.elements().size() > 0 ) this._util.savePositions( this.cy );
+    // if( this.cy.elements().size() > 0 ) this._util.savePositions( this.cy );
 
     // 그래프 비우고
     this.cy.elements().remove();
@@ -262,24 +260,23 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-  clickGraphLabelChip( labelType:string, labelName:string ): void {
+  clickGraphLabelChip( label:ILabel ): void {
     this.selectedElement = undefined;
     this.cy.elements(':selected').unselect();
 
-    this.labels.forEach(x => {
-      if( x.type == labelType && x.name == labelName){
-        this.selectedLabel = x;
-        return false;
-      }
-    });
-
+    this.selectedLabel = label;
     setTimeout(()=>{
-      let group = (labelType == 'edges') ? 'edge' : 'node';
-      this.cy.elements(`${group}[label='${labelName}']`).select();
-    }, 10);
+      let group = (label.type == 'edges') ? 'edge' : 'node';
+      this.cy.elements(`${group}[label='${label.name}']`).select();
+    }, 20);
   }
 
   graphPresetLayout(){
+    /*
+    // ///////////////////////////////////////////////////
+    // **NOTE: 레이아웃 적용시 가끔 StackOverflow 발생 
+    //  ==> 문제 해결때 까지 주석처리함 (2018-09-18)
+
     if( this._util.hasPositions() ){
       this.toggleProgressBar(true);
       let remains:any[] = this._util.loadPositions(this.cy);
@@ -302,6 +299,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     else{
       this.graphChangeLayout('random');
     }
+    */
+    this.graphChangeLayout('random');
   }
 
   // cytoscape makeLayout & run
@@ -634,10 +633,12 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   initTimeline(){
     this.timelineDisabled = true;
     if( this.labels.length > 0 ){
+      let property:IProperty = (this.labels[0].properties && this.labels[0].properties.length > 0) ?
+              this.labels[0].properties[0] : undefined;
       this.timelineLabelCtl = new FormControl(this.labels[0], []);
-      this.timelinePropertyCtl = new FormControl( (this.timelineLabelCtl.value).properties[0], [] );
+      this.timelinePropertyCtl = new FormControl( property, [] );
       this.timelineSampleCtl = new FormControl( {value: 
-        this.getTimelineSample( this.labels[0].name, this.labels[0].properties[0].key ), disabled: true}, [] );
+        this.getTimelineSample( this.labels[0].name, property ), disabled: true}, [] );
     }
     else{
       this.timelineLabelCtl = new FormControl( {value: { name: "" }, disabled: true} , []);
@@ -649,7 +650,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.timeline_data = [];
   }
   onChangeTimelineFormat(value){
-    let sample = this.getTimelineSample(this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value.key);
+    let sample = this.getTimelineSample(this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value);
     if( sample != '' && moment(sample, value, true ).isValid() )
       this.timelineDisabled = false;
     else this.timelineDisabled = true;
@@ -660,7 +661,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     if( event.value.type != 'STRING' ) this.timelineFormatCtl.disable({onlySelf:true});
     else this.timelineFormatCtl.enable({onlySelf:false});
 
-    let sample = this.getTimelineSample(this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value.key);
+    let sample = this.getTimelineSample(this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value);
     this.timelineSampleCtl.setValue( sample, {emitEvent: false} );
 
     if( sample != '' && moment(sample, this.timelineFormatCtl.value, true ).isValid() )
@@ -676,8 +677,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     if( eles.nonempty() ){
       let data = eles.map(e => { 
-        return (e.data('props').hasOwnProperty( propKey )) 
-                ? e.data('props')[ propKey ] : null; 
+        return (e.data('props').hasOwnProperty( propKey.key )) 
+                ? e.data('props')[ propKey.key ] : null; 
         }).filter(v => v != null);
       if( data.length > 0 ) return <string> data[0];
     }
@@ -727,7 +728,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     let restElements = this.cy.elements().difference( visibleElements );
     restElements.style('visibility','hidden');
     // restElements.animate({ style: { 'visibility': 'hidden' }, duration: 200 });
-    console.log("Slider changed:", event, visibleElements.size(), restElements.size());
   }
   onUpdateTimelineSlider(event) {
     console.log("Slider updated:", event);
@@ -743,7 +743,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   runFilterByGroupBy(options: any){
 
-    this._util.savePositions( this.cy );
+    // this._util.savePositions( this.cy );
 
     this.savePositions( this.dataGraph );
     this.clear(false);   // false: clear canvas except labels    

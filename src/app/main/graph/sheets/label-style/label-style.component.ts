@@ -134,8 +134,6 @@ export class LabelStyleComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log( target.data('name'), target.visible(), target._private.scratch._style );
-
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
     this.selectedStyle = this.getSelectedStyle(target);

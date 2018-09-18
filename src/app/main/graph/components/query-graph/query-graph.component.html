@@ -193,8 +193,8 @@
             <!-- Graph.Meta : Labels content -->
             <mat-chip-list id="agens-graph-labels">
                 <mat-chip *ngFor="let label of labels" [selected]="true"
-                    (click)="clickGraphLabelChip(label.type, label.name)" 
-                    [style.background]="(label.scratch['_style'].color) ? label.scratch['_style'].color.bc : '#d3d3d3'">
+                    (click)="clickGraphLabelChip(label)"
+                    [style.background]="label.scratch['_style'].color ? label.scratch['_style'].color.bc : '#d3d3d3'">
                     <span *ngIf="label.type=='nodes'" class="nodeType">{{label.name}} ({{label.size}})</span>
                     <span *ngIf="label.type=='edges'" class="edgeType">{{label.name}} ({{label.size}})</span>
                 </mat-chip>

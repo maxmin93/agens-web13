@@ -123,11 +123,12 @@ export class MetaGraphComponent implements OnInit {
     let target:ILabel = undefined;
     this.data['labels'].filter(x => x.type == element._private.group)
       .forEach(x => { 
-        if( x.id == element.id() ){
+        if( x.name == element.data('name') ){
           target = x;
           return false;
         }  
       });
+    console.log('findLabel:', target, element, this.data['labels']);
     return target;
   }
 
@@ -178,6 +179,7 @@ export class MetaGraphComponent implements OnInit {
       .map((v, i) => v ? this.selectedProps[i] : null)
       .filter(v => v !== null);
 
+    console.log('addItemGroupBy:', selected, this.selectedLabel);
     selected.forEach(item => {
       let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
       this.groupByList.push({ label: this.selectedElement.data('name'), prop: item
