@@ -14,9 +14,9 @@
                 </div>
                 <div class="card-content">
                     <ul class="list">
-                        <li title={{infos.uri}}><span class="property-name"> URL</span><p class="property-value">{{infos.uri}}</p></li>
-                        <li title={{infos.name}}><span class="property-name"> NAME</span><p class="property-value">{{infos.name}} (owner: '{{infos.owner}}')</p></li>
-                        <li title={{infos.desc}}><span class="property-name"> DESC</span><p class="property-value">{{infos.desc}}</p></li>
+                        <li title={{infos.uri}}><span class="property-name mr15"> URL</span><p class="property-value">{{infos.uri}}</p></li>
+                        <li title={{infos.name}}><span class="property-name mr15"> NAME</span><p class="property-value">{{infos.name}} (owner: '{{infos.owner}}')</p></li>
+                        <li title={{infos.desc}}><span class="property-name mr15"> DESC</span><p class="property-value">{{infos.desc}}</p></li>
                     </ul>
                 </div>
                 <!--
@@ -147,7 +147,8 @@
                     </div>
                     <div class="card-footer col">
                         <button #btnSave mat-raised-button (click)="saveElement()" color="primary" [disabled]="!btnStatus.save">
-                            <mat-icon class="mr10" [style.color]="btnStatus.save ? '#303F9F':'#afafaf' ">save</mat-icon><Strong>SAVE</Strong>
+                            <!-- <mat-icon class="mr10" [style.color]="btnStatus.save ? '#303F9F':'#afafaf' ">save</mat-icon><Strong>SAVE</Strong> -->
+                            <Strong>SAVE</Strong>
                         </button>
                     </div>
                 </div>

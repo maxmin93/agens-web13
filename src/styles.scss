@@ -52,8 +52,8 @@ ul, html, body, material-app, input, textarea, p,
 h1, h2, h3, h4, h5, h6, 
 ul, html, body, material-app, input, textarea, 
 .mat-menu-item, pre, .mat-tab-label, .mat-table, 
-.mat-button, .mat-fab, .mat-flat-button, 
-.mat-icon-button, .mat-mini-fab, 
+.mat-button, .mat-fab, .mat-flat-button, input, 
+.mat-icon-button, .mat-mini-fab, .mat-tab-group,
 .mat-raised-button, .mat-stroked-button {
   font-family: "Noto Sans", "Noto Sans Bold", sans-serif !important;
 }
@@ -61,6 +61,8 @@ ul, html, body, material-app, input, textarea,
 // Custom style for loading elements without height
 
 .will-load { min-height: 80px; }
+
+a { text-decoration: none; color: currentColor; }
 
 // table 
 
@@ -118,11 +120,11 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 .pos-abs { position: absolute; }
 
 .overflow-y { overflow-y: auto;}; 
+.overflow-x { overflow-x: auto;}; 
 
  
 // margin 및 padding ---------------------------------------------
 
-.block { display: block; }
 .in-block { display: inline-block; }
 
 .m-no { margin: 0 !important; }
@@ -136,15 +138,18 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 .mt10 { margin-top: .625rem; }
 
 .mr20 { margin-right: 1.25rem; }
+.mr15 { margin-right: .9375rem; }
 .mr10 { margin-right: .625rem; }
 
 .mb20 { margin-bottom: 1.25rem; }
 .mb10 { margin-bottom: .625rem; }
 
-.mr20 { margin-right: 1.25rem; }
-.mr10 { margin-right: .625rem; }
+.ml20 { margin-left: 1.25rem; }
+.ml10 { margin-left: .625rem; }
 
 .p-no { padding: 0 !important; }
+
+.p-side { padding: .625rem 1.25rem; }
 
 .p20 { padding: 1.25rem; }
 .p10 { padding: .625rem !important; }
@@ -154,6 +159,10 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 .pt10 { padding-top: .625rem; }
 
 .pb20 { padding-bottom: 1.25rem; }
+.pb10 { padding-bottom: .625rem; }
+
+.pr20 { padding-right: 1.25rem; }
+.pl20 { padding-left: 1.25rem; }
 
 // border 값 설정 ---------------------------------------------
 
@@ -182,12 +191,12 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   .btn.btn-link { margin: 0 1.25rem; 
     &:last-child { margin-right: 0; }
   }
+
+  &.side-l .btn { margin-left: .625rem; &:first-child {margin: 0} }
+  &.side-r .btn { margin-right: .625rem; &:last-child {margin: 0} }
 }
 
-.btn-group.btn-group-v { 
-  flex-direction: column; 
-
-}
+.btn-group.btn-group-v { flex-direction: column; }
 
 .btn { 
   display: inline-flex; 
@@ -197,13 +206,16 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   padding: 0 .625rem; 
   white-space: nowrap; 
   border: 1px solid transparent; 
+  border-radius: .225rem; 
   text-decoration: none; 
   text-align: center; 
+  text-transform: uppercase; 
   align-items: center; 
   justify-content: center; 
   font-size: .875rem;  
   color: inherit; 
   cursor: pointer;  
+  transition: all .1s ease-out; 
 
   &.checked { 
     background:#6585C2; 
@@ -216,18 +228,38 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   padding: 0; 
   line-height: initial; 
   height: initial; 
+  color: #585858; 
+
+  &:hover { 
+    color: #005aa8; 
+  }
 }
 
 .btn.btn-icon { 
   width: 45px;
-  min-width: initial;  
+  min-width: initial;
   height: 45px; 
   padding: 0; 
   align-items: center; 
   justify-content: center; 
+  mat-icon { color: #999; }
+
+  &:hover mat-icon { color: #005aa8; }
+}
+
+.btn.btn-fill { 
+  background: #005aa8; 
+  color: #fff; 
+  mat-icon { 
+    color: #fff; 
+  }
 }
 
 .btn.btn-disabled { }
+
+.btn.btn-icon.btn-ink { width: initial; }
+
+
 
 // list 값 설정
 
@@ -242,7 +274,6 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 .property-name { 
   background: linear-gradient(to right, rgb(0,90,168), rgba(0,90,168,.7));
   min-width: 3.75rem; 
-  margin-right: 1rem; 
   padding: .375rem .5rem; 
   display: inline-block; 
   box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
@@ -255,6 +286,12 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   }
 }
 
+.property-name-link { 
+  text-transform: uppercase; 
+  font-size: .825rem; 
+  color: #999; 
+}
+
 .property-value { 
   max-width: 32.5rem; 
   text-overflow: ellipsis; 
@@ -262,6 +299,31 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   overflow: hidden;
   font-size: .875rem; 
   color: rgba(0, 0, 0, 0.75); 
+}
+
+.property-list li { 
+  margin-bottom: .625rem; 
+  padding: .525rem 0; 
+  font-size: .925rem; 
+  border-bottom: 1px solid #ddd; 
+  color: #282828; 
+
+  &:last-child { margin: 0; border: 0; padding-bottom: 0; }
+
+  span { 
+    text-transform: uppercase; 
+    font-size: .825rem; 
+    color: #585858;
+  }
+
+  .json-box { 
+    background: #fbfbfb;
+    margin-top: .625rem; 
+    padding: 1rem; 
+    border: 1px solid #ddd; 
+    overflow-y: auto; 
+    box-shadow: inset 0 0 1px rgba(0,0,0,.25); 
+  }
 }
 
 /* ---------------------------------------------
@@ -298,6 +360,10 @@ form, input, textarea, select {
   border: none;
   outline: none;  
   resize: none; 
+
+  &.block {
+    width: 100%; 
+  }
 }
 
 select { 
@@ -308,6 +374,28 @@ select {
 
 input { 
   padding: .325rem; 
+}
+
+.search { 
+  display: flex; 
+  align-items: stretch; 
+  span { 
+    background: #005aa8; 
+    padding: .425rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    mat-icon { color: #fff; }
+  }
+  label {
+    width: 100%; 
+    padding-left: .425rem; 
+    border: 1px solid #ddd; 
+    input {
+      width: 100%; 
+      height: 100%; 
+    }
+  }
 }
 
 // Dropdown menu ---------------------------------------------
@@ -323,7 +411,8 @@ input {
 .empty-row::before, 
 .mat-subhead::before, 
 .sidebar h4::before,
-.title::before  {
+.title::before, 
+.sheet-bottom h4::before  {
   content:'';
   background: #005aa8; 
   width: 8px; 
@@ -355,11 +444,13 @@ input {
 
 .box-view {
   background: #f9f9f9; 
-  width: 45px;   
+  width: 55px;   
   height: 100%;
   overflow: hidden;
   z-index: 1000;
   box-shadow: inset 1px 0 2px rgba(0,0,0,0.25); 
+
+  &.shadow-none { box-shadow: none; border-left: 1px solid #ddd; }
 
   .box-scroll {
     width: 5rem; 
@@ -368,8 +459,14 @@ input {
     overflow-x: hidden; 
     
     .box-content { 
-      width: 45px;
+      width: 55px;
       height: inherit;  
+
+      .btn {
+        width: 55px;
+        height: 55px;  
+        border-radius: 0; 
+      }
     }
   }
 }
@@ -455,15 +552,13 @@ input {
 .CodeMirror { 
   flex: 1; 
   font-family: "RobotoMono","RobotoMono Bold", sans-serif !important;
-  font-size: .905rem; // .825rem;
+  font-size: .875rem; // .825rem;
   font-weight: 400; 
-  line-height: 1.3;
 }
-
-.CodeMirror pre { padding: .05rem .625rem !important; }
+.CodeMirror-sizer { margin-left: 59px; }
+.CodeMirror pre { padding: .15rem 12px !important; border-bottom: 1px dashed #f0f0f0!important; }
 .CodeMirror-lines { padding: 0 !important; }
-.CodeMirror-linenumber { padding: .05rem 4px !important; text-align: center; }
-.CodeMirror-gutter-wrapper { left: -36px !important; }
+.CodeMirror-linenumber { width: 59px; padding: .15rem 0 !important; text-align: center !important; }
 .CodeMirror-code > div[style="position: relative;"] { transition: all .2s ease-in-out;  }
 .CodeMirror-activeline { background-color: rgba(101,133,194,0.1) !important; }
 .cm-s-idea .CodeMirror-activeline-background { background-color: transparent !important; }
@@ -549,7 +644,7 @@ pre {
  { background: #1bc9e4 !important; }
 
  .cdk-global-overlay-wrapper { width: 100%; }
- .mat-slider-horizontal { height: 38px !important; }
+ .mat-slider-horizontal { height: 44px !important; }
 
 
 // tab ---------------------------------------------
@@ -597,8 +692,11 @@ pre {
       flex: 1; 
       z-index: 10;
       padding-left: .825rem; 
-      
-      &:last-child { border-bottom: 0; }
+      border-right: 1px solid #ddd;      
+      border-top: 1px solid #ddd;      
+
+      &:first-child { border-top: 0; }
+
       &::after { 
         content:'';
         display: block; 
@@ -615,6 +713,7 @@ pre {
       }
 
       &.mat-tab-label-active { 
+        border-right-color: white;
         &::after {
           background: #fff; 
           box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);

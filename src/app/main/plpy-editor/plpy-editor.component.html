@@ -71,12 +71,12 @@
                         </mat-error>
                     </mat-form-field>
                     
-                    <div class="col flex-1 mt20">
+                    <div class="col flex-1 mt20 border">
                         <textarea id="plpy-editor" #plpyEditor type="text" name="plpy" class=""></textarea>
                     </div>
 
                     <mat-error class="mt30 pt20 border-top" *ngIf="editor.getValue().trim().length == 0">
-                        <span class="property-name error">Error</span> Source must be not empty!
+                        <span class="property-name error mr15">Error</span> Source must be not empty!
                     </mat-error>
                 </form>             
             </div>

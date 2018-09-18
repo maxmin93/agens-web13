@@ -14,22 +14,21 @@
                 <ng-container *ngIf="btnStatus.showHideTitle">
                     <div id="slide-toggle" class="sidebar side-short-component">
                         <h4 class="mb20">find <strong>Title</strong></h4>   
-                        <div class="row row-m mb20">
-                            <mat-icon class="mr10">search</mat-icon>
+                        <div class="search mb20">
+                            <span><mat-icon>search</mat-icon></span>
                             <!-- <div class="strech row-center border-bottom">
                                 <span class="subtitle">Start Node</span>
                                 <span>{{ shortestPathOptions.sid }}</span>
                             </div> -->
-                            <label class="flex-1 border-bottom p10">
+                            <label>
                                 <input
-                                class="search"
                                 type='text'            
                                 placeholder='Type to filter label text...'
                                 (keyup)='updateFilterTitle($event)'/>
                             </label>
                         </div>
-                        <div class="row row-space border p10">
-                            <span>Found Elements :</span><strong>{{ labelSearchCount }}</strong>
+                        <div class="row row-m row-space">
+                            <span class="property-name">Total Found Elements</span><span>--- --- ---</span><span>{{ labelSearchCount }}</span>
                         </div>
                     </div>
                 </ng-container>
@@ -37,18 +36,18 @@
                 <!-- 출력상자 : Node/Edge 상세 정보 -->
                 <ng-container *ngIf="!!selectedElement">
                     <div id="slide-toggle" class="sidebar col">
-                        <div class="mb20">
-                            <h4><strong>{{ selectedElement.group() || uppercase }}</strong> info.</h4>
+                        <div class="mb20 row row-c row-space">
+                            <h4>{{ selectedElement.group() || uppercase }} <strong>info</strong></h4>
                             <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
                             [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
                             </mat-slide-toggle>
                         </div>
-                        <ul>
-                            <li><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
-                            <li><span>Name</span>{{ selectedElement.data('name') }}</li>
-                            <li>
+                        <ul class="property-list col flex-1">
+                            <li class="row row-m row-space"><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
+                            <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                            <li class="col flex-1">
                                 <span>Data</span>
-                                <div><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
+                                <div class="json-box col flex-1"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
                             </li>
                         </ul>
                     </div>
