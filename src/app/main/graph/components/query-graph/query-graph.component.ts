@@ -146,6 +146,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
+    // for DEBUG
+    console.log('cy.tap:', target._private);
+
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);

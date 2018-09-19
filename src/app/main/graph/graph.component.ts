@@ -720,30 +720,37 @@ return path1, path2;
       });
     data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
       (x:ILabel) => { 
+        x.scratch['_style'] = <IStyle>{ 
+          width: undefined, title: 'name', 
+          color: (x.type == 'nodes') ? this._util.nextColor() : undefined 
+          , visible: true
+        };
+        x.scratch['_styleBak'] = _.clone(x.scratch['_style']);
         this.resultTemp.labels.push( x );
+        this.queryGraph.addLabel( x );
       });
     data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
         // setNeighbors from this.resultGraph.labels;
         x.scratch['_neighbors'] = new Array<string>();
-        // this.resultGraph.labels
-        //   .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
-        //   .map(label => {
-        //     x.scratch['_neighbors'] += label.targets;
-        //     x.scratch['_style'] = label.scratch['_style'];
-        //     x.scratch['_styleBak'] = label.scratch['_styleBak'];
-        //   });
+        this.resultTemp.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.label)
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
+            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+          });
         this.resultTemp.nodes.push( x );
         this.queryGraph.addNode( x );
       });
     data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
-        // this.resultGraph.labels
-        // .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
-        // .map(label => {
-        //   x.scratch['_style'] = label.scratch['_style'];
-        //   x.scratch['_styleBak'] = label.scratch['_styleBak'];
-        // });
+        this.resultTemp.labels
+        .filter(val => val.type == 'edges' && val.name == x.data.label)
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
         this.resultTemp.edges.push( x );
         this.queryGraph.addEdge( x );
       });

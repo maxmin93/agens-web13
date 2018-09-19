@@ -14,7 +14,7 @@
                 <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="uploader.click()">IMPORT</a>
                 <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">LOAD</a>
                 <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a>
-                <input hidden type="file" #uploader (change)="uploadFile($event)" />
+                <input hidden type="file" #uploader (change)="importFile($event)" />
                 <!-- accept="text/xml,application/json"/> --> <!-- only graphml, graphson -->
             </div>
         </div>
