@@ -551,8 +551,10 @@
       let elements = cy.elements(':visible');
       let boundingBox = undefined;
       if( options ){
-        if( options.hasOwnProperty('elements') ) elements = options['elements'];
-        if( options.hasOwnProperty('boundingBox') ) boundingBox = options['boundingBox'];
+        if( options.hasOwnProperty('elements') && options['elements'] ) 
+          elements = options['elements'];
+        if( options.hasOwnProperty('boundingBox') && options['boundingBox'] ) 
+          boundingBox = options['boundingBox'];
       }
 
       let layoutOption = {

@@ -122,13 +122,20 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       // change Detection by force
       this._cd.detectChanges();
     });
-
-    // timeline slider initialization
-    jQuery("#timelineSlider").ionRangeSlider();
   }
 
   setData(dataGraph:IGraph){
     this.dataGraph = dataGraph;
+    this.dataGraph.labels_size = dataGraph.labels.length;
+    this.dataGraph.nodes_size = dataGraph.nodes.length;
+    this.dataGraph.edges_size = dataGraph.edges.length;
+    dataGraph.labels.forEach(x => {
+      let eles = (x.type == 'nodes') 
+                ? dataGraph.nodes.filter(y => y.data.label == x.name) 
+                : dataGraph.edges.filter(y => y.data.label == x.name);
+      x.size = eles.length;     // update eles size of label
+    });
+    this.labels = [...dataGraph.labels];    
   }
   setMeta(metaGraph:IGraph){
     this.metaGraph = metaGraph;
@@ -197,18 +204,33 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     Object.keys(this.btnStatus).map( key => this.btnStatus[key] = false );
   }
 
-  setGid( gid: number ){ this.gid = gid; }
-  addLabel( label:ILabel ){ this.labels.push( label ); }
-  addNode( ele:INode ){ this.cy.add( ele ); }
-  addEdge( ele:IEdge ){ this.cy.add( ele ); }
+  setGid( gid: number ){ 
+    if( gid > 0 ) this.gid = gid; 
+  }
+  addLabel( label:ILabel ){ 
+    let arr = this.labels.map(x => x.id);
+    if( arr.indexOf(label.id) == -1 ) this.labels.push( label );  // not exists
+    // else this.labels[ arr.indexOf(label.id) ] = label;
+  }
+  addNode( ele:INode ){ 
+    let target = this.cy.getElementById(ele.data.id);
+    if( target.empty() ) this.cy.add( ele );                      // not exists
+    // else target.forEach(x => x._private.data = ele.data );
+  }
+  addEdge( ele:IEdge ){ 
+    let target = this.cy.getElementById(ele.data.id);
+    if( target.empty() ) this.cy.add( ele );                      // not exists
+    // else target.forEach(x => x._private.data = ele.data );
+  }
 
   // 데이터 불러오고 최초 적용되는 작업들 
   initCanvas(isTempGraph:boolean){
-    // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
-    // this.cy.elements(':selected').unselect();
-
+    if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
+    this.cy.elements(':selected').unselect();
+    
     this.isTempGraph = isTempGraph;
     this.cy.style(agens.graph.stylelist['dark']).update();
+
     // this._cd.detectChanges();
     // Promise.resolve(null).then(() => {
     //   this.cy.fit( this.cy.elements(), 50);
@@ -308,9 +330,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
-    this.toggleProgressBar(true);
+    this.toggleProgressBar(true);    
+    let targets = this.cy.elements(':selected');
     this.cy.$api.changeLayout(layout, {
       "padding": 50
+      , "elements": (targets.size() > 2) ? targets : undefined
       , "ready": () => {}
       , "stop": () => this.toggleProgressBar(false)
     });

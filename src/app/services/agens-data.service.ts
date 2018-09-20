@@ -138,11 +138,12 @@ export class AgensDataService {
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
-  core_query(sql:string):Observable<any> {
+  core_query(gid:number, sql:string):Observable<any> {
     const url = `${this.api.core}/query`;
     // **NOTE: encodeURIComponent( sql ) 처리
     //         (SQL문의 '+','%','&','/' 등의 특수문자 변환)
     let params:HttpParams = new HttpParams().set('sql', encodeURIComponent( sql ) );
+    params = params.append('gid', gid+''); 
 
     return this._http.get<any>(url, {params: params, headers: this.createAuthorizationHeader()})
       .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
@@ -270,6 +271,12 @@ export class AgensDataService {
   }
 
   ////////////////////////////////////////////////
+
+  grph_graph(gid:number):Observable<any> {
+    const url = `${this.api.grph}/${gid}`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
+  }  
 
   grph_schema(gid:number):Observable<any> {
     const url = `${this.api.grph}/schema/${gid}`;

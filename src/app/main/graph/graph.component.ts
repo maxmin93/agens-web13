@@ -140,6 +140,7 @@ return path1, path2;
     });      
   }
 
+  // **NOTE: 주석 라인에 대한 color 변경 필요 (comment style)
   private installCodeMirrorAddons(){
     var cmds = CodeMirror.commands;
     var Pos = CodeMirror.Pos;
@@ -303,7 +304,7 @@ return path1, path2;
   /////////////////////////////////////////////////////////////////
 
   // call API: db
-  runQuery(){
+  runQuery(option:boolean = false){
 
     this.queryResult.toggleTimer(true);
     this.isLoading = true;
@@ -312,10 +313,11 @@ return path1, path2;
     if( sql.length < 5 ) return;
 
     // 이전 결과들 비우고
-    this.clearResults();
+    if(option) this.clearResults();
 
     // call API
-    let data$:Observable<any> = this._api.core_query( sql );
+    let gid:number = (this.resultDto && this.resultDto.hasOwnProperty('gid')) ? this.resultDto.gid : -1;
+    let data$:Observable<any> = this._api.core_query( gid, sql );
 
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
       (x:IResultDto) => {
@@ -338,23 +340,31 @@ return path1, path2;
         this._router.navigate(['/login']);
       });
 
+    /////////////////////////////////////////////////
+    // Graph 에 표시될 내용은 누적해서 유지
     this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
-        this.resultGraph = x;
-        this.resultGraph.labels = new Array<ILabel>();
-        this.resultGraph.nodes = new Array<INode>();
-        this.resultGraph.edges = new Array<IEdge>();
+        if( !this.resultGraph ){      // if not exists = NEW
+          this.resultGraph = x;
+          this.resultGraph.labels = new Array<ILabel>();
+          this.resultGraph.nodes = new Array<INode>();
+          this.resultGraph.edges = new Array<IEdge>();
+        }
       });
     this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
       (x:ILabel) => { 
-        x.scratch['_style'] = <IStyle>{ 
-                width: undefined, title: 'name', 
-                color: (x.type == 'nodes') ? this._util.nextColor() : undefined 
-                , visible: true
-              };
-        x.scratch['_styleBak'] = _.clone(x.scratch['_style']);
-        this.resultGraph.labels.push( x );
-        this.queryGraph.addLabel( x );
+        // not exists
+        if( this.resultGraph.labels.map(y => y.id).indexOf(x.id) == -1 ){
+          x.scratch['_style'] = <IStyle>{ 
+            width: undefined, title: 'name', 
+            color: (x.type == 'nodes') ? this._util.nextColor() : undefined 
+            , visible: true
+          };
+          x.scratch['_styleBak'] = _.clone(x.scratch['_style']);
+          this.resultGraph.labels.push( x );
+        }
+        // **NOTE: labels 갱신은 맨나중에 resultGraph의 setData()에서 처리
+        // this.queryGraph.addLabel( x );
       });
     this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
@@ -368,7 +378,10 @@ return path1, path2;
             x.scratch['_styleBak'] = label.scratch['_styleBak'];
           });
 
-        this.resultGraph.nodes.push( x );
+        // not exists
+        if( this.resultGraph.nodes.map(y => y.data.id).indexOf(x.data.id) == -1 ){
+          this.resultGraph.nodes.push( x );
+        } 
         this.queryGraph.addNode( x );
       });
     this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
@@ -380,9 +393,15 @@ return path1, path2;
             x.scratch['_styleBak'] =label.scratch['_styleBak'];
           });
 
-        this.resultGraph.edges.push( x );
+        // not exists
+        if( this.resultGraph.edges.map(y => y.data.id).indexOf(x.data.id) == -1 ){
+          this.resultGraph.edges.push( x );  
+        } 
         this.queryGraph.addEdge( x );
       });
+    
+    /////////////////////////////////////////////////
+    // Table 에 표시될 내용은 항상 최신 결과로만 유지 
     this.handlers[5] = data$.pipe( filter(x => x['group'] == 'record') ).subscribe(
       (x:IRecord) => {
         this.resultRecord = x;
@@ -397,10 +416,14 @@ return path1, path2;
       (x:IRow) => {
         this.resultRecord.rows.push( x );
       });
+
+    /////////////////////////////////////////////////
+    // Graph의 Label 별 카운팅 해서 갱신
+    //  ==> ILabel.size, IGraph.labels_size/nodes_size/edges_size
     this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         this.isLoading = false;
-        this.queryResult.setData(<IResponseDto>this.resultDto);
+        this.queryResult.setData(<IResponseDto>this.resultDto);   // 메시지 출력
 
         // send data to Canvas
         this.queryGraph.setData(this.resultGraph);
@@ -409,9 +432,13 @@ return path1, path2;
         // send data to Table 
         this.queryTable.setData(this.resultRecord);
 
-        // **NOTE: 이어서 schema graph 호출 (gid)
-        if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
-          this.runGraphSchema( this.resultDto.gid );
+        // 
+        //  **NOTE: schemaGraph를 지금 호출할 필요가 있는가? 
+        //  ==> 금방 나오는 거라 필요시 호출하는 것으로 변경해야
+        //
+        // // **NOTE: 이어서 schema graph 호출 (gid)
+        // if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
+        //   this.runGraphSchema( this.resultDto.gid );
       });
 
   }
