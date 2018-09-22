@@ -86,25 +86,25 @@
     },
     nodeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
-      return '55px';
+      return '45px';
     },
     nodeWidthSelect: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
-      return '75px';
+      return '65px';
     },
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.bc;
-      return '#8e8e8e';
+      return '#a6a6a6';
     },
     edgeDColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.dc;
-      return '#8e8e8e';
+      return '#a6a6a6';
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
-      return '2px';
+      return '3px';
     }
   };
 
@@ -245,9 +245,9 @@
         selector: 'edge:selected',             
         css: {
           'opacity': 1,
-          'width': 14,
+          'width': 12,
           'line-style': 'solid',            // line-style: solid, dotted, dashed
-          'line-color': '#83878d',
+          'line-color': '#8e8e8e',
           'target-arrow-color': '#83878d',
           'source-arrow-color': '#83878d',
           'text-outline-width': 1,

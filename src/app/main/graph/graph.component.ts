@@ -172,7 +172,7 @@ return path1, path2;
   }
 
   tabChanged($event){
-    console.log( `tabChanged from ${this.currentTabIndex} to ${$event.index}`);
+    // console.log( `tabChanged from ${this.currentTabIndex} to ${$event.index}`);
     this.currentTabIndex = $event.index;
   }
 
@@ -307,6 +307,7 @@ return path1, path2;
   runQuery(option:boolean = false){
 
     this.queryResult.toggleTimer(true);
+    this.currentTabIndex = 0;
     this.isLoading = true;
     
     let sql:string = this.makeupSql(<string> this.getEditorSelection() );
@@ -364,7 +365,7 @@ return path1, path2;
           this.resultGraph.labels.push( x );
         }
         // **NOTE: labels 갱신은 맨나중에 resultGraph의 setData()에서 처리
-        // this.queryGraph.addLabel( x );
+        this.statGraph.addLabel( x );
       });
     this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
@@ -473,7 +474,7 @@ return path1, path2;
       (x:ILabel) => { 
         // meta-graph 에는 스타일을 부여하지 않는다 (nodes, edges 둘뿐이라)
         this.resultMeta.labels.push( x );
-        this.statGraph.addLabel( x );
+        // this.statGraph.addLabel( x );
       });
     data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
@@ -488,7 +489,7 @@ return path1, path2;
             x.scratch['_styleBak'] = label.scratch['_styleBak'];
           });
         this.resultMeta.nodes.push( x );
-        this.statGraph.addNode( x );
+        // this.statGraph.addNode( x );
       });
     data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
@@ -500,7 +501,7 @@ return path1, path2;
           x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
       this.resultMeta.edges.push( x );
-      this.statGraph.addEdge( x );
+      // this.statGraph.addEdge( x );
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {

@@ -4,12 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatButtonToggle } from '@angular/material';
 
 import { Observable, Subject, Subscription } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
+import { IGraphDto } from '../../../../models/agens-response-types';
 
 import * as d3 from 'd3-selection';
 import * as d3Scale from 'd3-scale';
@@ -27,7 +28,9 @@ export class StatGraphComponent implements OnInit {
 
   isVisible: boolean = false;
 
-  gid: number = undefined;
+  gid: number = -1;
+  statGraph:IGraph = undefined;
+  
   cy: any = undefined;      // for Graph canvas
   labels: ILabel[] = [];    // for Label chips
 
@@ -94,7 +97,7 @@ export class StatGraphComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("stat-graph.tap:", target);
+    console.log("statGraph.tap:", target._private);
 
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
@@ -105,6 +108,64 @@ export class StatGraphComponent implements OnInit {
 
   }
   
+  /////////////////////////////////////////////////////////////////
+  // Canvas Controllers
+  /////////////////////////////////////////////////////////////////
+
+  loadMetaGraph(gid: number){
+    // call API
+    let data$:Observable<any> = this._api.grph_schema(gid);
+
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`statGraph receiving : gid=${x.gid} (${gid})`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.statGraph = x;
+        this.statGraph.labels = new Array<ILabel>();
+        this.statGraph.nodes = new Array<INode>();
+        this.statGraph.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+        // meta-graph 에는 스타일을 부여하지 않는다 (nodes, edges 둘뿐이라)
+        this.statGraph.labels.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        // setNeighbors from this.resultGraph.labels;
+        x.classes = 'meta';     // meta class style
+        x.scratch['_neighbors'] = new Array<string>();
+        this.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
+            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+          });
+        this.statGraph.nodes.push( x );
+        this.cy.add( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        x.classes = 'meta';     // meta class style
+        this.labels
+        .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
+        this.statGraph.edges.push( x );
+        this.cy.add( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        this.initCanvas();
+      });
+
+  }
+
   /////////////////////////////////////////////////////////////////
   // Graph Controllers
   /////////////////////////////////////////////////////////////////
@@ -124,8 +185,11 @@ export class StatGraphComponent implements OnInit {
   clear(){
     // 그래프 비우고
     this.cy.elements().remove();
-    // 그래프 라벨 칩리스트 비우고
+    // 그래프 라벨 칩리스트 비우고, gid와 statGraph 무효화
+    this.gid = -1;
     this.labels = [];
+    this.statGraph = undefined;
+
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
 
@@ -134,23 +198,18 @@ export class StatGraphComponent implements OnInit {
   }
 
   setGid( gid:number ){ this.gid = gid; }
-  addLabel( label:ILabel ){
-    this.labels.push( label );
-  }
-  addNode( ele:INode ){
-    this.cy.add( ele );
-  }
-  addEdge( ele:IEdge ){
-    this.cy.add( ele );
-  }
+  addLabel( label:ILabel ){ this.labels.push( label ); }
+  // addNode( ele:INode ){ this.cy.add( ele ); }
+  // addEdge( ele:IEdge ){ this.cy.add( ele ); }
 
   // 데이터 불러오고 최초 적용되는 작업들 
   initCanvas(){
     // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     // this.cy.elements(':selected').unselect();
+
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.fit( this.cy.elements(), 50);   
+    this.changeLayout( this.cy.elements() );
 
     this.initDone.emit(this.isVisible);
   }
@@ -158,8 +217,9 @@ export class StatGraphComponent implements OnInit {
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
     this.cy.resize();
-    this.changeLayout( this.cy.elements() );
     agens.cy = this.cy;
+
+    if( this.gid > 0 ) this.loadMetaGraph(this.gid);
 
     if( this.isVisible ){
       this.width = this.divD3Chart.nativeElement.offsetWidth;  //document.querySelector('div#div-d3-chart').offsetWidth;
@@ -172,19 +232,30 @@ export class StatGraphComponent implements OnInit {
       this.drawBars();  
     }
   }
+
   changeLayout( elements ){
-    let options = { name: 'klay',
-      nodeDimensionsIncludeLabels: false, fit: true, padding: 50,
-      animate: false, transform: function( node, pos ){ return pos; },
-      klay: {
-        aspectRatio: 2.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
-        borderSpacing: 60, // Minimal amount of space to be left to the border
-        edgeRouting: 'POLYLINE', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
-        edgeSpacingFactor: 0.6, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
-        spacing: 60, // Overall setting for the minimal amount of space to be left between objects
-        thoroughness: 6 // How much effort should be spent to produce a nice layout..
-      }
+    // let options = { name: 'klay',
+    //   nodeDimensionsIncludeLabels: false, fit: true, padding: 50,
+    //   animate: false, transform: function( node, pos ){ return pos; },
+    //   klay: {
+    //     aspectRatio: 2.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
+    //     borderSpacing: 60, // Minimal amount of space to be left to the border
+    //     edgeRouting: 'POLYLINE', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
+    //     edgeSpacingFactor: 0.6, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
+    //     spacing: 60, // Overall setting for the minimal amount of space to be left between objects
+    //     thoroughness: 6 // How much effort should be spent to produce a nice layout..
+    //   }
+    // };    
+    let options = { name: 'cose-bilkent',
+      ready: function () {}, stop: function () {},
+      nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 10,
+      randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
+      nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
+      animate: 'end', tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
+      gravityRangeCompound: 1.5, gravityCompound: 1.0, gravityRange: 3.8,
+      initialEnergyOnIncremental: 0.5    
     };    
+
     // adjust layout
     elements.layout(options).run();
   }

@@ -69,7 +69,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   shortestPathOptions:any = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };
   grph_data: string[][] = [];
-  
+
+  // ** Styles **
+  colorsPallet: any[] = [];         // colors Pallet  
+
+  // ** Timelines **
   timelineLabelCtl: FormControl;
   timelinePropertyCtl: FormControl;
   timelineFormatCtl: FormControl;
@@ -97,6 +101,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     private _graph: AgensGraphService,
     private _sheet: MatBottomSheet
   ) { 
+    this.colorsPallet = this._util.colors;
   }
 
   ngOnInit() {
@@ -139,6 +144,65 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   setMeta(metaGraph:IGraph){
     this.metaGraph = metaGraph;
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Style Controllers
+  /////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////
+  //
+  // 스타일 컨트롤러를 변경하면 진행되는 일
+  //   1) nodes, edges 에 따라 아래 스타일 변경 
+  //   2) meta class 로 style() 함수에서 스타일 변경
+  //   3) scratch() 함수로 _style 에 저장 
+  //   4) _style 값을 close()에서 data-graph, label, meta-graph 에 반영 
+
+  // opacity 로 반영 
+  onChangeStyleVisible(event){
+    console.log( 'onChangeStyleVisible:', event.checked );
+    this.selectedLabel.scratch._style.visible = event.checked;
+    let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
+    targets.forEach(x => {
+      x._private.scratch._style.visible = event.checked;
+    });
+    // node 라면 connectedEdge 들도 visible=false 가 되어야 함
+    if( this.selectedLabel.type == 'nodes' ){
+      targets.connectedEdges().forEach(x => {
+        x._private.scratch._style.visible = event.checked;
+      });
+    }
+    this.cy.style().update();
+  }
+  // 그대로 사용 가능
+  onChangeStyleColor(value:number){
+    console.log( 'onChangeStyleColor:', this.colorsPallet[value] );
+    this.selectedLabel.scratch._style.color = this.colorsPallet[value];
+    let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
+    targets.forEach(x => {
+      x._private.scratch._style.color = _.cloneDeep(this.colorsPallet[value]);
+    });
+    this.cy.style().update();
+  }
+  // 그대로 사용 가능 
+  onChangeStyleWidth(event){
+    console.log( 'onChangeStyleWidth:', event.value );    // number type
+    this.selectedLabel.scratch._style.width = event.value;
+    let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
+    targets.forEach(x => {
+      x._private.scratch._style.width = event.value;
+    });
+    this.cy.style().update();
+  }
+  // label name + '/n(' + property.key + ')' 로 반영
+  onChangeStyleTitle(event){
+    console.log( 'onChangeStyleTitle:', event.value );    // property.key
+    this.selectedLabel.scratch._style.title = (event.value == '_null_') ? undefined : event.value;
+    let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
+    targets.forEach(x => {
+      x._private.scratch._style.title = (event.value == '_null_') ? undefined : event.value;
+    });
+    this.cy.style().update();
   }
 
   /////////////////////////////////////////////////////////////////
