@@ -484,7 +484,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     const bottomSheetRef = this._sheet.open(MetaGraphComponent, {
       ariaLabel: 'Meta Graph',
       panelClass: 'sheet-meta-graph',
-      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
+      data: { "gid": this.gid, "labels": this.labels }
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {

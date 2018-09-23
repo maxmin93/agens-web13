@@ -4,12 +4,13 @@ import { FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
 
 import { Observable, Subject } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IProperty } from '../../../../models/agens-data-types';
+import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IProperty, IEnd } from '../../../../models/agens-data-types';
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
+import { IGraphDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../app.config';
 
@@ -56,7 +57,8 @@ export class MetaGraphComponent implements OnInit {
     private _sheetRef: MatBottomSheetRef<MetaGraphComponent>,
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any        
   ) {
-    this.metaGraph = (this.data) ? _.cloneDeep(this.data['metaGraph']) : undefined;
+    this.gid = (this.data) ? _.cloneDeep(this.data['gid']) : -1;
+    this.labels = (this.data) ? _.cloneDeep(this.data['labels']) : [];
   }
 
   ngOnInit() {
@@ -84,13 +86,74 @@ export class MetaGraphComponent implements OnInit {
       this._cd.detectChanges();
     });
 
-    this.initLoad();
+    this.loadMetaGraph(this.gid);
   }
 
   close(): void {
     let options:any = this.makeOptions(this.groupByList, this.filterByList);
     this._sheetRef.dismiss( options );
     event.preventDefault();
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // load meta graph for statistics
+  /////////////////////////////////////////////////////////////////
+
+  loadMetaGraph(gid: number){
+    if( !gid || gid < 0 ) return;
+
+    // call API
+    let data$:Observable<any> = this._api.grph_schema(gid);
+
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`metaGraph receiving : gid=${x.gid} (${gid})`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.metaGraph = x;
+        this.metaGraph.labels = new Array<ILabel>();
+        this.metaGraph.nodes = new Array<INode>();
+        this.metaGraph.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+        // meta-graph 에는 스타일을 부여하지 않는다 (nodes, edges 둘뿐이라)
+        this.metaGraph.labels.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        // setNeighbors from this.resultGraph.labels;
+        x.classes = 'meta';     // meta class style
+        x.scratch['_neighbors'] = new Array<string>();
+        this.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
+            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+          });
+        this.metaGraph.nodes.push( x );
+        this.cy.add( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        x.classes = 'meta';     // meta class style
+        this.labels
+        .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
+        this.metaGraph.edges.push( x );
+        this.cy.add( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        this.changeLayout( this.cy.elements() );
+        this.initCanvas();
+      });
+
   }
 
   initLoad(){
@@ -287,12 +350,22 @@ export class MetaGraphComponent implements OnInit {
   }
 
   changeLayout( elements ){
-    let options = { name: 'cose',
-      nodeDimensionsIncludeLabels: true, fit: true, padding: 50, animate: false, 
-      randomize: false, componentSpacing: 80, nodeOverlap: 4,
-      idealEdgeLength: 50, edgeElasticity: 50, nestingFactor: 1.5,
-      gravity: 0.5, numIter: 1000
+    // let options = { name: 'cose',
+    //   nodeDimensionsIncludeLabels: true, fit: true, padding: 50, animate: false, 
+    //   randomize: false, componentSpacing: 80, nodeOverlap: 4,
+    //   idealEdgeLength: 50, edgeElasticity: 50, nestingFactor: 1.5,
+    //   gravity: 0.5, numIter: 1000
+    // };    
+    let options = { name: 'cose-bilkent',
+      ready: function () {}, stop: function () {},
+      nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 10,
+      randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
+      nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
+      animate: 'end', tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
+      gravityRangeCompound: 1.5, gravityCompound: 1.0, gravityRange: 3.8,
+      initialEnergyOnIncremental: 0.5    
     };    
+
     // adjust layout
     elements.layout(options).run();
   }
