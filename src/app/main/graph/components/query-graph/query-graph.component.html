@@ -53,7 +53,7 @@
                     </div>
                 </ng-container>
 
-                <!-- 출력상자 : Label 상세 정보 -->
+                <!-- 출력상자 : Label 스타일 정보 -->
                 <ng-container *ngIf="!!selectedLabel && !selectedElement">
                     <div id="slide-toggle" class="sidebar">
                         <div class="mb20">
@@ -74,7 +74,7 @@
                                 <li *ngFor="let c of colorsPallet; let i = index" [attr.data-index]="i"
                                     [style.background-color]="c.bc" (click)="onChangeStyleColor(i)"
                                     [style.border-color]="'black'"
-                                    [style.border-width]="(selectedLabel.scratch._style.color.bc == c.bc) ? '2px' : '0px'"
+                                    [style.border-width]="(selectedLabel.scratch._style.color && selectedLabel.scratch._style.color.bc == c.bc) ? '2px' : '0px'"
                                 ></li>
                               </ul>
                             </div>

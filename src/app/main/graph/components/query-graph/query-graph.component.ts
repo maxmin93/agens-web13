@@ -5,7 +5,6 @@ import { Observable, Subject, interval } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
-import { LabelStyleComponent } from '../../sheets/label-style/label-style.component';
 import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
 import { TimelineSliderComponent } from '../timeline-slider/timeline-slider.component';
 
@@ -55,7 +54,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
-  labels: ILabel[] = [];    // for Label chips
+  labels: ILabel[] = [];    // for Label chips    <== 모든 스타일 정보 유지
 
   dataGraph: IGraph = undefined;
   metaGraph: IGraph = undefined;
@@ -158,9 +157,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   //   3) scratch() 함수로 _style 에 저장 
   //   4) _style 값을 close()에서 data-graph, label, meta-graph 에 반영 
 
-  // opacity 로 반영 
+  // Style: Visibility
   onChangeStyleVisible(event){
-    console.log( 'onChangeStyleVisible:', event.checked );
+    // console.log( 'onChangeStyleVisible:', event.checked );
     this.selectedLabel.scratch._style.visible = event.checked;
     let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
     targets.forEach(x => {
@@ -174,9 +173,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.cy.style().update();
   }
-  // 그대로 사용 가능
+  // Style: Color
   onChangeStyleColor(value:number){
-    console.log( 'onChangeStyleColor:', this.colorsPallet[value] );
+    // console.log( 'onChangeStyleColor:', this.colorsPallet[value] );
     this.selectedLabel.scratch._style.color = this.colorsPallet[value];
     let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
     targets.forEach(x => {
@@ -184,9 +183,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.cy.style().update();
   }
-  // 그대로 사용 가능 
+  // Style: Width
   onChangeStyleWidth(event){
-    console.log( 'onChangeStyleWidth:', event.value );    // number type
+    // console.log( 'onChangeStyleWidth:', event.value );    // number type
     this.selectedLabel.scratch._style.width = event.value;
     let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
     targets.forEach(x => {
@@ -194,9 +193,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.cy.style().update();
   }
-  // label name + '/n(' + property.key + ')' 로 반영
+  // Style: Label ==> Find Label로 탐색 가능
   onChangeStyleTitle(event){
-    console.log( 'onChangeStyleTitle:', event.value );    // property.key
+    // console.log( 'onChangeStyleTitle:', event.value );    // property.key
     this.selectedLabel.scratch._style.title = (event.value == '_null_') ? undefined : event.value;
     let targets = this.cy.elements(`${this.selectedLabel.type == 'nodes' ? 'node' : 'edge'}[label='${this.selectedLabel.name}']`);
     targets.forEach(x => {
@@ -479,7 +478,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   openSearchResultDialog(): void {
-    if( !this.metaGraph ) return;
+    // if( !this.metaGraph ) return;
 
     this.btnStatus.metaGraph = true;
     const bottomSheetRef = this._sheet.open(MetaGraphComponent, {
@@ -493,32 +492,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
       if( x ) this.runFilterByGroupBy(x);
-
-      // change Detection by force
-      this._cd.detectChanges();
-    });
-  }
-
-  /////////////////////////////////////////////////////////////////
-  // Label Style Setting Controllers
-  /////////////////////////////////////////////////////////////////
-
-  openLabelStyleSheet(): void {
-    if( !this.metaGraph ) return;
-
-    this.btnStatus.labelStyle = true;
-    const bottomSheetRef = this._sheet.open(LabelStyleComponent, {
-      ariaLabel: 'Label Style',
-      panelClass: 'sheet-label-style',
-      data: { "dataGraph": (this.isTempGraph) ? this.tempGraph : this.dataGraph
-              , "metaGraph": this.metaGraph, "labels": this.labels }
-    });
-
-    bottomSheetRef.afterDismissed().subscribe((x) => {
-      this.btnStatus.labelStyle = false;
-      agens.cy = this.cy;
-      // 스타일 변경 반영
-      if( x && x.changed ) this.cy.style().update();
 
       // change Detection by force
       this._cd.detectChanges();

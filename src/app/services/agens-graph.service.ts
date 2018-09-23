@@ -34,7 +34,7 @@ export class AgensGraphService {
     console.log( 'pageRank Centrality: ', acc[0], acc[1], acc[2]/cy.nodes().size() );
     cy.nodes().map(ele => {
       let value = Math.floor( (ele.scratch('_centralrityPr') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
+      ele.scratch('_style').width = value;
     });
   }
 
@@ -52,7 +52,7 @@ export class AgensGraphService {
     console.log( 'Degree Centrality: ', acc[0], acc[1], acc[2]/cy.nodes().size() );
     cy.nodes().map(ele => {
       let value = Math.floor( (ele.scratch('_centralrityDg') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
+      ele.scratch('_style').width = value;
     });
   }
 
@@ -71,7 +71,7 @@ export class AgensGraphService {
     console.log( 'Closeness Centrality:', acc[0], acc[1], acc[2]/cy.nodes().size() );
     cy.nodes().map(ele => {
       let value = Math.floor( (ele.scratch('_centralrityCn') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
+      ele.scratch('_style').width = value;
     });
   }
   
@@ -90,7 +90,7 @@ export class AgensGraphService {
     console.log( 'Betweenness Centrality:', acc[0], acc[1], acc[2]/cy.nodes().size() );
     cy.nodes().map(ele => {
       let value = Math.floor( (ele.scratch('_centralrityBt') - acc[0])/( acc[1]-acc[0] )*100 ) + 20;
-      ele.scratch('_style').width = value + 'px';
+      ele.scratch('_style').width = value;
     });
   }
     

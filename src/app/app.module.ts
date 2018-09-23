@@ -46,7 +46,6 @@ import { QueryTableComponent } from './main/graph/components/query-table/query-t
 import { StatGraphComponent } from './main/graph/components/stat-graph/stat-graph.component';
 import { MetaGraphComponent } from './main/graph/sheets/meta-graph/meta-graph.component';
 import { CellViewerComponent } from './main/graph/sheets/cell-viewer/cell-viewer.component';
-import { LabelStyleComponent } from './main/graph/sheets/label-style/label-style.component';
 import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.component';
 import { TimelineSliderComponent } from './main/graph/components/timeline-slider/timeline-slider.component';
 import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
@@ -73,7 +72,6 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
     QueryGraphComponent,
     QueryTableComponent,
     CellViewerComponent,
-    LabelStyleComponent,
     EditGraphComponent,
     TimelineSliderComponent,
     PlpyEditorComponent,
@@ -120,13 +118,11 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
   entryComponents: [ 
     ConfirmDeleteLabelDialog,
     
-    // LabelStyleSettingDialog,
     // ImageExportDialog,
     // ProjectOpenDialog,
     // ProjectSaveDialog,
     // SearchResultDialog
 
-    LabelStyleComponent,
     MetaGraphComponent,
     CellViewerComponent,
     EditGraphComponent,

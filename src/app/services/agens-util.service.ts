@@ -148,12 +148,12 @@ export class AgensUtilService {
         if( x.includes( ele.data['size'] ) ){
           // _style 객체가 새로 생성됨 (있으면 width만 갱신)
           if( ele.scratch.hasOwnProperty('_style') ){
-            ele.scratch._style.width = fn(idx) + 'px';
+            ele.scratch._style.width = fn(idx);
           }
           else{
             ele.scratch._style = {
               color: (newColor && ele.group == 'nodes') ? this.nextColor() : undefined
-              , width: fn(idx) + 'px'
+              , width: fn(idx)
               , title: 'name'
               , visible: true
             };

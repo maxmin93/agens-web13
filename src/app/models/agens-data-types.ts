@@ -89,12 +89,12 @@ export interface IProperty {
   size: number;
 };
 
-export interface IStyle {   // <== element.scratch('_style')
-  color: any;               // { bc, dc }
-  width: string;            // NODE: width, height | EDGE: width
-  title: string;            // one of keys of props (default: 'name')
-  visible?: boolean;        // 'visible' = true, 'hidden' = false
-  opacity?: number;         // 0.0 ~ 1.0
+export interface IStyle {             // <== element.scratch('_style')
+  color: { bc: string; dc: string; }; // { bc: body-color, dc: border-color }
+  width: number;                      // NODE: width, height | EDGE: width
+  title: string;                      // one of keys of props (default: 'name')
+  visible: boolean;                   // 'visible' = true, 'hidden' = false
+  opacity?: number;                   // 0.0 ~ 1.0
 };
 
 ///////////////////////////////////////////////////////////////
