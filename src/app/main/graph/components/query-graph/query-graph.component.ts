@@ -216,9 +216,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    // for DEBUG
-    console.log('cy.tap:', target._private);
-
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
@@ -306,29 +303,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){   
     this.cy.resize();
+    this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
     agens.cy = this.cy;
-  }
-
-  reloadGraph(){
-    if( !this.dataGraph ) return;
-
-    if( this._util.hasPositions() ){
-      this.clear(false);
-      this.isTempGraph = false;
-  
-      this.dataGraph.nodes.forEach( x => { 
-        let ele = this.cy.add( x );
-        if( x.scratch.hasOwnProperty('_position') ) ele.position( _.clone( x.scratch['_position'] ) );
-      });
-      this.dataGraph.edges.forEach( x => { 
-        this.cy.add( x ) 
-      });
-      this.labels = [...this.dataGraph.labels];
-      this._cd.detectChanges();
-    }
-    
-    this.refreshCanvas();
   }
 
   savePositions( graph ){
@@ -861,20 +838,80 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        // this._util.applyLabelStyle(this.resultTemp.nodes, this.resultGraph.labels, 
-        //   (ele:IElement, label:ILabel) => {
-        //     return label.type == 'nodes' && ele.data['label'] == label.name;
-        //   });
-        // this._util.applyLabelStyle(this.resultTemp.edges, this.resultGraph.labels, 
-        //   (ele:IElement, label:ILabel) => {
-        //     return label.type == 'edges' && ele.data['label'] == label.name;
-        //   });
-        this.labels = [...this.tempGraph.labels];
+        this.recountingLabels();
         this.initCanvas(true);
-        // this.queryGraph.graphChangeLayout('cose');
       });
-
   }
   
-  
+  // filterNgroup 등의 동작으로 element 개수가 달라진 경우 사용
+  // ** NOTE: 바꿔치기 하지 말것!! (스타일 정보 등의 정합성 유지)
+  recountingLabels(){
+    this.labels.forEach(x => {
+      let targets = (x.type == 'nodes') ? 
+                    this.cy.nodes(`[label='${x.name}']`) : this.cy.edges(`[label='${x.name}']`);
+      x.size = targets.length;
+    });
+  }
+
+  reloadGraph(){
+    if( this.gid < 0 ) return;
+
+    this.clear(false);   // false: clear canvas except labels    
+
+    // call API
+    let data$:Observable<any> = this._api.grph_graph(this.gid);
+
+    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        console.log(`graph_dto receiving : gid=${x.gid} (${this.gid})`);
+      });
+    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.dataGraph = x;
+        this.dataGraph.labels = new Array<ILabel>();
+        this.dataGraph.nodes = new Array<INode>();
+        this.dataGraph.edges = new Array<IEdge>();    
+      });
+    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+        this.labels
+        .filter(val => val.id == x.id)
+        .map(label => {
+          x.scratch['_style'] = _.cloneDeep( label.scratch['_style'] );
+        });
+        this.dataGraph.labels.push( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+      // setNeighbors from this.resultGraph.labels;
+      x.scratch['_neighbors'] = new Array<string>();
+      this.labels
+        .filter(val => val.type == 'nodes' && val.name == x.data['label'])
+        .map(label => {
+          x.scratch['_neighbors'] += label.targets;
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
+      this.dataGraph.nodes.push( x );
+      this.addNode( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.labels
+        .filter(val => val.type == 'edges' && val.name == x.data['label'])
+        .map(label => {
+          x.scratch['_style'] = label.scratch['_style'];
+          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+        });
+      this.dataGraph.edges.push( x );
+      this.addEdge( x );
+      });
+    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        this.recountingLabels();
+        this.initCanvas(true);
+      });    
+  }
+
+
 }

@@ -191,7 +191,6 @@ export class MetaGraphComponent implements OnInit {
           return false;
         }  
       });
-    console.log('findLabel:', target, element, this.data['labels']);
     return target;
   }
 
@@ -201,9 +200,9 @@ export class MetaGraphComponent implements OnInit {
     this.selectedLabel = this.findLabel(target);
     this.selectedProps = Object.keys(this.selectedElement.data('props')['propsCount']);
                       // (this.selectedLabel) ? this.selectedLabel.properties : <IProperty[]>[];
-    console.log( 'meta-graph.click:', this.selectedElement._private, this.selectedLabel);
+    console.log( 'meta-graph.click:', this.selectedElement._private);
 
-    this.makeFormGroup(this.selectedProps);
+    this.makeFormGroup(this.selectedProps, this.selectedElement._private.data.label == 'nodes');
   }  
 
   // Neighbor Label 로의 확장
@@ -218,8 +217,8 @@ export class MetaGraphComponent implements OnInit {
 
   // 참고 : Angular create checkbox array dynamically
   // https://coryrylan.com/blog/creating-a-dynamic-checkbox-list-in-angular
-  makeFormGroup(props:string[]){
-    props.unshift( '$ALL' );
+  makeFormGroup(props:string[], withAll:boolean=false){
+    if( withAll ) props.unshift( '$ALL' );
     const controls = props.map(k => new FormControl(false));
     this.formGrp = this.formBuilder.group({
       conditions: new FormArray(controls)
@@ -339,7 +338,7 @@ export class MetaGraphComponent implements OnInit {
     this.addQtipMenu( this.cy.elements() );
     // refresh style
     this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.fit( this.cy.elements(), 50);
+    // Promise.resolve(null).then(()=>{ this.cy.fit( this.cy.elements(), 100); });    
   }
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
@@ -358,7 +357,7 @@ export class MetaGraphComponent implements OnInit {
     // };    
     let options = { name: 'cose-bilkent',
       ready: function () {}, stop: function () {},
-      nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 10,
+      nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 100,
       randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
       nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
       animate: 'end', tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,

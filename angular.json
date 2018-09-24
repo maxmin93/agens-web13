@@ -37,7 +37,7 @@
               "node_modules/lodash/lodash.min.js",
 
               "node_modules/codemirror/lib/codemirror.js",
-              "node_modules/codemirror/mode/cypher/cypher.js",
+              "src/assets/js/cm-cypher.js",
               "node_modules/codemirror/mode/python/python.js",
               "node_modules/codemirror/addon/selection/active-line.js",
               "node_modules/codemirror/addon/search/searchcursor.js",

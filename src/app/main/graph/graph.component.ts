@@ -146,28 +146,24 @@ return path1, path2;
     var Pos = CodeMirror.Pos;
     /////////////////////////////////////////////////////////////////////
     // addon/comment/comment.js
-    cmds.toggleSqlComment = function(cm) {
-      let ranges = cm.listSelections();
-      for (let i = ranges.length - 1; i >= 0; i--) {
-        let from = ranges[i].from(), to = ranges[i].to();
-        for(let j = from.line; j <= to.line; j++ ){
-          if( j != from.line || j != to.line ){
-            if( j == from.line && from.ch == cm.getLine(j).length - 1 ) continue;
-            if( j == to.line && to.ch == 0 ) continue;
-          }
-          let line = cm.getLine(j).trim();
-          // do uncomment
-          if( line.startsWith('--') ) {
-            line = line.substring(2, line.length).trim();
-          }
-          // do comment 
-          else {
-            line = '-- '+line;
-          }
-          cm.replaceRange( line, {"line": j, "ch": 0}, {"line": j, "ch": cm.getLine(j).length })
+    cmds.toggleSqlComment = function(cm) {      
+      // ** 참고 "node_modules/codemirror/mode/cypher/cypher.js",
+      var options = { "fullLines":true, "lineComment": '--', "indent": true };
+      var minLine = Infinity, ranges = cm.listSelections(), mode = null;
+      for (var i = ranges.length - 1; i >= 0; i--) {
+        var from = ranges[i].from(), to = ranges[i].to();
+        if (from.line >= minLine) continue;
+        if (to.line >= minLine) to = Pos(minLine, 0);
+        minLine = from.line;
+        if (mode == null) {
+          if (cm.uncomment(from, to, options)) mode = "un";
+          else { cm.lineComment(from, to, options); mode = "line"; }
+        } else if (mode == "un") {
+          cm.uncomment(from, to, options);
+        } else {
+          cm.lineComment(from, to, options);
         }
-        cm.setCursor(to);
-      }  
+      }
     };    
   }
 

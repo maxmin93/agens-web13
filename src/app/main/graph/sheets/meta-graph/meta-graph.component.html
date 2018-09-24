@@ -39,7 +39,8 @@
                                 </li>
                             </ul>
                             <div class="btn-group side-l mt10 row-r">
-                                <a class="btn btn-fill" (click)="addItemGroupBy()">+ Group</a>
+                                <a class="btn btn-fill" (click)="addItemGroupBy()"
+                                  [ngClass]="{ 'adisabled': selectedElement.data('label') != 'nodes' }">+ Group</a>
                                 <a class="btn btn-fill" (click)="addItemFilterBy()">+ Filter</a>
                                 <a class="btn btn-icon btn-fill" (click)="resetChecked()"><mat-icon>refresh</mat-icon></a>  
                             </div>

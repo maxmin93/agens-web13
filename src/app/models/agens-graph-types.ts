@@ -37,10 +37,10 @@ export class Label implements ILabel {
     else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined, visible: true };
   }
 
-  get width():string {
+  get width():number {
     return (this.scratch._style) ? this.scratch._style.width : undefined;
   }
-  set width(val:string) {
+  set width(val:number) {
     if( this.scratch._style ) this.scratch._style.width = val;
     else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined, visible: true };
   }
@@ -132,10 +132,10 @@ export class Element implements IElement {
     else this.scratch._style = <IStyle>{ color: val, width: undefined, title: undefined, visible: true };
   }
 
-  get width():string {
+  get width():number {
     return (this.scratch._style) ? this.scratch._style.width : undefined;
   }
-  set width(val:string) {
+  set width(val:number) {
     if( this.scratch._style ) this.scratch._style.width = val;
     else this.scratch._style = <IStyle>{ color: undefined, width: val, title: undefined, visible: true };
   }
