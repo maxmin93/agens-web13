@@ -7,7 +7,8 @@
     <div class="row flex-1">
         <div class="col flex-1">
             <div id="graph-canvas" class="graph-canvas flex-1" #divCanvas 
-                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"></div>
+                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"
+                (mouseover)="canvasHover=true" (mouseleave)="canvasHover=false"></div>
             <!-- graph element info Box -->
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
@@ -251,13 +252,9 @@
                             (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="before">
                             <mat-icon>label</mat-icon></a>
         
-                        <a class="btn btn-icon" [ngClass]="{ 'checked': btnStatus.labelStyle }" 
-                            (click)="openEditGraphSheet()" matTooltip="Edit by Label" matTooltipPosition="before">
-                            <mat-icon>palette</mat-icon></a>
-        
                         <a class="btn btn-icon" [ngClass]="{ 'checked': btnStatus.metaGraph }" 
-                            id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openSearchResultDialog()" 
-                            matTooltip="Search in result" matTooltipPosition="before">
+                            id="btnResultSearch" mat-button-toggle #btnResultSearch (click)="openFilterNGroupSheet()" 
+                            matTooltip="Filtering & Grouping" matTooltipPosition="before">
                             <mat-icon>search</mat-icon></a>
         
                         <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" 
@@ -279,7 +276,7 @@
                                 <mat-divider></mat-divider>
                                     <button mat-menu-item (click)="graphChangeLayout('cose')">Cose</button>
                                 <mat-divider></mat-divider>
-                                    <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">Cose-Bilkent(very slow)</button>
+                                    <button mat-menu-item (click)="graphChangeLayout('cose-bilkent')">Cose-Bilkent (slow)</button>
                                 <mat-divider></mat-divider>
                                     <button mat-menu-item (click)="graphChangeLayout('dagre')">Dagre (hierachy)</button>
                                 <mat-divider></mat-divider>
@@ -338,13 +335,17 @@
                             matTooltip="play Timeline" matTooltipPosition="before">
                             <mat-icon>fast_forward</mat-icon></a>                  
         
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" 
+                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="compareGraph()" 
+                            matTooltip="compare Graph" matTooltipPosition="before">
+                            <mat-icon>compare_arrows</mat-icon></a>
+
+                        <!-- <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" 
                             matTooltip="refresh Canvas" matTooltipPosition="before">
-                            <mat-icon>reply</mat-icon></a>
+                            <mat-icon>reply</mat-icon></a> -->
         
                         <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="reloadGraph()" 
                             matTooltip="reload Graph" matTooltipPosition="before">
-                            <mat-icon>reply_all</mat-icon></a>
+                            <mat-icon>refresh</mat-icon></a>
                     </div>
                 </div>
             </div>

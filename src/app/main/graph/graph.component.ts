@@ -240,6 +240,9 @@ return path1, path2;
     // 프로젝트 정보 지우고
     this.currProject = undefined;
 
+    // util의 savePositions 지우고
+    this._util.resetPositions();
+
     // change Detection by force
     this._cd.detectChanges();
   }
@@ -309,9 +312,11 @@ return path1, path2;
     let sql:string = this.makeupSql(<string> this.getEditorSelection() );
     if( sql.length < 5 ) return;
 
-    // 이전 결과들 비우고
+    // 이전 결과들 비우고 (보통은 지우지 않는다)
     if(option) this.clearResults();
-
+    // dataGraph 결과의 이전 그래프 위치를 저장하고 (덧실행하는 경우만)
+    this.queryGraph.savePositions();
+    
     // call API
     let gid:number = (this.resultDto && this.resultDto.hasOwnProperty('gid')) ? this.resultDto.gid : -1;
     let data$:Observable<any> = this._api.core_query( gid, sql );

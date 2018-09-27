@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, HostListener, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatButtonToggle, MatButton, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
@@ -13,11 +13,9 @@ import { AgensUtilService } from '../../../../services/agens-util.service';
 import { AgensGraphService } from '../../../../services/agens-graph.service';
 
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd, IProperty } from '../../../../models/agens-data-types';
-import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IGraphDto, IDoubleListDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../app.config';
-import { delayWhen } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 
 import * as moment from 'moment';
@@ -29,13 +27,17 @@ declare var agens: any;
 @Component({
   selector: 'app-query-graph',
   templateUrl: './query-graph.component.html',
-  styleUrls: ['./query-graph.component.scss','../../graph.component.scss']
+  styleUrls: ['./query-graph.component.scss','../../graph.component.scss'],
+  host: {
+    '(document:keyup)': 'handleKeyboardEvent($event)'
+  }
 })
 export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isVisible: boolean = false;
   isLoading: boolean = false;
   isTempGraph: boolean = false;
+  canvasHover: boolean = false;
 
   selectedOption: string = undefined;
   btnStatus: any = { 
@@ -145,6 +147,18 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.metaGraph = metaGraph;
   }
 
+  onCanvasKeyup(event: KeyboardEvent) { 
+    console.log( 'canvas keyUp:', event.key );
+  }
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    let charCode = String.fromCharCode(event.which).toLowerCase();
+    if (this.canvasHover && event.ctrlKey) {
+      console.log( 'keyPress: Ctrl + '+charCode, this.canvasHover );
+      if( charCode == "z" ) this.cy.$api.unre.undo();
+      else if( charCode == "y" ) this.cy.$api.unre.redo();
+    }
+  }
+
   /////////////////////////////////////////////////////////////////
   // Style Controllers
   /////////////////////////////////////////////////////////////////
@@ -252,8 +266,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // 결과들만 삭제 : runQuery 할 때 사용
   clear(option:boolean=true){
-    // if( this.cy.elements().size() > 0 ) this._util.savePositions( this.cy );
-
     // 그래프 비우고
     this.cy.elements().remove();
     // 그래프 라벨 칩리스트 비우고
@@ -284,17 +296,12 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // 데이터 불러오고 최초 적용되는 작업들 
-  initCanvas(isTempGraph:boolean){
+  initCanvas( isTempGraph:boolean = false ){
     if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
     this.cy.elements(':selected').unselect();
     
     this.isTempGraph = isTempGraph;
     this.cy.style(agens.graph.stylelist['dark']).update();
-
-    // this._cd.detectChanges();
-    // Promise.resolve(null).then(() => {
-    //   this.cy.fit( this.cy.elements(), 50);
-    // });
 
     // 완료 상태를 상위 graph.component 에 알려주기 (& layout 적용)
     this.initDone.emit(this.isVisible);
@@ -306,19 +313,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cy.style(agens.graph.stylelist['dark']).update();
     this.cy.fit( this.cy.elements(), 50);
     agens.cy = this.cy;
-  }
-
-  savePositions( graph ){
-    graph.nodes.forEach( (x:INode) => {
-      let ele = this.cy.getElementById(x.data.id);
-      if( ele.empty() ) return true;
-      x.scratch['_position'] = _.clone( ele.position() );
-    });
-    graph.edges.forEach( (x:IEdge) => {
-      let ele = this.cy.getElementById(x.data.id);
-      if( ele.empty() ) return true;
-      x.scratch['_position'] = _.clone( ele.position() );
-    });
   }
 
   adjustMenuOnNode(labels: Array<ILabel>, collection:any ){
@@ -336,11 +330,16 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 20);
   }
 
+  savePositions(){
+    // 저장할 꺼리가 있으면 저장 
+    if( this.gid > 0 && this.cy.nodes().size() > 0 ) this._util.savePositions( this.cy );
+  }
+
   graphPresetLayout(){
-    /*
     // ///////////////////////////////////////////////////
-    // **NOTE: 레이아웃 적용시 가끔 StackOverflow 발생 
+    // **NOTE: 레이아웃 적용시 가끔 StackOverflow 발생
     //  ==> 문제 해결때 까지 주석처리함 (2018-09-18)
+    //  ==> setTimeout 으로 layout() 을 감싸주니 괜찮음. 다시 해제함 (2018-09-27)
 
     if( this._util.hasPositions() ){
       this.toggleProgressBar(true);
@@ -351,21 +350,17 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         fit: false, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
-        ready: () => {}, stop: () => { this.toggleProgressBar(false); }
+        ready: () => {}, stop: () => { this.cy.fit( this.cy.elements(), 50); this.toggleProgressBar(false); }
       };
       // rest random layout
-      let elements = this.cy.nodes().filter(x => remains.includes(x.id()));
-      elements.layout(layoutOption).run();     
-            
+      let elements = this.cy.nodes().filter(x => remains.includes(x.id()));           
       setTimeout(()=>{
-        this.cy.fit( this.cy.elements(), 50);
-      }, 100);
+        elements.layout(layoutOption).run();     
+      }, 10);
     }
     else{
       this.graphChangeLayout('random');
     }
-    */
-    this.graphChangeLayout('random');
   }
 
   // cytoscape makeLayout & run
@@ -451,10 +446,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /////////////////////////////////////////////////////////////////
-  // Search in Result Dialog
+  // FilterNGroupSheet
   /////////////////////////////////////////////////////////////////
 
-  openSearchResultDialog(): void {
+  openFilterNGroupSheet(): void {
     // if( !this.metaGraph ) return;
 
     this.btnStatus.metaGraph = true;
@@ -468,49 +463,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.btnStatus.metaGraph = false;
       agens.cy = this.cy;
       // 변경된 meta에 대해 data reload
-      if( x ) this.runFilterByGroupBy(x);
-
-      // change Detection by force
-      this._cd.detectChanges();
-    });
-  }
-
-  /////////////////////////////////////////////////////////////////
-  // Label Style Setting Controllers
-  /////////////////////////////////////////////////////////////////
-
-  openImageExportDialog(){
-    // recordTable에 결과가 없어도 graph 에 출력할 내용물이 있으면 OK!
-    if( this.cy.elements(':visible').length === 0 ) return;
-
-    // let dialogRef = this.dialog.open(ImageExportDialog, {
-    //   width: 'auto', height: 'auto',
-    //   data: this.cy
-    // });
-
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if( result === null ) return;
-
-    //   // agens.graph.exportImage 호출
-    //   agens.graph.exportImage( result.filename, result.watermark );
-    // });
-  }
-
-  openEditGraphSheet(){
-    if( !this.metaGraph ) return;
-
-    this.btnStatus.editGraph = true;
-    const bottomSheetRef = this._sheet.open(EditGraphComponent, {
-      ariaLabel: 'Edit Graph',
-      panelClass: 'sheet-label-style',
-      data: { "dataGraph": this.dataGraph, "metaGraph": this.metaGraph, "labels": this.labels }
-    });
-
-    bottomSheetRef.afterDismissed().subscribe((x) => {
-      this.btnStatus.editGraph = false;
-      agens.cy = this.cy;
-      // 스타일 변경 반영
-      if( x && x.changed ) this.cy.style().update();
+      if( x && (x.hasOwnProperty('filters') && x.hasOwnProperty('groups'))
+          && (Object.keys(x['filters']).length > 0 || Object.keys(x['groups']).length > 0) ) 
+        this.runFilterByGroupBy(x);
 
       // change Detection by force
       this._cd.detectChanges();
@@ -521,6 +476,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // graph Toolbar button controlls
   /////////////////////////////////////////////////////////////////
 
+  // _style의 width 데이터를 직접 수정, 원복시 _styleBak를 복사
   graphCentrality(option:string='degree'){ 
     // options: degree, pagerank, closeness, betweenness
     switch( option ){
@@ -530,11 +486,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'betweenness': this._graph.centralrityBt(this.cy ); break;
       default: 
         this.cy.elements().forEach(e => {
-          e.scratch('_style', _.clone(e.scratch('_styleBak')));
+          e.scratch('_style', _.cloneDeep(e.scratch('_styleBak')));
         });
     }
     this.cy.style(agens.graph.stylelist['dark']).update();
-
   }
 
   clearFindShortestPath(){
@@ -737,11 +692,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if( event == 'play' ){
       this.cy.elements(':selected').unselect();
-      this.cy.elements().style('visibility','hidden');
+      this.cy.elements().style('opacity',0.25);
     }
     else if( event == 'stop' ){
       this.cy.elements(':selected').unselect();
-      this.cy.elements().style('visibility','visible');
+      this.cy.elements().style('opacity',1.0);
     }
   }
   onChangeTimelineSlider(event) {    
@@ -763,10 +718,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       visibleElements = visibleElements.union( visibleElements.neighborhood() );
       visibleElements = visibleElements.union( visibleElements.edgesWith(visibleElements) );
     });
-    visibleElements.style('visibility','visible');
+    visibleElements.style('opacity',1.0);
     // visibleElements.animate({ style: { 'visibility': 'visible' }, duration: 500 });
     let restElements = this.cy.elements().difference( visibleElements );
-    restElements.style('visibility','hidden');
+    restElements.style('opacity',0.25);
     // restElements.animate({ style: { 'visibility': 'hidden' }, duration: 200 });
   }
   onUpdateTimelineSlider(event) {
@@ -783,10 +738,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   runFilterByGroupBy(options: any){
 
-    // this._util.savePositions( this.cy );
-
-    this.savePositions( this.dataGraph );
-    this.clear(false);   // false: clear canvas except labels    
+    this._util.savePositions( this.cy );  // hashMap<id,any> 에 position 저장
+    this.clear(false);                    // false: clear canvas except labels    
 
     // call API
     let data$:Observable<any> = this._api.grph_filterNgroupBy(this.gid, options);
@@ -822,6 +775,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           x.scratch['_style'] = label.scratch['_style'];
           x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
+      // x['position'] = this._util.getPositionById(x.data.id);
       this.tempGraph.nodes.push( x );
       this.addNode( x );
       });
@@ -839,7 +793,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         this.recountingLabels();
-        this.initCanvas(true);
+        this.initCanvas( true );
       });
   }
   
@@ -855,6 +809,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   reloadGraph(){
     if( this.gid < 0 ) return;
+    this._util.savePositions( this.cy );        // hashMap<id,any> 에 position 저장
 
     this.clear(false);   // false: clear canvas except labels    
 
@@ -892,6 +847,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           x.scratch['_style'] = label.scratch['_style'];
           x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
+      x['position'] = this._util.getPositionById(x.data.id);
       this.dataGraph.nodes.push( x );
       this.addNode( x );
       });
@@ -909,7 +865,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         this.recountingLabels();
-        this.initCanvas(true);
+        this.initCanvas( false );
       });    
   }
 

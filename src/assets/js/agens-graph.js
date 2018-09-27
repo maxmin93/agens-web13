@@ -70,7 +70,7 @@
     metaLabel: function(e){
       if( e.scratch('_style') ){
         if( e.data('props') && e.data('props').hasOwnProperty('name') ) 
-          return e.data('props')['name'] + '\n(' + e.scratch('_style').title +')';
+          return e.data('props')['name']; // + '\n(' + e.scratch('_style').title +')';
       }
       return '('+e.scratch('_style').title+')';
     },
@@ -599,11 +599,11 @@
 
     cy.$api.unre = cy.undoRedo({
         isDebug: false, // Debug mode for console messages
-        actions: {},// actions to be added
         undoableDrag: true, // Whether dragging nodes are undoable can be a function as well
-        stackSizeLimit: undefined, // Size limit of undo stack, note that the size of redo stack cannot exceed size of undo stack
-        ready: function () { // callback when undo-redo is ready
-        }      
+        // actions: {},// actions to be added
+        // stackSizeLimit: undefined, // Size limit of undo stack, note that the size of redo stack cannot exceed size of undo stack
+        // ready: function () { // callback when undo-redo is ready
+        // }      
       });
 
     // Public Property : APIs about view and undoredo

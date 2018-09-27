@@ -75,11 +75,11 @@ export class AgensUtilService {
   /////////////////////////////////////////////////////////////////
   
   hasPositions():boolean {
-    return (this.positions.size > 0) ? true : false;
+    return (this.positions && this.positions.size > 0) ? true : false;
   }
 
   resetPositions(){
-    this.positions = new Map<string,any>();
+    this.positions = undefined;
   }
 
   savePositions(cy:any){
@@ -88,9 +88,12 @@ export class AgensUtilService {
     // save nodes' positions 
     let nodes = cy.nodes();
     nodes.forEach(x => {
-      let key = x.group()+'::'+x.id();
-      this.positions.set( key, _.clone( x.position() ) );
+      this.positions.set( x.id(), _.clone( x.position() ) );
     })
+  }
+
+  getPositionById(id:string):any{
+    return this.positions.has(id) ? this.positions.get(id) : undefined;
   }
 
   // 존재하는 position 은 반영하고 없는 nodes 는 반환해서 random 처리
@@ -98,13 +101,14 @@ export class AgensUtilService {
     let remains: any[] = [];
     let nodes = cy.nodes();    
     nodes.forEach(x => {
-      let key = x.group()+'::'+x.id();
-      if( this.positions.has( key ) ) {
-        x.position( 'x', this.positions.get( key )['x']);
-        x.position( 'y', this.positions.get( key )['y']);
+      let pos = this.getPositionById( x.id() );
+      if( pos ) {
+        x.position( 'x', pos['x']);
+        x.position( 'y', pos['y']);
       }
-      else remains.push( x.id() );
-    });    
+      else remains.push( x.id() );      // remains: position 이 없는 id 리스트
+    });
+    // this.resetPositions();              // 한번 쓰고 버린다
     return remains;
   }
 
