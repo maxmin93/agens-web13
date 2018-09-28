@@ -68,11 +68,9 @@
       return '';
     },
     metaLabel: function(e){
-      if( e.scratch('_style') ){
-        if( e.data('props') && e.data('props').hasOwnProperty('name') ) 
-          return e.data('props')['name']; // + '\n(' + e.scratch('_style').title +')';
-      }
-      return '('+e.scratch('_style').title+')';
+      if( e.data('props') && e.data('props').hasOwnProperty('name') ) 
+        return e.data('props')['name']; // + '\n(' + e.scratch('_style').title +')';
+      return '(no-name)';
     },
     nodeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -155,8 +153,9 @@
               return agens.styles.dataLabel(e);
               },
           'background-color': function(e){ return agens.styles.nodeDColor(e); },
-          'border-width':'3',
+          'border-width': function(e){ return e.data('size') > 1 ? 6 : 3; },
           'border-color': function(e){ return agens.styles.nodeBColor(e); },
+          'border-style': function(e){ return e.data('size') > 1 ? 'double' : 'solid'; },
           'width':  function(e){ return agens.styles.nodeWidth(e); },
           'height': function(e){ return agens.styles.nodeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
