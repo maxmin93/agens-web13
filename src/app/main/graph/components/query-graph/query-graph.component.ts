@@ -141,7 +141,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
                 : dataGraph.edges.filter(y => y.data.label == x.name);
       x.size = eles.length;     // update eles size of label
     });
-    this.labels = [...dataGraph.labels];    
+    // label 정렬 : node>edge 순으로, size 역순으로
+    this.labels = [... _.orderBy(dataGraph.labels, ['type','size'], ['desc','desc'])];    
   }
   setMeta(metaGraph:IGraph){
     this.metaGraph = metaGraph;
@@ -230,6 +231,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
+    console.log('target:', target._private);
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
@@ -365,7 +367,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // cytoscape makeLayout & run
   graphChangeLayout(layout:string){
-    this.toggleProgressBar(true);    
+    this.toggleProgressBar(true);
     let targets = this.cy.elements(':selected');
     this.cy.$api.changeLayout(layout, {
       "padding": 50

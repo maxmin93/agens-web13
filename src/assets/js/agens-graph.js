@@ -85,12 +85,14 @@
       return '#e3e3e3';
     },
     nodeWidth: function(e){
-      if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
-      return '45px';
+      if( e.scratch('_style') && e.scratch('_style').width ) 
+        return e.scratch('_style').width;
+      return 45 + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*10 : 0 );
     },
     nodeWidthSelect: function(e){
-      if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
-      return '65px';
+      if( e.scratch('_style') && e.scratch('_style').width ) 
+        return e.scratch('_style').width;
+      return 65 + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*10 : 0 );
     },
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -103,8 +105,9 @@
       return '#a6a6a6';
     },
     edgeWidth: function(e){
-      if( e.scratch('_style') && e.scratch('_style').width ) return e.scratch('_style').width;
-      return '3px';
+      if( e.scratch('_style') && e.scratch('_style').width ) 
+        return e.scratch('_style').width;
+      return 3 + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*2 : 0 );
     }
   };
 
