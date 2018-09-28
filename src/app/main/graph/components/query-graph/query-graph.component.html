@@ -237,8 +237,10 @@
                 <mat-chip *ngFor="let label of labels" [selected]="true"
                     (click)="clickGraphLabelChip(label)"
                     [style.background]="label.scratch['_style'].color ? label.scratch['_style'].color.bc : '#a6a6a6'">
-                    <span *ngIf="label.type=='nodes'" class="nodeType">{{label.name}} ({{label.size}})</span>
-                    <span *ngIf="label.type=='edges'" class="edgeType">{{label.name}} ({{label.size}})</span>
+                    <span *ngIf="label.type=='nodes'" class="nodeType" style="font-weight: bold">
+                      {{label.name}} ({{label.size}})</span>
+                    <span *ngIf="label.type=='edges'" class="edgeType" style="text-decoration: underline">
+                      {{label.name}} ({{label.size}})</span>
                 </mat-chip>
             </mat-chip-list>
         </div>
