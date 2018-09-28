@@ -53,8 +53,6 @@
               "node_modules/codemirror/keymap/sublime.js",
 
               "node_modules/d3/build/d3.min.js",
-              
-              "node_modules/ion-rangeslider/js/ion.rangeSlider.min.js",
               "node_modules/moment/min/moment.min.js",
 
               "node_modules/cytoscape/dist/cytoscape.min.js",
@@ -63,6 +61,7 @@
               "node_modules/cytoscape-cxtmenu/cytoscape-cxtmenu.js",
               "node_modules/cytoscape-panzoom/cytoscape-panzoom.js",
               "node_modules/cytoscape-undo-redo/cytoscape-undo-redo.js",
+              "node_modules/cytoscape-clipboard/cytoscape-clipboard.js",
               "node_modules/cytoscape-view-utilities/cytoscape-view-utilities.js",
               "node_modules/cytoscape-edgehandles/cytoscape-edgehandles.js",
               "src/assets/js/jquery.qtip.min.js",

@@ -601,12 +601,20 @@
 
     cy.$api.unre = cy.undoRedo({
         isDebug: false, // Debug mode for console messages
-        undoableDrag: true, // Whether dragging nodes are undoable can be a function as well
-        // actions: {},// actions to be added
-        // stackSizeLimit: undefined, // Size limit of undo stack, note that the size of redo stack cannot exceed size of undo stack
-        // ready: function () { // callback when undo-redo is ready
-        // }      
+        undoableDrag: false, // Whether dragging nodes are undoable can be a function as well
       });
+
+    cy.$api.clipboard = cy.clipboard({
+      clipboardSize: 0,
+      beforePaste: function(clipboard) { 
+        // clipboard: { nodes: [], edges: [] }
+        console.log('beforePaste:', clipboard); 
+      },
+      afterPaste: function(eles) { 
+        // else : cy.collection()
+        console.log('afterPaste:', eles); 
+      },
+    });
 
     // Public Property : APIs about view and undoredo
     cy.$api.view = cy.viewUtilities({

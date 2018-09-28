@@ -148,15 +148,19 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.metaGraph = metaGraph;
   }
 
-  onCanvasKeyup(event: KeyboardEvent) { 
-    console.log( 'canvas keyUp:', event.key );
-  }
   handleKeyboardEvent(event: KeyboardEvent) { 
     let charCode = String.fromCharCode(event.which).toLowerCase();
     if (this.canvasHover && event.ctrlKey) {
       console.log( 'keyPress: Ctrl + '+charCode, this.canvasHover );
       if( charCode == "z" ) this.cy.$api.unre.undo();
       else if( charCode == "y" ) this.cy.$api.unre.redo();
+      // **참고 https://github.com/iVis-at-Bilkent/cytoscape.js-clipboard
+      else if( charCode == "a" ) { this.cy.elements(":visible").select(); event.preventDefault(); }
+      else if( charCode == "c" ) this.cy.clipboard().copy( this.cy.elements(":selected"), 1 );
+      else if( charCode == "v" ){
+        console.log("clipboard:", this.cy.scratch("_clipboard"));
+        this.cy.clipboard().paste( 1 );
+      } 
     }
   }
 
@@ -238,10 +242,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     else{
       let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
       if( !allStatus ){
-        this.selectedElement = target;
-        // HighlightNeighbors 상태가 아닌 일반 상태라면 unselect
         this.cy.elements(':selected').unselect();
-        // if( !this.btnHighlightNeighbors.checked ){}
+        this.selectedElement = target;
+        // edge 일 경우, 연결된 nodes 까지 선택
+        if( target.group() == 'edges' ){
+          target.source().select();
+          target.target().select();
+        } 
       }
     }
   }  
