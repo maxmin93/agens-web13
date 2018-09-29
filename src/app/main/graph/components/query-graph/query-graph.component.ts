@@ -133,7 +133,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // cy undoRedo initialization
     this.ur = this._util.initUndoRedo(this.cy);
-    console.log( 'ur init:', this.ur );
   }
 
   setData(dataGraph:IGraph){
