@@ -56,6 +56,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
+  ur: any = undefined;      // cy undoRedo
   labels: ILabel[] = [];    // for Label chips    <== 모든 스타일 정보 유지
 
   dataGraph: IGraph = undefined;
@@ -122,12 +123,17 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    // cy events
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
       // change Detection by force
       this._cd.detectChanges();
     });
+
+    // cy undoRedo initialization
+    this.ur = this._util.initUndoRedo(this.cy);
+    console.log( 'ur init:', this.ur );
   }
 
   setData(dataGraph:IGraph){
@@ -155,11 +161,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       if( charCode == "z" ) this.cy.$api.unre.undo();
       else if( charCode == "y" ) this.cy.$api.unre.redo();
       // **참고 https://github.com/iVis-at-Bilkent/cytoscape.js-clipboard
-      else if( charCode == "a" ) { this.cy.elements(":visible").select(); event.preventDefault(); }
-      else if( charCode == "c" ) this.cy.clipboard().copy( this.cy.elements(":selected"), 1 );
+      else if( charCode == "a" ) { 
+        this.cy.elements(":visible").select(); event.preventDefault(); 
+      }
+      else if( charCode == "c" ) this.ur.do('copy', this.cy.elements(":selected"));
+      else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"));
       else if( charCode == "v" ){
-        console.log("clipboard:", this.cy.scratch("_clipboard"));
-        this.cy.clipboard().paste( 1 );
+        this.ur.do('paste');
       } 
     }
   }

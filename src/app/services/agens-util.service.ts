@@ -5,7 +5,8 @@ import { IGraph, IElement, ILabel } from '../models/agens-data-types';
 import * as d3 from 'd3';
 import * as CONFIG from '../app.config';
 
-declare var _ : any;
+declare var agens: any;
+declare var _: any;
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,8 @@ export class AgensUtilService {
   colors: any[] = colorPallets;
 
   private positions: Map<string,any> = new Map();
+  private cy:any;               // current cy instance
+  private ur:any;               // undoRedo instance
 
   constructor() { 
   }
@@ -110,6 +113,86 @@ export class AgensUtilService {
     });
     // this.resetPositions();              // 한번 쓰고 버린다
     return remains;
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Graph Copy/Cut, Paste
+  /////////////////////////////////////////////////////////////////
+  
+  initUndoRedo(cy):any{
+    if( !cy || !cy.undoRedo ) return undefined;
+    this.cy = cy;
+    this.ur = cy.undoRedo({}, true);
+    this.ur.clipboard = {};
+
+    // register actions
+    this.ur.action('copy',      // actionName
+      (eles:any) => {           // do Func
+        this.cyCopy(eles);
+      },
+      (eles:any) => {           // undo Func
+        this.ur.clipboard = {};
+      });
+    this.ur.action('cut',      // actionName
+      (eles:any) => {           // do Func
+        this.cyCopy(eles);
+        // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
+        this.ur.clipboard['removed'] = eles.remove();
+      },
+      () => {           // undo Func
+        if( this.ur.clipboard['removed'] ){
+          this.ur.clipboard['removed'].restore();
+          this.ur.clipboard['removed'] = undefined;
+        } 
+      });
+    this.ur.action('paste',     // actionName
+      () => {           // do Func
+        console.log('cyPaste.do:', this.ur.clipboard['copied']);
+        if( !this.ur.clipboard['copied'] ) return;
+
+        let eles = this.ur.clipboard['copied'];
+        let cloneNum = ( this.ur.clipboard['cloneNum'] ) ? ++this.ur.clipboard['cloneNum'] : (this.ur.clipboard['cloneNum']=0);
+        let posDiff = this.cyPositionDiff(eles);
+
+        // **NOTE: nodes 는 id만 변경, 
+        //         edges 는 id 외에도 source와 target 변경
+        eles.forEach(e => {
+          e._private.data.id += `_clone${cloneNum}`;
+          e.position.x += posDiff.x;
+          e.position.y += posDiff.y;
+        });
+        eles.restore();
+        this.ur.clipboard['removed'] = eles;
+      },
+      () => {           // undo Func
+        console.log('cyPaste.undo:', this.ur.clipboard);
+        if( this.ur.clipboard['removed'] ) this.ur.clipboard['removed'].remove();
+      });
+
+    return this.ur;
+  }
+
+  cyCopy(eles:any){
+    eles.unselect();
+    let descs = eles.nodes().descendants();
+    let nodes = eles.nodes().union(descs).filter(":visible");
+    let edges = nodes.edgesWith(nodes).filter(":visible");
+    // **NOTE: clone() 사용시 scratch{} 내용이 복사되지 않음
+    this.ur.clipboard['copied'] = nodes.clone().add(edges.clone());
+    this.ur.clipboard['cloneNum'] = 0;
+  }
+
+  cyPositionDiff(eles:any){
+    let extent = eles.nodes().boundingBox();
+    let wholeExtent = this.cy.nodes().boundingBox();
+    let center = { x: (wholeExtent.x1 + wholeExtent.x2)/2, y: (wholeExtent.y1 + wholeExtent.y2)/2 };
+    let posDiff = { x: 150, y: 150 };
+
+    if( center.x < extent.x2 ) posDiff.x *= -1;
+    else if( center.x < extent.x1 && extent.x1 < extent.x2 ) posDiff.x *= -1;
+    if( center.y < extent.y2 ) posDiff.y *= -1;
+    else if( center.y < extent.y1 && extent.y1 < extent.y2 ) posDiff.y *= -1;
+    return posDiff;
   }
 
   /////////////////////////////////////////////////////////////////

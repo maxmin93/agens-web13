@@ -521,9 +521,13 @@
       }
     });
 
-    // ** NOTE: mouseover 이벤트는 부하가 심하고 작동도 하지 않음!
-    // cy.on('mouseover', 'node', function(e){
-    // });
+    // ** node 선택을 위한 편의 기능 (뭉쳤을때)
+    cy.on('mouseover', 'node', function(e){
+      if( e.target && !e.target.selected() ) e.target.style('z-index', 2);
+    });
+    cy.on('mouseout', 'node', function(e){
+      if( e.target && !e.target.selected() ) e.target.style('z-index', 1);
+    });
 
     // ==========================================
     // ==  cy utilities 등록
