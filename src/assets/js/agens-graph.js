@@ -174,10 +174,16 @@
           'transition-duration':'.3s',
           'transition-timing-function': 'ease-out-cubic'
         }}, {
+        selector: 'node.clone',
+        css: {
+          'border-width': 4,
+          'border-color': '#FF5959',
+          'border-style': 'dashed'
+        }},{
         selector: 'node.new',
         css: {
           'border-width': 4,
-          'border-color':'#FF5959',
+          'border-color': '#FF5959',
           'border-style': 'dashed'
         }},{
         /// 선택한 노드의 변화 
@@ -235,13 +241,21 @@
           'transition-duration':'.3s',
           'transition-timing-function': 'ease-out-cubic'
         }}, {
-          selector: 'edge.new',
-          css: {
-            'width': 6,
-            'line-style': 'dotted',
-            'line-color':'#FF5959',
-            'target-arrow-color': '#FF5959',
-            'source-arrow-color': '#FF5959'
+        selector: 'edge.clone',
+        css: {
+          'width': 6,
+          'line-style': 'dotted',
+          'line-color': '#FF5959',
+          'target-arrow-color': '#FF5959',
+          'source-arrow-color': '#FF5959'
+        }}, {
+        selector: 'edge.new',
+        css: {
+          'width': 6,
+          'line-style': 'dotted',
+          'line-color':'#FF5959',
+          'target-arrow-color': '#FF5959',
+          'source-arrow-color': '#FF5959'
         }}, {
         /// 엣지만 클릭했을 경우 변화
         selector: 'edge:selected',             

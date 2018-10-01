@@ -17,6 +17,7 @@ import * as d3Scale from 'd3-scale';
 import * as d3Array from 'd3-array';
 import * as d3Axis from 'd3-axis';
 
+declare var _: any;
 declare var agens: any;
 
 @Component({
@@ -52,6 +53,7 @@ export class StatGraphComponent implements OnInit {
   @ViewChild('divD3Chart', {read: ElementRef}) divD3Chart: ElementRef;
   
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
+  todo$:Subject<any> = new Subject();
 
   constructor(
     private _cd: ChangeDetectorRef,
@@ -113,6 +115,9 @@ export class StatGraphComponent implements OnInit {
   /////////////////////////////////////////////////////////////////
 
   loadMetaGraph(gid: number){
+    if( gid < 0 ) return;
+    this.clear();
+
     // call API
     let data$:Observable<any> = this._api.grph_schema(gid);
 
@@ -141,8 +146,7 @@ export class StatGraphComponent implements OnInit {
           .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
-            x.scratch['_style'] = label.scratch['_style'];
-            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+            x.scratch['_style'] = _.cloneDeep( label.scratch['_style'] );
           });
         this.statGraph.nodes.push( x );
         this.cy.add( x );
@@ -153,15 +157,21 @@ export class StatGraphComponent implements OnInit {
         this.labels
         .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
         .map(label => {
-          x.scratch['_style'] = label.scratch['_style'];
-          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+          x.scratch['_style'] = _.cloneDeep(label.scratch['_style']);
         });
         this.statGraph.edges.push( x );
         this.cy.add( x );
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        this.initCanvas();
+        this._util.calcElementStyles( this.statGraph.nodes, (x)=>40+x*5, false );
+        this._util.calcElementStyles( this.statGraph.edges, (x)=>2+x, false );
+        this.cy.style(agens.graph.stylelist['dark']).update();
+        // **NOTE: delay 가 작으면 style(width)가 반영되기 전에 layout 이 완료되어 동일한 간격이 된다!
+        setTimeout(() => {
+          this.changeLayout( this.cy.elements(':visible') );
+        }, 400);
+        // this.initDone.emit(this.isVisible);
       });
 
   }
@@ -185,11 +195,8 @@ export class StatGraphComponent implements OnInit {
   clear(){
     // 그래프 비우고
     this.cy.elements().remove();
-    // 그래프 라벨 칩리스트 비우고, gid와 statGraph 무효화
-    this.gid = -1;
-    this.labels = [];
+    // 그래프 데이터 비우고
     this.statGraph = undefined;
-
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
 
@@ -202,24 +209,13 @@ export class StatGraphComponent implements OnInit {
   // addNode( ele:INode ){ this.cy.add( ele ); }
   // addEdge( ele:IEdge ){ this.cy.add( ele ); }
 
-  // 데이터 불러오고 최초 적용되는 작업들 
-  initCanvas(){
-    // if( this.cy.$api.view ) this.cy.$api.view.removeHighlights();
-    // this.cy.elements(':selected').unselect();
-
-    // refresh style
-    this.cy.style(agens.graph.stylelist['dark']).update();
-    this.changeLayout( this.cy.elements() );
-
-    this.initDone.emit(this.isVisible);
-  }
-
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
     this.cy.resize();
     agens.cy = this.cy;
 
-    if( this.gid > 0 ) this.loadMetaGraph(this.gid);
+    // metaGraph 불러오기 by gid
+    this.loadMetaGraph(this.gid);
 
     if( this.isVisible ){
       this.width = this.divD3Chart.nativeElement.offsetWidth;  //document.querySelector('div#div-d3-chart').offsetWidth;
@@ -233,29 +229,20 @@ export class StatGraphComponent implements OnInit {
     }
   }
 
-  changeLayout( elements ){
-    // let options = { name: 'klay',
-    //   nodeDimensionsIncludeLabels: false, fit: true, padding: 50,
-    //   animate: false, transform: function( node, pos ){ return pos; },
-    //   klay: {
-    //     aspectRatio: 2.6, // The aimed aspect ratio of the drawing, that is the quotient of width by height
-    //     borderSpacing: 60, // Minimal amount of space to be left to the border
-    //     edgeRouting: 'POLYLINE', // Defines how edges are routed (POLYLINE, ORTHOGONAL, SPLINES)
-    //     edgeSpacingFactor: 0.6, // Factor by which the object spacing is multiplied to arrive at the minimal spacing between edges.
-    //     spacing: 60, // Overall setting for the minimal amount of space to be left between objects
-    //     thoroughness: 6 // How much effort should be spent to produce a nice layout..
-    //   }
-    // };    
+  runLayout(){
+    this.changeLayout( this.cy.elements() );
+  }
+
+  private changeLayout( elements ){
     let options = { name: 'cose-bilkent',
       ready: function () {}, stop: function () {},
-      nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 10,
+      nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 50,
       randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
       nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
       animate: 'end', tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
       gravityRangeCompound: 1.5, gravityCompound: 1.0, gravityRange: 3.8,
       initialEnergyOnIncremental: 0.5    
-    };    
-
+    };
     // adjust layout
     elements.layout(options).run();
   }

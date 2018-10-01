@@ -204,6 +204,8 @@ return path1, path2;
   }
   // stat-graph Canvas의 초기화 작업 완료 이벤트
   initCallbackStat(isVisible:boolean){
+    if( isVisible ) this.statGraph.runLayout();
+    else this.statGraph.todo$.next({ cmd: 'changeLayout', param: 'cose' });
     // change Detection by force
     this._cd.detectChanges();
   }
@@ -305,12 +307,12 @@ return path1, path2;
   // call API: db
   runQuery(option:boolean = false){
 
-    this.queryResult.toggleTimer(true);
-    this.currentTabIndex = 0;
-    this.isLoading = true;
-    
+    this.currentTabIndex = 0;   
     let sql:string = this.makeupSql(<string> this.getEditorSelection() );
     if( sql.length < 5 ) return;
+
+    this.queryResult.toggleTimer(true);
+    this.isLoading = true;
 
     // 이전 결과들 비우고 (보통은 지우지 않는다)
     if(option) this.clearResults();
@@ -358,11 +360,12 @@ return path1, path2;
         // not exists
         if( this.resultGraph.labels.map(y => y.id).indexOf(x.id) == -1 ){
           x.scratch['_style'] = <IStyle>{ 
-            width: undefined, title: 'name', 
-            color: (x.type == 'nodes') ? this._util.nextColor() : undefined 
+            width: (x.type == 'nodes') ? 45 : 3
+            , title: 'name'
+            , color: (x.type == 'nodes') ? this._util.nextColor() : undefined // this._util.getColor(0)
             , visible: true
           };
-          x.scratch['_styleBak'] = _.clone(x.scratch['_style']);
+          x.scratch['_styleBak'] = _.cloneDeep(x.scratch['_style']);
           this.resultGraph.labels.push( x );
         }
         // **NOTE: labels 갱신은 맨나중에 resultGraph의 setData()에서 처리
@@ -376,7 +379,7 @@ return path1, path2;
           .filter(val => val.type == 'nodes' && val.name == x.data.label)
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
-            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_style'] = label.scratch['_style'];        // label 에 연결된 Object
             x.scratch['_styleBak'] = label.scratch['_styleBak'];
           });
 
@@ -391,7 +394,7 @@ return path1, path2;
         this.resultGraph.labels
           .filter(val => val.type == 'edges' && val.name == x.data.label)
           .map(label => {
-            x.scratch['_style'] = label.scratch['_style'];
+            x.scratch['_style'] = label.scratch['_style'];        // label 에 연결된 Object
             x.scratch['_styleBak'] =label.scratch['_styleBak'];
           });
 
@@ -433,14 +436,6 @@ return path1, path2;
 
         // send data to Table 
         this.queryTable.setData(this.resultRecord);
-
-        // 
-        //  **NOTE: schemaGraph를 지금 호출할 필요가 있는가? 
-        //  ==> 금방 나오는 거라 필요시 호출하는 것으로 변경해야
-        //
-        // // **NOTE: 이어서 schema graph 호출 (gid)
-        // if( this.resultDto.hasOwnProperty('gid') && this.resultDto.gid > 0 ) 
-        //   this.runGraphSchema( this.resultDto.gid );
       });
 
   }
@@ -454,130 +449,6 @@ return path1, path2;
 
     // change Detection by force
     this._cd.detectChanges();
-  }
-
-  runGraphSchema(gid: number){
-    // call API
-    let data$:Observable<any> = this._api.grph_schema(gid);
-
-    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
-      (x:IGraphDto) => {
-        console.log(`graph_dto receiving : gid=${x.gid} (${gid})`);
-      });
-    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
-      (x:IGraph) => {
-        this.resultMeta = x;
-        this.resultMeta.labels = new Array<ILabel>();
-        this.resultMeta.nodes = new Array<INode>();
-        this.resultMeta.edges = new Array<IEdge>();    
-      });
-    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
-      (x:ILabel) => { 
-        // meta-graph 에는 스타일을 부여하지 않는다 (nodes, edges 둘뿐이라)
-        this.resultMeta.labels.push( x );
-        // this.statGraph.addLabel( x );
-      });
-    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
-      (x:INode) => {
-        // setNeighbors from this.resultGraph.labels;
-        x.classes = 'meta';     // meta class style
-        x.scratch['_neighbors'] = new Array<string>();
-        this.resultGraph.labels
-          .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
-          .map(label => {
-            x.scratch['_neighbors'] += label.targets;
-            x.scratch['_style'] = label.scratch['_style'];
-            x.scratch['_styleBak'] = label.scratch['_styleBak'];
-          });
-        this.resultMeta.nodes.push( x );
-        // this.statGraph.addNode( x );
-      });
-    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
-      (x:IEdge) => {
-        x.classes = 'meta';     // meta class style
-        this.resultGraph.labels
-        .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
-        .map(label => {
-          x.scratch['_style'] = label.scratch['_style'];
-          x.scratch['_styleBak'] = label.scratch['_styleBak'];
-        });
-      this.resultMeta.edges.push( x );
-      // this.statGraph.addEdge( x );
-      });
-    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
-      (x:IEnd) => {
-        // // meta-graph에 대한 width 스타일만 적용 (label 스타일 연결)
-        // // : newColor option = false (새로운 색상 사용 안함)
-        // this._util.calcElementStyles( this.resultMeta.nodes, (x)=>40+x*5, false );
-        // this._util.calcElementStyles( this.resultMeta.edges, (x)=>2+x, false );
-        this.queryGraph.setMeta(this.resultMeta);
-        this.statGraph.initCanvas();
-      });
-
-  }
-
-  runGraphGroupBy($event: any){
-
-    this.queryGraph.clear(false);   // clear canvas except labels
-
-    // call API
-    let data$:Observable<any> = this._api.grph_groupBy(this.resultDto.gid, [ $event ]);
-
-    data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
-      (x:IGraphDto) => {
-        console.log(`graph_dto receiving : gid=${x.gid} (${this.resultDto.gid})`);
-      });
-    data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
-      (x:IGraph) => {
-        this.resultTemp = x;
-        this.resultTemp.labels = new Array<ILabel>();
-        this.resultTemp.nodes = new Array<INode>();
-        this.resultTemp.edges = new Array<IEdge>();    
-      });
-    data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
-      (x:ILabel) => { 
-      this.resultTemp.labels.push( x );
-      });
-    data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
-      (x:INode) => {
-      // setNeighbors from this.resultGraph.labels;
-      x.scratch['_neighbors'] = new Array<string>();
-      this.resultGraph.labels
-        .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
-        .map(label => {
-          x.scratch['_neighbors'] += label.targets;
-          x.scratch['_style'] = label.scratch['_style'];
-          x.scratch['_styleBak'] = label.scratch['_styleBak'];
-        });
-      this.resultTemp.nodes.push( x );
-      this.queryGraph.addNode( x );
-      });
-    data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
-      (x:IEdge) => {
-        this.resultGraph.labels
-        .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
-        .map(label => {
-          x.scratch['_style'] = label.scratch['_style'];
-          x.scratch['_styleBak'] = label.scratch['_styleBak'];
-        });
-      this.resultTemp.edges.push( x );
-      this.queryGraph.addEdge( x );
-      });
-    data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
-      (x:IEnd) => {
-        // this._util.applyLabelStyle(this.resultTemp.nodes, this.resultGraph.labels, 
-        //   (ele:IElement, label:ILabel) => {
-        //     return label.type == 'nodes' && ele.data['label'] == label.name;
-        //   });
-        // this._util.applyLabelStyle(this.resultTemp.edges, this.resultGraph.labels, 
-        //   (ele:IElement, label:ILabel) => {
-        //     return label.type == 'edges' && ele.data['label'] == label.name;
-        //   });
-
-        this.queryGraph.initCanvas(true);
-        // this.queryGraph.graphChangeLayout('cose');
-      });
-
   }
 
   /////////////////////////////////////////////////////////////////

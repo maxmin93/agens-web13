@@ -112,7 +112,7 @@ export class TimelineSliderComponent implements OnInit {
   // }
 
   toFormat(val:number):string {
-    return (val) ? moment(val).format(this.format) : '';
+    return (val) ? moment(val).format(this.format).valueOf() : '';
   }
 
   update( data:any ) {

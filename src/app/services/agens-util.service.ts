@@ -147,26 +147,38 @@ export class AgensUtilService {
       });
     this.ur.action('paste',     // actionName
       () => {           // do Func
-        console.log('cyPaste.do:', this.ur.clipboard['copied']);
-        if( !this.ur.clipboard['copied'] ) return;
+        if( !this.ur.clipboard['nodes'] || !this.ur.clipboard['edges'] ) return;
 
-        let eles = this.ur.clipboard['copied'];
-        let cloneNum = ( this.ur.clipboard['cloneNum'] ) ? ++this.ur.clipboard['cloneNum'] : (this.ur.clipboard['cloneNum']=0);
-        let posDiff = this.cyPositionDiff(eles);
+        let eles = this.cy.collection();
+        let cloneNum = ++this.ur.clipboard['cloneNum'];
 
         // **NOTE: nodes 는 id만 변경, 
         //         edges 는 id 외에도 source와 target 변경
-        eles.forEach(e => {
-          e._private.data.id += `_clone${cloneNum}`;
-          e.position.x += posDiff.x;
-          e.position.y += posDiff.y;
+        let nodes = this.ur.clipboard['nodes'].map(e => {
+          let x = _.cloneDeep(e);
+          x.data.id += `_clone${cloneNum}`;
+          x.position.x += 70;    // 우측 상단
+          x.position.y -= 20;    // 우측 상단
+          return this.cy.add(x);
         });
-        eles.restore();
-        this.ur.clipboard['removed'] = eles;
+        nodes.forEach( e => eles = eles.add( e ) );
+        let edges = this.ur.clipboard['edges'].map(e => {
+          let x = _.cloneDeep(e);
+          x.data.id += `_clone${cloneNum}`;
+          x.data.source += `_clone${cloneNum}`;
+          x.data.target += `_clone${cloneNum}`;
+          return this.cy.add(x);
+        });
+        edges.forEach( e => eles = eles.add( e ) );
+        this.ur.clipboard['pasted'] = eles;
+        console.log('cyPaste.do:', this.ur.clipboard);
       },
       () => {           // undo Func
         console.log('cyPaste.undo:', this.ur.clipboard);
-        if( this.ur.clipboard['removed'] ) this.ur.clipboard['removed'].remove();
+        if( this.ur.clipboard['pasted'] ){
+          this.ur.clipboard['pasted'].remove();
+          this.ur.clipboard['pasted'] = undefined;
+        } 
       });
 
     return this.ur;
@@ -177,21 +189,38 @@ export class AgensUtilService {
     let descs = eles.nodes().descendants();
     let nodes = eles.nodes().union(descs).filter(":visible");
     let edges = nodes.edgesWith(nodes).filter(":visible");
+
     // **NOTE: clone() 사용시 scratch{} 내용이 복사되지 않음
-    this.ur.clipboard['copied'] = nodes.clone().add(edges.clone());
+    let nodes_json = nodes.map( e => {
+      let obj = e.json();
+      obj.scratch = _.cloneDeep(e._private.scratch);
+      obj.position = _.clone(e._private.position);
+      obj.classes = 'clone';
+      return obj;
+    });
+    this.ur.clipboard['nodes'] = nodes_json;
+    let edges_json = edges.map( e => {
+      let obj = e.json();
+      obj.scratch = _.cloneDeep(e._private.scratch);
+      obj.position = {};
+      obj.classes = 'clone';
+      return obj;
+    });
+    this.ur.clipboard['edges'] = edges_json;
     this.ur.clipboard['cloneNum'] = 0;
   }
 
+  // 나타나는 위치가 헷갈림. 안쓰기로 함!
   cyPositionDiff(eles:any){
     let extent = eles.nodes().boundingBox();
     let wholeExtent = this.cy.nodes().boundingBox();
     let center = { x: (wholeExtent.x1 + wholeExtent.x2)/2, y: (wholeExtent.y1 + wholeExtent.y2)/2 };
-    let posDiff = { x: 150, y: 150 };
+    let posDiff = { x: 100, y: 100 };
 
-    if( center.x < extent.x2 ) posDiff.x *= -1;
-    else if( center.x < extent.x1 && extent.x1 < extent.x2 ) posDiff.x *= -1;
-    if( center.y < extent.y2 ) posDiff.y *= -1;
-    else if( center.y < extent.y1 && extent.y1 < extent.y2 ) posDiff.y *= -1;
+    if( extent.x2 < center.x ) posDiff.x *= -1;
+    else if( extent.x1 < center.x && extent.x2 < extent.x1 ) posDiff.x *= -1;
+    if( extent.y2 < center.y ) posDiff.y *= -1;
+    else if( extent.y1 < center.y && extent.y2 < extent.y1 ) posDiff.y *= -1;
     return posDiff;
   }
 
@@ -231,7 +260,7 @@ export class AgensUtilService {
   public calcElementStyles(eles:Array<IElement>, fn:Function, newColor:boolean=true){
     let bins = this.makeBins( eles.map(x => x.data['size']) );
     eles.map( ele => {
-      bins.forEach( (x,idx) => {
+      bins.every( (x,idx) => {
         if( x.includes( ele.data['size'] ) ){
           // _style 객체가 새로 생성됨 (있으면 width만 갱신)
           if( ele.scratch.hasOwnProperty('_style') ){
@@ -239,7 +268,7 @@ export class AgensUtilService {
           }
           else{
             ele.scratch._style = {
-              color: (newColor && ele.group == 'nodes') ? this.nextColor() : undefined
+              color: (newColor && ele.group == 'nodes') ? this.nextColor() : undefined // this.getColor(0)
               , width: fn(idx)
               , title: 'name'
               , visible: true
@@ -247,6 +276,7 @@ export class AgensUtilService {
           }
           return false;
         }
+        return true;
       });
     });
   }
@@ -320,6 +350,9 @@ export class AgensUtilService {
     this.colorIndex += 1;
     if( this.colorIndex >= colorPallets.length ) this.colorIndex = 1;
     return colorPallets[this.colorIndex];
+  }
+  public getColor(idx:number):any {
+    return colorPallets[idx];
   }
 }
 

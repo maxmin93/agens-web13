@@ -344,6 +344,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       let group = (label.type == 'edges') ? 'edge' : 'node';
       this.cy.elements(`${group}[label='${label.name}']`).select();
     }, 20);
+    console.log('clickGraphLabelChip:', this.selectedLabel.scratch._style);
+    this._cd.detectChanges();
   }
 
   savePositions(){
@@ -502,7 +504,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'betweenness': this._graph.centralrityBt(this.cy ); break;
       default: 
         this.cy.elements().forEach(e => {
-          e.scratch('_style', _.cloneDeep(e.scratch('_styleBak')));
+          e._private.scratch._style.width = e._private.scratch._styleBak.width;
         });
     }
     this.cy.style(agens.graph.stylelist['dark']).update();
@@ -648,13 +650,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
               this.labels[0].properties[0] : undefined;
       this.timelineLabelCtl = new FormControl(this.labels[0], []);
       this.timelinePropertyCtl = new FormControl( property, [] );
-      this.timelineSampleCtl = new FormControl( {value: 
-        this.getTimelineSample( this.labels[0].name, property ), disabled: true}, [] );
+      this.timelineSampleCtl = new FormControl( 
+              this.getTimelineSample( this.labels[0].name, property ), [] );
     }
     else{
       this.timelineLabelCtl = new FormControl( {value: { name: "" }, disabled: true} , []);
       this.timelinePropertyCtl = new FormControl( {value: { key: "" }, disabled: true}, [] );
-      this.timelineSampleCtl = new FormControl( {value: '', disabled: true}, [] );
+      this.timelineSampleCtl = new FormControl( '', [] );
     }
     this.timelineFormatCtl = new FormControl( "YYYY-MM-DD", []);
     
@@ -703,7 +705,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   
   onControlTimelineSlider(event) {
-    console.log("Slider control:", event);
     if( !event ) return;
 
     if( event == 'play' ){
@@ -717,6 +718,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   onChangeTimelineSlider(event) {    
     if( !event ) return;
+    this.timelineSampleCtl.setValue(event);
 
     let labelName = this.timelineLabelCtl.value.name;
     let propKey = this.timelinePropertyCtl.value.key;
@@ -741,7 +743,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // restElements.animate({ style: { 'visibility': 'hidden' }, duration: 200 });
   }
   onUpdateTimelineSlider(event) {
-    console.log("Slider updated:", event);
+    console.log("timelineSlider updated:", event);
     if( !event ) return;
   }
   setTimelineSliderValue( value ) {

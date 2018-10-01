@@ -85,12 +85,12 @@
                             <h5 class="mr20"><strong>SIZE </strong></h5>
                             <mat-slider *ngIf="selectedLabel.type == 'nodes'" class="flex-1 p-no"
                                         [min]="10" [max]="120" [step]="5" [thumbLabel]="true"
-                                        [value]="40"
+                                        [value]="selectedLabel.scratch._style.width"
                                         (change)="onChangeStyleWidth($event)">
                             </mat-slider>
                             <mat-slider *ngIf="selectedLabel.type == 'edges'" class="flex-1 p-no"
                                         [min]="1" [max]="12" [step]="1" [thumbLabel]="true"
-                                        [value]="3"
+                                        [value]="selectedLabel.scratch._style.width"
                                         (change)="onChangeStyleWidth($event)">
                             </mat-slider>
                           </div>
@@ -173,8 +173,8 @@
                                 </mat-select>
                             </mat-form-field>
                             <mat-form-field>
-                                <input matInput type="text" placeholder="Check sample" value=""
-                                    [formControl]="timelineSampleCtl">
+                                <input matInput type="text" placeholder="Check value" value=""
+                                    [formControl]="timelineSampleCtl" readonly="true">
                             </mat-form-field>
     
                             <mat-form-field>

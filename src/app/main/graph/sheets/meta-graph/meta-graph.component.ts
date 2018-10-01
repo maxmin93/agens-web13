@@ -130,8 +130,7 @@ export class MetaGraphComponent implements OnInit {
           .filter(val => val.type == 'nodes' && val.name == x.data.props['name'])
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
-            x.scratch['_style'] = label.scratch['_style'];
-            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+            x.scratch['_style'] = _.cloneDeep(label.scratch['_style']);
           });
         this.metaGraph.nodes.push( x );
         this.cy.add( x );
@@ -142,35 +141,19 @@ export class MetaGraphComponent implements OnInit {
         this.labels
         .filter(val => val.type == 'edges' && val.name == x.data.props['name'])
         .map(label => {
-          x.scratch['_style'] = label.scratch['_style'];
-          x.scratch['_styleBak'] = label.scratch['_styleBak'];
+          x.scratch['_style'] = _.cloneDeep(label.scratch['_style']);
         });
         this.metaGraph.edges.push( x );
         this.cy.add( x );
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
+        this._util.calcElementStyles( this.metaGraph.nodes, (x)=>40+x*5, false );
+        this._util.calcElementStyles( this.metaGraph.edges, (x)=>2+x, false );
+        this.cy.style(agens.graph.stylelist['dark']).update();
         this.changeLayout( this.cy.elements() );
-        this.initCanvas();
       });
 
-  }
-
-  initLoad(){
-    this._util.calcElementStyles( this.metaGraph.nodes, (x)=>40+x*5, false );
-    this._util.calcElementStyles( this.metaGraph.edges, (x)=>2+x, false );
-
-    this.metaGraph.nodes.forEach(e => {
-      e.classes += ' dataLabel';
-      this.cy.add( e );
-    });
-    this.metaGraph.edges.forEach(e => {
-      e.classes += ' dataLabel';
-      this.cy.add( e );
-    });
-    this.initCanvas();
-
-    this.changeLayout( this.cy.elements() );
   }
 
   /////////////////////////////////////////////////////////////////
@@ -332,14 +315,6 @@ export class MetaGraphComponent implements OnInit {
     this.cy.add( ele );
   }
 
-  // 데이터 불러오고 최초 적용되는 작업들 
-  initCanvas(){
-    // add groupBy menu
-    this.addQtipMenu( this.cy.elements() );
-    // refresh style
-    this.cy.style(agens.graph.stylelist['dark']).update();
-    // Promise.resolve(null).then(()=>{ this.cy.fit( this.cy.elements(), 100); });    
-  }
   // 액티브 상태가 될 때마다 실행되는 작업들
   refreshCanvas(){
     this.cy.resize();
