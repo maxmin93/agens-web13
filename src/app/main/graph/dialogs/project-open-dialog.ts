@@ -1,7 +1,7 @@
-import { Component, ViewChild , Inject, OnInit, OnDestroy, NgZone, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild , Inject, OnInit, OnDestroy, NgZone, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http/src/response';
-import { Observable } from 'rxjs';
+import { concatAll } from 'rxjs/operators';
 
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { MatSnackBar } from '@angular/material';
@@ -18,7 +18,7 @@ import { IResponseDto } from '../../../models/agens-response-types';
 declare var $:any;
 
 @Component({
-  selector: 'ab-project-open-dialog',
+  selector: 'app-project-open-dialog',
   template: `
 
 <h2 mat-dialog-title>
@@ -32,19 +32,20 @@ declare var $:any;
   <div>
     <div class="wrapped-box-flex">
       <span><i class="fa fa-search" aria-hidden="true"></i><input
-          type='text'          
+          type='text' #inputFilter
           placeholder='Type to filter the title column...'
           (keyup)='updateFilter($event)'
         /></span>
     </div>
+
     <div class="wrapped-box-flex">
 
-    <ngx-datatable #projectsTable class='material' [columnMode]="'flex'"
+    <ngx-datatable #projectsTable class='material flex-1' [columnMode]="'flex'"
       [rows]="projectRows" [reorderable]="reorderable" [limit]="10"
       [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
       (activate)="onActivateTableLabels($event)">
 
-        <ngx-datatable-row-detail [rowHeight]="auto" #projectRow (toggle)="onRowDetailToggle($event)">
+      <ngx-datatable-row-detail [rowHeight]="auto" #projectRow (toggle)="onRowDetailToggle($event)">
         <ng-template let-row="row" ngx-datatable-row-detail-template>
           <div>
             <div class="span__row-detail-content">
@@ -55,35 +56,39 @@ declare var $:any;
         </ngx-datatable-row-detail>
 
         <ngx-datatable-column name="ID" [flexGrow]="1">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <strong><a (click)="onSubmit(row.id)">{{row.id}}</a></strong>
-        </ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <strong><a (click)="onSubmit(row.id)">{{row.id}}</a></strong>
+          </ng-template>
         </ngx-datatable-column>
+
         <ngx-datatable-column name="Title" [flexGrow]="4">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <button *ngIf="row.description" mat-icon-button matTooltip="Expand/Collapse Row"
-              (click)="toggleLogExpandRow(row, 'description')">
-            <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
-          </button>
-          <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row.id)">{{row.title}}</a></span>
-        </ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <button *ngIf="row.description" mat-icon-button matTooltip="Expand/Collapse Row"
+                (click)="toggleLogExpandRow(row, 'description')">
+              <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
+            </button>
+            <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row.id)">{{row.title}}</a></span>
+          </ng-template>
         </ngx-datatable-column>
+
         <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [flexGrow]="2">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <span>{{ row.create_dt | date:'yyyy-MM-dd HH:mm' }}</span>
-        </ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span>{{ row.create_dt | date:'yyyy-MM-dd HH:mm' }}</span>
+          </ng-template>
         </ngx-datatable-column>
+
         <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [flexGrow]="2">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <span>{{ row.update_dt | date:'yyyy-MM-dd HH:mm' }}</span>
-        </ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span>{{ row.update_dt | date:'yyyy-MM-dd HH:mm' }}</span>
+          </ng-template>
         </ngx-datatable-column>
+
         <ngx-datatable-column name="Remove" [sortable]="false" [flexGrow]="1">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <a (click)="deleteProjectAfterConfirm(row)" mdTooltip="Delete" mdTooltipPosition="before">
-              <mat-icon>delete</mat-icon>
-          </a>
-        </ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <a (click)="deleteProjectAfterConfirm(row)" mdTooltip="Delete" mdTooltipPosition="before">
+                <mat-icon>delete</mat-icon>
+            </a>
+          </ng-template>
         </ngx-datatable-column>            
 
       </ngx-datatable>
@@ -110,10 +115,11 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   // filtering 을 위한 임시 array
   tmpRows: IProject[] = [];
 
+  @ViewChild('inputFilter') inputFilter: ElementRef;
   @ViewChild('projectsTable') projectsTable: DatatableComponent;
   
   constructor(
-    private _http: HttpClient,
+    private _cd: ChangeDetectorRef,
     private _api: AgensDataService,
     private _ngZone: NgZone,
     public _snackBar: MatSnackBar,
@@ -130,6 +136,7 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
       submitDialogCallback: (row) => this.deleteProject(row),
       component: this
     };
+
   }  
 
   ngOnDestroy() {
@@ -137,6 +144,7 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   }
   
   ngAfterViewInit() {
+    this.inputFilter.nativeElement.blur();
     this.loadProjects();
   }  
 
@@ -163,19 +171,22 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   // call API: manager/logs  
   loadProjects( message_out:boolean = true ){
 
-    this._api.mngr_projects_list()
+    this.projectRows = [];
+
+    this._api.mngr_projects_list().pipe( concatAll() )
     .subscribe(
       data => {
-        this.projectRows.push(data);
-        
+        this.tmpRows.push( <IProject>data );
       },
       err => {
         this.onCancel();
       },
       () => {
         // cache our list
-        this.tmpRows = [...this.projectRows];
+        this.projectRows = [...this.tmpRows];
+        console.log('mngr_projects_list', this.projectRows);
         // this._angulartics2.eventTrack.next({ action: 'listProjects', properties: { category: 'graph', label: data.length }});
+        this._cd.detectChanges();
       });    
   }
 
@@ -195,8 +206,11 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateFilter(event) {
+    if( this.projectRows.length == 0 ){
+      event.preventDefault();      
+      return;
+    }
     const val = event.target.value.toLowerCase();
-
     // filter our data
     const temp = this.tmpRows.filter(function(d) {
       return d.title.toLowerCase().indexOf(val) !== -1 || !val;

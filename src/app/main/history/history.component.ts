@@ -74,7 +74,7 @@ export class HistoryComponent implements AfterViewInit {
   // call API: manager/logs  
   loadLogs(){
 
-    this.toggleProgress(false);
+    this.toggleProgress(true);
 
     this._api.mngr_history().pipe( concatAll() )
     .subscribe(
