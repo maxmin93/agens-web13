@@ -455,6 +455,17 @@ return path1, path2;
 
   openProjectSaveDialog(){
 
+    if( !this.resultGraph ){
+      this._api.setResponses(<IResponseDto>{
+        group: 'project::save',
+        state: StateType.WARNING,
+        message: 'Graph is empty. Blank graph cannot be saved'
+      });
+      return;
+    }
+    // Stringify 변환
+    let graph_json:string = JSON.stringify( this.queryGraph.cy.json() );
+
     let sql:string = this.makeupSql(<string> this.editor.getValue());
     if( sql.length < 5 ){
       this._api.setResponses(<IResponseDto>{
@@ -465,19 +476,7 @@ return path1, path2;
       return;
     }
 
-    // Stringify 변환
-    let graph_json:string = JSON.stringify( this.resultGraph );
-    if( graph_json.length < 5 ){
-      this._api.setResponses(<IResponseDto>{
-        group: 'project::save',
-        state: StateType.WARNING,
-        message: 'Graph is empty. Blank graph cannot be saved'
-      });
-      return;
-    }
-
-    if( this.currProject === null )
-      this.currProject = <IProject>{
+    if( !this.currProject ) this.currProject = <IProject>{
           id: null,
           userName: null,
           userIp: null,
@@ -486,14 +485,15 @@ return path1, path2;
           create_dt: Date.now(),    // timestamp
           update_dt: Date.now(),    // timestamp
           sql: '',
-          graph_json: '{}'
+          graph_json: '{}',
+          pic: null
         };
     this.currProject.sql = this.editor.getValue();
     this.currProject.graph_json = graph_json;
 
     let dialogRef = this.dialog.open(ProjectSaveDialog, {
-      width: '400px', height: 'auto',
-      data: this.currProject
+      width: '800px', height: 'auto',
+      data: { "cy": this.queryGraph.cy, "project": this.currProject }
     });
 
     dialogRef.afterClosed().subscribe(result => {

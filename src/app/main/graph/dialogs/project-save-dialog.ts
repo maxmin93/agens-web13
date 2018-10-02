@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { NgForm, FormGroup, FormControl, Validators } from '@angular/forms';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http/src/response';
@@ -27,6 +27,7 @@ declare var agens:any;
 <div mat-dialog-content>
   
   <form class="example-form" novalidate [formGroup]="projectForm">
+  <img #divGraphImage style="width: 400px;" />
   <div class="example-container">
 
     <mat-form-field class="example-full-width">
@@ -87,7 +88,9 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
 
   // 로딩 상태
   private isLoading:boolean = false;
-  
+  private cy:any;
+  imgBlob:Blob;
+
   projectForm: FormGroup;
   projectTitleCtl: FormControl;
   projectDescriptionCtl: FormControl;
@@ -104,9 +107,11 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       create_dt: Date.now(),    // timestamp
       update_dt: Date.now(),    // timestamp
       sql: '',
-      graph_json: '{}'
+      graph_json: '{}',
+      // pic: null
     };
 
+  @ViewChild('divGraphImage') divGraphImage: ElementRef;
   constructor(
     private _http: HttpClient,
     private _api: AgensDataService,
@@ -115,11 +120,11 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<ProjectSaveDialog>,
     @Inject(MAT_DIALOG_DATA) public data: IProject
   ) { 
+    if( data.hasOwnProperty('cy') ) this.cy = data['cy'];
+    if( data.hasOwnProperty('project') ) this.project = data['project'];
   }
 
   ngOnInit() {
-    if( this.data !== null ) this.project = this.data;
-
     this.projectTitleCtl = new FormControl( this.project.title, [ Validators.maxLength(this.MAX_TITLE_SIZE), Validators.required ]);
     this.projectDescriptionCtl = new FormControl( this.project.description, [ Validators.maxLength(this.MAX_DESCRIPTION_SIZE) ]);
 
@@ -127,6 +132,13 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       projectTitle: this.projectTitleCtl,
       projectDescription: this.projectDescriptionCtl
     });
+
+    // make snapshot image of GRAPH
+    let png64 = this.cy.png({ full : true });
+    this.divGraphImage.nativeElement.setAttribute("src", png64);
+    this.imgBlob = this.dataURItoBlob(png64);
+    console.log( 'byteString:', typeof this.imgBlob, this.imgBlob);
+    // this.project.pic = this.imgBlob;
 
     // prepare to call this.function from external javascript
     window['angularDialogRef'] = {
@@ -184,12 +196,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
   openSnackBar(message: string, action: string) {
     this._snackBar.open(message, action, { duration: 3000, });
   }
-
-  private createAuthorizationHeader():HttpHeaders {
-    let ssid:string = localStorage.getItem('agens-ssid');
-    return new HttpHeaders({'Content-Type': 'application/json', 'Authorization':ssid});
-  }
-  
+ 
   /////////////////////////////////////////////////////////////////
   // Data Handlers
   /////////////////////////////////////////////////////////////////
@@ -211,4 +218,19 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     }    
   }
   
+  dataURItoBlob(png64:any):Blob {
+    // convert base64/URLEncoded data component to raw binary data held in a string
+    let byteString;
+    if (png64.split(',')[0].indexOf('base64') >= 0) {
+      byteString = atob(png64.split(',')[1]);
+    } else {
+      byteString = decodeURI(png64.split(',')[1]);
+    }
+    let mimeString = png64.split(',')[0].split(':')[1].split(';')[0];
+    let array = [];
+    for(var i = 0; i < byteString.length; i++) {
+      array.push(byteString.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], {type: mimeString});
+  };  
 }

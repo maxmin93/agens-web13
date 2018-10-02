@@ -51,8 +51,8 @@ import { TimelineSliderComponent } from './main/graph/components/timeline-slider
 import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
 
 import { ImageExportDialog } from './main/graph/dialogs/image-export.dialog';
-// import { ProjectOpenDialog } from './main/graph/project-open-dialog';
-// import { ProjectSaveDialog } from './main/graph/project-save-dialog';
+import { ProjectOpenDialog } from './main/graph/dialogs/project-open-dialog';
+import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
 // import { SearchResultDialog } from './main/graph/search-result.dialog';
 
 @NgModule({
@@ -77,8 +77,8 @@ import { ImageExportDialog } from './main/graph/dialogs/image-export.dialog';
     StatGraphComponent,
 
     ImageExportDialog,
-    // ProjectOpenDialog,
-    // ProjectSaveDialog,
+    ProjectOpenDialog,
+    ProjectSaveDialog,
     // SearchResultDialog
   ], 
   // directives, components, and pipes owned by this NgModule
@@ -117,8 +117,8 @@ import { ImageExportDialog } from './main/graph/dialogs/image-export.dialog';
     ConfirmDeleteLabelDialog,
     
     ImageExportDialog,
-    // ProjectOpenDialog,
-    // ProjectSaveDialog,
+    ProjectOpenDialog,
+    ProjectSaveDialog,
     // SearchResultDialog
 
     MetaGraphComponent,
