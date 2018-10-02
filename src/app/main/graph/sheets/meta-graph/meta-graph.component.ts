@@ -293,6 +293,7 @@ export class MetaGraphComponent implements OnInit {
     // toggle progressBar's visibility
     if( option ) graphProgressBar.style.visibility = 'visible';
     else graphProgressBar.style.visibility = 'hidden';
+    this._cd.detectChanges();
   } 
 
   // 결과들만 삭제 : runQuery 할 때 사용

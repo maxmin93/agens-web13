@@ -34,9 +34,6 @@
             <div class="card col flex-1">                    
                 <div class="card-header">
                     <h4 class="row row-m"><mat-icon class="mr10">bookmarks</mat-icon>LABEL <strong> LIST</strong></h4>
-                    <div #progressBar style='visibility:hidden;'>
-                        <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
-                    </div>
                 </div>
                 <div class="card-content">
                     <ngx-datatable #tableLabels class="material flex-1"
@@ -75,7 +72,10 @@
 
             <div class="row flex-2 card card-space-no mr20">
                 <div class="card-header pos-abs">
-                    <h4 class="row row-m"><mat-icon class="mr10">bubble_chart</mat-icon>SCHEMA <strong> GRAPH</strong></h4>
+                  <div #progressBar style='visibility:hidden; z-index: 10; width: 100%;'>
+                    <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+                  </div>
+                  <h4 class="row row-m"><mat-icon class="mr10">bubble_chart</mat-icon>SCHEMA <strong> GRAPH</strong></h4>
                     <!-- <p>If there is no real data,<br/>the edge(relation between nodes) may not be visible.</p> -->
                 </div>
                 <div class="card-content row flex-1">

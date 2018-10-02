@@ -54,6 +54,7 @@ export class HistoryComponent implements AfterViewInit {
     else{
       this.progressBar.nativeElement.style.visibility = option ? 'visible' : 'hidden';
     }
+    this._cd.detectChanges();
   }
 
   /////////////////////////////////////////////////////////////////

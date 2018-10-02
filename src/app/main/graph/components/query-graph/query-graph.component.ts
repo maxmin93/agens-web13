@@ -249,7 +249,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     else{
       let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
       if( !allStatus ){
-        this.cy.elements(':selected').unselect();
         this.selectedElement = target;
         // edge 일 경우, 연결된 nodes 까지 선택
         if( target.group() == 'edges' ){
@@ -278,6 +277,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // toggle progressBar's visibility
     if( option ) graphProgressBar.style.visibility = 'visible';
     else graphProgressBar.style.visibility = 'hidden';
+    this._cd.detectChanges();
   } 
 
   // 결과들만 삭제 : runQuery 할 때 사용
@@ -756,6 +756,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   runFilterByGroupBy(options: any){
 
+    this.toggleProgressBar(true);
     this._util.savePositions( this.cy );  // hashMap<id,any> 에 position 저장
     this.clear(false);                    // false: clear canvas except labels    
 
@@ -812,6 +813,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       (x:IEnd) => {
         this.recountingLabels();
         this.initCanvas( true );
+        this.toggleProgressBar(false);
       });
   }
   
@@ -827,6 +829,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   reloadGraph(){
     if( this.gid < 0 ) return;
+    this.toggleProgressBar(true);
     this._util.savePositions( this.cy );        // hashMap<id,any> 에 position 저장
 
     this.clear(false);   // false: clear canvas except labels    
@@ -884,6 +887,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       (x:IEnd) => {
         this.recountingLabels();
         this.initCanvas( false );
+        this.toggleProgressBar(false);
       });    
   }
 

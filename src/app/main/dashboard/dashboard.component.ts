@@ -251,6 +251,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     else{
       this.progressBar.nativeElement.style.visibility = option ? 'visible' : 'hidden';
     }
+    this._cd.detectChanges();
   }
 
   clearInfos(){

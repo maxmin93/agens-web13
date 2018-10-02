@@ -75,6 +75,7 @@ export class QueryResultComponent implements OnInit {
     else{
       this.progressBar.nativeElement.style.visibility = option ? 'visible' : 'hidden';
     }
+    this._cd.detectChanges();
   }
 
   clear(){

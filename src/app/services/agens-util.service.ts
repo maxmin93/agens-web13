@@ -20,6 +20,7 @@ export class AgensUtilService {
   private positions: Map<string,any> = new Map();
   private cy:any;               // current cy instance
   private ur:any;               // undoRedo instance
+  private ids = new Map<string,string>();
 
   constructor() { 
   }
@@ -150,23 +151,25 @@ export class AgensUtilService {
         if( !this.ur.clipboard['nodes'] || !this.ur.clipboard['edges'] ) return;
 
         let eles = this.cy.collection();
-        let cloneNum = ++this.ur.clipboard['cloneNum'];
-
         // **NOTE: nodes 는 id만 변경, 
         //         edges 는 id 외에도 source와 target 변경
         let nodes = this.ur.clipboard['nodes'].map(e => {
           let x = _.cloneDeep(e);
-          x.data.id += `_clone${cloneNum}`;
-          x.position.x += 70;    // 우측 상단
-          x.position.y -= 20;    // 우측 상단
+          let newId = this.cyUUID(); 
+          this.ids.set( x.data.id, newId);   
+          x.data.id = newId;      // new ID : random string
+          x.position.x += 70;     // 우측 상단
+          x.position.y -= 20;     // 우측 상단
           return this.cy.add(x);
         });
         nodes.forEach( e => eles = eles.add( e ) );
         let edges = this.ur.clipboard['edges'].map(e => {
           let x = _.cloneDeep(e);
-          x.data.id += `_clone${cloneNum}`;
-          x.data.source += `_clone${cloneNum}`;
-          x.data.target += `_clone${cloneNum}`;
+          let newId = this.cyUUID(); 
+          this.ids.set( x.data.id, newId);
+          x.data.id = newId;      // new ID : random string
+          x.data.source = this.ids.get(x.data.source);
+          x.data.target = this.ids.get(x.data.target);
           return this.cy.add(x);
         });
         edges.forEach( e => eles = eles.add( e ) );
@@ -182,6 +185,16 @@ export class AgensUtilService {
       });
 
     return this.ur;
+  }
+
+  cyUUID(length:number=12):string{
+    let chars = "abcdefghijklmnopqrstufwxyzABCDEFGHIJKLMNOPQRSTUFWXYZ1234567890"
+    let newId = (_.sampleSize(chars, length || 12)).join('');   // lodash v4
+    let exists = Array.from(this.ids.values());
+    while( exists.includes(newId) ){
+      newId = (_.sampleSize(chars, length || 12)).join('');     // again
+    }
+    return newId;
   }
 
   cyCopy(eles:any){
@@ -207,7 +220,6 @@ export class AgensUtilService {
       return obj;
     });
     this.ur.clipboard['edges'] = edges_json;
-    this.ur.clipboard['cloneNum'] = 0;
   }
 
   // 나타나는 위치가 헷갈림. 안쓰기로 함!

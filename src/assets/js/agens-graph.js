@@ -84,13 +84,13 @@
     },
     nodeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
-        return e.scratch('_style').width;
-      return 45 + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*10 : 0 );
+        return e.scratch('_style').width + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*10 : 0 );
+      return 45;
     },
     nodeWidthSelect: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
-        return e.scratch('_style').width;
-      return 65 + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*10 : 0 );
+        return e.scratch('_style').width + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*10 : 0 );
+      return 65;
     },
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -104,8 +104,8 @@
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
-        return e.scratch('_style').width;
-      return 3 + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*2 : 0 );
+        return e.scratch('_style').width + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*2 : 0 );
+      return 3;
     }
   };
 
@@ -153,9 +153,10 @@
               return agens.styles.dataLabel(e);
               },
           'background-color': function(e){ return agens.styles.nodeDColor(e); },
-          'border-width': function(e){ return e.data('size') > 1 ? 6 : 3; },
+          'border-width': function(e){ return e.data('size') > 1 ? 5 : 2; },
           'border-color': function(e){ return agens.styles.nodeBColor(e); },
           'border-style': function(e){ return e.data('size') > 1 ? 'double' : 'solid'; },
+          'z-index': function(e){ return e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10)) : 1 ; },
           'width':  function(e){ return agens.styles.nodeWidth(e); },
           'height': function(e){ return agens.styles.nodeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
