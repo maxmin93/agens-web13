@@ -7,6 +7,7 @@ import { filter } from 'rxjs/operators';
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
 import { TimelineSliderComponent } from '../timeline-slider/timeline-slider.component';
+import { ImageExportDialog } from '../../dialogs/image-export.dialog';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
@@ -891,5 +892,24 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       });    
   }
 
+  /////////////////////////////////////////////////////////////////
+  // Label Style Setting Controllers
+  /////////////////////////////////////////////////////////////////
+  
+  openImageExportDialog(){
+    // recordTable에 결과가 없어도 graph 에 출력할 내용물이 있으면 OK!
+    if( this.cy.elements(':visible').length === 0 ) return;
+    
+    let dialogRef = this._dialog.open(ImageExportDialog, {
+      width: 'auto', height: 'auto',
+      data: this.cy
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if( result === null ) return;
+      // agens.graph.exportImage 호출
+      agens.graph.exportImage( result.filename, result.watermark );
+    });
+  }
 
 }

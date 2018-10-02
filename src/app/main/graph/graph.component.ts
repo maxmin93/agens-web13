@@ -31,8 +31,6 @@ import { StatGraphComponent } from './components/stat-graph/stat-graph.component
 import { SearchResultDialog } from './dialogs/search-result.dialog';
 import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
-import { ImageExportDialog } from './dialogs/image-export.dialog';
-import { analyzeFileForInjectables } from '@angular/compiler';
 
 declare var CodeMirror: any;
 declare var agens: any;

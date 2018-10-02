@@ -50,8 +50,7 @@ import { EditGraphComponent } from './main/graph/sheets/edit-graph/edit-graph.co
 import { TimelineSliderComponent } from './main/graph/components/timeline-slider/timeline-slider.component';
 import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
 
-// import { LabelStyleSettingDialog } from './main/graph/label-style-setting.dialog';
-// import { ImageExportDialog } from './main/graph/image-export.dialog';
+import { ImageExportDialog } from './main/graph/dialogs/image-export.dialog';
 // import { ProjectOpenDialog } from './main/graph/project-open-dialog';
 // import { ProjectSaveDialog } from './main/graph/project-save-dialog';
 // import { SearchResultDialog } from './main/graph/search-result.dialog';
@@ -77,8 +76,7 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
     PlpyEditorComponent,
     StatGraphComponent,
 
-    // LabelStyleSettingDialog,
-    // ImageExportDialog,
+    ImageExportDialog,
     // ProjectOpenDialog,
     // ProjectSaveDialog,
     // SearchResultDialog
@@ -118,7 +116,7 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
   entryComponents: [ 
     ConfirmDeleteLabelDialog,
     
-    // ImageExportDialog,
+    ImageExportDialog,
     // ProjectOpenDialog,
     // ProjectSaveDialog,
     // SearchResultDialog
