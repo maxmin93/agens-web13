@@ -14,9 +14,9 @@ import { AgensDataService } from '../services/agens-data.service';
 export class MainComponent implements OnInit, AfterViewInit {
 
   productTitle: string;
+  
   currentMenu: string = 'main';
-
-  private currentPath: string = '/';
+  currentPath: string = '/';
   
   // @ViewChild('btnMenuGroup') public btnMenuGroup: matButtonToggleGroup;
   @ViewChild('btnMenuMain') public btnMenuMain: MatButtonToggle;

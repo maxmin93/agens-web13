@@ -6,8 +6,7 @@
     <!-- Graph content -->
     <div class="row flex-1">
         <div class="col flex-1">
-            <div id="graph-canvas" class="graph-canvas flex-1" #divCanvas 
-                [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"
+            <div id="graph-canvas" class="graph-canvas flex-1" #divCanvas
                 (mouseover)="canvasHover=true" (mouseleave)="canvasHover=false"></div>
             <!-- graph element info Box -->
             <nav>
@@ -261,7 +260,7 @@
         
                         <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" 
                             matTooltip="LAYOUT" matTooltipPosition="before"><mat-icon>bubble_chart</mat-icon></a>
-                            <mat-menu #layoutMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
+                            <mat-menu #layoutMenu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
                                 <div td-menu-header>
                                     <h4 class="mat-subhead">Layout <strong>Type</strong></h4>
                                 </div>
@@ -291,7 +290,7 @@
                         <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="centralityMenu" 
                             matTooltip="Centrality" matTooltipPosition="before">
                             <mat-icon>control_camera</mat-icon></a>
-                            <mat-menu #centralityMenu="matMenu" [attr.x-position]="before" [attr.y-position]="below">
+                            <mat-menu #centralityMenu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
                                 <div td-menu-header>
                                     <h4 class="mat-subhead">Centrality <strong>Methods</strong></h4>
                                 </div>

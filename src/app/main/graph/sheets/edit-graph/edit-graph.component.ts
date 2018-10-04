@@ -170,4 +170,12 @@ export class EditGraphComponent implements OnInit, AfterViewInit {
     elements.layout(options).run();
   }
 
+  unfoldProperties(){
+
+  }
+
+  foldProperties(){
+
+  }
+  
 }

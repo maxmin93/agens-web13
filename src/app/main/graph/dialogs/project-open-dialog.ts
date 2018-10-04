@@ -40,11 +40,11 @@ declare var $:any;
     <div class="wrapped-box-flex">
 
     <ngx-datatable #projectsTable class='material' [columnMode]="'flex'"
-      [rows]="projectRows" [reorderable]="reorderable" [limit]="10"
+      [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
       [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
       (activate)="onActivateTableLabels($event)">
 
-        <ngx-datatable-row-detail [rowHeight]="auto" #projectRow (toggle)="onRowDetailToggle($event)">
+        <ngx-datatable-row-detail [rowHeight]="'auto'" #projectRow (toggle)="onRowDetailToggle($event)">
         <ng-template let-row="row" ngx-datatable-row-detail-template>
           <div>
             <div class="span__row-detail-content">

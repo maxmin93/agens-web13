@@ -28,7 +28,6 @@ import { QueryTableComponent } from './components/query-table/query-table.compon
 import { StatGraphComponent } from './components/stat-graph/stat-graph.component';
 
 // Dialogs
-import { SearchResultDialog } from './dialogs/search-result.dialog';
 import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 

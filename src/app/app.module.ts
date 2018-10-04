@@ -79,7 +79,6 @@ import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
     ImageExportDialog,
     ProjectOpenDialog,
     ProjectSaveDialog,
-    // SearchResultDialog
   ], 
   // directives, components, and pipes owned by this NgModule
   imports: [
@@ -119,7 +118,6 @@ import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
     ImageExportDialog,
     ProjectOpenDialog,
     ProjectSaveDialog,
-    // SearchResultDialog
 
     MetaGraphComponent,
     CellViewerComponent,

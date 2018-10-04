@@ -20,11 +20,11 @@
           
           <!-- (activate)="onActivateTableLabels($event)" -->
           <ngx-datatable #logsTable class="material flex-1" [columnMode]="'flex'"
-                  [rows]="logRows" [reorderable]="reorderable" [limit]="9"
+                  [rows]="logRows" [reorderable]="'reorderable'" [limit]="9"
                   [headerHeight]="48" [footerHeight]="48" [rowHeight]="'auto'"
                   >
 
-            <ngx-datatable-row-detail [rowHeight]="auto" #queryRow (toggle)="onRowDetailToggle($event)" >
+            <ngx-datatable-row-detail [rowHeight]="'auto'" #queryRow (toggle)="onRowDetailToggle($event)" >
               <ng-template let-row="row" ngx-datatable-row-detail-template>
                 <div>
                   <span class="expand-cell">{{ row[row._selectedColumn] }}</span>

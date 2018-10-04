@@ -12,11 +12,11 @@ export class TimelineSliderComponent implements OnInit {
 
   private initialized = false;
 
-  private isPaused:boolean = false;
-  private btnPlayDisabled:boolean = true;
-  private btnPauseDisabled:boolean = true;
-  private btnStopDisabled:boolean = true;
-  private sliderDisabled:boolean = true;
+  isPaused:boolean = false;
+  btnPlayDisabled:boolean = true;
+  btnPauseDisabled:boolean = true;
+  btnStopDisabled:boolean = true;
+  sliderDisabled:boolean = true;
   @ViewChild('sliderElement') sliderElement: MatSlider;
   
   @Input() private format: string = 'YYYY-MM-DD';
@@ -25,11 +25,11 @@ export class TimelineSliderComponent implements OnInit {
   private _values: any[] = [];
 
   // current value, min & max
-  private _value: any;
+  _value: any;
   get value():any { return this.initialized ? this.toFormat(this._value) : undefined; }  
-  private _min:any;
+  _min:any;
   get min():any { return this.initialized ? this.toFormat(this._min) : undefined; }
-  private _max:any;
+  _max:any;
   get max():any { return this.initialized ? this.toFormat(this._max) : undefined; }
   
   reset(){

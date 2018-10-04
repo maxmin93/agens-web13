@@ -30,7 +30,8 @@ declare var agens: any;
   templateUrl: './query-graph.component.html',
   styleUrls: ['./query-graph.component.scss','../../graph.component.scss'],
   host: {
-    '(document:keyup)': 'handleKeyboardEvent($event)'
+    '(document:keyup)': 'handleKeyUpEvent($event)',
+    '(document:keydown)': 'handleKeyDownEvent($event)'
   }
 })
 export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -39,6 +40,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = false;
   isTempGraph: boolean = false;
   canvasHover: boolean = false;
+  withShiftKey: boolean = false;
 
   selectedOption: string = undefined;
   btnStatus: any = { 
@@ -154,7 +156,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.metaGraph = metaGraph;
   }
 
-  handleKeyboardEvent(event: KeyboardEvent) { 
+  handleKeyUpEvent(event: KeyboardEvent) { 
     let charCode = String.fromCharCode(event.which).toLowerCase();
     if (this.canvasHover && event.ctrlKey) {
       console.log( 'keyPress: Ctrl + '+charCode, this.canvasHover );
@@ -169,6 +171,15 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       else if( charCode == "v" ){
         this.ur.do('paste');
       } 
+    }
+    if (!event.shiftKey) {
+      this.withShiftKey = false;    // multi selection 해제
+    }
+  }
+
+  handleKeyDownEvent(event: KeyboardEvent) { 
+    if (event.shiftKey) {
+      this.withShiftKey = true;     // multi selection 가능
     }
   }
 
@@ -251,6 +262,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
       if( !allStatus ){
         this.selectedElement = target;
+        // **NOTE : click 에 의한 multi-selection 방지. But, shift 키 사용시 계속 선택
+        if( !this.withShiftKey ) this.cy.elements(':selected').unselect();
         // edge 일 경우, 연결된 nodes 까지 선택
         if( target.group() == 'edges' ){
           target.source().select();
@@ -893,7 +906,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /////////////////////////////////////////////////////////////////
-  // Label Style Setting Controllers
+  // Image Export : PNG
   /////////////////////////////////////////////////////////////////
   
   openImageExportDialog(){
@@ -910,6 +923,14 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       // agens.graph.exportImage 호출
       agens.graph.exportImage( result.filename, result.watermark );
     });
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Label Style Setting Controllers
+  /////////////////////////////////////////////////////////////////
+  
+  compareGraph(){
+
   }
 
 }
