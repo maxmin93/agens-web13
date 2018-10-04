@@ -172,8 +172,8 @@
           'min-zoomed-font-size': 5,  // not shown when less than this
           'text-opacity': 1,
           'transition-property': 'width, height, border-style, border-width, background-color, text-outline-color, color',
-          'transition-duration':'.3s',
-          'transition-timing-function': 'ease-out-cubic'
+          'transition-duration': '0.1s',
+          // 'transition-timing-function': 'ease-out-cubic'
         }}, {
         selector: 'node.clone',
         css: {
@@ -239,8 +239,8 @@
           'target-arrow-shape': 'triangle',
           'source-arrow-shape': 'none',
           'transition-property': 'width, target-arrow-color, line-color, source-arrow-color, color',
-          'transition-duration':'.3s',
-          'transition-timing-function': 'ease-out-cubic'
+          'transition-duration': '0.1s',
+          // 'transition-timing-function': 'ease-out-cubic'
         }}, {
         selector: 'edge.clone',
         css: {
@@ -337,23 +337,7 @@
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s'
         }},{
-        /// timeline shown
-        selector: '.timeline-shown',
-        css: {
-          'visibility': 'visible',
-          'transition-property': 'visibility',
-          'transition-duration': '0.2s'
-        }},{
-        /// timeline hidden
-        selector: '.timeline-hidden',
-        css: {
-          'visibility': 'hidden',
-          'transition-property': 'visibility',
-          'transition-duration': '0.4s'
-        }},
-
         // some style for the extension
-        {
         selector: '.eh-handle',
         css: {
           'background-color': 'red',

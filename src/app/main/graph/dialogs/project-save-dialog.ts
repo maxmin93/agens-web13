@@ -108,7 +108,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       update_dt: Date.now(),    // timestamp
       sql: '',
       graph_json: '{}',
-      // pic: null
+      image: null
     };
 
   @ViewChild('divGraphImage') divGraphImage: ElementRef;
@@ -120,8 +120,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<ProjectSaveDialog>,
     @Inject(MAT_DIALOG_DATA) public data: IProject
   ) { 
-    if( data.hasOwnProperty('cy') ) this.cy = data['cy'];
-    if( data.hasOwnProperty('project') ) this.project = data['project'];
+    if( data != null ) this.project = data;
   }
 
   ngOnInit() {
@@ -133,12 +132,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       projectDescription: this.projectDescriptionCtl
     });
 
-    // make snapshot image of GRAPH
-    let png64 = this.cy.png({ full : true });
-    this.divGraphImage.nativeElement.setAttribute("src", png64);
-    this.imgBlob = this.dataURItoBlob(png64);
-    console.log( 'byteString:', typeof this.imgBlob, this.imgBlob);
-    // this.project.pic = this.imgBlob;
+    this.divGraphImage.nativeElement.setAttribute("src", URL.createObjectURL(this.project.image));
 
     // prepare to call this.function from external javascript
     window['angularDialogRef'] = {
@@ -217,20 +211,5 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
         });
     }    
   }
-  
-  dataURItoBlob(png64:any):Blob {
-    // convert base64/URLEncoded data component to raw binary data held in a string
-    let byteString;
-    if (png64.split(',')[0].indexOf('base64') >= 0) {
-      byteString = atob(png64.split(',')[1]);
-    } else {
-      byteString = decodeURI(png64.split(',')[1]);
-    }
-    let mimeString = png64.split(',')[0].split(':')[1].split(';')[0];
-    let array = [];
-    for(var i = 0; i < byteString.length; i++) {
-      array.push(byteString.charCodeAt(i));
-    }
-    return new Blob([new Uint8Array(array)], {type: mimeString});
-  };  
+ 
 }

@@ -262,13 +262,19 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
       if( !allStatus ){
         this.selectedElement = target;
-        // **NOTE : click 에 의한 multi-selection 방지. But, shift 키 사용시 계속 선택
-        if( !this.withShiftKey ) this.cy.elements(':selected').unselect();
+        let selected = this.cy.elements(':selected').filter(x => x != target );
         // edge 일 경우, 연결된 nodes 까지 선택
         if( target.group() == 'edges' ){
-          target.source().select();
-          target.target().select();
+          let sourceV = target.source().select();
+          let targetV = target.target().select();
+          selected = selected.filter(x => x != sourceV && x != targetV );
         } 
+        // **NOTE : click 에 의한 multi-selection 방지. But, shift 키 사용시 계속 선택
+        if( !this.withShiftKey) {
+          Promise.resolve(null).then(()=>{
+            selected.unselect();
+          });
+        }
       }
     }
   }  

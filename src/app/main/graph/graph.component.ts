@@ -512,9 +512,13 @@ return path1, path2;
     this.currProject.sql = this.editor.getValue();
     this.currProject.graph_json = graph_json;
 
+    // make snapshot image of GRAPH
+    let png64 = this.queryGraph.cy.png({ full : true });
+    this.currProject.image = this._util.dataURItoBlob(png64);
+
     let dialogRef = this.dialog.open(ProjectSaveDialog, {
       width: '800px', height: 'auto',
-      data: { "cy": this.queryGraph.cy, "project": this.currProject }
+      data: this.currProject
     });
 
     dialogRef.afterClosed().subscribe(result => {

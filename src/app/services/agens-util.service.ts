@@ -366,6 +366,29 @@ export class AgensUtilService {
   public getColor(idx:number):any {
     return colorPallets[idx];
   }
+
+  /////////////////////////////////////////////////////////////////
+  // Common Utilities : Project save and load
+  /////////////////////////////////////////////////////////////////
+  
+  // convert png64 to Blob (byte array)
+  // ==> splice "data:image/png;base64," at head
+  public dataURItoBlob(png64:any):Blob {
+    // convert base64/URLEncoded data component to raw binary data held in a string
+    let byteString;
+    if (png64.split(',')[0].indexOf('base64') >= 0) {
+      byteString = atob(png64.split(',')[1]);
+    } else {
+      byteString = decodeURI(png64.split(',')[1]);
+    }
+    let mimeString = png64.split(',')[0].split(':')[1].split(';')[0];
+    let array = [];
+    for(var i = 0; i < byteString.length; i++) {
+      array.push(byteString.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], {type: mimeString});
+  };  
+
 }
 
 // { "bc": bg-color, "dc": border-color }
