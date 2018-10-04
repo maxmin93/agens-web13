@@ -71,7 +71,18 @@ return path1, path2;
   private resultMeta: IGraph = undefined;
   private resultTemp: IGraph = undefined;
 
-  currProject: IProject = undefined;
+  currProject: IProject =  <IProject>{
+    id: null,
+    userName: null,
+    userIp: null,
+    title: '',
+    description: '',
+    create_dt: Date.now(),    // timestamp
+    update_dt: Date.now(),    // timestamp
+    sql: '',
+    graph_json: '{}',
+    image: null
+  };
   currentTabIndex: number = 0;
 
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
@@ -237,7 +248,18 @@ return path1, path2;
     this.editor.setValue('');
 
     // 프로젝트 정보 지우고
-    this.currProject = undefined;
+    this.currProject = <IProject>{
+      id: null,
+      userName: null,
+      userIp: null,
+      title: '',
+      description: '',
+      create_dt: Date.now(),    // timestamp
+      update_dt: Date.now(),    // timestamp
+      sql: '',
+      graph_json: '{}',
+      image: null
+    };
 
     // util의 savePositions 지우고
     this._util.resetPositions();
@@ -485,7 +507,7 @@ return path1, path2;
           update_dt: Date.now(),    // timestamp
           sql: '',
           graph_json: '{}',
-          pic: null
+          image: null
         };
     this.currProject.sql = this.editor.getValue();
     this.currProject.graph_json = graph_json;
@@ -509,12 +531,12 @@ return path1, path2;
   openProjectOpenDialog(){
     let dialogRef = this.dialog.open(ProjectOpenDialog, {
       width: '800px', height: 'auto',
-      data: this.currProject
+      data: this.currProject            // **NOTE: dialog 에 undefined 를 전달하면 오류 발생 
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if( result === null ) return;
-      console.log('close ProjectOpenDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
+      if( !result ) return;
+      console.log('close(1) ProjectOpenDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // Project Open 위한 API 호출
       this.currProject = this.loadProject(<IProject>result);
 

@@ -24,5 +24,5 @@ export interface IProject {
   update_dt: number;    // timestamp
   sql: string;
   graph_json: string;
-  // pic?: Blob;
+  image?: Blob;
 };

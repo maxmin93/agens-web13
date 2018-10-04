@@ -18,7 +18,7 @@ declare var $:any;
 declare var agens:any;
 
 @Component({
-  selector: 'ab-project-save-dialog',
+  selector: 'app-project-save-dialog',
   template: `
 <h2 mat-dialog-title>
   Project Save<br/>
