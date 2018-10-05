@@ -59,6 +59,7 @@ export interface IGraphDto extends IResponseDto {
   // group == 'graph_dto'
 
   gid: number;
+  graph?: IGraph;
 }
 
 export interface IDoubleListDto extends IResponseDto {

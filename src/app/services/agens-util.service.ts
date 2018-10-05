@@ -18,9 +18,6 @@ export class AgensUtilService {
   colors: any[] = colorPallets;
 
   private positions: Map<string,any> = new Map();
-  private cy:any;               // current cy instance
-  private ur:any;               // undoRedo instance
-  private ids = new Map<string,string>();
 
   constructor() { 
   }
@@ -116,116 +113,10 @@ export class AgensUtilService {
     return remains;
   }
 
-  /////////////////////////////////////////////////////////////////
-  // Graph Copy/Cut, Paste
-  /////////////////////////////////////////////////////////////////
-  
-  initUndoRedo(cy):any{
-    if( !cy || !cy.undoRedo ) return undefined;
-    this.cy = cy;
-    this.ur = cy.undoRedo({}, true);
-    this.ur.clipboard = {};
-
-    // register actions
-    this.ur.action('copy',      // actionName
-      (eles:any) => {           // do Func
-        this.cyCopy(eles);
-      },
-      (eles:any) => {           // undo Func
-        this.ur.clipboard = {};
-      });
-    this.ur.action('cut',      // actionName
-      (eles:any) => {           // do Func
-        this.cyCopy(eles);
-        // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
-        this.ur.clipboard['removed'] = eles.remove();
-      },
-      () => {           // undo Func
-        if( this.ur.clipboard['removed'] ){
-          this.ur.clipboard['removed'].restore();
-          this.ur.clipboard['removed'] = undefined;
-        } 
-      });
-    this.ur.action('paste',     // actionName
-      () => {           // do Func
-        if( !this.ur.clipboard['nodes'] || !this.ur.clipboard['edges'] ) return;
-
-        let eles = this.cy.collection();
-        // **NOTE: nodes 는 id만 변경, 
-        //         edges 는 id 외에도 source와 target 변경
-        let nodes = this.ur.clipboard['nodes'].map(e => {
-          let x = _.cloneDeep(e);
-          let newId = this.cyUUID(); 
-          this.ids.set( x.data.id, newId);   
-          x.data.id = newId;      // new ID : random string
-          x.position.x += 70;     // 우측 상단
-          x.position.y -= 20;     // 우측 상단
-          return this.cy.add(x);
-        });
-        nodes.forEach( e => eles = eles.add( e ) );
-        let edges = this.ur.clipboard['edges'].map(e => {
-          let x = _.cloneDeep(e);
-          let newId = this.cyUUID(); 
-          this.ids.set( x.data.id, newId);
-          x.data.id = newId;      // new ID : random string
-          x.data.source = this.ids.get(x.data.source);
-          x.data.target = this.ids.get(x.data.target);
-          return this.cy.add(x);
-        });
-        edges.forEach( e => eles = eles.add( e ) );
-        this.ur.clipboard['pasted'] = eles;
-        console.log('cyPaste.do:', this.ur.clipboard);
-      },
-      () => {           // undo Func
-        console.log('cyPaste.undo:', this.ur.clipboard);
-        if( this.ur.clipboard['pasted'] ){
-          this.ur.clipboard['pasted'].remove();
-          this.ur.clipboard['pasted'] = undefined;
-        } 
-      });
-
-    return this.ur;
-  }
-
-  cyUUID(length:number=12):string{
-    let chars = "abcdefghijklmnopqrstufwxyzABCDEFGHIJKLMNOPQRSTUFWXYZ1234567890"
-    let newId = (_.sampleSize(chars, length || 12)).join('');   // lodash v4
-    let exists = Array.from(this.ids.values());
-    while( exists.includes(newId) ){
-      newId = (_.sampleSize(chars, length || 12)).join('');     // again
-    }
-    return newId;
-  }
-
-  cyCopy(eles:any){
-    eles.unselect();
-    let descs = eles.nodes().descendants();
-    let nodes = eles.nodes().union(descs).filter(":visible");
-    let edges = nodes.edgesWith(nodes).filter(":visible");
-
-    // **NOTE: clone() 사용시 scratch{} 내용이 복사되지 않음
-    let nodes_json = nodes.map( e => {
-      let obj = e.json();
-      obj.scratch = _.cloneDeep(e._private.scratch);
-      obj.position = _.clone(e._private.position);
-      obj.classes = 'clone';
-      return obj;
-    });
-    this.ur.clipboard['nodes'] = nodes_json;
-    let edges_json = edges.map( e => {
-      let obj = e.json();
-      obj.scratch = _.cloneDeep(e._private.scratch);
-      obj.position = {};
-      obj.classes = 'clone';
-      return obj;
-    });
-    this.ur.clipboard['edges'] = edges_json;
-  }
-
   // 나타나는 위치가 헷갈림. 안쓰기로 함!
-  cyPositionDiff(eles:any){
+  cyPositionDiff(cy:any, eles:any){
     let extent = eles.nodes().boundingBox();
-    let wholeExtent = this.cy.nodes().boundingBox();
+    let wholeExtent = cy.nodes().boundingBox();
     let center = { x: (wholeExtent.x1 + wholeExtent.x2)/2, y: (wholeExtent.y1 + wholeExtent.y2)/2 };
     let posDiff = { x: 100, y: 100 };
 

@@ -135,7 +135,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // cy undoRedo initialization
-    this.ur = this._util.initUndoRedo(this.cy);
+    this.ur = this.initUndoRedo(this.cy, this.gid);
   }
 
   setData(dataGraph:IGraph){
@@ -156,6 +156,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.metaGraph = metaGraph;
   }
 
+  // ** Copy/Cut/Paste: Ctrl+C, +X, Ctrl+V
   handleKeyUpEvent(event: KeyboardEvent) { 
     let charCode = String.fromCharCode(event.which).toLowerCase();
     if (this.canvasHover && event.ctrlKey) {
@@ -166,10 +167,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       else if( charCode == "a" ) { 
         this.cy.elements(":visible").select(); event.preventDefault(); 
       }
-      else if( charCode == "c" ) this.ur.do('copy', this.cy.elements(":selected"));
-      else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"));
+      else if( charCode == "c" ) this.ur.do('copy', this.cy.elements(":selected"), this.gid);
+      else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"), this.updateGraph);
       else if( charCode == "v" ){
-        this.ur.do('paste');
+        this.ur.do('paste', this.updateGraph);
       } 
     }
     if (!event.shiftKey) {
@@ -182,6 +183,129 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.withShiftKey = true;     // multi selection 가능
     }
   }
+
+  /////////////////////////////////////////////////////////////////
+  // Copy/Cut/Paste : TinkerGraph sync
+  /////////////////////////////////////////////////////////////////
+
+  updateGraph(oper:string, nodes:any[], edges:any[]){
+    console.log('updateGraph:', this.gid, oper, nodes, edges);
+  }
+
+  initUndoRedo(cy, gid):any{
+    if( !cy || !cy.undoRedo ) return undefined;
+
+    let ur = cy.undoRedo({}, true);
+    ur.clipboard = {};
+    ur.ids = new Map<string,string>();    // element's id Mapper for paste
+
+    ur.newId = function(length:number=12):string{
+      let chars = "abcdefghijklmnopqrstufwxyzABCDEFGHIJKLMNOPQRSTUFWXYZ1234567890"
+      let newId = (_.sampleSize(chars, length || 12)).join('');   // lodash v4
+      let exists = Array.from(ur.ids.values());
+      while( exists.includes(newId) ){
+        newId = (_.sampleSize(chars, length || 12)).join('');     // again
+      }
+      return newId;
+    }
+  
+    ur.copy2cb = function(eles:any){
+      eles.unselect();
+      let descs = eles.nodes().descendants();
+      let nodes = eles.nodes().union(descs).filter(":visible");
+      let edges = nodes.edgesWith(nodes).filter(":visible");
+  
+      // **NOTE: clone() 사용시 scratch{} 내용이 복사되지 않음
+      let nodes_json = nodes.map( e => {
+        let obj = e.json();
+        obj.scratch = _.cloneDeep(e._private.scratch);
+        obj.position = _.clone(e._private.position);
+        obj.classes = 'clone';
+        return obj;
+      });
+      ur.clipboard['nodes'] = nodes_json;
+      let edges_json = edges.map( e => {
+        let obj = e.json();
+        obj.scratch = _.cloneDeep(e._private.scratch);
+        obj.position = {};
+        obj.classes = 'clone';
+        return obj;
+      });
+      ur.clipboard['edges'] = edges_json;
+    }
+  
+    // register actions
+    ur.action('copy',      // actionName
+      (eles:any) => {           // do Func
+        ur.copy2cb(eles);
+      },
+      (eles:any) => {           // undo Func
+        ur.clipboard = {};
+      });
+
+    ur.action('cut',      // actionName
+      (eles:any) => {           // do Func
+        ur.copy2cb(eles);
+        // TinkerGraph update::delete
+        this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
+        // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
+        ur.clipboard['removed'] = eles.remove();
+      },
+      () => {           // undo Func
+        // TinkerGraph update::upsert
+        this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
+        // restore removed elements
+        if( ur.clipboard['removed'] ){
+          ur.clipboard['removed'].restore();
+          ur.clipboard['removed'] = undefined;
+        } 
+      });
+
+    ur.action('paste',     // actionName
+      () => {           // do Func
+        if( !ur.clipboard['nodes'] || !ur.clipboard['edges'] ) return;
+        // TinkerGraph update::upsert
+        this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
+
+        let eles = cy.collection();
+        // **NOTE: nodes 는 id만 변경, 
+        //         edges 는 id 외에도 source와 target 변경
+        let nodes = ur.clipboard['nodes'].map(e => {
+          let x = _.cloneDeep(e);
+          let newId = ur.newId();
+          ur.ids.set( x.data.id, newId);   
+          x.data.id = newId;      // new ID : random string
+          x.position.x += 70;     // 우측 상단
+          x.position.y -= 20;     // 우측 상단
+          return cy.add(x);
+        });
+        nodes.forEach( e => eles = eles.add( e ) );
+        let edges = ur.clipboard['edges'].map(e => {
+          let x = _.cloneDeep(e);
+          let newId = ur.newId(); 
+          ur.ids.set( x.data.id, newId);
+          x.data.id = newId;      // new ID : random string
+          x.data.source = ur.ids.get(x.data.source);
+          x.data.target = ur.ids.get(x.data.target);
+          return cy.add(x);
+        });
+        edges.forEach( e => eles = eles.add( e ) );
+        ur.clipboard['pasted'] = eles;
+        console.log('cyPaste.do:', ur.clipboard);
+      },
+      () => {           // undo Func
+        // TinkerGraph update::delete
+        this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
+        console.log('cyPaste.undo:', ur.clipboard);
+        if( ur.clipboard['pasted'] ){
+          ur.clipboard['pasted'].remove();
+          ur.clipboard['pasted'] = undefined;
+        } 
+      });
+
+    return ur;
+  }
+
 
   /////////////////////////////////////////////////////////////////
   // Style Controllers

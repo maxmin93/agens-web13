@@ -293,6 +293,11 @@ export class AgensDataService {
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
+  grph_update(gid:number, oper:string, data:IGraphDto):Observable<IResponseDto> {    
+    const url = `${this.api.grph}/update/${gid}/${oper}`;   // oper : 'delete' | 'upsert'
+    return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()});
+  }
+
   grph_groupBy(gid:number, list:any[]):Observable<any> {
     if( list.length == 0 ) return empty();
     let label:string = list[0]['label'];
