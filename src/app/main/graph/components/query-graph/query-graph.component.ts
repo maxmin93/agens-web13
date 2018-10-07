@@ -14,7 +14,7 @@ import { AgensUtilService } from '../../../../services/agens-util.service';
 import { AgensGraphService } from '../../../../services/agens-graph.service';
 
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd, IProperty } from '../../../../models/agens-data-types';
-import { IGraphDto, IDoubleListDto } from '../../../../models/agens-response-types';
+import { IGraphDto, IDoubleListDto, IResponseDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../app.config';
 import { FormControl } from '@angular/forms';
@@ -189,7 +189,24 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   updateGraph(oper:string, nodes:any[], edges:any[]){
-    console.log('updateGraph:', this.gid, oper, nodes, edges);
+    let data:any = { gid: this.gid, graph: { labels: [],
+      nodes: nodes.map(x => { 
+        return { "type": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
+                  "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
+      edges: edges.map(x => { 
+        return { "type": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
+                  "source": x.data.source, "target": x.data.target, "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
+    }};
+    this._api.grph_update(this.gid, oper, data).subscribe(
+      x => {
+        // console.log( 'grph_update:', this.gid, oper, x );
+        this._api.setResponses(<IResponseDto>{
+          group: 'update::'+oper,
+          state: x.state,
+          message: (<string>x.message).replace('tinkergraph','')
+        });        
+      }
+    );
   }
 
   initUndoRedo(cy, gid):any{

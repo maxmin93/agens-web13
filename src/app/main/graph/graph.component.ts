@@ -474,6 +474,12 @@ return path1, path2;
   // Dailog Controllers
   /////////////////////////////////////////////////////////////////
 
+  // ** SAVE 전략
+  // 1) tinkerGraph 에 position과 style 데이터 전송 (updateGraph)
+  // 1-1) props 에 '$$style'과 '$$position' 으로 저장
+  // 2) tinkerGraph 에서 writeGraph 로 graphson 출력
+  // 3) project table 에 graph_json 에 저장
+
   openProjectSaveDialog(){
 
     if( !this.resultGraph ){

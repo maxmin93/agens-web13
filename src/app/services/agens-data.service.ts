@@ -293,7 +293,7 @@ export class AgensDataService {
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
-  grph_update(gid:number, oper:string, data:IGraphDto):Observable<IResponseDto> {    
+  grph_update(gid:number, oper:string, data:any):Observable<any> {    
     const url = `${this.api.grph}/update/${gid}/${oper}`;   // oper : 'delete' | 'upsert'
     return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()});
   }

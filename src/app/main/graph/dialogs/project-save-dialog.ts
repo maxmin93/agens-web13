@@ -108,12 +108,13 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       update_dt: Date.now(),    // timestamp
       sql: '',
       graph_json: '{}',
+      styles_json: '{}',
+      positions_json: '{}',
       image: null
     };
 
   @ViewChild('divGraphImage') divGraphImage: ElementRef;
   constructor(
-    private _http: HttpClient,
     private _api: AgensDataService,
     private _ngZone: NgZone,
     public _snackBar: MatSnackBar,

@@ -23,6 +23,8 @@ export interface IProject {
   create_dt: number;    // timestamp
   update_dt: number;    // timestamp
   sql: string;
-  graph_json: string;
+  graph_json?: string;    // <== tinkerGraph 에서 직접 저장/로딩 (empty)
+  styles_json: string;    // [{ <id>: <style> }, ..]      list of label's style
+  positions_json: string; // [{ <id>: <position> }, ..]   list of element's position
   image?: Blob;
 };
