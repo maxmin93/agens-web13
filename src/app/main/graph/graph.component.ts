@@ -514,6 +514,8 @@ return path1, path2;
     // this.currProject.graph_json = graph_json;
 
     // make snapshot image of GRAPH
+    // 참고 https://stackoverflow.com/questions/24218382/how-to-upload-encoded-base64-image-to-the-server-using-spring
+    
     let png64 = this.queryGraph.cy.png({ full : true });
     let imageBlob = this._util.dataURItoBlob(png64);
 
