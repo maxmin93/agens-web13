@@ -257,7 +257,7 @@ export class AgensDataService {
 
   mngr_project_save(project:IProject):Observable<IProject> {
     const url = `${this.api.mngr}/projects/save`;
-    return this._http.post<IProject>(url, JSON.stringify(project), { headers: this.createAuthorizationHeader() });
+    return this._http.post<IProject>(url, project, { headers: this.createAuthorizationHeader() });
   }
 
   mngr_project_delete(id):Observable<IProject> {
@@ -296,6 +296,27 @@ export class AgensDataService {
   grph_update(gid:number, oper:string, data:any):Observable<any> {    
     const url = `${this.api.grph}/update/${gid}/${oper}`;   // oper : 'delete' | 'upsert'
     return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()});
+  }
+
+  grph_save(gid:number, data:any):Observable<any> {    
+    const url = `${this.api.grph}/save/${gid}`;
+    return this._http.post<any>(url, data, 
+      // {headers: this.createAuthorizationHeader()}
+      { headers: new HttpHeaders({ 'Authorization': this.getSSID() }) }
+    );
+/*
+    const formData: FormData = new FormData();
+
+    formData.append('project', data);
+    formData.append('image', imgBlob);
+  
+    const req = new HttpRequest('POST', url, formData, {
+      // **NOTE: 이거 필요 없음! 오류만 발생함 ==> 'Content-Type': 'multipart/form-data'
+      headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
+      reportProgress: false // for progress data
+    });
+    return this._http.request(req);  
+*/    
   }
 
   grph_groupBy(gid:number, list:any[]):Observable<any> {

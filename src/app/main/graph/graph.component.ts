@@ -72,7 +72,7 @@ return path1, path2;
   private resultTemp: IGraph = undefined;
 
   currProject: IProject =  <IProject>{
-    id: null,
+    pid: null,
     userName: null,
     userIp: null,
     title: '',
@@ -80,7 +80,7 @@ return path1, path2;
     create_dt: Date.now(),    // timestamp
     update_dt: Date.now(),    // timestamp
     sql: '',
-    graph_json: '{}',
+    graph: null,
     image: null
   };
   currentTabIndex: number = 0;
@@ -249,7 +249,7 @@ return path1, path2;
 
     // 프로젝트 정보 지우고
     this.currProject = <IProject>{
-      id: null,
+      pid: null,
       userName: null,
       userIp: null,
       title: '',
@@ -257,7 +257,7 @@ return path1, path2;
       create_dt: Date.now(),    // timestamp
       update_dt: Date.now(),    // timestamp
       sql: '',
-      graph_json: '{}',
+      graph: null,
       image: null
     };
 
@@ -471,7 +471,7 @@ return path1, path2;
   }
 
   /////////////////////////////////////////////////////////////////
-  // Dailog Controllers
+  // Project save, load
   /////////////////////////////////////////////////////////////////
 
   // ** SAVE 전략
@@ -504,27 +504,22 @@ return path1, path2;
     }
 
     if( !this.currProject ) this.currProject = <IProject>{
-          id: null,
-          userName: null,
-          userIp: null,
+          pid: null,
           title: '',
           description: '',
-          create_dt: Date.now(),    // timestamp
-          update_dt: Date.now(),    // timestamp
           sql: '',
-          graph_json: '{}',
-          image: null
+          graph: null
         };
     this.currProject.sql = this.editor.getValue();
-    this.currProject.graph_json = graph_json;
+    // this.currProject.graph_json = graph_json;
 
     // make snapshot image of GRAPH
     let png64 = this.queryGraph.cy.png({ full : true });
-    this.currProject.image = this._util.dataURItoBlob(png64);
+    let imageBlob = this._util.dataURItoBlob(png64);
 
     let dialogRef = this.dialog.open(ProjectSaveDialog, {
       width: '800px', height: 'auto',
-      data: this.currProject
+      data: { "gid": this.queryGraph.gid, "cy": this.queryGraph.cy, "project": this.currProject, "image": imageBlob }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -537,6 +532,10 @@ return path1, path2;
       this._cd.detectChanges();
     });
   }
+
+  /////////////////////////////////////////////////////////////////
+  // Project load
+  /////////////////////////////////////////////////////////////////
 
   openProjectOpenDialog(){
     let dialogRef = this.dialog.open(ProjectOpenDialog, {
@@ -562,18 +561,18 @@ return path1, path2;
     this.editor.setValue(data.sql);
     let graphData:any = null;
 
-    // json data parse
-    try {
-      graphData = JSON.parse( data.graph_json );
-    } 
-    catch(ex) {
-      console.log('graph_json parse error =>', ex);
-      this._api.setResponses(<IResponseDto>{
-        group: 'project::load',
-        state: StateType.ERROR,
-        message: 'JSON parse error on loading project'
-      });
-    }
+    // // json data parse
+    // try {
+    //   graphData = JSON.parse( data.graph_json );
+    // } 
+    // catch(ex) {
+    //   console.log('graph_json parse error =>', ex);
+    //   this._api.setResponses(<IResponseDto>{
+    //     group: 'project::load',
+    //     state: StateType.ERROR,
+    //     message: 'JSON parse error on loading project'
+    //   });
+    // }
 
     // load graph
     // ...

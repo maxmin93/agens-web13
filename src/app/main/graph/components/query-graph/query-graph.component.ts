@@ -191,10 +191,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   updateGraph(oper:string, nodes:any[], edges:any[]){
     let data:any = { gid: this.gid, graph: { labels: [],
       nodes: nodes.map(x => { 
-        return { "type": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
+        return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
                   "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
       edges: edges.map(x => { 
-        return { "type": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
+        return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
                   "source": x.data.source, "target": x.data.target, "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
     }};
     this._api.grph_update(this.gid, oper, data).subscribe(
@@ -308,12 +308,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         edges.forEach( e => eles = eles.add( e ) );
         ur.clipboard['pasted'] = eles;
-        console.log('cyPaste.do:', ur.clipboard);
       },
       () => {           // undo Func
         // TinkerGraph update::delete
         this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
-        console.log('cyPaste.undo:', ur.clipboard);
         if( ur.clipboard['pasted'] ){
           ur.clipboard['pasted'].remove();
           ur.clipboard['pasted'] = undefined;

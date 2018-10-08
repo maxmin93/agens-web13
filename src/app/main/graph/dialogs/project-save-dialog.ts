@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material';
 
 import * as CONFIG from '../../../app.config';
 import { IProject } from '../../../models/agens-manager-types';
+import { IResponseDto } from '../../../models/agens-response-types';
 
 // services
 import { AgensDataService } from '../../../services/agens-data.service';
@@ -31,7 +32,7 @@ declare var agens:any;
   <div class="example-container">
 
     <mat-form-field class="example-full-width">
-      <input matInput name="projectId" value="{{project.id}}" placeholder="ID" disabled>
+      <input matInput name="projectId" value="{{project.pid}}" placeholder="ID" readonly="true" >
     </mat-form-field>
 
     <mat-form-field class="example-full-width">
@@ -87,9 +88,10 @@ styles: [`
 export class ProjectSaveDialog implements OnInit, OnDestroy {
 
   // 로딩 상태
-  private isLoading:boolean = false;
-  private cy:any;
-  imgBlob:Blob;
+  private isLoading: boolean = false;
+  private gid: number;
+  private cy: any;
+  imgBlob: Blob;
 
   projectForm: FormGroup;
   projectTitleCtl: FormControl;
@@ -99,18 +101,12 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
   MAX_DESCRIPTION_SIZE: number = 900;
 
   project: IProject = {
-      id: null,
-      userName: null,
-      userIp: null,
+      pid: null,
       title: '',
       description: '',
-      create_dt: Date.now(),    // timestamp
-      update_dt: Date.now(),    // timestamp
       sql: '',
-      graph_json: '{}',
-      styles_json: '{}',
-      positions_json: '{}',
-      image: null
+      graph: null,
+      // image: null
     };
 
   @ViewChild('divGraphImage') divGraphImage: ElementRef;
@@ -119,9 +115,14 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     private _ngZone: NgZone,
     public _snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<ProjectSaveDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: IProject
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) { 
-    if( data != null ) this.project = data;
+    if( data != null ){
+      if( data['project'] ) this.project = data['project'];
+      if( data['cy'] ) this.cy = data['cy'];
+      if( data['gid'] ) this.gid = data['gid'];
+      if( data['image'] ) this.imgBlob = data['image'];
+    }
   }
 
   ngOnInit() {
@@ -133,7 +134,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       projectDescription: this.projectDescriptionCtl
     });
 
-    this.divGraphImage.nativeElement.setAttribute("src", URL.createObjectURL(this.project.image));
+    this.divGraphImage.nativeElement.setAttribute("src", URL.createObjectURL(this.imgBlob));
 
     // prepare to call this.function from external javascript
     window['angularDialogRef'] = {
@@ -153,7 +154,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     this.project.description = this.projectDescriptionCtl.value;
 
     // project overwrite 인 경우에 한번 더 confirm : jquery dialog
-    if( this.project.id !== null ){
+    if( this.project.pid !== null ){
       $( function() {
         $( "#confirm-project-overwrite" ).dialog({
           resizable: false,
@@ -200,17 +201,64 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
   saveProject() {    
     // 이상 없으면 입력값 리턴
     if( this.projectForm.valid ){
-
-      this._api.mngr_project_save(this.project)
-      .subscribe(
-        data => {
-          // this.openSnackBar(`project[${data.id}] was saved`, 'DONE');
-          this.dialogRef.close(<IProject>data);
-        },
-        err => {
-          this.dialogRef.close(<IProject>null);
-        });
+      this.updateVariables();
+      // this._api.mngr_project_save(this.project)
+      // .subscribe(
+      //   data => {
+      //     // this.openSnackBar(`project[${data.id}] was saved`, 'DONE');
+      //     this.dialogRef.close(<IProject>data);
+      //   },
+      //   err => {
+      //     this.dialogRef.close(<IProject>null);
+      //   });
     }    
   }
- 
+
+  // **NOTE: 저장될 특수 변수들
+  // ele.scratch('_style') => props['$$style'] = { color, width, title }
+  // ele.position() => props['$$position'] = { x, y }
+  // ele.classes => props['$$classes'] = '<class> ..'
+  updateVariables(){
+    let nodes = this.cy.nodes().map(e => {
+      let x = e.json();
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props };
+      if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
+      if( x.classes ) data['props']['$$classes'] = x.classes;
+      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
+      return data;
+    });
+    let edges = this.cy.edges().map(e => {
+      let x = e.json();
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props, 
+                  "source": x.data.source, "target": x.data.target };
+      if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
+      if( x.classes ) data['props']['$$classes'] = x.classes;
+      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
+      return data;
+    });
+    let data = {
+      "pid": (this.project.pid && this.project.pid > 0) ? this.project.pid : null,
+      "title": this.project.title,
+      "descrption": this.project.description,
+      "sql": this.project.sql,
+      "graph": { "labels": [], "nodes": nodes, "edges": edges },
+      "image": this.imgBlob
+    };
+    console.log( 'ProjectSaveDialog:', data );
+
+    this._api.grph_save(this.gid, data).subscribe(
+      x => {
+        console.log( 'grph_save:', this.gid, 'save', x );
+        if( x.hasOwnProperty('id') ){
+          this.project.pid = x.id;
+          this._api.setResponses(<IResponseDto>{
+            group: 'save',
+            state: 'SUCCESS',
+            message: `project (id=${x.id}) is saved`
+          });        
+        }
+      }
+    );
+
+  }
 }

@@ -269,6 +269,7 @@ export class AgensUtilService {
     let byteString;
     if (png64.split(',')[0].indexOf('base64') >= 0) {
       byteString = atob(png64.split(',')[1]);
+      console.log( '==>', png64.split(',')[1], byteString );
     } else {
       byteString = decodeURI(png64.split(',')[1]);
     }
