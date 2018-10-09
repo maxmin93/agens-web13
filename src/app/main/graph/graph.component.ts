@@ -72,13 +72,9 @@ return path1, path2;
   private resultTemp: IGraph = undefined;
 
   currProject: IProject =  <IProject>{
-    pid: null,
-    userName: null,
-    userIp: null,
+    id: null,
     title: '',
     description: '',
-    create_dt: Date.now(),    // timestamp
-    update_dt: Date.now(),    // timestamp
     sql: '',
     graph: null,
     image: null
@@ -249,13 +245,9 @@ return path1, path2;
 
     // 프로젝트 정보 지우고
     this.currProject = <IProject>{
-      pid: null,
-      userName: null,
-      userIp: null,
+      id: null,
       title: '',
       description: '',
-      create_dt: Date.now(),    // timestamp
-      update_dt: Date.now(),    // timestamp
       sql: '',
       graph: null,
       image: null
@@ -503,30 +495,49 @@ return path1, path2;
       return;
     }
 
-    if( !this.currProject ) this.currProject = <IProject>{
-          pid: null,
-          title: '',
-          description: '',
-          sql: '',
-          graph: null
-        };
+    // update all graph (without data) : style, classes, position
+
+    // **NOTE: 저장될 특수 변수들
+    // ele.scratch('_style') => props['$$style'] = { color, width, title }
+    // ele.position() => props['$$position'] = { x, y }
+    // ele.classes => props['$$classes'] = '<class> ..'
+
+    let nodes = this.queryGraph.cy.nodes().map(e => {
+      let x = e.json();
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "props": {} };
+      if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
+      if( x.classes ) data['props']['$$classes'] = x.classes;
+      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
+      return data;
+    });
+    let edges = this.queryGraph.cy.edges().map(e => {
+      let x = e.json();
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "props": {}, 
+                   "source": x.data.source, "target": x.data.target };
+      // edge는 position 정보가 없음
+      if( x.classes ) data['props']['$$classes'] = x.classes;
+      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
+      return data;
+    });
+
     this.currProject.sql = this.editor.getValue();
-    // this.currProject.graph_json = graph_json;
+    this.currProject.graph = { "labels": [], "nodes": nodes, "edges": edges };
+    this.currProject.image = this.queryGraph.cy.png({ full: true, scale: 0.2, maxWidth:100, maxHeight:100 });
 
     // make snapshot image of GRAPH
     // 참고 https://stackoverflow.com/questions/24218382/how-to-upload-encoded-base64-image-to-the-server-using-spring
-    
-    let png64 = this.queryGraph.cy.png({ full : true });
-    let imageBlob = this._util.dataURItoBlob(png64);
+
+    // let png64 = this.queryGraph.cy.png({ full : true });
+    // let imageBlob = this._util.dataURItoBlob(png64);
 
     let dialogRef = this.dialog.open(ProjectSaveDialog, {
       width: '800px', height: 'auto',
-      data: { "gid": this.queryGraph.gid, "cy": this.queryGraph.cy, "project": this.currProject, "image": imageBlob }
+      data: { "gid": this.queryGraph.gid, "project": this.currProject }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if( result === null ) return;
-      console.log('close ProjectSaveDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
+      console.log('close ProjectSaveDialog:', result.id, result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // saved Project
       this.currProject = result;
 
@@ -547,7 +558,7 @@ return path1, path2;
 
     dialogRef.afterClosed().subscribe(result => {
       if( !result ) return;
-      console.log('close(1) ProjectOpenDialog:', result.hasOwnProperty('title') ? result['title'] : '(undefined)');
+      console.log('ProjectOpenDialog:', result.id, result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // Project Open 위한 API 호출
       this.currProject = this.loadProject(<IProject>result);
 

@@ -40,50 +40,55 @@ declare var $:any;
 
     <div class="wrapped-box-flex">
 
-    <ngx-datatable #projectsTable class='material' [columnMode]="'flex'"
+    <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
       [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
       [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
       (activate)="onActivateTableLabels($event)">
 
         <ngx-datatable-row-detail [rowHeight]="'auto'" #projectRow (toggle)="onRowDetailToggle($event)">
-        <ng-template let-row="row" ngx-datatable-row-detail-template>
-          <div>
+          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
             <div class="span__row-detail-content">
-              <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row[row._selectedColumn] }}</span>
+              <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.descriptiion }}</span>
             </div>
-          </div>
-        </ng-template>
+          </ng-template>
         </ngx-datatable-row-detail>
 
-        <ngx-datatable-column name="ID" [flexGrow]="1">
+        <!-- Column Templates -->
+        <ngx-datatable-column [width]="60" 
+              [resizeable]="false" [sortable]="false" [draggable]="false" [canAutoResize]="false">
+          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+            <a href="javascript:void(0)"
+              [class.datatable-icon-right]="!expanded" [class.datatable-icon-down]="expanded"
+              title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
+            </a>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="ID" [width]="60" >
           <ng-template let-row="row" ngx-datatable-cell-template>
             <strong><a (click)="onSubmit(row.id)">{{row.id}}</a></strong>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Title" [flexGrow]="4">
+        <ngx-datatable-column name="Title" [minWidth]="200">
           <ng-template let-row="row" ngx-datatable-cell-template>
-            <button *ngIf="row.description" mat-icon-button matTooltip="Expand/Collapse Row"
-                (click)="toggleLogExpandRow(row, 'description')">
-              <i [class.datatable-icon-right]="!row.$$expanded" [class.datatable-icon-down]="row.$$expanded"></i>
-            </button>
             <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row.id)">{{row.title}}</a></span>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [flexGrow]="2">
+        <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="120" >
           <ng-template let-row="row" ngx-datatable-cell-template>
-            <span>{{ row.create_dt | date:'yyyy-MM-dd HH:mm' }}</span>
+            <span>{{ row.create_dt | date:'MM/dd HH:mm' }}</span>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [flexGrow]="2">
+        <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="120" >
           <ng-template let-row="row" ngx-datatable-cell-template>
-            <span>{{ row.update_dt | date:'yyyy-MM-dd HH:mm' }}</span>
+            <span>{{ row.update_dt | date:'MM/dd HH:mm' }}</span>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Remove" [sortable]="false" [flexGrow]="1">
+        <ngx-datatable-column name="Remove" [sortable]="false" [width]="80">
           <ng-template let-row="row" ngx-datatable-cell-template>
             <a (click)="deleteProjectAfterConfirm(row)" mdTooltip="Delete" mdTooltipPosition="before">
                 <mat-icon>delete</mat-icon>
@@ -171,6 +176,7 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   // call API: manager/logs  
   loadProjects( message_out:boolean = true ){
 
+    this.tmpRows = [];
     this.projectRows = [];
 
     this._api.mngr_projects_list().pipe( concatAll() )
@@ -184,16 +190,14 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
       () => {
         // cache our list
         this.projectRows = [...this.tmpRows];
-        console.log('mngr_projects_list', this.projectRows);
+        console.log('projects_list:', this.projectRows);
         // this._angulartics2.eventTrack.next({ action: 'listProjects', properties: { category: 'graph', label: data.length }});
         this._cd.detectChanges();
       });    
   }
 
   // Table page event
-  toggleLogExpandRow(row, col) {
-    // console.log('Toggled Expand Row!', col);
-    row._selectedColumn = col;
+  toggleExpandRow(row) {
     this.projectsTable.rowDetail.toggleExpandRow(row);
   }
 
@@ -221,6 +225,12 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   }  
 
   deleteProjectAfterConfirm(row){
+
+    if( confirm(`Are you sure to delete this project(id=${row.id})\n  ==> "${row.title}"`) ) {
+      this.deleteProject(row);
+    }
+/*    
+    // **NOTE: 이거 하나 쓰자고 jquery-ui 붙이는게 성능상 좋지않아 주석 처리 함! (2018-10-09)
     $( function() {
       $( "#confirm-project-delete" ).dialog({
         resizable: false,
@@ -239,12 +249,11 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
         }
       });
     } );  
+*/
   }
 
   deleteProject(row){
-
-    this._api.mngr_project_delete(row.id)
-    .subscribe(
+    this._api.mngr_project_delete(row.id).subscribe(
       data => {
       },
       (err:HttpErrorResponse) => {
@@ -253,9 +262,7 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
       () => {
         // reload
         this.loadProjects( false );
-
         // this._angulartics2.eventTrack.next({ action: 'deleteProject', properties: { category: 'graph', label: row.id }});
       });    
-
   }
 }

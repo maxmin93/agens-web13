@@ -16,7 +16,7 @@ export interface ILogs {
 
 export interface IProject {
 
-  pid: number;
+  id: number;
   userName?: string;
   userIp?: string;
   title: string;

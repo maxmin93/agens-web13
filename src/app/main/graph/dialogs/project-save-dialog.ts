@@ -28,11 +28,11 @@ declare var agens:any;
 <div mat-dialog-content>
   
   <form class="example-form" novalidate [formGroup]="projectForm">
-  <img #divGraphImage style="width: 400px;" />
+  <img #divGraphImage />
   <div class="example-container">
 
     <mat-form-field class="example-full-width">
-      <input matInput name="projectId" value="{{project.pid}}" placeholder="ID" readonly="true" >
+      <input matInput name="projectId" value="{{project.id}}" placeholder="ID" readonly="true" >
     </mat-form-field>
 
     <mat-form-field class="example-full-width">
@@ -101,7 +101,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
   MAX_DESCRIPTION_SIZE: number = 900;
 
   project: IProject = {
-      pid: null,
+      id: null,
       title: '',
       description: '',
       sql: '',
@@ -119,9 +119,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
   ) { 
     if( data != null ){
       if( data['project'] ) this.project = data['project'];
-      if( data['cy'] ) this.cy = data['cy'];
       if( data['gid'] ) this.gid = data['gid'];
-      if( data['image'] ) this.imgBlob = data['image'];
     }
   }
 
@@ -134,7 +132,8 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
       projectDescription: this.projectDescriptionCtl
     });
 
-    this.divGraphImage.nativeElement.setAttribute("src", URL.createObjectURL(this.imgBlob));
+    if( this.project.image )
+      this.divGraphImage.nativeElement.setAttribute("src", this.project.image);
 
     // prepare to call this.function from external javascript
     window['angularDialogRef'] = {
@@ -153,8 +152,12 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
     this.project.title = this.projectTitleCtl.value;
     this.project.description = this.projectDescriptionCtl.value;
 
-    // project overwrite 인 경우에 한번 더 confirm : jquery dialog
-    if( this.project.pid !== null ){
+    // project overwrite 인 경우에 한번 더 confirm
+    if( this.project.id !== null ){
+      if( confirm(`Are you sure to overwrite this project(id=${this.project.id})\n  ==> "${this.project.title}"`) )
+        this.saveProject();
+/*  
+      // **NOTE: 이거 하나 쓰자고 jquery-ui 붙이는게 성능상 좋지않아 주석 처리 함! (2018-10-09)
       $( function() {
         $( "#confirm-project-overwrite" ).dialog({
           resizable: false,
@@ -175,6 +178,7 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
           }
         });
       } );
+*/      
     }
     else{
       this.saveProject();
@@ -201,64 +205,17 @@ export class ProjectSaveDialog implements OnInit, OnDestroy {
   saveProject() {    
     // 이상 없으면 입력값 리턴
     if( this.projectForm.valid ){
-      this.updateVariables();
-      // this._api.mngr_project_save(this.project)
-      // .subscribe(
-      //   data => {
-      //     // this.openSnackBar(`project[${data.id}] was saved`, 'DONE');
-      //     this.dialogRef.close(<IProject>data);
-      //   },
-      //   err => {
-      //     this.dialogRef.close(<IProject>null);
-      //   });
+      // this._api.mngr_project_save(this.project).subscribe(
+      this._api.grph_save(this.gid, this.project).subscribe(
+        x => {
+          if( x.hasOwnProperty('id') )
+            this.openSnackBar(`project[${x.id}] was saved`, 'DONE');
+          this.dialogRef.close(<IProject>x);
+        },
+        err => {
+          this.dialogRef.close(<IProject>null);
+        });
     }    
   }
 
-  // **NOTE: 저장될 특수 변수들
-  // ele.scratch('_style') => props['$$style'] = { color, width, title }
-  // ele.position() => props['$$position'] = { x, y }
-  // ele.classes => props['$$classes'] = '<class> ..'
-  updateVariables(){
-    let nodes = this.cy.nodes().map(e => {
-      let x = e.json();
-      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props };
-      if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
-      if( x.classes ) data['props']['$$classes'] = x.classes;
-      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
-      return data;
-    });
-    let edges = this.cy.edges().map(e => {
-      let x = e.json();
-      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props, 
-                  "source": x.data.source, "target": x.data.target };
-      if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
-      if( x.classes ) data['props']['$$classes'] = x.classes;
-      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
-      return data;
-    });
-    let data = {
-      "pid": (this.project.pid && this.project.pid > 0) ? this.project.pid : null,
-      "title": this.project.title,
-      "descrption": this.project.description,
-      "sql": this.project.sql,
-      "graph": { "labels": [], "nodes": nodes, "edges": edges },
-      "image": this.imgBlob
-    };
-    console.log( 'ProjectSaveDialog:', data );
-
-    this._api.grph_save(this.gid, data).subscribe(
-      x => {
-        console.log( 'grph_save:', this.gid, 'save', x );
-        if( x.hasOwnProperty('id') ){
-          this.project.pid = x.id;
-          this._api.setResponses(<IResponseDto>{
-            group: 'save',
-            state: 'SUCCESS',
-            message: `project (id=${x.id}) is saved`
-          });        
-        }
-      }
-    );
-
-  }
 }

@@ -298,25 +298,15 @@ export class AgensDataService {
     return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()});
   }
 
-  grph_save(gid:number, data:any):Observable<any> {    
+  grph_save(gid:number, data:IProject):Observable<any> {    
     const url = `${this.api.grph}/save/${gid}`;
-    return this._http.post<any>(url, data, 
-      // {headers: this.createAuthorizationHeader()}
-      { headers: new HttpHeaders({ 'Authorization': this.getSSID() }) }
-    );
-/*
-    const formData: FormData = new FormData();
+    return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()} );
+  }
 
-    formData.append('project', data);
-    formData.append('image', imgBlob);
-  
-    const req = new HttpRequest('POST', url, formData, {
-      // **NOTE: 이거 필요 없음! 오류만 발생함 ==> 'Content-Type': 'multipart/form-data'
-      headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
-      reportProgress: false // for progress data
-    });
-    return this._http.request(req);  
-*/    
+  grph_load(pid:number):Observable<any> {    
+    const url = `${this.api.grph}/load/${pid}`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()} )
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 
   grph_groupBy(gid:number, list:any[]):Observable<any> {
