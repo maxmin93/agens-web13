@@ -581,6 +581,9 @@ return path1, path2;
 
   parseGraphDto2Project( data$:Observable<any> ){
 
+    this.queryResult.toggleTimer(true);
+    this.isLoading = true;
+
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
         this.projectDto = x;
@@ -639,12 +642,12 @@ return path1, path2;
           .filter(val => val.type == 'nodes' && val.name == x.data.label)
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
-            x.scratch['_style'] = label.scratch['_style'];       // label 에 연결된 Object            
-            x.scratch['_styleBak'] = label.scratch['_styleBak'];
+            if( !x.scratch.hasOwnProperty('_style')) x.scratch['_style'] = label.scratch['_style']; // 없으면
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];  // 복사본은 항상 Label의 style과 일치하도록 
           });
-        if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
-        if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
-        if( x.data.props.hasOwnProperty('$$position')) x.position = x.data.props['$$position'];
+        // if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
+        // if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
+        // if( x.data.props.hasOwnProperty('$$position')) x.position = x.data.props['$$position'];
 
         // not exists
         if( this.resultGraph.nodes.map(y => y.data.id).indexOf(x.data.id) == -1 ){
@@ -657,11 +660,11 @@ return path1, path2;
         this.resultGraph.labels
           .filter(val => val.type == 'edges' && val.name == x.data.label)
           .map(label => {
-            x.scratch['_style'] = label.scratch['_style'];        // label 에 연결된 Object
+            if( !x.scratch.hasOwnProperty('_style')) x.scratch['_style'] = label.scratch['_style']; // 없으면
             x.scratch['_styleBak'] =label.scratch['_styleBak'];
           });
-        if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
-        if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
+        // if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
+        // if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
   
         // not exists
         if( this.resultGraph.edges.map(y => y.data.id).indexOf(x.data.id) == -1 ){
@@ -675,7 +678,8 @@ return path1, path2;
     //  ==> ILabel.size, IGraph.labels_size/nodes_size/edges_size
     this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        this.isLoading = false;
+        console.log('END:', this.projectDto);
+        this.isLoading = false;        
         this.queryResult.setData(<IResponseDto>this.projectDto);   // 메시지 출력
 
         // send data to Canvas
