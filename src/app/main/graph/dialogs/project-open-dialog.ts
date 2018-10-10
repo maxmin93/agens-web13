@@ -37,18 +37,20 @@ declare var $:any;
           (keyup)='updateFilter($event)'
         /></span>
     </div>
-
+    <img #imgProjectCapture style="width:100; height:100;" class="border-styles" />
     <div class="wrapped-box-flex">
 
     <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
       [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
       [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
-      (activate)="onActivateTableLabels($event)">
+      (activate)="onActivateTableLabels($event)" >
+
+      <!-- [selected]="selected" [selectionType]="'single'" (select)="onSelect($event)" > -->
 
         <ngx-datatable-row-detail [rowHeight]="'auto'" #projectRow (toggle)="onRowDetailToggle($event)">
           <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
             <div class="span__row-detail-content">
-              <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.descriptiion }}</span>
+              <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.description }}</span>              
             </div>
           </ng-template>
         </ngx-datatable-row-detail>
@@ -66,13 +68,13 @@ declare var $:any;
 
         <ngx-datatable-column name="ID" [width]="60" >
           <ng-template let-row="row" ngx-datatable-cell-template>
-            <strong><a (click)="onSubmit(row.id)">{{row.id}}</a></strong>
+            <strong><a (click)="onSubmit(row)">{{row.id}}</a></strong>
           </ng-template>
         </ngx-datatable-column>
 
         <ngx-datatable-column name="Title" [minWidth]="200">
           <ng-template let-row="row" ngx-datatable-cell-template>
-            <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row.id)">{{row.title}}</a></span>
+            <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row)">{{row.title}}</a></span>
           </ng-template>
         </ngx-datatable-column>
 
@@ -110,7 +112,13 @@ declare var $:any;
 </div>
 `,
 styles: [`
- 
+.border-styles {
+  margin: 2px 0;
+  padding: 1px 3px;
+  border-width: 2px;
+  border-color: #aaa;
+  border-style: solid;
+} 
   `]
 })
 export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
@@ -121,6 +129,7 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   tmpRows: IProject[] = [];
 
   @ViewChild('inputFilter') inputFilter: ElementRef;
+  @ViewChild('imgProjectCapture') imgProjectCapture: ElementRef;
   @ViewChild('projectsTable') projectsTable: DatatableComponent;
   
   constructor(
@@ -153,16 +162,8 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
     this.loadProjects();
   }  
 
-  onSubmit(id:number): void {
-
-    this._api.mngr_project_detail(id)
-    .subscribe(
-      data => {
-        this.dialogRef.close(<IProject>data);
-      },
-      err => {
-        this.dialogRef.close(<IProject>null);
-      });    
+  onSubmit(row:any): void {
+    this.dialogRef.close(row);
   }
 
   onCancel(): void {
@@ -206,7 +207,15 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onActivateTableLabels(event){
-    // console.log('onActivateTableLabels: ', event);
+    if( event.row.id ){
+      this._api.mngr_project_image( event.row.id ).subscribe(x => {
+        if(x){
+          console.log( 'capture image:', event.row.id, x.length );
+          this.imgProjectCapture.nativeElement.src = x;
+          this._cd.detectChanges();
+        }
+      })
+    }
   }
 
   updateFilter(event) {

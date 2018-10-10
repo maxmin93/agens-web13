@@ -2,6 +2,7 @@
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+// import { HttpModule } from '@angular/http';            // !!deprecated
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 

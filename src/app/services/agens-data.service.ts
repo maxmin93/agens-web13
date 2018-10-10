@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
+// import { Http, Response } from '@angular/http';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+
 import { MatSnackBar } from '@angular/material';
 
 import { Observable, Subject, BehaviorSubject, Subscription, empty } from 'rxjs';
-import { map, filter, concatAll, share } from 'rxjs/operators';
+import { tap, map, filter, concatAll, share } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto, IDoubleListDto } from '../models/agens-response-types';
@@ -248,6 +250,18 @@ export class AgensDataService {
   mngr_project_detail(id):Observable<IProject> {
     const url = `${this.api.mngr}/projects/${id}`;
     return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});
+  }
+
+  mngr_project_image(id):Observable<string> {
+    const url = `${this.api.mngr}/projects/${id}/image`;
+    let httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'plain/text',
+        'Authorization': this.getSSID()
+      }),
+      'responseType': 'text' as 'json'      // httpclient Requesting non-JSON data 
+    };
+    return this._http.get<string>(url, httpOptions);
   }
 
   mngr_projects_list():Observable<IProject> {
