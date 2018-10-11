@@ -44,7 +44,7 @@
                         </div>
                         <ul class="property-list col flex-1">
                             <li class="row row-m row-space"><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
-                            <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                            <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('props')['name'] }}</li>
                             <li class="col flex-1">
                                 <span>Data</span>
                                 <div class="json-box col flex-1"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
@@ -96,11 +96,11 @@
                           <div class="border mt20 pl20 pr20 row row-space row-m">    
                               <h5 class="mr20"><strong>TITLE </strong></h5>
                               <mat-form-field class="flex-1">
-                                  <mat-select [value]="selectedLabel.scratch._style.title"
+                                <mat-select [value]="selectedLabel.scratch._style.title"
                                               (selectionChange)="onChangeStyleTitle($event)" required>
                                   <mat-option value="_null_">_NONE_</mat-option>
                                   <mat-option *ngFor="let prop of selectedLabel.properties" [value]="prop.key">{{ prop.key }}</mat-option>
-                                  </mat-select>
+                                </mat-select>
                               </mat-form-field>                
                           </div>
                         </div>

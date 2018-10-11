@@ -586,15 +586,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
           data: {
             id: x.label.id,
             label: x.label.type,
-            name: x.label.name,
             size: x.label.size,
-            props: {}
+            props: { name: x.label.name }
           },
           scratch: { _style: { color: this._util.nextColor(), width: '40px', title: 'name' }},
           position: position,
           classes: 'new'
         });
-        ele.style('label', ele.data('name'));
+        ele.style('label', ele.data('props')['name']);
         ele.select();
 
         // table에 추가하고 refresh

@@ -210,7 +210,7 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
     if( event.row.id ){
       this._api.mngr_project_image( event.row.id ).subscribe(x => {
         if(x){
-          console.log( 'capture image:', event.row.id, x.length );
+          // console.log( 'capture image:', event.row.id, x.length );
           this.imgProjectCapture.nativeElement.src = x;
           this._cd.detectChanges();
         }

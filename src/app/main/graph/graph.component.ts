@@ -684,7 +684,8 @@ return path1, path2;
 
         // send data to Canvas
         this.queryGraph.setData(this.resultGraph);
-        this.queryGraph.initCanvas(false);
+        // this.queryGraph.initCanvas(false);
+        this.queryGraph.refreshCanvas();
       });    
   }
 

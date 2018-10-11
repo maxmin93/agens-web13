@@ -126,12 +126,26 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    // cy events
+    // cy events : click
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback();
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
       // change Detection by force
       this._cd.detectChanges();
+    });
+
+    // cy events: edge 생성
+    this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
+      let { position } = event;
+      this.cy.elements(':selected').unselect();      
+      
+      let edge:any = addedEles.nonempty() ? addedEles.first() : undefined;
+      let sourceV = edge ? edge.source(): undefined;
+      let targetV = edge ? edge.target(): undefined;
+      this.cy.remove( addedEles );      // remove oldEdge having temporary id
+
+      // send edge to server and get NEW ID
+      // => re-create edge on canvas
     });
 
     // cy undoRedo initialization
@@ -161,8 +175,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     let charCode = String.fromCharCode(event.which).toLowerCase();
     if (this.canvasHover && event.ctrlKey) {
       console.log( 'keyPress: Ctrl + '+charCode, this.canvasHover );
+      // key : undo/redo
       if( charCode == "z" ) this.cy.$api.unre.undo();
       else if( charCode == "y" ) this.cy.$api.unre.redo();
+      // key : copy/cut/paste
       // **참고 https://github.com/iVis-at-Bilkent/cytoscape.js-clipboard
       else if( charCode == "a" ) { 
         this.cy.elements(":visible").select(); event.preventDefault(); 
@@ -171,7 +187,20 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"), this.updateGraph);
       else if( charCode == "v" ){
         this.ur.do('paste', this.updateGraph);
-      } 
+      }
+      // key: new node/edge
+      else if( charCode == 'n' ) this.openEditElementSheet();
+      else if( charCode == 'e' ){
+        if( this.cy.scratch('_edgehandled') ){
+          this.cy.$api.edge.disable();
+          this.cy.scratch('_edgehandled', false);
+        }
+        else{
+          this.cy.$api.edge.enable();
+          this.cy.scratch('_edgehandled', true);
+        }
+      }
+
     }
     if (!event.shiftKey) {
       this.withShiftKey = false;    // multi selection 해제
@@ -619,6 +648,26 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cy.$api.view.highlight(edges);
     Promise.resolve(null).then(() => { 
       neighbors.select(); 
+    });
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Edit Sheet : Label, Properties of element
+  /////////////////////////////////////////////////////////////////
+
+  openEditElementSheet(): void {
+    if( !this.selectedElement ) return;
+
+    const bottomSheetRef = this._sheet.open(EditGraphComponent, {
+      ariaLabel: 'Edit element',
+      panelClass: 'sheet-edit-graph',
+      data: { "gid": this.gid, "labels": this.labels, "element": this.selectedElement.json() }
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((x) => {
+      console.log( "editElement closed:", x);
+      // change Detection by force
+      this._cd.detectChanges();
     });
   }
 
