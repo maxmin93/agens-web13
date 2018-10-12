@@ -248,6 +248,11 @@
             <div class="box-scroll">
                 <div class="box-content">
                     <div class="btn-group btn-group-v">
+                        <a class="checked btn btn-icon" [ngClass]="{ 'checked': btnStatus.editMode }" 
+                            id="btnEditMode" mat-button-toggle #btnEditMode
+                            (click)="toggleEditMode()" matTooltip="edit Mode" matTooltipPosition="before">
+                            <mat-icon>edit</mat-icon></a>
+
                         <a class="checked btn btn-icon" [ngClass]="{ 'checked': btnStatus.showHideTitle }" 
                             id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle 
                             (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="before">
@@ -352,4 +357,23 @@
             </div>
         </div>
     </div>
+</div>
+
+<div id="divCxtMenu" style="display:none;">
+  <h4><strong>CxtMenu</strong></h4><hr/>
+  <ul>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipCxtMenu('newNode')">new Node</a></li>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipCxtMenu('showAll')">show All</a></li>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipCxtMenu('showAll')">toggle Selection</a></li>
+  </ul>
+</div>
+
+<div id="divEleMenu" style="display:none;">
+  <h4><strong>EleMenu</strong></h4><hr/>
+  <ul>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('edit')">edit Element</a></li>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('remove')">remove Element</a></li>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('remove')">grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('remove')">de-grouping</a></li>
+  </ul>
 </div>

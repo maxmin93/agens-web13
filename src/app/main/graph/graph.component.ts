@@ -65,6 +65,7 @@ return path1, path2;
 //  `;
 
   // core/query API 결과
+  gid:number = -1;
   private resultDto: IResultDto = undefined;
   private resultGraph: IGraph = undefined;
   private resultRecord: IRecord = undefined;
@@ -90,6 +91,19 @@ return path1, path2;
   @ViewChild('queryGraph') queryGraph: QueryGraphComponent;
   @ViewChild('queryTable') queryTable: QueryTableComponent;
   @ViewChild('statGraph') statGraph: StatGraphComponent;
+
+  /////////////////////////////////////////////////////////
+
+  // ** clear 정책
+  // 1) 최초 로딩시  : newGraph
+  // 2) new 버튼클릭 : newGraph
+  // 3) query Run    : - 
+  // 4) requery Run  : -  
+  // 3) project Load : newGraph
+  // 4) project Save : -
+  // 5) import file  : - 
+
+  /////////////////////////////////////////////////////////
 
   constructor(    
     private _cd: ChangeDetectorRef,
@@ -126,8 +140,8 @@ return path1, path2;
       theme: 'idea'
     });
     // CodeMirror : initial value
-    this.editor.setValue( this.query );
     this.editor.setSize('100%', '100px');
+    this.editor.setValue( this.query );
 
     // toggleComment 만 안되서 기능 구현
     this.installCodeMirrorAddons();
@@ -142,7 +156,21 @@ return path1, path2;
     this.editor.on('keyup', function(cm, e){      
       // console.log('this.editor is keyup:', e.keyCode );
       if( e.keyCode == 13 ) agens.cy.resize();
-    });      
+    });
+
+    Promise.resolve(null).then(()=>{
+      // new graph to call API
+      this._api.grph_new().pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+        x => {
+          console.log( 'grph_new:', x );
+          if( x.hasOwnProperty('gid') && x['gid'] > 0 ){
+            this.gid = x.gid;
+            this.queryGraph.setGid( x.gid );
+            this.statGraph.setGid( x.gid );
+            this.queryResult.setMessage(x.state, x.message);
+          }
+        });
+    });
   }
 
   // **NOTE: 주석 라인에 대한 color 변경 필요 (comment style)
@@ -231,7 +259,7 @@ return path1, path2;
   /////////////////////////////////////////////////////////////////
 
   // when button "NEW" click
-  clearProject(){
+  clearProject(option:boolean = true){
     this.clearResults();
 
     // 결과값 지우고
@@ -256,6 +284,20 @@ return path1, path2;
 
     // util의 savePositions 지우고
     this._util.resetPositions();
+
+    if( option ){
+      this.gid = -1;
+      this._api.grph_new().pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+        x => {
+          console.log( 'grph_new:', x );
+          if( x.hasOwnProperty('gid') && x['gid'] > 0 ){
+            this.gid = x.gid;
+            this.queryGraph.setGid( x.gid );
+            this.statGraph.setGid( x.gid );
+            this.queryResult.setMessage(x.state, x.message);
+          }
+      });
+    }
 
     // change Detection by force
     this._cd.detectChanges();
@@ -332,8 +374,7 @@ return path1, path2;
     this.queryGraph.savePositions();
     
     // call API
-    let gid:number = (this.resultDto && this.resultDto.hasOwnProperty('gid')) ? this.resultDto.gid : -1;
-    let data$:Observable<any> = this._api.core_query( gid, sql );
+    let data$:Observable<any> = this._api.core_query( this.gid, sql );
 
     // load Graph to QueryGraph
     this.parseGraphDto2Data(data$);
@@ -344,7 +385,8 @@ return path1, path2;
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
       (x:IResultDto) => {
         this.resultDto = <IResultDto>x;
-        if( x.hasOwnProperty('gid') ) {
+        if( x.hasOwnProperty('gid') ) {       // gid 갱신
+          this.gid = x.gid;
           this.queryGraph.setGid( x.gid );
           this.statGraph.setGid( x.gid );
         }  
@@ -569,11 +611,12 @@ return path1, path2;
       // Project Open 위한 API 호출
       this.currProject = result;
       // clear
-      this.clearProject();
+      this.clearProject(false);
       // editor query
       this.editor.setValue(result.sql);
 
-      let data$:Observable<any> = this._api.grph_load(result.id);
+      // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
+      let data$:Observable<any> = this._api.grph_load(this.gid, result.id);
       // load GraphDto to QueryGraph
       this.parseGraphDto2Project( data$ );
     });
@@ -587,7 +630,8 @@ return path1, path2;
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
         this.projectDto = x;
-        if( x.hasOwnProperty('gid') ) {
+        if( x.hasOwnProperty('gid') ) {       // gid 갱신
+          this.gid = x.gid;
           this.queryGraph.setGid( x.gid );
           this.statGraph.setGid( x.gid );
         }
@@ -720,7 +764,8 @@ return path1, path2;
       return;
     }
 
-    this.handlers[9] = this._api.importFile( fileItem ).subscribe(
+    console.log( 'importFile:', fileItem,  event.target.files);
+    this.handlers[9] = this._api.importFile( this.gid, fileItem ).subscribe(
       x => {
         // progress return 
         // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
@@ -748,6 +793,7 @@ return path1, path2;
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
         console.log(`graph_dto receiving : gid=${x.gid}`);
+        // gid 갱신 안함
       });
     data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {

@@ -46,9 +46,12 @@ export class EditGraphComponent implements OnInit, AfterViewInit {
     this.editLabelCtl = new FormControl(this.element.data.label, []);
     let targets = this.labels.filter(x => x.name == this.element.data.label && x.type == this.element.group );
     if( this.element.data.props ){
-      this.properties = _.map( this.element.data.props, (v,k,i) => { 
-        // k 에서 오류 ==> targets[0].properties[k]
-        let t = (targets.length > 0) ? targets[0].properties[k].type : 'STRING';
+      this.properties = _.map( this.element.data.props, (v,k) => { 
+        let t = 'STRING';
+        if( targets.length > 0 ){
+          let index = _.findIndex( targets[0].properties, {'key':k} );
+          if( index >= 0 ) t = targets[0].properties[index].type;
+        }
         return { "key":k, "value": JSON.stringify(v), "type": t };
       });
     }

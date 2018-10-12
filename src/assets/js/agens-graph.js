@@ -443,10 +443,11 @@
 
   // Public Function : graphFactory()
   agens.graph.graphFactory = function(target, options){
-    let customSetting = _.clone( agens.graph.defaultSetting );
+    let customSetting = _.cloneDeep( agens.graph.defaultSetting );
 
     if( options === undefined ){
       customSetting = _.merge( customSetting, agens.graph.customSetting );
+      // customSetting = _.assignInWith( customSetting, agens.graph.customSetting, (o,s) => !_.isUndefined(s) ? s : o )
     }
     else{
       // selectionType 이 single이면 multiSelection 못하게

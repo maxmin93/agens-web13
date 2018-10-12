@@ -53,7 +53,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     findCycles: false,        // 사이클 디텍션
     editGraph: false,
     megaGraph: false,
-    labelStyle: false
+    labelStyle: false,
+    editMode: false           // Edit Mode : create node/edge, edit data
   };
   labelSearchCount: number = 0;
 
@@ -89,6 +90,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // material elements
   @ViewChild('btnShortestPath') public btnShortestPath: MatButtonToggle;
   @ViewChild('slideShortestPathDirected') public slideSPathDirected: MatSlideToggle;
+  @ViewChild('btnEditMode') public btnEditMode: MatButtonToggle;
   @ViewChild('btnShowHideTitle') public btnShowHideTitle: MatButtonToggle;
   @ViewChild('btnHighlightNeighbors') public btnHighlightNeighbors: MatButtonToggle;
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
@@ -150,6 +152,28 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // cy undoRedo initialization
     this.ur = this.initUndoRedo(this.cy, this.gid);
+
+    Promise.resolve(null).then(() => {
+      this.cy.$api.qtipFn = this.cyQtipMenuCallback;
+
+      // Cytoscape 바탕화면 qTip menu
+      let tooltip = this.cy.qtip({
+        content: jQuery('#divCxtMenu').html(),
+        // function(e){ 
+        //   let html:string = `<div class="hide-me"><h4><strong>Menu</strong></h4><hr/><ul>`;
+        //   html += `<li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipFn('newNode')")>create new NODE</a></li>`;
+        //   html += `</ul></div>`;
+        //   return html;
+        // },
+        show: { event: 'cxttap', cyBgOnly: true },    // cxttap: mouse right button click event
+        hide: { event: 'click unfocus' },
+        position: { target: 'mouse', adjust: { mouse: false } },
+        style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
+        events: { visible: (event, api) => { jQuery('.qtip').click(() => { jQuery('.qtip').hide(); }); }}
+      });
+
+    });
+
   }
 
   setData(dataGraph:IGraph){
@@ -166,9 +190,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // label 정렬 : node>edge 순으로, size 역순으로
     this.labels = [... _.orderBy(dataGraph.labels, ['type','size'], ['desc','desc'])];    
   }
-  setMeta(metaGraph:IGraph){
-    this.metaGraph = metaGraph;
-  }
+  // setMeta(metaGraph:IGraph){
+  //   this.metaGraph = metaGraph;
+  // }
 
   // ** Copy/Cut/Paste: Ctrl+C, +X, Ctrl+V
   handleKeyUpEvent(event: KeyboardEvent) { 
@@ -188,19 +212,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       else if( charCode == "v" ){
         this.ur.do('paste', this.updateGraph);
       }
-      // key: new node/edge
-      else if( charCode == 'n' ) this.openEditElementSheet();
-      else if( charCode == 'e' ){
-        if( this.cy.scratch('_edgehandled') ){
-          this.cy.$api.edge.disable();
-          this.cy.scratch('_edgehandled', false);
-        }
-        else{
-          this.cy.$api.edge.enable();
-          this.cy.scratch('_edgehandled', true);
-        }
-      }
-
+      // key: new node/edge, edit data
+      else if( charCode == 'e' ) this.toggleEditMode();
     }
     if (!event.shiftKey) {
       this.withShiftKey = false;    // multi selection 해제
@@ -210,6 +223,23 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   handleKeyDownEvent(event: KeyboardEvent) { 
     if (event.shiftKey) {
       this.withShiftKey = true;     // multi selection 가능
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // Edit Mode : create node/edge, edit data
+  /////////////////////////////////////////////////////////////////
+
+  toggleEditMode(checked?:boolean){
+    if( checked === undefined ) this.btnEditMode.checked = !this.btnEditMode.checked;
+    else this.btnEditMode.checked = checked;
+    this.btnStatus.editMode = this.btnEditMode.checked;
+
+    if( this.btnStatus.editMode ){      // editMode on
+      this.cy.$api.edge.enable();
+    }
+    else{                               // editMode off
+      this.cy.$api.edge.disable();
     }
   }
 
@@ -426,6 +456,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
+    else if( this.btnStatus.editMode ) this.openSheetEditElement(target);
     else{
       let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
       if( !allStatus ){
@@ -448,10 +479,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }  
 
   // qtipMenu 선택 이벤트
-  cyQtipMenuCallback( target:any, value:string ){
-
+  cyQtipMenuCallback( value:any ){
+    console.log( 'cyQtipMenuCallback:', value, agens.cy.scratch('_position') );
   }
   
+
   /////////////////////////////////////////////////////////////////
   // Graph Controllers
   /////////////////////////////////////////////////////////////////
@@ -472,8 +504,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   clear(option:boolean=true){
     // 그래프 비우고
     this.cy.elements().remove();
-    // 그래프 라벨 칩리스트 비우고
-    if( option ) this.labels = [];
+    // 그래프 라벨 칩리스트 비우고, gid도 초기화
+    if( option ) { this.labels = []; this.gid = -1; }
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;
     // 그래프 관련 콘트롤러들 초기화
@@ -655,13 +687,15 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // Edit Sheet : Label, Properties of element
   /////////////////////////////////////////////////////////////////
 
-  openEditElementSheet(): void {
-    if( !this.selectedElement ) return;
+  openSheetEditElement(element:any=undefined): void {
+    // undefined => new node
+    let target:any = { group: 'nodes', data: { id: '', label: '', props: {}, size: 1 }};
+    if( element ) target = element.json();
 
     const bottomSheetRef = this._sheet.open(EditGraphComponent, {
       ariaLabel: 'Edit element',
       panelClass: 'sheet-edit-graph',
-      data: { "gid": this.gid, "labels": this.labels, "element": this.selectedElement.json() }
+      data: { "gid": this.gid, "labels": this.labels, "element": target }
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {

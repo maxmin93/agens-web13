@@ -286,6 +286,12 @@ export class AgensDataService {
 
   ////////////////////////////////////////////////
 
+  grph_new():Observable<any> {
+    const url = `${this.api.grph}/new`;
+    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')) );
+  }  
+
   grph_graph(gid:number):Observable<any> {
     const url = `${this.api.grph}/${gid}`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()})
@@ -317,7 +323,7 @@ export class AgensDataService {
     return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()} );
   }
 
-  grph_load(pid:number):Observable<any> {    
+  grph_load(gid:number, pid:number):Observable<any> {    
     const url = `${this.api.grph}/load/${pid}`;
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()} )
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
@@ -411,10 +417,11 @@ export class AgensDataService {
     return this._http.get<any>(url, {headers: this.createAuthorizationHeader()});
   }
 
-  importFile(fileItem:File, extraData?:object):any{
+  importFile(gid: number, fileItem:File, extraData?:object):any{
     const url = `${this.api.file}/import`;
     const formData: FormData = new FormData();
 
+    formData.append('gid', gid+'');   // convert number to string 
     formData.append('file', fileItem, fileItem.name);
     if (extraData) {
       for(let key in extraData){

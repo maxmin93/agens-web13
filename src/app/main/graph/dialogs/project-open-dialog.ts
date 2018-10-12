@@ -191,7 +191,6 @@ export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {
       () => {
         // cache our list
         this.projectRows = [...this.tmpRows];
-        console.log('projects_list:', this.projectRows);
         // this._angulartics2.eventTrack.next({ action: 'listProjects', properties: { category: 'graph', label: data.length }});
         this._cd.detectChanges();
       });    

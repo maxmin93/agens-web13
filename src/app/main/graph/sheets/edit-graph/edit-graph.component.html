@@ -45,7 +45,7 @@
       <ngx-datatable #tblProperties class="material"
         [headerHeight]="50" [limit]="5" [columnMode]="'force'"
         [footerHeight]="50" [rowHeight]="'auto'" [rows]="properties">
-        <ngx-datatable-column name="key">
+        <ngx-datatable-column name="key" [width]="120">
           <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
             <span title="Double click to edit"
               (dblclick)="editing[rowIndex + '-key'] = true"
@@ -57,7 +57,7 @@
             />
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="value">
+        <ngx-datatable-column name="value" [width]="240">
           <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
              <span title="Double click to edit"
               (dblclick)="editing[rowIndex + '-value'] = true"
@@ -69,7 +69,7 @@
             />
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="type">
+        <ngx-datatable-column name="type" [width]="80">
           <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
             <span title="Double click to edit"
               (dblclick)="editing[rowIndex + '-type'] = true"
