@@ -699,7 +699,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {
+      if( !x ) return;
       console.log( "editElement closed:", x);
+      // element.json() 의 내용이 변경된 경우 cy.element 내부 데이터도 연결되어 변경됨
+      // ==> Server TP3 에 반영되면 됨
+      
       // change Detection by force
       this._cd.detectChanges();
     });

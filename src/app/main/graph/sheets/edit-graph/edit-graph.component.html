@@ -48,11 +48,11 @@
         <ngx-datatable-column name="key" [width]="120">
           <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
             <span title="Double click to edit"
-              (dblclick)="editing[rowIndex + '-key'] = true"
+              (dblclick)="editing[rowIndex + '-key'] = (row.state == 'new') ? true : false"
               *ngIf="!editing[rowIndex + '-key']">
               {{value}}
             </span>
-            <input (blur)="updateValue($event, 'key', rowIndex)"
+            <input autofocus (blur)="updateValue($event, 'key', rowIndex)"
               *ngIf="editing[rowIndex+ '-key']" type="text" [value]="value"
             />
           </ng-template>
@@ -72,7 +72,7 @@
         <ngx-datatable-column name="type" [width]="80">
           <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
             <span title="Double click to edit"
-              (dblclick)="editing[rowIndex + '-type'] = true"
+              (dblclick)="editing[rowIndex + '-type'] = (row.state == 'new') ? true : false"
               *ngIf="!editing[rowIndex + '-type']">
               {{value}}
             </span>
@@ -92,4 +92,7 @@
       </ngx-datatable>        
     </li>
   </ul>
+
+  <button mat-raised-button color="accent" (click)="addNewProperty()">add Property</button>
+  <button mat-raised-button color="primary" [disabled]="!changed" (click)="close()">Update</button>
 </div>
