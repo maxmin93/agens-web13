@@ -20,7 +20,8 @@ const new_value:string = '__new__';
   styleUrls: ['./edit-graph.component.scss']
 })
 export class EditGraphComponent implements OnInit, AfterViewInit {
-  
+
+  created: boolean = false;
   changed: boolean = false;
   editLabelCtl: FormControl;
 
@@ -43,14 +44,24 @@ export class EditGraphComponent implements OnInit, AfterViewInit {
     if( data.hasOwnProperty('gid') ) this.gid = data['gid'];
     if( data.hasOwnProperty('labels') ) this.labels = data['labels'];
     if( data.hasOwnProperty('element') ) this.element = data['element'];
-    // label 이 없는 new node or edge 라면 무조건 changed = true
-    if( this.element && this.element.data.label == '' ) this.changed = true;
+
+    if( this.element.data.label == '' ) this.created = true;
+    else{
+      let temp = this.labels.filter(y => y.type == this.element.group && y.name == this.element.data.label);
+      if( temp.length > 0 ) this.label = temp[0];
+    }
   }
 
   ngOnInit() {
     // init label input
     this.editLabelCtl = new FormControl(this.element.data.label, []);
-    if( !this.changed ) this.editLabelCtl.disable();    // 기존 데이터라면 label 변경은 불가!!
+    this.editLabelCtl.valueChanges.subscribe(x => {
+      if( x != this.element.data.label ){
+        this.changed = true;
+        let temp = this.labels.filter(y => y.type == this.element.group && y.name == x);
+        if( temp.length > 0 ) this.label = temp[0];
+      } 
+    });
 
     // init props' table 
     let targets = this.labels.filter(x => x.name == this.element.data.label && x.type == this.element.group );
@@ -77,7 +88,10 @@ export class EditGraphComponent implements OnInit, AfterViewInit {
   close(): void {
     if( this.changed ){
       // label name => element.data.label
-      this.element.data.label = this.editLabelCtl.value;
+      if( this.created ){
+        this.element.data.label = this.editLabelCtl.value;
+        if( this.label ) this.element.scratch = { "_style": this.label.scratch._style };
+      } 
       // properties => element.data.props
       this.properties.forEach(x => {
         if( x.key && x.key != new_value && x.value && x.value != new_value ) 
@@ -85,7 +99,12 @@ export class EditGraphComponent implements OnInit, AfterViewInit {
       });
     }
 
-    this._sheetRef.dismiss( { changed: this.changed, element: this.element } );
+    if( this.editLabelCtl.value == '' ) {
+      this._sheetRef.dismiss();
+    }
+    else{
+      this._sheetRef.dismiss( { created: this.created, changed: this.changed, element: this.element } );
+    }
     event.preventDefault();
   }
 

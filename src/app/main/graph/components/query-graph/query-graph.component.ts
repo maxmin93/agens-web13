@@ -130,7 +130,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     // cy events : click
     this.cy.on('tap', (e) => { 
-      if( e.target === this.cy ) this.cyCanvasCallback();
+      if( e.target === this.cy ) this.cyCanvasCallback(e['position']);
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
       // change Detection by force
       this._cd.detectChanges();
@@ -141,11 +141,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       let { position } = event;
       this.cy.elements(':selected').unselect();      
       
-      let edge:any = addedEles.nonempty() ? addedEles.first() : undefined;
-      let sourceV = edge ? edge.source(): undefined;
-      let targetV = edge ? edge.target(): undefined;
-      this.cy.remove( addedEles );      // remove oldEdge having temporary id
+      let element:any = _.cloneDeep( addedEles.first().json() );
+      element.data.label = '';
+      element.data.props = {};
+      element.classes = "new";
+      // this.cy.remove( addedEles );            // remove oldEdge having temporary id
 
+      this.openSheetEditElement( element, () => { this.cy.remove( addedEles ); } );   // 생성되는 edge 속성값 작성하기
       // send edge to server and get NEW ID
       // => re-create edge on canvas
     });
@@ -445,9 +447,16 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   // graph canvas 클릭 콜백 함수
-  cyCanvasCallback():void {
+  cyCanvasCallback(position=undefined):void {
     this.selectedElement = undefined;
     this.selectedLabel = undefined;
+
+    if( this.btnStatus.editMode ){
+      // undefined => new node
+      let target:any = { group: 'nodes', data: { id: agens.graph.makeid(), label: '', props: {}, size: 1 }
+            , position: position, classes: "new" };
+      this.openSheetEditElement( target );
+    }
   }
 
   // graph elements 클릭 콜백 함수
@@ -456,7 +465,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // null 이 아니면 정보창 (infoBox) 출력
     if( this.btnStatus.shortestPath ) this.selectFindShortestPath(target);
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
-    else if( this.btnStatus.editMode ) this.openSheetEditElement(target);
+    else if( this.btnStatus.editMode ) this.openSheetEditElement(target.json());
     else{
       let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
       if( !allStatus ){
@@ -687,23 +696,23 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // Edit Sheet : Label, Properties of element
   /////////////////////////////////////////////////////////////////
 
-  openSheetEditElement(element:any=undefined): void {
-    // undefined => new node
-    let target:any = { group: 'nodes', data: { id: '', label: '', props: {}, size: 1 }};
-    if( element ) target = element.json();
+  openSheetEditElement(element:any=undefined, callback:Function=undefined): void {
+    if( !element ) return;
 
     const bottomSheetRef = this._sheet.open(EditGraphComponent, {
       ariaLabel: 'Edit element',
       panelClass: 'sheet-edit-graph',
-      data: { "gid": this.gid, "labels": this.labels, "element": target }
+      data: { "gid": this.gid, "labels": this.labels, "element": element }
     });
 
     bottomSheetRef.afterDismissed().subscribe((x) => {
+      if( callback ) (callback)();
       if( !x ) return;
       console.log( "editElement closed:", x);
       // element.json() 의 내용이 변경된 경우 cy.element 내부 데이터도 연결되어 변경됨
       // ==> Server TP3 에 반영되면 됨
-      
+      if( x.created ) this.cy.add( x.element );
+
       // change Detection by force
       this._cd.detectChanges();
     });

@@ -44,7 +44,7 @@
                         </div>
                         <ul class="property-list col flex-1">
                             <li class="row row-m row-space"><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
-                            <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('props')['name'] }}</li>
+                            <!-- <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('props')['name'] }}</li> -->
                             <li class="col flex-1">
                                 <span>Data</span>
                                 <div class="json-box col flex-1"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
