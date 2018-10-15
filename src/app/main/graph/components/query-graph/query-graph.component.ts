@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, HostListener, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, NgZone, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatButtonToggle, MatButton, MatSlideToggle, MatBottomSheet } from '@angular/material';
 
 import { Observable, Subject, interval } from 'rxjs';
@@ -101,6 +101,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   todo$:Subject<any> = new Subject();
   
   constructor(
+    private _ngZone: NgZone,
     private _cd: ChangeDetectorRef,
     private _dialog: MatDialog,    
     private _api: AgensDataService,
@@ -121,10 +122,19 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         hideNodeTitle: true,        // hide nodes' title
         hideEdgeTitle: true,        // hide edges' title
     });
+    // prepare to call this.function from external javascript
+    window['angularComponentRef'] = {
+      zone: this._ngZone,
+      qtipCxtMenu: (action) => this.qtipCxtMenu(action),
+      qtipEleMenu: (action, targets) => this.qtipEleMenu(action, targets),
+      component: this
+    };
+
     this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
   }
 
   ngOnDestroy(){
+    window['angularComponentRef'] = null;
   }
 
   ngAfterViewInit() {
@@ -156,8 +166,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ur = this.initUndoRedo(this.cy, this.gid);
 
     Promise.resolve(null).then(() => {
-      this.cy.$api.qtipFn = this.cyQtipMenuCallback;
-
       // Cytoscape 바탕화면 qTip menu
       let tooltip = this.cy.qtip({
         content: jQuery('#divCxtMenu').html(),
@@ -167,7 +175,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         //   html += `</ul></div>`;
         //   return html;
         // },
-        show: { event: 'cxttap', cyBgOnly: true },    // cxttap: mouse right button click event
+        show: { event: 'cxttap', cyBgOnly: false /* true */ },    // cyBgOnly : element 위에서는 작동 안되게 할 것인지
         hide: { event: 'click unfocus' },
         position: { target: 'mouse', adjust: { mouse: false } },
         style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
@@ -239,9 +247,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if( this.btnStatus.editMode ){      // editMode on
       this.cy.$api.edge.enable();
+      this.divCanvas.nativeElement.style.cursor = 'cell';     // PLUS
     }
     else{                               // editMode off
       this.cy.$api.edge.disable();
+      this.divCanvas.nativeElement.style.cursor = 'pointer';  // Default
     }
   }
 
@@ -249,7 +259,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // Copy/Cut/Paste : TinkerGraph sync
   /////////////////////////////////////////////////////////////////
 
-  updateGraph(oper:string, nodes:any[], edges:any[]){
+  updateGraph(oper:string, nodes:any[], edges:any[], callback:Function=undefined){
     let data:any = { gid: this.gid, graph: { labels: [],
       nodes: nodes.map(x => { 
         return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
@@ -260,6 +270,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }};
     this._api.grph_update(this.gid, oper, data).subscribe(
       x => {
+        if( callback ) (callback)();
         // console.log( 'grph_update:', this.gid, oper, x );
         this._api.setResponses(<IResponseDto>{
           group: 'update::'+oper,
@@ -313,23 +324,60 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   
     // register actions
-    ur.action('copy',      // actionName
-      (eles:any) => {           // do Func
-        ur.copy2cb(eles);
+    ur.action('invisible',      
+      (eles:any) => { 
+        // style('visibility', 'hidden') 시키면, eles 가 삭제되어 찾을 수 없음
+        ur.clipboard['hidden'] = eles; 
+        eles.style('visibility', 'hidden'); 
+        return eles;
       },
-      (eles:any) => {           // undo Func
+      (eles:any) => { 
+        if( ur.clipboard['hidden'] ){
+          ur.clipboard['hidden'].style('visibility', 'visible');
+          ur.clipboard['hidden'] = undefined;
+        } 
+        return eles;
+      });      
+    ur.action('grouping',
+      (eles:any) => { 
+        parent = this.cy.$api.grouping( eles );      
+        return eles;   
+      },
+      (eles:any) => { 
+        let parents:any = eles.parent();
+        parents.forEach(target => { this.cy.$api.degrouping(target); });
+        return eles;   
+      });
+    ur.action('degrouping',
+      (target:any) => { 
+        this.cy.$api.degrouping( target ); 
+        return target;
+      },
+      (target:any) => { 
+        this.cy.restore( target );
+        if( target.scratch('_memebers') ) this.cy.$api.grouping( target.scratch('_memebers'), target );
+        return target;
+      });
+
+    ur.action('copy',      // actionName
+      (eles:any) => {      // do Func
+        ur.copy2cb(eles);
+        return eles;
+      },
+      () => {              // undo Func
         ur.clipboard = {};
       });
 
-    ur.action('cut',      // actionName
-      (eles:any) => {           // do Func
+    ur.action('cut',       // actionName
+      (eles:any) => {      // do Func
         ur.copy2cb(eles);
         // TinkerGraph update::delete
         this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
         // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
         ur.clipboard['removed'] = eles.remove();
+        return eles;
       },
-      () => {           // undo Func
+      () => {              // undo Func
         // TinkerGraph update::upsert
         this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
         // restore removed elements
@@ -339,9 +387,42 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         } 
       });
 
+    ur.action('delete',    // actionName
+      (eles:any) => {      // do Func
+        ur.copy2cb(eles);
+        // TinkerGraph update::delete
+        this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
+        // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
+        ur.clipboard['removed'] = eles.remove();        
+      },
+      () => {              // undo Func
+        // TinkerGraph update::upsert
+        this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
+        // restore removed elements
+        if( ur.clipboard['removed'] ){
+          ur.clipboard['removed'].restore();
+          ur.clipboard['removed'] = undefined;
+        } 
+      });
+    ur.action('create',
+      (json:any) => {
+        if( json.group == 'nodes' ) this.updateGraph('upsert', [json], []);
+        else this.updateGraph('upsert', [], [json]);
+        return this.cy.add( json );
+      },
+      (ele:any) => {
+        if( ele.group() == 'nodes' ) this.updateGraph('delete', [ele.json()], []);
+        else this.updateGraph('delete', [], [ele.json()]);
+        return ele.remove();
+      }
+    );
+
     ur.action('paste',     // actionName
-      () => {           // do Func
-        if( !ur.clipboard['nodes'] || !ur.clipboard['edges'] ) return;
+      () => {              // do Func
+        let stack = ur.getUndoStack();
+        if( stack.length < 1 || !['copy','cut','paste'].includes(stack[stack.length-1]['name']) ) return;
+        if( !ur.clipboard['nodes'] || !ur.clipboard['edges'] ) return;        
+
         // TinkerGraph update::upsert
         this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
 
@@ -488,8 +569,49 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }  
 
   // qtipMenu 선택 이벤트
-  cyQtipMenuCallback( value:any ){
-    console.log( 'cyQtipMenuCallback:', value, agens.cy.scratch('_position') );
+  qtipEleMenu( action, targets ){
+    console.log( 'qtipEleMenu:', action, targets );
+
+  }
+
+  // qtipMenu 선택 이벤트
+  qtipCxtMenu( action ){
+    console.log( 'qtipCxtMenu:', action, this.cy.scratch('_position') );
+    let targets = this.cy.nodes(':selected');
+    let target = targets.empty() ? undefined : targets.first();
+
+    switch( action )    {
+      case 'selectAll': 
+              this.cy.elements(':visible').select(); break;
+      case 'showAll': 
+              this.cy.elements(':hidden').style('visibility','visible'); break;
+      case 'toggleSelection': 
+              let selected = this.cy.elements(':selected');
+              let unselected = this.cy.elements(':unselected');                
+              this.ur.do('batch', [{name: 'select', param: unselected}, {name: 'unselect', param: selected}]);
+              break;
+      // case 'makeInvisible': 
+      //         if( targets.nonempty() ) this.ur.do('invisible', targets); 
+      //         break;
+      case 'grouping': 
+              if( targets.size() > 1 ) this.ur.do('grouping', targets); 
+              break;
+      case 'degrouping': 
+              if( target && target.isParent() ) this.ur.do('degrouping', target); 
+              break;
+      case 'copy': 
+              if( targets.nonempty() ) this.ur.do('copy', targets);
+              break;
+      case 'cut': 
+              if( targets.nonempty() ) this.ur.do('cut', targets);
+              break;
+      case 'paste': 
+              if( targets.nonempty() ) this.ur.do('paste', targets);
+              break;
+      case 'remove': 
+              if( targets.nonempty() ) this.ur.do('delete', targets);
+              break;
+    }
   }
   
 
@@ -527,17 +649,18 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   addLabel( label:ILabel ){ 
     let arr = this.labels.map(x => x.id);
     if( arr.indexOf(label.id) == -1 ) this.labels.push( label );  // not exists
-    // else this.labels[ arr.indexOf(label.id) ] = label;
   }
   addNode( ele:INode ){ 
     let target = this.cy.getElementById(ele.data.id);
-    if( target.empty() ) this.cy.add( ele );                      // not exists
-    // else target.forEach(x => x._private.data = ele.data );
+    if( target.empty() ){   // not exists
+      target = this.cy.add( ele );
+    }
   }
   addEdge( ele:IEdge ){ 
     let target = this.cy.getElementById(ele.data.id);
-    if( target.empty() ) this.cy.add( ele );                      // not exists
-    // else target.forEach(x => x._private.data = ele.data );
+    if( target.empty() ){   // not exists
+      target = this.cy.add( ele );
+    }
   }
 
   // 데이터 불러오고 최초 적용되는 작업들 
@@ -711,7 +834,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log( "editElement closed:", x);
       // element.json() 의 내용이 변경된 경우 cy.element 내부 데이터도 연결되어 변경됨
       // ==> Server TP3 에 반영되면 됨
-      if( x.created ) this.cy.add( x.element );
+      if( x.created ){
+        this.ur.do( "create", x.element );
+      }
 
       // change Detection by force
       this._cd.detectChanges();
@@ -828,7 +953,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     if( this.btnStatus.connectedGroup ) {
       let groups:any[] = this.cy.elements(':visible').components();
       groups.forEach((grp,idx) => {
-        this.cy.$api.grouping(grp.nodes(), 'group#'+idx);
+        this.cy.$api.grouping(grp.nodes(), undefined, 'group#'+idx);
       });
     }
     else {

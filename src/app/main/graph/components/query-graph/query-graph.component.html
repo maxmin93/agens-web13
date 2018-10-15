@@ -359,21 +359,48 @@
     </div>
 </div>
 
+
+<!--
+  /////////////////////////////////////////////////////////////////
+  //
+  //  qtip Menu template : not displayed
+  //
+  /////////////////////////////////////////////////////////////////
+-->
+
 <div id="divCxtMenu" style="display:none;">
-  <h4><strong>CxtMenu</strong></h4><hr/>
-  <ul>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipCxtMenu('newNode')">new Node</a></li>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipCxtMenu('showAll')">show All</a></li>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipCxtMenu('showAll')">toggle Selection</a></li>
+  <h4><strong>CxtMenu</strong></h4>
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('selectAll')">select All</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('toggleSelection')">toggle Selection</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('remove')">remove</a></li>
+  </ul>
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('copy')">copy (Ctrl+C)</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('cut')">cut (Ctrl+X)</a></li>
+    <!-- <li *ngIf="ur && ur.clipboard && ur.clipboard['nodes']">       // 왜 안되지?? (_cd 써도 안됨) -->
+    <li>
+      <a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('paste')">paste (Ctrl+V)</a>
+    </li>
+  </ul>
+    <!-- <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('showAll')">show All</a></li> -->
+    <!-- <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('makeInvisible')">make Invisible</a></li> -->
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('grouping')">grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('degrouping')">degrouping</a></li>
   </ul>
 </div>
 
+<!--
+// **NOTE: element를 물고 들어갈 수 없음. 단지 canvas냐 element냐 에 따라 메뉴 항목만 달라질 뿐.
+//         ==> 의미 없음. 주석처리!! (2018-10-15)
 <div id="divEleMenu" style="display:none;">
   <h4><strong>EleMenu</strong></h4><hr/>
   <ul>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('edit')">edit Element</a></li>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('remove')">remove Element</a></li>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('remove')">grouping</a></li>
-    <li><a href="javascript:void(0)" onclick="agens.cy.$api.qtipEleMenu('remove')">de-grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('edit', this)">edit Element</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('remove', this)">remove Element</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('remove', this)">grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('remove', this)">de-grouping</a></li>
   </ul>
 </div>
+-->

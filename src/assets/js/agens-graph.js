@@ -655,28 +655,41 @@
       return connectedNodes;
     };
 
-    cy.$api.grouping = function(members=undefined, title=undefined){
+    cy.$api.grouping = function(members=undefined, target=undefined, title=undefined){
       let nodes = cy.nodes(':selected');
       if( members && !members.empty() ) nodes = members;
-      let edges = nodes.connectedEdges();
       if( nodes.empty() ) return;
+
+      let parentPos = nodes.boundingBox();
+      let edges = nodes.connectedEdges();
       
       cy.elements(':selected').unselect();
-      nodes.remove();
+      nodes.remove();   // 우선순위 문제 때문에 삭제했다가 맨 나중에 다시 추가
   
-      let parentId = agens.graph.makeid();
-      let parentPos = nodes.boundingBox();
-      let parent = { "group": "nodes", "data": { "id": parentId, "name": title, "parent": undefined }
-                  , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } }
-      let parentNode = cy.add(parent);
-      parentNode.style('width', parentPos.x2-parentPos.x1 );
-      parentNode.style('height', parentPos.y2-parentPos.y1 );
-  
-      nodes.forEach(v => {
-        v._private.data.parent = parentId;
+      if( !target ){
+        let parentId = agens.graph.makeid();
+        let parent = { "group": "nodes"
+                    , "data": { 
+                      "id": parentId, "name": (title)?title:'group', "parent": undefined,
+                      "props": { "$$size": nodes.size(), "$$members": nodes.map(x=>x.id()) }
+                    }
+                    , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } }
+        target = cy.add(parent);
+      }
+
+      cy.batch(() => { 
+        target.style('width', parentPos.x2-parentPos.x1 );
+        target.style('height', parentPos.y2-parentPos.y1 );
+        target.scratch('_members', nodes);    // save memebers
+
+        nodes.forEach(v => {
+          v._private.data.parent = target.id();
+        });
+        cy.add(nodes); 
+        cy.add(edges); 
       });
-      cy.add(nodes);
-      cy.add(edges);
+
+      return target;
     }
   
     cy.$api.degrouping = function(target=undefined){
@@ -694,6 +707,8 @@
       target.remove();
       cy.add(children);
       cy.add(edges);
+
+      return children;    // nodes
     }
 
   };
