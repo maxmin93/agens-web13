@@ -2,19 +2,21 @@
   <div>
     <a matTooltip="Refresh" matTooltipPosition="above" (click)="loadProjects()"><mat-icon>refresh</mat-icon></a>  
   </div>
-  User Projects <br/><small> select project and edit query</small>    
+  User Projects <br/><small> select project and overlay test</small>    
 </h2>
 
 <div>
   <div>
     <div class="wrapped-box-flex">
-      <span><i class="fa fa-search" aria-hidden="true"></i><input
+      <!-- <span><i class="fa fa-search" aria-hidden="true"></i><input
           type='text' #inputFilter
           placeholder='Type to filter the title column...'
           (keyup)='updateFilter($event)'
-        /></span>
+        /></span> -->
+        <textarea #matchTestMessage placeholder="matching Test" readonly="true" mat-autosize="false"
+            rows="2" style="border: 1px solid; width: 100%;"></textarea>
     </div>
-    <img #imgProjectCapture style="width:100; height:100;" class="border-styles" />
+
     <div class="wrapped-box-flex">
 
     <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"

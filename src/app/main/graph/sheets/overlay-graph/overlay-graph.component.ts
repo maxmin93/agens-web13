@@ -1,15 +1,21 @@
 import { Component, ViewChild , Inject, OnInit, OnDestroy, NgZone, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
-import { HttpErrorResponse } from '@angular/common/http/src/response';
-import { concatAll } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import { Observable, Subscription } from 'rxjs';
+import { concatAll, filter } from 'rxjs/operators';
 
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { MatSnackBar } from '@angular/material';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
+import { ILabel, IGraph, INode, IEdge, IEnd } from '../../../../models/agens-data-types';
 import { IProject } from '../../../../models/agens-manager-types';
+import { IGraphDto, IResponseDto } from '../../../../models/agens-response-types';
 // services
 import { AgensDataService } from '../../../../services/agens-data.service';
+
+declare var agens: any;
 
 @Component({
   selector: 'app-overlay-graph',
@@ -18,13 +24,28 @@ import { AgensDataService } from '../../../../services/agens-data.service';
 })
 export class OverlayGraphComponent implements OnInit {
 
+  private handlers: Array<Subscription> = [
+    undefined, undefined, undefined, undefined, undefined, undefined
+  ];
+  isLoading: boolean = false;
+
+  projectDto:IGraphDto = undefined;
+  overlayGraph:IGraph = undefined;
+
+  // 매칭에 사용될 nodes 의 id 리스트
+  ids: string[] = [];
+  // 스타일 부여를 위해 labels 유지
+  labels: ILabel[] = [];
+  // position for adjust center
+  extent: any = { x1: 9999999, x2: -9999999, y1: 9999999, y2: -9999999 };
+  center: any = undefined;
+
   // data array
   projectRows: IProject[] = [];
   // filtering 을 위한 임시 array
   tmpRows: IProject[] = [];
 
-  @ViewChild('inputFilter') inputFilter: ElementRef;
-  @ViewChild('imgProjectCapture') imgProjectCapture: ElementRef;
+  @ViewChild('matchTestMessage') matchTestMessage: ElementRef;
   @ViewChild('projectsTable') projectsTable: DatatableComponent;
 
   constructor(
@@ -34,18 +55,30 @@ export class OverlayGraphComponent implements OnInit {
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any            
   ) { 
     console.log('constructor', data);
+    if( data.hasOwnProperty('ids') ) this.ids = data['ids'];
+    if( data.hasOwnProperty('labels') ) this.labels = data['labels'];
+    if( data.hasOwnProperty('center') ) this.center = data['center'];
   }
 
   ngOnInit() {
   }
 
+  ngOnDestroy(): void {
+    this.handlers.forEach(x => {
+      if( x ) x.unsubscribe();
+      x = undefined;
+    });
+  }
+
   ngAfterViewInit() {
-    this.inputFilter.nativeElement.blur();
     this.loadProjects();
   }  
 
   close(row:any=undefined): void {
-    this._sheetRef.dismiss( row );
+    if( row ){
+      this.loadProjectGraph( row.id );
+    }
+    else this._sheetRef.dismiss();
     event.preventDefault();
   }
 
@@ -95,10 +128,11 @@ export class OverlayGraphComponent implements OnInit {
 
   onActivateTableLabels(event){
     if( event.row.id ){
-      this._api.mngr_project_image( event.row.id ).subscribe(x => {
+      this._api.grph_matching_test( event.row.id, this.ids ).subscribe(x => {
         if(x){
-          // console.log( 'capture image:', event.row.id, x.length );
-          this.imgProjectCapture.nativeElement.src = x;
+          // console.log( 'matching test:', event.row.id, x );
+          this.matchTestMessage.nativeElement.value = x.message;
+          // meesage out!!
           this._cd.detectChanges();
         }
       })
@@ -120,26 +154,15 @@ export class OverlayGraphComponent implements OnInit {
     this.projectRows = temp;
   }  
 
-/*  
   loadProjectGraph(pid:number){
     // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
-    let data$:Observable<any> = this._api.grph_load(this.gid, result.id);
-    // load GraphDto to QueryGraph
-    this.parseGraphDto2Project( data$ );
-  }
-
-  parseGraphDto2Project( data$:Observable<any> ){
+    let data$:Observable<any> = this._api.grph_load(pid, true);
 
     this.isLoading = true;
-
+    // load GraphDto to json array
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
         this.projectDto = x;
-        if( x.hasOwnProperty('gid') ) {       // gid 갱신
-          this.gid = x.gid;
-          this.queryGraph.setGid( x.gid );
-          this.statGraph.setGid( x.gid );
-        }
       },
       err => {
         console.log( 'project_load: ERROR=', err instanceof HttpErrorResponse, err.error );
@@ -147,95 +170,83 @@ export class OverlayGraphComponent implements OnInit {
           group: 'project::load',
           state: err.statusText,
           message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
-        });
-        
-        this.clearSubscriptions();
-        // login 페이지로 이동
-        this._router.navigate(['/login']);
+        });        
+        this.ngOnDestroy();
       });
 
     /////////////////////////////////////////////////
     // Graph 에 표시될 내용은 누적해서 유지
     this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
-        if( !this.resultGraph ){      // if not exists = NEW
-          this.resultGraph = x;
-          this.resultGraph.labels = new Array<ILabel>();
-          this.resultGraph.nodes = new Array<INode>();
-          this.resultGraph.edges = new Array<IEdge>();
-        }
+          this.overlayGraph = x;
+          this.overlayGraph.labels = new Array<ILabel>();
+          this.overlayGraph.nodes = new Array<INode>();
+          this.overlayGraph.edges = new Array<IEdge>();
+
+          // create parent node          
+          this.overlayGraph.nodes.push(<INode>{
+            group: 'nodes',
+            data: { 
+              id: agens.graph.makeid(),
+              parent: undefined,
+              label: 'overlay',
+              props: {},
+              size: 1          
+            },
+            scratch: {},
+            classes: 'overlay',
+            position: undefined
+          });
       });
     this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
-      (x:ILabel) => { 
-        // not exists
-        if( this.resultGraph.labels.map(y => y.id).indexOf(x.id) == -1 ){
-          // new style
-          x.scratch['_style'] = <IStyle>{ 
-            width: (x.type == 'nodes') ? 45 : 3
-            , title: 'name'
-            , color: (x.type == 'nodes') ? this._util.nextColor() : undefined // this._util.getColor(0)
-            , visible: true
-          };
-          x.scratch['_styleBak'] = _.cloneDeep(x.scratch['_style']);
-
-          this.resultGraph.labels.push( x );
-          this.statGraph.addLabel( x );
-        }
-        // **NOTE: labels 갱신은 맨나중에 resultGraph의 setData()에서 처리
+      (x:ILabel) => {
+        this.overlayGraph.labels.push( x );
       });
     this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
-        // setNeighbors from this.resultGraph.labels;
-        x.scratch['_neighbors'] = new Array<string>();
-        this.resultGraph.labels
-          .filter(val => val.type == 'nodes' && val.name == x.data.label)
-          .map(label => {
-            x.scratch['_neighbors'] += label.targets;
-            if( !x.scratch.hasOwnProperty('_style')) x.scratch['_style'] = label.scratch['_style']; // 없으면
-            x.scratch['_styleBak'] = label.scratch['_styleBak'];  // 복사본은 항상 Label의 style과 일치하도록 
-          });
-        // if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
-        // if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
-        // if( x.data.props.hasOwnProperty('$$position')) x.position = x.data.props['$$position'];
-
-        // not exists
-        if( this.resultGraph.nodes.map(y => y.data.id).indexOf(x.data.id) == -1 ){
-          this.resultGraph.nodes.push( x );
-        } 
-        this.queryGraph.addNode( x );
+        x.scratch['_id'] = x.data.id;               // 원본 id를 scratch에 저장 
+        x.data.id = '$$'+x.data.id;                 // 다른 id를 만들어야 overlay 시킬 수 있음
+        x.data.parent = this.overlayGraph.nodes[0].data.id;   // set parent
+        x.classes = 'overlay';
+        this.overlayGraph.nodes.push( x );  
+        // get extent of overlay graph
+        if( x.hasOwnProperty('position') && x['position'] ){
+          if( x.position['x'] < this.extent['x1'] ) this.extent['x1'] = x.position['x'];  // x min
+          if( x.position['x'] > this.extent['x2'] ) this.extent['x2'] = x.position['x'];  // x max
+          if( x.position['y'] < this.extent['y1'] ) this.extent['y1'] = x.position['y'];  // y min
+          if( x.position['y'] > this.extent['y2'] ) this.extent['y2'] = x.position['y'];  // y max
+        }
       });
     this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
       (x:IEdge) => {
-        this.resultGraph.labels
-          .filter(val => val.type == 'edges' && val.name == x.data.label)
-          .map(label => {
-            if( !x.scratch.hasOwnProperty('_style')) x.scratch['_style'] = label.scratch['_style']; // 없으면
-            x.scratch['_styleBak'] =label.scratch['_styleBak'];
-          });
-        // if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
-        // if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
-  
-        // not exists
-        if( this.resultGraph.edges.map(y => y.data.id).indexOf(x.data.id) == -1 ){
-          this.resultGraph.edges.push( x );  
-        } 
-        this.queryGraph.addEdge( x );
-      });    
-
+        x.scratch['_id'] = x.data.id;               // 원본 id를 scratch에 저장 
+        x.data.id = '$$'+x.data.id;                 // 다른 id를 만들어야 overlay 시킬 수 있음
+        x.scratch['_source'] = x.data.source;       // 
+        x.data.source = '$$'+x.data.source;         // source id
+        x.scratch['_target'] = x.data.target;       // 
+        x.data.target = '$$'+x.data.target;         // target id
+        x.data.parent = this.overlayGraph.nodes[0].data.id;   // set parent
+        x.classes = 'overlay';
+        this.overlayGraph.edges.push( x );  
+      });
     /////////////////////////////////////////////////
     // Graph의 Label 별 카운팅 해서 갱신
     //  ==> ILabel.size, IGraph.labels_size/nodes_size/edges_size
-    this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+    this.handlers[5] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        console.log('END:', this.projectDto);
-        this.isLoading = false;        
-        this.queryResult.setData(<IResponseDto>this.projectDto);   // 메시지 출력
+        // adjust position
+        if( this.center ){
+          let temp = { x: (this.extent['x1']+this.extent['x2'])/2, y: (this.extent['y1']+this.extent['y2'])/2 };
+          let diffPos = {x: this.center['x']-temp['x'], y: this.center['y']-temp['y']};
+          this.overlayGraph.nodes.filter(x => x.position).forEach(x => {
+            x.position['x'] += diffPos['x'];
+            x.position['y'] += diffPos['y'];
+          });
+        }
 
-        // send data to Canvas
-        this.queryGraph.setData(this.resultGraph);
-        // this.queryGraph.initCanvas(false);
-        this.queryGraph.refreshCanvas();
+        this.isLoading = false;
+        this._sheetRef.dismiss( this.overlayGraph );      // close sheet
       });    
   }
-*/
+
 }

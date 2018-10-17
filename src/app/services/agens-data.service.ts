@@ -323,9 +323,16 @@ export class AgensDataService {
     return this._http.post<any>(url, data, {headers: this.createAuthorizationHeader()} );
   }
 
-  grph_load(gid:number, pid:number):Observable<any> {    
+  grph_matching_test(pid:number, ids:string[]):Observable<any> {    
+    const url = `${this.api.grph}/match/${pid}/test`;
+    return this._http.post<any>(url, ids, {headers: this.createAuthorizationHeader()} );
+  }
+
+  grph_load(pid:number, onlyData:boolean=false):Observable<any> {    
     const url = `${this.api.grph}/load/${pid}`;
-    return this._http.get<any>(url, {headers: this.createAuthorizationHeader()} )
+    let params:HttpParams = new HttpParams();
+    params = params.append('onlyData', onlyData+'');
+    return this._http.get<any>(url, { params: params, headers: this.createAuthorizationHeader() })
         .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
   }
 

@@ -187,6 +187,12 @@
           'border-color': '#FF5959',
           'border-style': 'dashed'
         }},{
+        selector: 'node.overlay',
+        css: {
+          'border-width': 4,
+          'border-color': '#8b8b00',
+          'border-style': 'solid'
+        }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
         selector: 'node:selected',

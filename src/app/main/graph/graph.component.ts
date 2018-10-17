@@ -611,12 +611,12 @@ return path1, path2;
       // Project Open 위한 API 호출
       this.currProject = result;
       // clear
-      this.clearProject(false);
+      this.clearProject(false);    // if or not do new Graph 
       // editor query
       this.editor.setValue(result.sql);
 
       // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
-      let data$:Observable<any> = this._api.grph_load(this.gid, result.id);
+      let data$:Observable<any> = this._api.grph_load(result.id);
       // load GraphDto to QueryGraph
       this.parseGraphDto2Project( data$ );
     });
@@ -630,7 +630,7 @@ return path1, path2;
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
         this.projectDto = x;
-        if( x.hasOwnProperty('gid') ) {       // gid 갱신
+        if( x.hasOwnProperty('gid') ) {       // project 가 로딩된 gid 로 갱신 (새그래프)
           this.gid = x.gid;
           this.queryGraph.setGid( x.gid );
           this.statGraph.setGid( x.gid );

@@ -1317,27 +1317,45 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // overlay Graph 해제시, 존재하는 overlay Box 들 등을 모두 remove
     else {
-
+      this.ur.do('remove', this.cy.elements('.overlay'));
     }
 
   }
 
   openOverlayGraphSheet(): void {
 
-    this.btnStatus.metaGraph = true;
+    // id list
+    let ids = this.cy.nodes(':visible').map(x => x.id());
+
+    // get center position
+    let extent = (this.cy.nodes().size() > 0 ) ? this.cy.nodes().boundingBox() : undefined;
+    let center = ( extent ) ? { x: (extent.x2+extent.x1)/2, y: (extent.y2+extent.y1)/2 } : undefined;
+
     const bottomSheetRef = this._sheet.open(OverlayGraphComponent, {
       ariaLabel: 'Overlay Graph',
       panelClass: 'sheet-meta-graph',
-      data: { "gid": this.gid, "labels": this.labels }
+      data: { "ids": ids, "labels": this.labels, "center": center }
     });
 
-    bottomSheetRef.afterDismissed().subscribe((x) => {
-      this.btnStatus.metaGraph = false;
+    bottomSheetRef.afterDismissed().subscribe((x:IGraph) => {
+
       agens.cy = this.cy;
-      // 변경된 meta에 대해 data reload
-      if( x && (x.hasOwnProperty('filters') && x.hasOwnProperty('groups'))
-          && (Object.keys(x['filters']).length > 0 || Object.keys(x['groups']).length > 0) ) 
-        this.runFilterByGroupBy(x);
+      if( !x ) return;
+
+      // 혹시 기존에 overlay graph 가 있다면 제거
+      this.cy.batch(()=>{
+        this.cy.elements('.overlay').remove();
+
+        // 새로운 overlay graph 붙이기
+        x.nodes.forEach(e => {
+          this.cy.add( e );
+        });
+        x.edges.forEach(e => {
+          this.cy.add( e );
+        });
+
+        this.cy.fit( this.cy.elements(), 50);
+      });
 
       // change Detection by force
       this._cd.detectChanges();
