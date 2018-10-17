@@ -341,8 +341,8 @@
                             matTooltip="play Timeline" matTooltipPosition="before">
                             <mat-icon>fast_forward</mat-icon></a>                  
         
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="compareGraph()" 
-                            matTooltip="compare Graph" matTooltipPosition="before">
+                        <a class="btn btn-icon" [ngClass]="{ 'checked': btnStatus.overlayGraph }" (click)="toggleOverlayGraph()" 
+                            matTooltip="overlay Graph" matTooltipPosition="before">
                             <mat-icon>compare_arrows</mat-icon></a>
 
                         <!-- <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" 

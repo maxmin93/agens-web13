@@ -7,15 +7,11 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { MatSnackBar } from '@angular/material';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
-import * as CONFIG from '../../../app.config';
 import { IProject } from '../../../models/agens-manager-types';
-
 // services
 import { AgensDataService } from '../../../services/agens-data.service';
 
-import { IResponseDto } from '../../../models/agens-response-types';
-
-declare var $:any;
+declare var jQuery:any;
 
 @Component({
   selector: 'app-project-open-dialog',

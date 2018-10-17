@@ -4,6 +4,7 @@ import { MatDialog, MatButtonToggle, MatButton, MatSlideToggle, MatBottomSheet }
 import { Observable, Subject, interval } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+import { OverlayGraphComponent } from '../../sheets/overlay-graph/overlay-graph.component';
 import { MetaGraphComponent } from '../../sheets/meta-graph/meta-graph.component';
 import { EditGraphComponent } from '../../sheets/edit-graph/edit-graph.component';
 import { TimelineSliderComponent } from '../timeline-slider/timeline-slider.component';
@@ -54,7 +55,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     editGraph: false,
     megaGraph: false,
     labelStyle: false,
-    editMode: false           // Edit Mode : create node/edge, edit data
+    editMode: false,          // Edit Mode : create node/edge, edit data
+    overlayGraph: false       // overlay Graph : when false, then remove overlayed graph
   };
   labelSearchCount: number = 0;
 
@@ -1295,8 +1297,51 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // Label Style Setting Controllers
   /////////////////////////////////////////////////////////////////
   
-  compareGraph(){
+  toggleOverlayGraph(option:boolean=undefined){
+    if( !option ) this.btnStatus.overlayGraph = !this.btnStatus.overlayGraph;
+    else this.btnStatus.overlayGraph = option;
 
+    // overlay Graph 가 선택되면, IGraph 데이터를 받아 Canvas 상에 표시
+    // 1) node 가 몇개 매칭되는지 표시 되어야 하고 (project Sheet 상에서 임시로 매칭??)
+    // 2) <id> => clone_<id> 등으로 변경되어 add 되어야 함 (동일 id 존재 불가능)
+    // 3) 존재하는 node 의 position 가져오고 , 없는 것들은 layout 적용
+    // 4) grouping 시킨다
+
+    if( this.btnStatus.overlayGraph ) {
+      this.openOverlayGraphSheet();
+
+      Promise.resolve(null).then(()=>{ 
+        this._cd.detectChanges();
+      });
+    }
+
+    // overlay Graph 해제시, 존재하는 overlay Box 들 등을 모두 remove
+    else {
+
+    }
+
+  }
+
+  openOverlayGraphSheet(): void {
+
+    this.btnStatus.metaGraph = true;
+    const bottomSheetRef = this._sheet.open(OverlayGraphComponent, {
+      ariaLabel: 'Overlay Graph',
+      panelClass: 'sheet-meta-graph',
+      data: { "gid": this.gid, "labels": this.labels }
+    });
+
+    bottomSheetRef.afterDismissed().subscribe((x) => {
+      this.btnStatus.metaGraph = false;
+      agens.cy = this.cy;
+      // 변경된 meta에 대해 data reload
+      if( x && (x.hasOwnProperty('filters') && x.hasOwnProperty('groups'))
+          && (Object.keys(x['filters']).length > 0 || Object.keys(x['groups']).length > 0) ) 
+        this.runFilterByGroupBy(x);
+
+      // change Detection by force
+      this._cd.detectChanges();
+    });
   }
 
 }

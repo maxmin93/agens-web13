@@ -12,10 +12,6 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IProperty, IEnd } from 
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
-import * as CONFIG from '../../../../app.config';
-
-import * as cytoscape from 'cytoscape';
-
 declare var _: any;
 declare var $: any;
 declare var agens: any;

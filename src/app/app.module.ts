@@ -54,6 +54,7 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
 import { ImageExportDialog } from './main/graph/dialogs/image-export.dialog';
 import { ProjectOpenDialog } from './main/graph/dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
+import { OverlayGraphComponent } from './main/graph/sheets/overlay-graph/overlay-graph.component';
 // import { SearchResultDialog } from './main/graph/search-result.dialog';
 
 @NgModule({
@@ -80,6 +81,7 @@ import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
     ImageExportDialog,
     ProjectOpenDialog,
     ProjectSaveDialog,
+    OverlayGraphComponent,
   ], 
   // directives, components, and pipes owned by this NgModule
   imports: [
@@ -119,6 +121,7 @@ import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
     ImageExportDialog,
     ProjectOpenDialog,
     ProjectSaveDialog,
+    OverlayGraphComponent,
 
     MetaGraphComponent,
     CellViewerComponent,
