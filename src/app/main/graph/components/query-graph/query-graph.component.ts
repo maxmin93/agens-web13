@@ -43,6 +43,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   canvasHover: boolean = false;
   withShiftKey: boolean = false;
 
+  private cyDoubleClickDelayMs = 350;
+  private cyPreviousTapStamp;
+
   selectedOption: string = undefined;
   btnStatus: any = { 
     showHideTitle: false,     // Node Title 노출여부 
@@ -142,10 +145,22 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     // cy events : click
     this.cy.on('tap', (e) => { 
-      if( e.target === this.cy ) this.cyCanvasCallback(e['position']);
+      if( e.target === this.cy ) this.cyCanvasCallback(e);
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
       // change Detection by force
       this._cd.detectChanges();
+    });
+
+    // only canvas trigger doubleTap event
+    this.cy.on('doubleTap', (e, originalTapEvent) => {
+      if( this.btnStatus.editMode ){
+        if( originalTapEvent.position ){
+          // undefined => new node
+          let target:any = { group: 'nodes', data: { id: agens.graph.makeid(), label: '', props: {}, size: 1 }
+                , position: originalTapEvent.position, classes: "new" };
+          this.openSheetEditElement( target );
+        }
+      }
     });
 
     // cy events: edge 생성
@@ -530,16 +545,17 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /////////////////////////////////////////////////////////////////
 
   // graph canvas 클릭 콜백 함수
-  cyCanvasCallback(position=undefined):void {
+  cyCanvasCallback(e):void {
     this.selectedElement = undefined;
     this.selectedLabel = undefined;
 
-    if( this.btnStatus.editMode ){
-      // undefined => new node
-      let target:any = { group: 'nodes', data: { id: agens.graph.makeid(), label: '', props: {}, size: 1 }
-            , position: position, classes: "new" };
-      this.openSheetEditElement( target );
+    let currentTapStamp = e.timeStamp;
+    let msFromLastTap = currentTapStamp - this.cyPreviousTapStamp;
+
+    if (msFromLastTap < this.cyDoubleClickDelayMs) {
+        e.target.trigger('doubleTap', e);
     }
+    this.cyPreviousTapStamp = currentTapStamp;    
   }
 
   // graph elements 클릭 콜백 함수
@@ -833,7 +849,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     bottomSheetRef.afterDismissed().subscribe((x) => {
       if( callback ) (callback)();
       if( !x ) return;
-      console.log( "editElement closed:", x);
       // element.json() 의 내용이 변경된 경우 cy.element 내부 데이터도 연결되어 변경됨
       // ==> Server TP3 에 반영되면 됨
       if( x.created ){

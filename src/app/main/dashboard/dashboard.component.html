@@ -85,8 +85,8 @@
                     <div class="box-scroll">
                         <div class="box-content">
                             <div class="btn-group btn-group-v">
-                                <a class="btn btn-icon" (click)="createNode()" matTooltip="create NODE" matTooltipPosition="before"><mat-icon>add</mat-icon></a>
-                                <a class="btn btn-icon" [ngClass]="{'checked':btnStatus.edge}" (click)="toggleEditEdge()" matTooltip="edit Schema" matTooltipPosition="before"><mat-icon>edit</mat-icon></a>
+                                <!-- <a class="btn btn-icon" (click)="createNode()" matTooltip="create NODE" matTooltipPosition="before"><mat-icon>add</mat-icon></a> -->
+                                <a class="btn btn-icon" [ngClass]="{'checked':btnStatus.edit}" (click)="toggleEditEdge()" matTooltip="edit Schema" matTooltipPosition="before"><mat-icon>edit</mat-icon></a>
                                 <a class="btn btn-icon" [ngClass]="{'checked':btnStatus.delete}" (click)="toggleDeleteElement()" matTooltip="Delete" matTooltipPosition="before"><mat-icon>delete_outline</mat-icon></a>
                                 <a class="btn btn-icon" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="before"><mat-icon>refresh</mat-icon></a>
                             </div>

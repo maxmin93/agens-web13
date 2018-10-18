@@ -43,9 +43,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // cytoscape 객체
   private cy:any = null;
+  private cyDoubleClickDelayMs = 350;
+  private cyPreviousTapStamp;
 
   // 선택 버튼: edge, delete
-  btnStatus:any = { edge: false, delete: false, save: false };
+  btnStatus:any = { edit: false, delete: false, save: false };
   private counterNew:number = 0;
 
   // call API
@@ -128,6 +130,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
       // change Detection by force
       this._cd.detectChanges();
+    });
+
+    // only canvas trigger doubleTap event
+    this.cy.on('doubleTap', (e, originalTapEvent) => {
+      if( this.btnStatus.edit ){
+        if( originalTapEvent.position ) this.createNode( originalTapEvent.position );
+      }
     });
 
     // edge 생성 이벤트
@@ -215,6 +224,15 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   // graph canvas 클릭 콜백 함수
   cyCanvasCallback(e):void {
+
+    let currentTapStamp = e.timeStamp;
+    let msFromLastTap = currentTapStamp - this.cyPreviousTapStamp;
+
+    if (msFromLastTap < this.cyDoubleClickDelayMs) {
+        e.target.trigger('doubleTap', e);
+    }
+    this.cyPreviousTapStamp = currentTapStamp;
+    
     // delete 모드인 경우 해제
     if( this.btnStatus.delete ){
       this.toggleDeleteElement(false);
@@ -571,13 +589,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   ////////////////////////////////////////////////////////
   // 유용한 커서 타입: 'context-menu', 'move', 'copy', 'wait', 'zoom-in', 'zoom-out'
 
-  createNode(){
+  createNode(position:any=undefined){
     this.cy.elements(':selected').unselect();
 
     this.handlers[4] = this.createLabelOnDB('nodes').subscribe(
       (x:ILabelDto) => {
         let boundingBox = this.cy.elements().boundingBox();
-        let position:any = {
+        position = position ? position : {
           x: Math.floor(Math.random() * (boundingBox.x2 - boundingBox.x1 + 1)) + boundingBox.x1,
           y: Math.floor(Math.random() * (boundingBox.y2 - boundingBox.y1 + 1)) + boundingBox.y1,
         }
@@ -612,10 +630,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   toggleEditEdge(option:boolean=undefined){
-    if( option ) this.btnStatus.edge = option;
-    else this.btnStatus.edge = !this.btnStatus.edge;
+    if( option ) this.btnStatus.edit = option;
+    else this.btnStatus.edit = !this.btnStatus.edit;
 
-    if( this.btnStatus.edge ){
+    if( this.btnStatus.edit ){
       this.btnStatus.delete = false;
       this.cy.$api.edge.enable();
       // this.cy.$api.edge.enableDrawMode();
@@ -635,7 +653,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     else this.btnStatus.delete = !this.btnStatus.delete;
 
     if( this.btnStatus.delete ){
-      this.btnStatus.edge = false;
+      this.btnStatus.edit = false;
       this.divCanvas.nativeElement.style.cursor = 'not-allowed';   // or no-drop
     }else{
       this.divCanvas.nativeElement.style.cursor = 'pointer';  // Default
@@ -646,25 +664,30 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   saveElement(){
     let name$:Observable<ILabelDto> = empty();
     let desc$:Observable<ILabelDto> = empty();
+
     // update Desc : comment on label
     if( this.labelDescCtl.nativeElement.value != ''
         && this.selectedLabel.desc != this.labelDescCtl.nativeElement.value ){
+      console.log( 'update desc:', this.labelDescCtl.nativeElement.value);
       desc$ = this._api.core_comment_label(this.selectedLabel.type, 
                     this.selectedLabel.name, this.labelDescCtl.nativeElement.value);
     }
+    
     // update Name : alter label rename
     if( this.labelNameCtl.nativeElement.value != ''
         && this.selectedLabel.name != this.labelNameCtl.nativeElement.value ){
+      console.log( 'update name:', this.labelNameCtl.nativeElement.value);
       name$ = this._api.core_rename_label(this.selectedLabel.type, 
         this.selectedLabel.name, this.labelNameCtl.nativeElement.value);
     }
+    
     // **NOTE: empty 일 경우에는 subscribe 되지 않는다 (필터링 필요없음)
     concat( desc$, name$ ).pipe(tap(x => console.log)).subscribe( 
       x => {
+      console.log( 'saveElement:', x.request.type, x );
       if( !x.label ) return;
       let targetsRow = this.tableLabelsRows.filter(y => y.id == x.label.id && y.type == x.label.type );
       let targetsEle = this.cy.getElementById(x.label.id);
-      console.log( 'saveElement:', x, targetsRow, targetsEle );
       // update information
       if( x.request && x.request.type )
         switch( x.request.type ){
