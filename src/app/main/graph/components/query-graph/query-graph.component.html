@@ -28,7 +28,13 @@
                             </label>
                         </div>
                         <div class="row row-m row-space">
-                            <span class="property-name">Total Found Elements</span><span>--- --- ---</span><span>{{ labelSearchCount }}</span>
+                          <span class="property-name">Total Found Elements:</span> &nbsp;&nbsp; <span>{{ labelSearchCount }}</span>
+                          <br />
+                          <ul *ngIf="labelSearchCount > 0" class="property-list col flex-1">
+                            <li class="row row-m row-space" *ngFor="let item of labelSearchItems; let i = index">
+                              <span>{{ (item.length > 16)? (item | slice:0:16)+'..':(item) }}</span>
+                            </li>
+                          </ul>
                         </div>
                     </div>
                 </ng-container>

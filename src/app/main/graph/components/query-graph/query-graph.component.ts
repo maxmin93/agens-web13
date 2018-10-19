@@ -62,6 +62,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     overlayGraph: false       // overlay Graph : when false, then remove overlayed graph
   };
   labelSearchCount: number = 0;
+  labelSearchItems: string[] = [];
 
   gid: number = undefined;
   cy: any = undefined;      // for Graph canvas
@@ -756,10 +757,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.toggleProgressBar(true);
     let targets = this.cy.elements(':selected');
     this.cy.$api.changeLayout(layout, {
-      "padding": 50
+      "padding": 50      
       , "elements": (targets.size() > 2) ? targets : undefined
-      , "ready": () => {}
-      , "stop": () => this.toggleProgressBar(false)
+      , "boundingBox": (targets.size() > 2) ? targets.boundingBox() : undefined
+      , "ready": () => { }
+      , "stop": () => { this.toggleProgressBar(false); }
     });
   }
 
@@ -791,6 +793,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       return title.toLowerCase().indexOf(kwd) > -1;
     });
     this.labelSearchCount = elements.size();
+    this.labelSearchItems = elements.map(x => x.style('label') );
     // console.log('updateFilterLabel', kwd, elements);
     setTimeout(() => { if( !elements.empty() ) this.cy.$api.view.highlight( elements )}, 10);
   }
@@ -804,6 +807,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     if( this.btnShowHideTitle.checked ){
       this.selectedOption = 'labelSearch';
       this.labelSearchCount = 0;
+      this.labelSearchItems = [];
     } 
     else{
       this.selectedOption = undefined;
@@ -959,6 +963,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     if( !pathTo.empty() ){
       this.shortestPathOptions.distTo = dijkstra.distanceTo( this.cy.getElementById(this.shortestPathOptions.eid) );
       this.cy.$api.view.highlight(pathTo);
+      pathTo.select();
     }
   }
 

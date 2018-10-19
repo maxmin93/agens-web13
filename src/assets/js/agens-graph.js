@@ -204,8 +204,19 @@
           'border-width':'5',
           'text-outline-color':'white', 
           'color': function(e){ return agens.styles.edgeDColor(e); },
-          'z-index': 9,
+          'z-index': 99,
         }}, {
+        selector: 'node.highlighted',      
+        css: {
+          'background-color': '#fff', 
+          'width': 60,
+          'height': 60,
+          'border-style':'double',
+          'border-width':'5',
+          'text-outline-color':'white', 
+          'color': function(e){ return agens.styles.edgeDColor(e); },
+          'z-index': 9
+        }},{
         selector: 'node:locked',
         css: {
           'background-color': '#d64937',
@@ -276,22 +287,22 @@
           'text-outline-width': 1,
           'text-outline-color': '#83878d',
           'color':'white', 
+          'z-index': 99
+        }}, {
+        selector: 'edge.highlighted',
+        css: {
+          'width': 12,
+          'color': '#483d41',
+          'text-outline-width': 0,
+          'line-style':'dashed',
+          'line-color': '#83878d',
+          'target-arrow-color': '#83878d',
+          'source-arrow-color': '#83878d',
           'z-index': 9
-        }}, {
-        /// 엣지를 잠궜을 때 변화
-        selector: 'edge:locked',              
-        css: {
-          'opacity': 1,
-          'line-color': '#433f40',
-          'target-arrow-color': '#433f40',
-          'source-arrow-color': '#433f40'
-        }}, {
-        /// 기존과 다른 엣지버전의 변화
-        selector: 'edge.expand',             
-        css: {
-          'opacity': 0.6,
-          'line-style':'dotted'
-        }}, {
+        }},{
+
+        ///////////////////////////////////////////////////////////
+
         // meta-graph 에서 사용할 스타일 : width와 color는 그대로 사용
         selector: '.meta',
         css: {
@@ -303,32 +314,7 @@
         selector: '.dataLabel',
         css: {
           'label': function(e){ return agens.styles.dataLabel(e); },
-        }}, {
-  
-        // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
-        selector: 'node.highlighted',      
-        css: {
-          'background-color': '#fff', 
-          'width': 60,
-          'height': 60,
-          'border-style':'double',
-          'border-width':'5',
-          'text-outline-color':'white', 
-          'color': function(e){ return agens.styles.edgeDColor(e); },
-          'z-index': 99
-        }},{
-        selector: 'edge.highlighted',
-        css: {
-          'width': 12,
-          'color': '#483d41',
-          'text-outline-width': 0,
-          'line-style':'dashed',
-          'line-color': '#83878d',
-          'target-arrow-color': '#83878d',
-          'source-arrow-color': '#83878d',
-          'z-index': 99
-        }},{
-
+        }}, { 
         selector: '.downlighted',
         css: {
           'label': '',
@@ -343,6 +329,9 @@
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s'
         }},{
+
+        ///////////////////////////////////////////////////////////
+
         // some style for the extension
         selector: '.eh-handle',
         css: {
@@ -571,17 +560,23 @@
 
       let layoutOption = {
         name: layout,
-        fit: true, padding: 50, boundingBox: boundingBox, 
+        fit: false, padding: 50, boundingBox: boundingBox, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
-        ready: function(){}, stop: function(){},
+        ready: function(){
+          if( options && options.hasOwnProperty('ready') ) (options.ready)();
+        }, 
+        stop: function(){ 
+          if( options && options.hasOwnProperty('stop') ) (options.stop)();
+          Promise.resolve(null).then(()=>{cy.fit( cy.elements(':visible'), 50 );});
+        },
         // for euler
         springLength: edge => 120, springCoeff: edge => 0.0008,
       };
       if( options && options.hasOwnProperty('animate') ) layoutOption.animate = options.animate;
       if( options && options.hasOwnProperty('padding') ) layoutOption.padding = options.padding;
-      if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
-      if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
+      // if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
+      // if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
 
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);
