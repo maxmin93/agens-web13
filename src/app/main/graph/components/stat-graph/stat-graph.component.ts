@@ -193,10 +193,12 @@ export class StatGraphComponent implements OnInit {
   } 
 
   // 결과들만 삭제 : runQuery 할 때 사용
-  clear(){
+  clear( option:boolean = true ){
     // 그래프 비우고
     this.cy.elements().remove();
+
     // 그래프 데이터 비우고
+    if( option ){ this.gid = -1; }
     this.statGraph = undefined;
     this.selectedElement = undefined;
     this.timeoutNodeEvent = undefined;

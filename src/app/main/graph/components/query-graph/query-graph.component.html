@@ -28,7 +28,13 @@
                             </label>
                         </div>
                         <div class="row row-m row-space">
-                            <span class="property-name">Total Found Elements</span><span>--- --- ---</span><span>{{ labelSearchCount }}</span>
+                          <span class="property-name">Total Found Elements:</span> &nbsp;&nbsp; <span>{{ labelSearchCount }}</span>
+                          <br />
+                          <ul *ngIf="labelSearchCount > 0" class="property-list col flex-1">
+                            <li class="row row-m row-space" *ngFor="let item of labelSearchItems; let i = index">
+                              <span>{{ (item.length > 16)? (item | slice:0:16)+'..':(item) }}</span>
+                            </li>
+                          </ul>
                         </div>
                     </div>
                 </ng-container>
@@ -44,7 +50,7 @@
                         </div>
                         <ul class="property-list col flex-1">
                             <li class="row row-m row-space"><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
-                            <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('name') }}</li>
+                            <!-- <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('props')['name'] }}</li> -->
                             <li class="col flex-1">
                                 <span>Data</span>
                                 <div class="json-box col flex-1"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
@@ -96,11 +102,11 @@
                           <div class="border mt20 pl20 pr20 row row-space row-m">    
                               <h5 class="mr20"><strong>TITLE </strong></h5>
                               <mat-form-field class="flex-1">
-                                  <mat-select [value]="selectedLabel.scratch._style.title"
+                                <mat-select [value]="selectedLabel.scratch._style.title"
                                               (selectionChange)="onChangeStyleTitle($event)" required>
                                   <mat-option value="_null_">_NONE_</mat-option>
                                   <mat-option *ngFor="let prop of selectedLabel.properties" [value]="prop.key">{{ prop.key }}</mat-option>
-                                  </mat-select>
+                                </mat-select>
                               </mat-form-field>                
                           </div>
                         </div>
@@ -248,6 +254,11 @@
             <div class="box-scroll">
                 <div class="box-content">
                     <div class="btn-group btn-group-v">
+                        <a class="checked btn btn-icon" [ngClass]="{ 'checked': btnStatus.editMode }" 
+                            id="btnEditMode" mat-button-toggle #btnEditMode
+                            (click)="toggleEditMode()" matTooltip="edit Mode" matTooltipPosition="before">
+                            <mat-icon>edit</mat-icon></a>
+
                         <a class="checked btn btn-icon" [ngClass]="{ 'checked': btnStatus.showHideTitle }" 
                             id="btnShowHideTitle" mat-button-toggle #btnShowHideTitle 
                             (click)="toggleShowHideTitle()" matTooltip="show/hide Title" matTooltipPosition="before">
@@ -336,8 +347,8 @@
                             matTooltip="play Timeline" matTooltipPosition="before">
                             <mat-icon>fast_forward</mat-icon></a>                  
         
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="compareGraph()" 
-                            matTooltip="compare Graph" matTooltipPosition="before">
+                        <a class="btn btn-icon" [ngClass]="{ 'checked': btnStatus.overlayGraph }" (click)="toggleOverlayGraph()" 
+                            matTooltip="overlay Graph" matTooltipPosition="before">
                             <mat-icon>compare_arrows</mat-icon></a>
 
                         <!-- <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" 
@@ -353,3 +364,49 @@
         </div>
     </div>
 </div>
+
+
+<!--
+  /////////////////////////////////////////////////////////////////
+  //
+  //  qtip Menu template : not displayed
+  //
+  /////////////////////////////////////////////////////////////////
+-->
+
+<div id="divCxtMenu" style="display:none;">
+  <h4><strong>CxtMenu</strong></h4>
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('selectAll')">select All</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('toggleSelection')">toggle Selection</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('remove')">remove</a></li>
+  </ul>
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('copy')">copy (Ctrl+C)</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('cut')">cut (Ctrl+X)</a></li>
+    <!-- <li *ngIf="ur && ur.clipboard && ur.clipboard['nodes']">       // 왜 안되지?? (_cd 써도 안됨) -->
+    <li>
+      <a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('paste')">paste (Ctrl+V)</a>
+    </li>
+  </ul>
+    <!-- <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('showAll')">show All</a></li> -->
+    <!-- <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('makeInvisible')">make Invisible</a></li> -->
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('grouping')">grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('degrouping')">degrouping</a></li>
+  </ul>
+</div>
+
+<!--
+// **NOTE: element를 물고 들어갈 수 없음. 단지 canvas냐 element냐 에 따라 메뉴 항목만 달라질 뿐.
+//         ==> 의미 없음. 주석처리!! (2018-10-15)
+<div id="divEleMenu" style="display:none;">
+  <h4><strong>EleMenu</strong></h4><hr/>
+  <ul>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('edit', this)">edit Element</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('remove', this)">remove Element</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('remove', this)">grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipEleMenu)('remove', this)">de-grouping</a></li>
+  </ul>
+</div>
+-->

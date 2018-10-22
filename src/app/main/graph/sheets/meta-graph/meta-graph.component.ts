@@ -12,10 +12,6 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IProperty, IEnd } from 
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
-import * as CONFIG from '../../../../app.config';
-
-import * as cytoscape from 'cytoscape';
-
 declare var _: any;
 declare var $: any;
 declare var agens: any;
@@ -166,15 +162,9 @@ export class MetaGraphComponent implements OnInit {
   }
 
   findLabel(element:any): ILabel {
-    let target:ILabel = undefined;
-    this.data['labels'].filter(x => x.type == element._private.group)
-      .forEach(x => { 
-        if( x.name == element.data('name') ){
-          target = x;
-          return false;
-        }  
-      });
-    return target;
+    let targets: ILabel[] = this.data['labels'].filter(x => 
+        x.id == element._private.data.id && x.type == element._private.group);
+    return targets.length > 0 ? targets[0] : undefined;
   }
 
   // graph elements 클릭 콜백 함수
@@ -225,11 +215,12 @@ export class MetaGraphComponent implements OnInit {
       .filter(v => v !== null);
 
     console.log('addItemGroupBy:', selected, this.selectedLabel);
-    selected.forEach(item => {
-      let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
-      this.groupByList.push({ label: this.selectedElement.data('name'), prop: item
-            , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
-    });
+    if( this.selectedLabel )
+      selected.forEach(item => {
+        let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
+        this.groupByList.push({ label: this.selectedElement.data('props')['name'], prop: item
+              , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
+      });
   }  
   addItemFilterBy() {
     const selected:string[] = this.formGrp.value.conditions
@@ -239,7 +230,7 @@ export class MetaGraphComponent implements OnInit {
     selected.forEach(item => {
       if( item == '$ALL' ) return true;
       let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
-      this.filterByList.push({ label: this.selectedElement.data('name'), prop: item
+      this.filterByList.push({ label: this.selectedElement.data('props')['name'], prop: item
             , oper: "eq", value: ""
             , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
     });

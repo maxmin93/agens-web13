@@ -1,80 +1,102 @@
-   
-<!-- GRAPH -->
+<!-- Node/Edge Editor
+     1) select LABEL     
+     2) edit JSON (props)
+     3) if created, call API of TP Sync (about create) => id
+-->
 <div id="graphCard" class="col flex-1 p20">
-  <div id="progressBarMetaGraph" #progressBar style='visibility:hidden; z-index: 10; width: 100%;'>
-      <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
+  <div class="mb20 row row-c row-space">
+    <h4>{{ element.group | uppercase }} <strong>Editor</strong></h4>
   </div>
-
-  <!-- Graph content -->
-  <div class="row flex-1">
-    <div class="row flex-1">
-      <div class="col flex-1">
-        <!-- graph canvas -->
-        <div id="meta-canvas" class="graph-canvas flex-1 border" #divCanvas></div>
-      </div>
-        <!-- Graph.Meta : toolbar -->
-      <div class="row">
-        <div id="agens-graph-toolbar" class="box-view flex-1 theme">                    
-          <div class="box-view">
-            <div class="box-scroll">
-              <div class="box-content">
-                <div class="btn-group btn-group-h">
-                  <a (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above">
-                          <mat-icon>refresh</mat-icon></a>
-                  <a (click)="unfoldProperties()" matTooltip="unfold Properties" matTooltipPosition="above">
-                          <mat-icon>unfold_more</mat-icon></a>
-                  <a (click)="foldProperties()" matTooltip="fold Properties" matTooltipPosition="above">
-                          <mat-icon>unfold_less</mat-icon></a>
-                  <a (click)="close()" matTooltip="Close" matTooltipPosition="above">
-                          <mat-icon>close</mat-icon></a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>    
-    <div class="col flex-1">
-      <div class="col flex-1 border p20">    
-        
+  <ul class="property-list col flex-1">
+    <li class="row row-m row-space">
+      <span>ID</span>
+      <mat-form-field class="col">
+        <input matInput [value]="element.data.id" readonly="true">
+      </mat-form-field>
+    </li>
+    <li *ngIf="element.group == 'edges'" class="row row-m row-space">
+        <span>source-nodeID</span>
         <mat-form-field class="col">
-          <input class="flex-1" name="eleName" matInput placeholder="Selected" [(ngModel)]="ele_name">
+          <input matInput [value]="element.data.source" readonly="true">
         </mat-form-field>
-
-        <form [formGroup]="options" class="mt20">
-          <label class="row-center">Hide required marker<mat-checkbox formControlName="hideRequired"></mat-checkbox></label>
-          
-          <div class="mt20">
-            <label>Float label : </label><br/>
-            <mat-radio-group formControlName="floatLabel" class="col">
-              <mat-radio-button class="m-20" value="auto">Auto</mat-radio-button>
-              <mat-radio-button class="m-10" value="always">Always</mat-radio-button>
-              <mat-radio-button class="m-10" value="never">Never</mat-radio-button>
-            </mat-radio-group>
-          </div>
-        </form>
-
-        <mat-form-field class="mt10"
-            [hideRequiredMarker]="options.value.hideRequired"
-            [floatLabel]="options.value.floatLabel">
-          <input matInput placeholder="Simple placeholder" required>
+    </li>
+    <li *ngIf="element.group == 'edges'" class="row row-m row-space">
+        <span>target-node ID</span>
+        <mat-form-field class="col">
+          <input matInput [value]="element.data.target" readonly="true">
         </mat-form-field>
+    </li>
+    <li class="row row-m row-space">
+      <span>Label</span>
+      <mat-form-field>
+        <!-- case : old element -->
+        <input matInput *ngIf="!created" [value]="element.data.label" type="text" readonly="true">
+        <!-- case : new element -->
+        <input matInput *ngIf="created" placeholder="label name" [formControl]="editLabelCtl" 
+            [matAutocomplete]="autoSelector">
+        <mat-autocomplete #autoSelector="matAutocomplete">
+          <mat-option *ngFor="let label of labels" [value]="label.name">
+            {{label.name}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </li>
+    <li class="col flex-1">
+      <span>Properties</span>
+      <!-- <div class="json-box col flex-1">
+        <pre [innerHtml]="element.data.props | prettyjson:3"></pre>
+      </div> -->
+      <ngx-datatable #tblProperties class="material"
+        [headerHeight]="50" [limit]="5" [columnMode]="'force'"
+        [footerHeight]="50" [rowHeight]="'auto'" [rows]="properties">
+        <ngx-datatable-column name="key" [width]="120">
+          <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
+            <span title="Double click to edit"
+              (dblclick)="editing[rowIndex + '-key'] = (row.state == 'new') ? true : false"
+              *ngIf="!editing[rowIndex + '-key']">
+              {{value}}
+            </span>
+            <input autofocus (blur)="updateValue($event, 'key', rowIndex)"
+              *ngIf="editing[rowIndex+ '-key']" type="text" [value]="value"
+            />
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="value" [width]="240">
+          <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+             <span title="Double click to edit"
+              (dblclick)="editing[rowIndex + '-value'] = true"
+              *ngIf="!editing[rowIndex + '-value']">
+              {{value}}
+            </span>
+            <input autofocus (blur)="updateValue($event, 'value', rowIndex)"
+              *ngIf="editing[rowIndex+ '-value']" type="text" [value]="value"
+            />
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="type" [width]="80">
+          <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+            <span title="Double click to edit"
+              (dblclick)="editing[rowIndex + '-type'] = (row.state == 'new') ? true : false"
+              *ngIf="!editing[rowIndex + '-type']">
+              {{value}}
+            </span>
+              <select
+                *ngIf="editing[rowIndex + '-type']"
+                (blur)="editing[rowIndex + '-type'] = false"
+                (change)="updateValue($event, 'type', rowIndex)"
+                [value]="value">
+                <option value="STRING">string</option>
+                <option value="NUMBER">number</option>
+                <option value="ARRAY">array</option>
+                <option value="OBJECT">object</option>
+                <option value="BOOLEAN">boolean</option>
+              </select>
+            </ng-template>
+          </ngx-datatable-column>        
+      </ngx-datatable>        
+    </li>
+  </ul>
 
-        <mat-form-field [floatLabel]="options.value.floatLabel" class="mt10">
-          <mat-label>Both a label and a placeholder</mat-label>
-          <input matInput placeholder="Simple placeholder">
-        </mat-form-field>
-
-        <mat-form-field class="mt10"
-            [hideRequiredMarker]="options.value.hideRequired"
-            [floatLabel]="options.value.floatLabel">
-          <mat-select required>
-            <mat-option>-- None --</mat-option>
-            <mat-option value="option">Option</mat-option>
-          </mat-select>
-          <mat-label class="row row-l"><mat-icon>favorite</mat-icon> <span> <b> Fancy </b><i> label</i></span></mat-label>
-        </mat-form-field>
-      </div>
-    </div>
-  </div>
+  <button mat-raised-button color="accent" (click)="addNewProperty()">add Property</button>
+  <button mat-raised-button color="primary" [disabled]="!changed" (click)="close()">Update</button>
 </div>

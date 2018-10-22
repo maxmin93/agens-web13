@@ -65,12 +65,14 @@ return path1, path2;
 //  `;
 
   // core/query API 결과
+  gid:number = -1;
   private resultDto: IResultDto = undefined;
   private resultGraph: IGraph = undefined;
   private resultRecord: IRecord = undefined;
   private resultMeta: IGraph = undefined;
   private resultTemp: IGraph = undefined;
 
+  private projectDto: IGraphDto = undefined;
   currProject: IProject =  <IProject>{
     id: null,
     title: '',
@@ -89,6 +91,19 @@ return path1, path2;
   @ViewChild('queryGraph') queryGraph: QueryGraphComponent;
   @ViewChild('queryTable') queryTable: QueryTableComponent;
   @ViewChild('statGraph') statGraph: StatGraphComponent;
+
+  /////////////////////////////////////////////////////////
+
+  // ** clear 정책
+  // 1) 최초 로딩시  : newGraph
+  // 2) new 버튼클릭 : newGraph
+  // 3) query Run    : - 
+  // 4) requery Run  : -  
+  // 3) project Load : newGraph
+  // 4) project Save : -
+  // 5) import file  : - 
+
+  /////////////////////////////////////////////////////////
 
   constructor(    
     private _cd: ChangeDetectorRef,
@@ -125,8 +140,8 @@ return path1, path2;
       theme: 'idea'
     });
     // CodeMirror : initial value
-    this.editor.setValue( this.query );
     this.editor.setSize('100%', '100px');
+    this.editor.setValue( this.query );
 
     // toggleComment 만 안되서 기능 구현
     this.installCodeMirrorAddons();
@@ -141,7 +156,21 @@ return path1, path2;
     this.editor.on('keyup', function(cm, e){      
       // console.log('this.editor is keyup:', e.keyCode );
       if( e.keyCode == 13 ) agens.cy.resize();
-    });      
+    });
+
+    Promise.resolve(null).then(()=>{
+      // new graph to call API
+      this._api.grph_new().pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+        x => {
+          console.log( 'grph_new:', x );
+          if( x.hasOwnProperty('gid') && x['gid'] > 0 ){
+            this.gid = x.gid;
+            this.queryGraph.setGid( x.gid );
+            this.statGraph.setGid( x.gid );
+            this.queryResult.setMessage(x.state, x.message);
+          }
+        });
+    });
   }
 
   // **NOTE: 주석 라인에 대한 color 변경 필요 (comment style)
@@ -230,7 +259,7 @@ return path1, path2;
   /////////////////////////////////////////////////////////////////
 
   // when button "NEW" click
-  clearProject(){
+  clearProject(option:boolean = true){
     this.clearResults();
 
     // 결과값 지우고
@@ -255,6 +284,20 @@ return path1, path2;
 
     // util의 savePositions 지우고
     this._util.resetPositions();
+
+    if( option ){
+      this.gid = -1;
+      this._api.grph_new().pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+        x => {
+          console.log( 'grph_new:', x );
+          if( x.hasOwnProperty('gid') && x['gid'] > 0 ){
+            this.gid = x.gid;
+            this.queryGraph.setGid( x.gid );
+            this.statGraph.setGid( x.gid );
+            this.queryResult.setMessage(x.state, x.message);
+          }
+      });
+    }
 
     // change Detection by force
     this._cd.detectChanges();
@@ -331,13 +374,19 @@ return path1, path2;
     this.queryGraph.savePositions();
     
     // call API
-    let gid:number = (this.resultDto && this.resultDto.hasOwnProperty('gid')) ? this.resultDto.gid : -1;
-    let data$:Observable<any> = this._api.core_query( gid, sql );
+    let data$:Observable<any> = this._api.core_query( this.gid, sql );
+
+    // load Graph to QueryGraph
+    this.parseGraphDto2Data(data$);
+  }
+
+  parseGraphDto2Data(data$:Observable<any>){
 
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
       (x:IResultDto) => {
         this.resultDto = <IResultDto>x;
-        if( x.hasOwnProperty('gid') ) {
+        if( x.hasOwnProperty('gid') ) {       // gid 갱신
+          this.gid = x.gid;
           this.queryGraph.setGid( x.gid );
           this.statGraph.setGid( x.gid );
         }  
@@ -448,7 +497,6 @@ return path1, path2;
         // send data to Table 
         this.queryTable.setData(this.resultRecord);
       });
-
   }
 
   // when button "STOP" click
@@ -558,39 +606,131 @@ return path1, path2;
 
     dialogRef.afterClosed().subscribe(result => {
       if( !result ) return;
-      console.log('ProjectOpenDialog:', result.id, result.hasOwnProperty('title') ? result['title'] : '(undefined)');
-      // Project Open 위한 API 호출
-      this.currProject = this.loadProject(<IProject>result);
+      console.log('ProjectOpenDialog:', result);
 
-      // change Detection by force
-      this._cd.detectChanges();
+      // Project Open 위한 API 호출
+      this.currProject = result;
+      // clear
+      this.clearProject(false);    // if or not do new Graph 
+      // editor query
+      this.editor.setValue(result.sql);
+
+      // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
+      let data$:Observable<any> = this._api.grph_load(result.id);
+      // load GraphDto to QueryGraph
+      this.parseGraphDto2Project( data$ );
     });
   }
 
-  loadProject(data:IProject){
-    // clear
-    this.clearProject();
-    // editor query
-    this.editor.setValue(data.sql);
-    let graphData:any = null;
+  parseGraphDto2Project( data$:Observable<any> ){
 
-    // // json data parse
-    // try {
-    //   graphData = JSON.parse( data.graph_json );
-    // } 
-    // catch(ex) {
-    //   console.log('graph_json parse error =>', ex);
-    //   this._api.setResponses(<IResponseDto>{
-    //     group: 'project::load',
-    //     state: StateType.ERROR,
-    //     message: 'JSON parse error on loading project'
-    //   });
-    // }
+    this.queryResult.toggleTimer(true);
+    this.isLoading = true;
 
-    // load graph
-    // ...
+    this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        this.projectDto = x;
+        if( x.hasOwnProperty('gid') ) {       // project 가 로딩된 gid 로 갱신 (새그래프)
+          this.gid = x.gid;
+          this.queryGraph.setGid( x.gid );
+          this.statGraph.setGid( x.gid );
+        }
+      },
+      err => {
+        console.log( 'project_load: ERROR=', err instanceof HttpErrorResponse, err.error );
+        this._api.setResponses(<IResponseDto>{
+          group: 'project::load',
+          state: err.statusText,
+          message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
+        });
+        
+        this.clearSubscriptions();
+        // login 페이지로 이동
+        this._router.navigate(['/login']);
+      });
 
-    return data;
+    /////////////////////////////////////////////////
+    // Graph 에 표시될 내용은 누적해서 유지
+    this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        if( !this.resultGraph ){      // if not exists = NEW
+          this.resultGraph = x;
+          this.resultGraph.labels = new Array<ILabel>();
+          this.resultGraph.nodes = new Array<INode>();
+          this.resultGraph.edges = new Array<IEdge>();
+        }
+      });
+    this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+        // not exists
+        if( this.resultGraph.labels.map(y => y.id).indexOf(x.id) == -1 ){
+          // new style
+          x.scratch['_style'] = <IStyle>{ 
+            width: (x.type == 'nodes') ? 45 : 3
+            , title: 'name'
+            , color: (x.type == 'nodes') ? this._util.nextColor() : undefined // this._util.getColor(0)
+            , visible: true
+          };
+          x.scratch['_styleBak'] = _.cloneDeep(x.scratch['_style']);
+
+          this.resultGraph.labels.push( x );
+          this.statGraph.addLabel( x );
+        }
+        // **NOTE: labels 갱신은 맨나중에 resultGraph의 setData()에서 처리
+      });
+    this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        // setNeighbors from this.resultGraph.labels;
+        x.scratch['_neighbors'] = new Array<string>();
+        this.resultGraph.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.label)
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
+            if( !x.scratch.hasOwnProperty('_style')) x.scratch['_style'] = label.scratch['_style']; // 없으면
+            x.scratch['_styleBak'] = label.scratch['_styleBak'];  // 복사본은 항상 Label의 style과 일치하도록 
+          });
+        // if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
+        // if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
+        // if( x.data.props.hasOwnProperty('$$position')) x.position = x.data.props['$$position'];
+
+        // not exists
+        if( this.resultGraph.nodes.map(y => y.data.id).indexOf(x.data.id) == -1 ){
+          this.resultGraph.nodes.push( x );
+        } 
+        this.queryGraph.addNode( x );
+      });
+    this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.resultGraph.labels
+          .filter(val => val.type == 'edges' && val.name == x.data.label)
+          .map(label => {
+            if( !x.scratch.hasOwnProperty('_style')) x.scratch['_style'] = label.scratch['_style']; // 없으면
+            x.scratch['_styleBak'] =label.scratch['_styleBak'];
+          });
+        // if( x.data.props.hasOwnProperty('$$style')) x.scratch['_style'] = x.data.props['$$style'];
+        // if( x.data.props.hasOwnProperty('$$classes')) x.classes = x.data.props['$$classes'];
+  
+        // not exists
+        if( this.resultGraph.edges.map(y => y.data.id).indexOf(x.data.id) == -1 ){
+          this.resultGraph.edges.push( x );  
+        } 
+        this.queryGraph.addEdge( x );
+      });    
+
+    /////////////////////////////////////////////////
+    // Graph의 Label 별 카운팅 해서 갱신
+    //  ==> ILabel.size, IGraph.labels_size/nodes_size/edges_size
+    this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        console.log('END:', this.projectDto);
+        this.isLoading = false;        
+        this.queryResult.setData(<IResponseDto>this.projectDto);   // 메시지 출력
+
+        // send data to Canvas
+        this.queryGraph.setData(this.resultGraph);
+        // this.queryGraph.initCanvas(false);
+        this.queryGraph.refreshCanvas();
+      });    
   }
 
   uploadFile(event){
@@ -624,7 +764,8 @@ return path1, path2;
       return;
     }
 
-    this.handlers[9] = this._api.importFile( fileItem ).subscribe(
+    console.log( 'importFile:', fileItem,  event.target.files);
+    this.handlers[9] = this._api.importFile( this.gid, fileItem ).subscribe(
       x => {
         // progress return 
         // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
@@ -634,7 +775,8 @@ return path1, path2;
         }
         else if (x instanceof HttpResponse) {
           console.log('File is completely uploaded!', fileItem.name);
-          if( x.body ) this.parseGraphDto( of(x.body).pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() ) );
+          // load Graph to TempGraph
+          if( x.body ) this.parseGraphDto2Temp( of(x.body).pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() ) );
         }
       },
       err => {
@@ -646,11 +788,12 @@ return path1, path2;
     );
   }
 
-  parseGraphDto( data$:Observable<any> ){
+  parseGraphDto2Temp( data$:Observable<any> ){
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
         console.log(`graph_dto receiving : gid=${x.gid}`);
+        // gid 갱신 안함
       });
     data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {

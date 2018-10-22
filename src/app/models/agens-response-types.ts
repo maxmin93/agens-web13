@@ -49,10 +49,10 @@ export interface IRequestDto {
 export interface IResultDto extends IResponseDto {
   // group == 'result'
 
-  request: IRequestDto;
+  gid: number;
   hasGraph: boolean;
   hasRecord: boolean;
-  gid?: number;
+  request?: IRequestDto;
 };
 
 export interface IGraphDto extends IResponseDto {

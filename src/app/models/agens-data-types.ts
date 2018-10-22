@@ -52,13 +52,14 @@ export interface IElement {
     id: string;
     parent?: string;
     label: string;
-    props: Map<string,any>;
+    props: any;         // Map<string,any>;
     size: number;
   };
   scratch: {
     _style?: IStyle;          // styles (user property appended after API call)
   };
   classes?: string;
+  position?: any;
 
   getPropertyId?: () => string;
   getPropertyName?: () => string;
@@ -76,7 +77,7 @@ export interface IEdge extends IElement {
     id: string;
     parent?: string;
     label: string;
-    props: Map<string,any>;
+    props: any;       // Map<string,any>;
     size: number;
     source: string;           // only EDGE
     target: string;           // only EDGE

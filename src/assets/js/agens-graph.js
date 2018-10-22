@@ -187,6 +187,12 @@
           'border-color': '#FF5959',
           'border-style': 'dashed'
         }},{
+        selector: 'node.overlay',
+        css: {
+          'border-width': 4,
+          'border-color': '#8b8b00',
+          'border-style': 'solid'
+        }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
         selector: 'node:selected',
@@ -198,8 +204,19 @@
           'border-width':'5',
           'text-outline-color':'white', 
           'color': function(e){ return agens.styles.edgeDColor(e); },
-          'z-index': 9,
+          'z-index': 99,
         }}, {
+        selector: 'node.highlighted',      
+        css: {
+          'background-color': '#fff', 
+          'width': 60,
+          'height': 60,
+          'border-style':'double',
+          'border-width':'5',
+          'text-outline-color':'white', 
+          'color': function(e){ return agens.styles.edgeDColor(e); },
+          'z-index': 9
+        }},{
         selector: 'node:locked',
         css: {
           'background-color': '#d64937',
@@ -270,22 +287,22 @@
           'text-outline-width': 1,
           'text-outline-color': '#83878d',
           'color':'white', 
+          'z-index': 99
+        }}, {
+        selector: 'edge.highlighted',
+        css: {
+          'width': 12,
+          'color': '#483d41',
+          'text-outline-width': 0,
+          'line-style':'dashed',
+          'line-color': '#83878d',
+          'target-arrow-color': '#83878d',
+          'source-arrow-color': '#83878d',
           'z-index': 9
-        }}, {
-        /// 엣지를 잠궜을 때 변화
-        selector: 'edge:locked',              
-        css: {
-          'opacity': 1,
-          'line-color': '#433f40',
-          'target-arrow-color': '#433f40',
-          'source-arrow-color': '#433f40'
-        }}, {
-        /// 기존과 다른 엣지버전의 변화
-        selector: 'edge.expand',             
-        css: {
-          'opacity': 0.6,
-          'line-style':'dotted'
-        }}, {
+        }},{
+
+        ///////////////////////////////////////////////////////////
+
         // meta-graph 에서 사용할 스타일 : width와 color는 그대로 사용
         selector: '.meta',
         css: {
@@ -297,32 +314,7 @@
         selector: '.dataLabel',
         css: {
           'label': function(e){ return agens.styles.dataLabel(e); },
-        }}, {
-  
-        // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
-        selector: 'node.highlighted',      
-        css: {
-          'background-color': '#fff', 
-          'width': 60,
-          'height': 60,
-          'border-style':'double',
-          'border-width':'5',
-          'text-outline-color':'white', 
-          'color': function(e){ return agens.styles.edgeDColor(e); },
-          'z-index': 99
-        }},{
-        selector: 'edge.highlighted',
-        css: {
-          'width': 12,
-          'color': '#483d41',
-          'text-outline-width': 0,
-          'line-style':'dashed',
-          'line-color': '#83878d',
-          'target-arrow-color': '#83878d',
-          'source-arrow-color': '#83878d',
-          'z-index': 99
-        }},{
-
+        }}, { 
         selector: '.downlighted',
         css: {
           'label': '',
@@ -337,6 +329,9 @@
           'transition-property': 'background-color, line-color, target-arrow-color',
           'transition-duration': '0.2s'
         }},{
+
+        ///////////////////////////////////////////////////////////
+
         // some style for the extension
         selector: '.eh-handle',
         css: {
@@ -443,10 +438,11 @@
 
   // Public Function : graphFactory()
   agens.graph.graphFactory = function(target, options){
-    let customSetting = _.clone( agens.graph.defaultSetting );
+    let customSetting = _.cloneDeep( agens.graph.defaultSetting );
 
     if( options === undefined ){
       customSetting = _.merge( customSetting, agens.graph.customSetting );
+      // customSetting = _.assignInWith( customSetting, agens.graph.customSetting, (o,s) => !_.isUndefined(s) ? s : o )
     }
     else{
       // selectionType 이 single이면 multiSelection 못하게
@@ -564,17 +560,23 @@
 
       let layoutOption = {
         name: layout,
-        fit: true, padding: 50, boundingBox: boundingBox, 
+        fit: false, padding: 50, boundingBox: boundingBox, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
-        ready: function(){}, stop: function(){},
+        ready: function(){
+          if( options && options.hasOwnProperty('ready') ) (options.ready)();
+        }, 
+        stop: function(){ 
+          if( options && options.hasOwnProperty('stop') ) (options.stop)();
+          Promise.resolve(null).then(()=>{cy.fit( cy.elements(':visible'), 50 );});
+        },
         // for euler
         springLength: edge => 120, springCoeff: edge => 0.0008,
       };
       if( options && options.hasOwnProperty('animate') ) layoutOption.animate = options.animate;
       if( options && options.hasOwnProperty('padding') ) layoutOption.padding = options.padding;
-      if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
-      if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
+      // if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
+      // if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
 
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);
@@ -654,28 +656,41 @@
       return connectedNodes;
     };
 
-    cy.$api.grouping = function(members=undefined, title=undefined){
+    cy.$api.grouping = function(members=undefined, target=undefined, title=undefined){
       let nodes = cy.nodes(':selected');
       if( members && !members.empty() ) nodes = members;
-      let edges = nodes.connectedEdges();
       if( nodes.empty() ) return;
+
+      let parentPos = nodes.boundingBox();
+      let edges = nodes.connectedEdges();
       
       cy.elements(':selected').unselect();
-      nodes.remove();
+      nodes.remove();   // 우선순위 문제 때문에 삭제했다가 맨 나중에 다시 추가
   
-      let parentId = agens.graph.makeid();
-      let parentPos = nodes.boundingBox();
-      let parent = { "group": "nodes", "data": { "id": parentId, "name": title, "parent": undefined }
-                  , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } }
-      let parentNode = cy.add(parent);
-      parentNode.style('width', parentPos.x2-parentPos.x1 );
-      parentNode.style('height', parentPos.y2-parentPos.y1 );
-  
-      nodes.forEach(v => {
-        v._private.data.parent = parentId;
+      if( !target ){
+        let parentId = agens.graph.makeid();
+        let parent = { "group": "nodes"
+                    , "data": { 
+                      "id": parentId, "name": (title)?title:'group', "parent": undefined,
+                      "props": { "$$size": nodes.size(), "$$members": nodes.map(x=>x.id()) }
+                    }
+                    , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } }
+        target = cy.add(parent);
+      }
+
+      cy.batch(() => { 
+        target.style('width', parentPos.x2-parentPos.x1 );
+        target.style('height', parentPos.y2-parentPos.y1 );
+        target.scratch('_members', nodes);    // save memebers
+
+        nodes.forEach(v => {
+          v._private.data.parent = target.id();
+        });
+        cy.add(nodes); 
+        cy.add(edges); 
       });
-      cy.add(nodes);
-      cy.add(edges);
+
+      return target;
     }
   
     cy.$api.degrouping = function(target=undefined){
@@ -693,6 +708,8 @@
       target.remove();
       cy.add(children);
       cy.add(edges);
+
+      return children;    // nodes
     }
 
   };

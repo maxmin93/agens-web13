@@ -1,14 +1,18 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Inject, ChangeDetectorRef } from '@angular/core';
 
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IElement, INode, IEdge, IStyle } from '../../../../models/agens-data-types';
 
+import { DatatableComponent } from '@swimlane/ngx-datatable';
+
 declare var _: any;
 declare var agens: any;
+
+const new_value:string = '__new__';
 
 @Component({
   selector: 'app-edit-graph',
@@ -16,166 +20,123 @@ declare var agens: any;
   styleUrls: ['./edit-graph.component.scss']
 })
 export class EditGraphComponent implements OnInit, AfterViewInit {
-  
-  options: FormGroup;
 
-  metaGraph: IGraph = undefined;
+  created: boolean = false;
+  changed: boolean = false;
+  editLabelCtl: FormControl;
 
   gid: number = undefined;
-  cy: any = undefined;      // for Graph canvas
-  labels: ILabel[] = [];    // for Label chips
+  labels: ILabel[] = [];      // for Label chips
+  element: any = undefined;   // cy.element.json()
 
-  selectedElement: any = undefined;
-  ele_name: string = '';
+  label: ILabel = undefined;
+  properties: any[] = [];
+  editing:any = {};
 
-  // material elements
-  @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
-  @ViewChild('testEle', {read: ElementRef}) divPopup: ElementRef;
+  @ViewChild('tblProperties') tblProperties: DatatableComponent;
 
   constructor(
-    public fb: FormBuilder,
     private _cd: ChangeDetectorRef,
     private _util: AgensUtilService,
     private _sheetRef: MatBottomSheetRef<EditGraphComponent>,
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any
   ) { 
-    this.metaGraph = (this.data) ? _.cloneDeep(this.data['metaGraph']) : undefined;   
+    if( data.hasOwnProperty('gid') ) this.gid = data['gid'];
+    if( data.hasOwnProperty('labels') ) this.labels = data['labels'];
+    if( data.hasOwnProperty('element') ) this.element = data['element'];
 
-    this.options = fb.group({
-      hideRequired: false,
-      floatLabel: 'auto',
-    });
-  }
-
-  ngOnInit() {
-    // Cytoscape 생성
-    this.cy = agens.graph.graphFactory(
-      this.divCanvas.nativeElement, {
-        selectionType: 'single',    // 'single' or 'additive'
-        boxSelectionEnabled: false, // if single then false, else true
-        useCxtmenu: false,           // whether to use Context menu or not
-        hideNodeTitle: false,        // hide nodes' title
-        hideEdgeTitle: false,        // hide edges' title
-      });
-  }
-
-  ngAfterViewInit() {
-    this.cy.on('tap', (e) => { 
-      if( e.target === this.cy ) this.cyCanvasCallback();
-      else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
-
-      // change Detection by force
-      this._cd.detectChanges();
-    });
-
-    if( this.metaGraph ){
-      this.initLoad();
-      this.selectedElement = this.cy.nodes()[0];
+    if( this.element.data.label == '' ) this.created = true;
+    else{
+      let temp = this.labels.filter(y => y.type == this.element.group && y.name == this.element.data.label);
+      if( temp.length > 0 ) this.label = temp[0];
     }
   }
 
+  ngOnInit() {
+    // init label input
+    this.editLabelCtl = new FormControl(this.element.data.label, []);
+    this.editLabelCtl.valueChanges.subscribe(x => {
+      if( x != this.element.data.label ){
+        this.changed = true;
+        let temp = this.labels.filter(y => y.type == this.element.group && y.name == x);
+        if( temp.length > 0 ) this.label = temp[0];
+      } 
+    });
+
+    // init props' table 
+    let targets = this.labels.filter(x => x.name == this.element.data.label && x.type == this.element.group );
+    if( this.element.data.props ){
+      this.properties = _.map( this.element.data.props, (v,k) => { 
+        let t = 'STRING';
+        if( targets.length > 0 ){
+          let index = _.findIndex( targets[0].properties, {'key':k} );
+          if( index >= 0 ) t = targets[0].properties[index].type;
+        }
+        // **NOTE: 기존(old) prop 데이터는 삭제하거나, value만 바꿀 수 있음!!
+        //         반면에 신규(new) prop는 key, value, type 모두 수정 가능
+        
+        let value = v+'';     // string과 number, boolean 는 그냥 출력해야 함 
+        if( t == 'ARRAY' || t=='OBJECT' ) value = JSON.stringify(v);
+        return { "key":k, "value": value, "type": t, "state": 'old' };
+      });
+    }
+  }
+
+  ngAfterViewInit() {
+  }
+
   close(): void {
-    this._sheetRef.dismiss();
+    if( this.changed ){
+      // label name => element.data.label
+      if( this.created ){
+        this.element.data.label = this.editLabelCtl.value;
+        if( this.label ) this.element.scratch = { "_style": this.label.scratch._style };
+      } 
+      // properties => element.data.props
+      this.properties.forEach(x => {
+        if( x.key && x.key != new_value && x.value && x.value != new_value ) 
+          this.element.data.props[x.key] = x.value;
+      });
+    }
+
+    if( this.editLabelCtl.value == '' ) {
+      this._sheetRef.dismiss();
+    }
+    else{
+      this._sheetRef.dismiss( { created: this.created, changed: this.changed, element: this.element } );
+    }
     event.preventDefault();
   }
 
-  initLoad(){
-    this._util.calcElementStyles( this.metaGraph.nodes, (x)=>40+x*5, false );
-    this._util.calcElementStyles( this.metaGraph.edges, (x)=>2+x, false );
-
-    this.metaGraph.nodes.forEach(e => {
-      e.classes += ' dataLabel';
-      this.cy.add( e );
-    });
-    this.metaGraph.edges.forEach(e => {
-      e.classes += ' dataLabel';
-      this.cy.add( e );
-    });
-    this.initCanvas();
-
-    this.changeLayout( this.cy.elements() );
-  }
-
-  setGid( gid:number ){ this.gid = gid; }  
-
   /////////////////////////////////////////////////////////////////
-  // Canvas Controllers
+  // Edit Properties
   /////////////////////////////////////////////////////////////////
 
-  // graph canvas 클릭 콜백 함수
-  cyCanvasCallback():void {
-    this.selectedElement = undefined;
+  addNewProperty(){
+    this.tblProperties.offset = 0;
+    let temp = [...this.properties];
+    temp.unshift( { "key": new_value, "value": new_value, "type": 'STRING', "state": 'new' } );
+    this.properties = [...temp];     // 테이블 갱신
+    Promise.resolve(null).then(()=>{
+      this.editing['0-key'] = true;
+      this.editing['0-value'] = true;
+      this.editing['0-type'] = true;
+    });
   }
 
-  // graph elements 클릭 콜백 함수
-  cyElemCallback(target:any):void {
-    // null 이 아니면 정보창 (infoBox) 출력
-    this.selectedElement = target;
-    this.ele_name = this.selectedElement._private.data.name;
-    console.log( 'meta-graph.click:[0]', this.ele_name, this.selectedElement);
+  updateValue(event, cell, rowIndex) {
+    this.editing[rowIndex + '-' + cell] = false;
+    let value = event.target.value;
+    if( cell == 'value' ){
+      if( this.properties[rowIndex]['type'] == 'NUMBER' ) value = Number(value);
+      else if( this.properties[rowIndex]['type'] == 'BOOLEAN' ) value = Boolean(value);
+      else if( this.properties[rowIndex]['type'] == 'ARRAY' ) value = JSON.parse(value);
+      else if( this.properties[rowIndex]['type'] == 'OBJECT' ) value = JSON.parse(value);
+    }
+    // 변경사항이 발생하면 changed on 설정
+    if( this.properties[rowIndex][cell] != value ) this.changed = true;
+
+    this.properties[rowIndex][cell] = value;    // 값 변경
+    this.properties = [...this.properties];     // 테이블 갱신
   }  
-
-  cyQtipMenuCallback( target:any, value:string ){
-    console.log( 'qtipMenuCallback:', target, value );
-  }
-  
-  /////////////////////////////////////////////////////////////////
-  // Graph Controllers
-  /////////////////////////////////////////////////////////////////
-
-  // for banana javascript, have to use 'document.querySelector(...)'
-  toggleProgressBar(option:boolean = undefined){
-    let graphProgressBar:any = document.querySelector('div#progressBarMetaGraph');
-    if( !graphProgressBar ) return;
-
-    if( option === undefined ) option = !((graphProgressBar.style.visibility == 'visible') ? true : false);
-    // toggle progressBar's visibility
-    if( option ) graphProgressBar.style.visibility = 'visible';
-    else graphProgressBar.style.visibility = 'hidden';
-    this._cd.detectChanges();
-  } 
-
-  // 결과들만 삭제 : runQuery 할 때 사용
-  clear(){
-    // 그래프 비우고
-    this.cy.elements().remove();
-    // 그래프 라벨 칩리스트 비우고
-    this.labels = [];
-    this.selectedElement = undefined;
-  }
-
-  // 데이터 불러오고 최초 적용되는 작업들 
-  initCanvas(){
-    // // add groupBy menu
-    // this.addQtipMenu( this.cy.elements() );
-    // refresh style
-    this.cy.style(agens.graph.stylelist['dark']).update();
-    this.cy.fit( this.cy.elements(), 50);
-  }
-  // 액티브 상태가 될 때마다 실행되는 작업들
-  refreshCanvas(){
-    this.cy.resize();
-    this.changeLayout( this.cy.elements() );
-    agens.cy = this.cy;
-  }
-
-  changeLayout( elements ){
-    let options = { name: 'cose',
-      nodeDimensionsIncludeLabels: true, fit: true, padding: 50, animate: false, 
-      randomize: false, componentSpacing: 80, nodeOverlap: 4,
-      idealEdgeLength: 50, edgeElasticity: 50, nestingFactor: 1.5,
-      gravity: 0.5, numIter: 1000
-    };    
-    // adjust layout
-    elements.layout(options).run();
-  }
-
-  unfoldProperties(){
-
-  }
-
-  foldProperties(){
-
-  }
-  
 }
