@@ -368,11 +368,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     ur.action('degrouping',
       (target:any) => { 
+        if( !target || target.hasClass('overlay') ) return undefined;
         this.cy.$api.degrouping( target ); 
         return target;
       },
       (target:any) => { 
-        this.cy.restore( target );
+        if( !target || target.hasClass('overlay') ) return undefined;
+        target.restore();
         if( target.scratch('_memebers') ) this.cy.$api.grouping( target.scratch('_memebers'), target );
         return target;
       });
@@ -567,7 +569,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     else if( this.btnStatus.neighbors ) this.highlightNeighbors(target);
     else if( this.btnStatus.editMode ) this.openSheetEditElement(target.json());
     else{
-      let allStatus = Object.keys(this.btnStatus).reduce( (prev,key) => { return  <boolean> prev || this.btnStatus[key] }, false );
+      let allStatus = Object.keys(this.btnStatus).reduce((prev,key) => {
+        if( key == 'overlayGraph' ) return prev;      // 예외: overlay 에서도 정보창 이용 가능하도록
+        return <boolean>prev || this.btnStatus[key];
+      }, false );
+
       if( !allStatus ){
         this.selectedElement = target;
         let selected = this.cy.elements(':selected').filter(x => x != target );
@@ -1337,7 +1343,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // overlay Graph 해제시, 존재하는 overlay Box 들 등을 모두 remove
     else {
-      this.ur.do('remove', this.cy.elements('.overlay'));
+      // this.ur.do('remove', this.cy.elements('.overlay'));
+      this.cy.elements('.overlay').remove();
+      this.cy.nodes(':locked').unlock();
     }
 
   }
@@ -1365,14 +1373,26 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       // 혹시 기존에 overlay graph 가 있다면 제거
       this.cy.batch(()=>{
         this.cy.elements('.overlay').remove();
+        let unmatched = this.cy.collection();
 
         // 새로운 overlay graph 붙이기
         x.nodes.forEach(e => {
-          this.cy.add( e );
+          let match = this.cy.getElementById(e.scratch['_id']);
+          if( match.size() > 0 ){
+            e.position = _.clone( match.position() );
+            match.lock();
+          } 
+          let overlay = this.cy.add( e );
+          if( match.size() == 0 ) unmatched = unmatched.add( overlay );
+          else{
+            overlay.style('background-opacity',1.0);
+            overlay.addClass('locked');
+          }
         });
         x.edges.forEach(e => {
-          this.cy.add( e );
+          let overlay = this.cy.add( e );
         });
+        console.log( 'unmatched:', unmatched.size(), unmatched );
 
         this.cy.fit( this.cy.elements(), 50);
       });

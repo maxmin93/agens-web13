@@ -54,7 +54,6 @@ export class OverlayGraphComponent implements OnInit {
     private _sheetRef: MatBottomSheetRef<OverlayGraphComponent>,
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: any            
   ) { 
-    console.log('constructor', data);
     if( data.hasOwnProperty('ids') ) this.ids = data['ids'];
     if( data.hasOwnProperty('labels') ) this.labels = data['labels'];
     if( data.hasOwnProperty('center') ) this.center = data['center'];

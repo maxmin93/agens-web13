@@ -191,7 +191,9 @@
         css: {
           'border-width': 4,
           'border-color': '#8b8b00',
-          'border-style': 'solid'
+          'border-style': 'solid',
+          'background-opacity': 0.4,
+          'z-index': 99,
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
@@ -300,7 +302,17 @@
           'source-arrow-color': '#83878d',
           'z-index': 9
         }},{
-
+        selector: 'edge.overlay',
+        css: {
+          'width': 4,
+          'line-style': 'solid',
+          'line-color': '#8b8b00',
+          'target-arrow-color': '#8b8b00',
+          'source-arrow-color': '#8b8b00',
+          'opacity': 0.4,
+          'z-index': 99,
+        }},{
+  
         ///////////////////////////////////////////////////////////
 
         // meta-graph 에서 사용할 스타일 : width와 color는 그대로 사용
@@ -551,16 +563,20 @@
     cy.$api.changeLayout = function(layout='cose', options=undefined){
       let elements = cy.elements(':visible');
       let boundingBox = undefined;
+      let partial_layout = false;
       if( options ){
-        if( options.hasOwnProperty('elements') && options['elements'] ) 
+        if( options.hasOwnProperty('elements') && options['elements'] ){ 
           elements = options['elements'];
+          partial_layout = true;                  // 부분 레이아웃 적용
+        }
         if( options.hasOwnProperty('boundingBox') && options['boundingBox'] ) 
           boundingBox = options['boundingBox'];
       }
 
       let layoutOption = {
         name: layout,
-        fit: false, padding: 50, boundingBox: boundingBox, 
+        fit: (partial_layout) ? false : true, padding: 50, 
+        boundingBox: (partial_layout) ? boundingBox : undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){
@@ -568,7 +584,9 @@
         }, 
         stop: function(){ 
           if( options && options.hasOwnProperty('stop') ) (options.stop)();
-          Promise.resolve(null).then(()=>{cy.fit( cy.elements(':visible'), 50 );});
+          Promise.resolve(null).then(()=>{
+            if( partial_layout ) cy.fit( cy.elements(':visible'), 50 );
+          });
         },
         // for euler
         springLength: edge => 120, springCoeff: edge => 0.0008,
@@ -606,7 +624,7 @@
 
     cy.$api.unre = cy.undoRedo({
         isDebug: false, // Debug mode for console messages
-        undoableDrag: false, // Whether dragging nodes are undoable can be a function as well
+        undoableDrag: true, // Whether dragging nodes are undoable can be a function as well
       });
 
     // Public Property : APIs about view and undoredo
