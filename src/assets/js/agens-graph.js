@@ -193,7 +193,22 @@
           'border-color': '#8b8b00',
           'border-style': 'solid',
           'background-opacity': 0.4,
+          'z-index': 11,
+        }},{
+        selector: 'node.exact_match',
+        css: {
+          'border-width': 6,
+          'border-color': '#d64937',
+          'border-style': 'solid',
+          'background-opacity': 1.0,
           'z-index': 99,
+        }},{
+        selector: 'node.half_match',
+        css: {
+          'border-width': 6,
+          'border-color': '#d64937',
+          'border-style': 'dashed',
+          'z-index': 98,
         }},{
         /// 선택한 노드의 변화 
         /// (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)          
@@ -289,7 +304,7 @@
           'text-outline-width': 1,
           'text-outline-color': '#83878d',
           'color':'white', 
-          'z-index': 99
+          'z-index': 98
         }}, {
         selector: 'edge.highlighted',
         css: {
@@ -300,7 +315,7 @@
           'line-color': '#83878d',
           'target-arrow-color': '#83878d',
           'source-arrow-color': '#83878d',
-          'z-index': 9
+          'z-index': 8
         }},{
         selector: 'edge.overlay',
         css: {
@@ -310,9 +325,19 @@
           'target-arrow-color': '#8b8b00',
           'source-arrow-color': '#8b8b00',
           'opacity': 0.4,
-          'z-index': 99,
+          'z-index': 8,
         }},{
-  
+        selector: 'edge.half_match',
+        css: {
+          'width': 6,
+          'line-style': 'dashed',
+          'line-color': '#d64937',
+          'target-arrow-color': '#d64937',
+          'source-arrow-color': '#d64937',
+          'opacity': 1.0,
+          'z-index': 10,
+        }},{
+    
         ///////////////////////////////////////////////////////////
 
         // meta-graph 에서 사용할 스타일 : width와 color는 그대로 사용
@@ -692,7 +717,9 @@
                       "id": parentId, "name": (title)?title:'group', "parent": undefined,
                       "props": { "$$size": nodes.size(), "$$members": nodes.map(x=>x.id()) }
                     }
-                    , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } }
+                    , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } 
+                    , "selectable": false       // 선택 대상에서 제외
+                  }
         target = cy.add(parent);
       }
 

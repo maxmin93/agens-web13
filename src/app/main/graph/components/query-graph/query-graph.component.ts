@@ -574,8 +574,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         return <boolean>prev || this.btnStatus[key];
       }, false );
 
-      if( !allStatus ){
-        this.selectedElement = target;
+      if( !allStatus && !target.isParent() ){         // parent 는 정보창 출력 대상에서 제외
+          this.selectedElement = target;
         let selected = this.cy.elements(':selected').filter(x => x != target );
         // edge 일 경우, 연결된 nodes 까지 선택
         if( target.group() == 'edges' ){
@@ -1373,26 +1373,48 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       // 혹시 기존에 overlay graph 가 있다면 제거
       this.cy.batch(()=>{
         this.cy.elements('.overlay').remove();
-        let unmatched = this.cy.collection();
+        let exact_matched:string[] = [];     // 완전 매치
+        let half_matched:string[] = [];      // 부분 매치 : same direction, same label
 
         // 새로운 overlay graph 붙이기
+        // ** match 전략
+        // 1) 같은 ID 의 node 에 대해 동일 position 부여 (최우선)
+        // 2) matched node list 순회
+        //    - same direction, same label ==> half match
         x.nodes.forEach(e => {
           let match = this.cy.getElementById(e.scratch['_id']);
           if( match.size() > 0 ){
-            e.position = _.clone( match.position() );
-            match.lock();
+            e.position = _.clone( match.position() );   // 동일 ID
+            match.lock();                               // lock
+            exact_matched.push( match.id() );           // exact_matched 추가
+            e.classes += ' exact_match';                // marking overlay matched node
           } 
-          let overlay = this.cy.add( e );
-          if( match.size() == 0 ) unmatched = unmatched.add( overlay );
-          else{
-            overlay.style('background-opacity',1.0);
-            overlay.addClass('locked');
-          }
+          this.cy.add( e );
         });
+
         x.edges.forEach(e => {
-          let overlay = this.cy.add( e );
+          let isMatched = false;
+          // if sourceV is matched and targetV is not matched
+          if( exact_matched.includes( e.scratch['_source'] ) && !exact_matched.includes( e.scratch['_target'] ) ){
+            // overlay 매칭 대상
+            let target = this.cy.getElementById(e.data['target']);
+            // original 매칭 후보들                                                                                       
+            let candidates = this.cy.getElementById(e.scratch['_source']).outgoers().targets();
+            // half matching : same label and not used for matching
+            isMatched = isMatched || this.overlayHalfMatching( target, candidates, half_matched );
+          }
+          // if sourceV is not matched and targetV is matched
+          if( !exact_matched.includes( e.scratch['_source'] ) && exact_matched.includes( e.scratch['_target'] ) ){
+            // overlay 매칭 대상
+            let target = this.cy.getElementById(e.data['source']);
+            // original 매칭 후보들                                                                                       
+            let candidates = this.cy.getElementById(e.scratch['_target']).incomers().sources();
+            // half matching : same label and not used for matching
+            isMatched = isMatched || this.overlayHalfMatching( target, candidates, half_matched );
+          }
+          if( isMatched ) e.classes += ' half_match';    // 사용된 edge 에도 match 표식
+          this.cy.add( e );
         });
-        console.log( 'unmatched:', unmatched.size(), unmatched );
 
         this.cy.fit( this.cy.elements(), 50);
       });
@@ -1402,4 +1424,24 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private overlayHalfMatching(target:any, candidates:any, half_matched:string[] ){
+    let isMatched = false;
+    if( target.size() > 0 && candidates.size() > 0 ){
+      // 부분매칭 조건 : same label
+      candidates = candidates.filter(y => y.data('label') == target.data('label') );
+      if( candidates.size() > 0 ){
+        isMatched = true;
+        let matches = candidates.filter(y => !half_matched.includes( y.id() ) );
+        if( matches.size() > 0 ){    // 선정 : matches.first()                
+          let ele = matches.first();
+          half_matched.push( ele.id() );          // half_matched 추가                
+          target.scratch('_match', ele.id());
+          target.position( _.clone(ele.position()) );
+          // 이후에 class 제어하려면 이렇게 ==> overlay._private.classes.add('new',1);
+          target.addClass('half_match');
+        }
+      }
+    }
+    return isMatched;
+  }
 }

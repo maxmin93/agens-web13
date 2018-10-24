@@ -270,7 +270,7 @@ return path1, path2;
     this.resultTemp = undefined;
 
     // 에디터 비우고
-    this.editor.setValue('');
+    this.editor.setValue('match path=()-[]->()-[]->() return path limit 100;');
 
     // 프로젝트 정보 지우고
     this.currProject = <IProject>{

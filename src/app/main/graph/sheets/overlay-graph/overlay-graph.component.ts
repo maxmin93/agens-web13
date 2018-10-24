@@ -46,6 +46,7 @@ export class OverlayGraphComponent implements OnInit {
   tmpRows: IProject[] = [];
 
   @ViewChild('matchTestMessage') matchTestMessage: ElementRef;
+  // @ViewChild('imgProjectCapture') imgProjectCapture: ElementRef;
   @ViewChild('projectsTable') projectsTable: DatatableComponent;
 
   constructor(
@@ -134,7 +135,16 @@ export class OverlayGraphComponent implements OnInit {
           // meesage out!!
           this._cd.detectChanges();
         }
-      })
+      });
+
+      // ** 매칭 테스트와 이미지 출력, 둘다 하니깐 버벅된다. 이미지 출력을 제외하는 걸로!
+      // this._api.mngr_project_image( event.row.id ).subscribe(x => {
+      //   if(x){
+      //     // console.log( 'capture image:', event.row.id, x.length );
+      //     this.imgProjectCapture.nativeElement.src = x;
+      //     this._cd.detectChanges();
+      //   }
+      // });
     }
   }
 
@@ -194,7 +204,8 @@ export class OverlayGraphComponent implements OnInit {
             },
             scratch: {},
             classes: 'overlay',
-            position: undefined
+            position: undefined,
+            selectable: false       // 선택 대상에서 제외
           });
       });
     this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
