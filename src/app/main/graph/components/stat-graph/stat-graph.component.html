@@ -24,14 +24,31 @@
             </div>
         </div> 
         <div class="col flex-1">
+
             <div id="div-d3-chart" #divD3Chart class="col flex-1 border p20">
                 <h5><strong>CHART</strong></h5>
                 <div>
                     <svg id="svg-d3-chart" width="600" height="150"></svg>
                 </div>
             </div>
+
             <div class="col flex-1 border p20 mt20">
-                <h5><strong>LINE</strong></h5>
+              <ngx-datatable #tableProperties class="material flex-1"
+                [columnMode]="'force'" [limit]="8"
+                [rows]='tablePropertiesRows' [columns]='tablePropertiesColumns'
+                [footerHeight]="48" [rowHeight]="'auto'"
+                [selected]="selectedProperties" [selectionType]="'single'"
+                (select)="onSelectProperty($event)"
+                >
+                <!-- <ngx-datatable-column name="Type" [width]="40"></ngx-datatable-column>
+                <ngx-datatable-column name="ID" [width]="20"></ngx-datatable-column>
+                <ngx-datatable-column name="Name" ></ngx-datatable-column>
+                <ngx-datatable-column name="Size" [width]="40">
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                        <span>{{row.size | number}}</span>
+                    </ng-template>
+                </ngx-datatable-column> -->
+              </ngx-datatable>
             </div>
         </div>
     </div>

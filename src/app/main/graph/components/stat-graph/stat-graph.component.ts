@@ -6,10 +6,11 @@ import { MatDialog, MatButtonToggle } from '@angular/material';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+import { DatatableComponent } from '@swimlane/ngx-datatable';
+
 import { AgensDataService } from '../../../../services/agens-data.service';
 import { AgensUtilService } from '../../../../services/agens-util.service';
-import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
-import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
+import { IGraph, ILabel, IProperty, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
 import * as d3 from 'd3-selection';
@@ -37,6 +38,19 @@ export class StatGraphComponent implements OnInit {
 
   selectedElement: any = undefined;  
   timeoutNodeEvent: any = undefined;    // neighbors 선택시 select 추가를 위한 interval 목적
+
+  // 출력: 테이블 label의 properties
+  selectedLabel: ILabel = undefined;
+  selectedProperties: IProperty[] = [];
+  tablePropertiesRows: IProperty[] = [];
+  tablePropertiesColumns : any[] = [
+    { name: 'KEY', prop: 'key' },
+    { name: 'TYPE', prop: 'type' },
+    { name: 'Size', prop: 'size' },
+  ];
+  
+  // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
+  @ViewChild('tableProperties') tableProperties: DatatableComponent;
 
   ////////// d3 example //////////////
   private width: number;
@@ -103,12 +117,29 @@ export class StatGraphComponent implements OnInit {
 
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
+    let temp = this.labels.filter(x => x.id == target.id() && x.type == target.group() );
+    this.selectedLabel = temp.length > 0 ? temp[0] : undefined;
+
+    // 테이블 초기화: 선택 label의 properties 주입
+    this.selectedProperties = [];
+    this.tablePropertiesRows = this.selectedLabel ? [...this.selectedLabel.properties] : [];
+    this.tableProperties.offset = 0;
   }  
 
   // qtipMenu 선택 이벤트
   cyQtipMenuCallback( target:any, value:string ){
 
   }
+
+  /////////////////////////////////////////////////////////////////
+  // table for properties
+  /////////////////////////////////////////////////////////////////
+
+  onSelectProperty(event){
+    console.log('onSelectProperty:', event);
+
+  }
+
   
   /////////////////////////////////////////////////////////////////
   // load meta graph for statistics
