@@ -264,9 +264,9 @@ export class AgensDataService {
     return this._http.get<string>(url, httpOptions);
   }
 
-  mngr_projects_list():Observable<IProject> {
+  mngr_projects_list():Observable<IProject[]> {
     const url = `${this.api.mngr}/projects`;
-    return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});
+    return this._http.get<IProject[]>(url, {headers: this.createAuthorizationHeader()});
   }
 
   mngr_project_save(project:IProject):Observable<IProject> {
@@ -279,9 +279,9 @@ export class AgensDataService {
     return this._http.get<IProject>(url, {headers: this.createAuthorizationHeader()});
   }
 
-  mngr_history():Observable<ILogs> {
+  mngr_history():Observable<ILogs[]> {
     const url = `${this.api.mngr}/logs`;
-    return this._http.get<ILogs>(url, {headers: this.createAuthorizationHeader()});
+    return this._http.get<ILogs[]>(url, {headers: this.createAuthorizationHeader()});
   }
 
   ////////////////////////////////////////////////

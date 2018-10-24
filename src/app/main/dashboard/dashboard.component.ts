@@ -19,12 +19,9 @@ import { AgensDataService } from '../../services/agens-data.service';
 import { AgensUtilService } from '../../services/agens-util.service';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IEnd } from '../../models/agens-data-types'
 import { IResponseDto, ILabelDto } from '../../models/agens-response-types';
-import { Label, Element, Node, Edge } from '../../models/agens-graph-types';
+
 import * as CONFIG from '../../app.config';
 import { ISchemaDto } from '../../models/agens-response-types';
-
-import * as d3 from 'd3';
-import { FormControl, Validators } from '@angular/forms';
 
 declare var $: any;
 declare var agens: any;
