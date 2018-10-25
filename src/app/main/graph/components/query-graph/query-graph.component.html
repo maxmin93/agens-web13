@@ -269,7 +269,7 @@
                             matTooltip="Filtering & Grouping" matTooltipPosition="before">
                             <mat-icon>search</mat-icon></a>
         
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="layoutMenu" 
+                        <a class="btn btn-icon" [ngClass]="{ 'disabled': isLoading }" [matMenuTriggerFor]="layoutMenu" 
                             matTooltip="LAYOUT" matTooltipPosition="before"><mat-icon>bubble_chart</mat-icon></a>
                             <mat-menu #layoutMenu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
                                 <div td-menu-header>
@@ -298,7 +298,7 @@
                             </mat-menu>
                         
         
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" [matMenuTriggerFor]="centralityMenu" 
+                        <a class="btn btn-icon" [ngClass]="{ 'disabled': isLoading }" [matMenuTriggerFor]="centralityMenu" 
                             matTooltip="Centrality" matTooltipPosition="before">
                             <mat-icon>control_camera</mat-icon></a>
                             <mat-menu #centralityMenu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
@@ -323,7 +323,7 @@
                             matTooltip="Highlight Neighbors" matTooltipPosition="before">
                             <mat-icon id="btnHighlightNeighborsIcon">grain</mat-icon></a>
         
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openImageExportDialog()" 
+                        <a class="btn btn-icon" [ngClass]="{ 'disabled': isLoading }" (click)="openImageExportDialog()" 
                             matTooltip="Image Export" matTooltipPosition="before">
                             <mat-icon>image</mat-icon></a>
         
@@ -340,9 +340,6 @@
                             matTooltip="find Cycles" matTooltipPosition="before">
                             <mat-icon>toll</mat-icon></a>
         
-                        <!-- <li><a [ngClass]="{ 'checked': btnStatus.editGraph }" (click)="openEditGraphSheet()" matTooltip="edit Graph" matTooltipPosition="above">
-                            <mat-icon>create</mat-icon></a></li> -->
-        
                         <a class="btn btn-icon" [ngClass]="{ 'checked': btnStatus.timeLine }" (click)="toggleTimeline()" 
                             matTooltip="play Timeline" matTooltipPosition="before">
                             <mat-icon>fast_forward</mat-icon></a>                  
@@ -351,11 +348,7 @@
                             matTooltip="overlay Graph" matTooltipPosition="before">
                             <mat-icon>compare_arrows</mat-icon></a>
 
-                        <!-- <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="refreshCanvas()" 
-                            matTooltip="refresh Canvas" matTooltipPosition="before">
-                            <mat-icon>reply</mat-icon></a> -->
-        
-                        <a class="btn btn-icon" [ngClass]="{ 'disabled-btn': isLoading }" (click)="reloadGraph()" 
+                        <a class="btn btn-icon" [ngClass]="{ 'disabled': isLoading }" (click)="reloadGraph()" 
                             matTooltip="reload Graph" matTooltipPosition="before">
                             <mat-icon>refresh</mat-icon></a>
                     </div>

@@ -8,13 +8,21 @@
         <div class="card-header row row-m row-space">
           <h4 class="row row-m"><mat-icon class="mr10">code</mat-icon><span class="row row-b"> Query <strong>Editor </strong> <small> (CYPHER OR ANSI-SQL)</small></span></h4>
           <div class="btn-group">
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">Run</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">Stop</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">New</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="uploader.click()">Import</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="exportGraph()">Export</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">Load</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">Save</a>
+            <button mat-button [disabled]="isLoading" (click)="runQuery()">Run</button>
+            <button mat-button [disabled]="!isLoading" (click)="stopQuery()">Stop</button>
+            <button mat-button [disabled]="isLoading" (click)="clearProject()">New</button>
+            <button mat-button [disabled]="isLoading" (click)="uploader.click()">Import</button>
+            <button mat-button [disabled]="isLoading" [matMenuTriggerFor]="exportMenu"
+                matTooltip="Export file" matTooltipPosition="above">Export</button>
+              <mat-menu #exportMenu="matMenu" [yPosition]="'below'">
+                  <div td-menu-header><h4 class="mat-subhead">format</h4></div>
+                  <mat-divider></mat-divider>
+                      <button mat-menu-item (click)="exportGraph('graphson')">Graphson (json)</button>
+                  <mat-divider></mat-divider>
+                      <button mat-menu-item (click)="exportGraph('graphml')">Graphml (xml)</button>
+              </mat-menu>
+            <button mat-button [disabled]="isLoading" (click)="openProjectOpenDialog()">Load</button>
+            <button mat-button [disabled]="isLoading" (click)="openProjectSaveDialog()">Save</button>
             <input hidden type="file" #uploader (change)="importFile($event)" />
             <!-- accept="text/xml,application/json"/> --> <!-- only graphml, graphson -->
           </div>

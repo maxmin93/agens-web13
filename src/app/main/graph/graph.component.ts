@@ -844,17 +844,16 @@ return path1, path2;
 
   ///////////////////////////////////////////////////
 
-  exportGraph(){
-    let fileType = 'graphml';  // 'graphson';
+  exportGraph(fileType:string){
     let fileName = `graph_${this.gid}` + (fileType == 'graphson' ? '.json' : '.xml');
 
     this._api.exportFile(this.gid, fileType).subscribe(
       x => {
-        const blob = new Blob([x], { type: 'application/octet-stream' });
+        const blob = new Blob([x], { type: (fileType == 'graphson' ? 'application/json' : 'application/xml') });
         saveAs(blob, fileName);
       },
       err => {
-        console.log('exportGraph:', err);
+        console.log('exportGraph ERROR:', err);
       }
     );
   }  
