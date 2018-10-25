@@ -6,9 +6,6 @@ import { Router, } from '@angular/router';
 import { MatDialog, MatSnackBar, MatButtonToggle, MatInput } from '@angular/material';
 import { MatTabGroup } from '@angular/material/tabs';
 
-import { DatatableComponent } from '@swimlane/ngx-datatable';
-import { PrettyJsonModule } from 'angular2-prettyjson';
-
 import * as _ from 'lodash';
 import { Observable, Subscription, of } from 'rxjs';
 import { filter, share, concatAll } from 'rxjs/operators';
@@ -33,7 +30,7 @@ import { ProjectSaveDialog } from './dialogs/project-save-dialog';
 
 declare var CodeMirror: any;
 declare var agens: any;
-
+declare var saveAs: any;      // file-saver
 
 @Component({
   selector: 'app-graph',
@@ -843,6 +840,23 @@ return path1, path2;
         this.queryGraph.initCanvas(true);
         // this.queryGraph.graphChangeLayout('cose');
       });
-
   }
+
+  ///////////////////////////////////////////////////
+
+  exportGraph(){
+    let fileType = 'graphml';  // 'graphson';
+    let fileName = `graph_${this.gid}` + (fileType == 'graphson' ? '.json' : '.xml');
+
+    this._api.exportFile(this.gid, fileType).subscribe(
+      x => {
+        const blob = new Blob([x], { type: 'application/octet-stream' });
+        saveAs(blob, fileName);
+      },
+      err => {
+        console.log('exportGraph:', err);
+      }
+    );
+  }  
+
 }

@@ -6,14 +6,15 @@
 
     <div id="queryCard" [ngClass]="{'flex-1':isExpanded}" class="card col flex-1">
         <div class="card-header row row-m row-space">
-          <h4 class="row row-m"><mat-icon class="mr10">code</mat-icon><span class="row row-b"> QUERY <strong>EDITOR </strong> <small> (CYPHER OR ANSI-SQL)</small></span></h4>
+          <h4 class="row row-m"><mat-icon class="mr10">code</mat-icon><span class="row row-b"> Query <strong>Editor </strong> <small> (CYPHER OR ANSI-SQL)</small></span></h4>
           <div class="btn-group">
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">RUN</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">STOP</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">NEW</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="uploader.click()">IMPORT</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">LOAD</a>
-            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">SAVE</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="runQuery()">Run</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': !isLoading }" (click)="stopQuery()">Stop</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="clearProject()">New</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="uploader.click()">Import</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="exportGraph()">Export</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectOpenDialog()">Load</a>
+            <a class="btn btn-link" [ngClass]="{ 'disabled-btn': isLoading }" (click)="openProjectSaveDialog()">Save</a>
             <input hidden type="file" #uploader (change)="importFile($event)" />
             <!-- accept="text/xml,application/json"/> --> <!-- only graphml, graphson -->
           </div>

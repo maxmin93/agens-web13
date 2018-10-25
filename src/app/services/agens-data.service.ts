@@ -444,5 +444,22 @@ export class AgensDataService {
     });
     return this._http.request(req);
   }
-  
+
+  exportFile(gid: number, fileType:string):any{
+    const url = `${this.api.file}/export`;
+
+    let params:HttpParams = new HttpParams();
+    params = params.append('gid', gid+'');   
+    params = params.append('type', fileType);   // graphson or graphml
+
+    let httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/octet-stream; charset=utf-8',
+        'Authorization': this.getSSID()
+      }),
+      params: params,
+      'responseType': 'text' as 'json'      // httpclient Requesting non-JSON data 
+    };
+    return this._http.get<string>(url, httpOptions);
+  }
 }
