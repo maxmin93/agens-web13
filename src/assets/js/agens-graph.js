@@ -69,7 +69,7 @@
     },
     metaLabel: function(e){
       if( e.data('props') && e.data('props').hasOwnProperty('name') ) 
-        return e.data('props')['name']; // + '\n(' + e.scratch('_style').title +')';
+        return e.data('props')['name'] + '\n(' + e.data('size') +')';
       return '(no-name)';
     },
     nodeBColor: function(e){
@@ -215,11 +215,11 @@
         selector: 'node:selected',
         css: {
           'background-color': '#fff', 
-          'width': 60,
-          'height': 60,
-          'border-style':'double',
-          'border-width':'5',
-          'text-outline-color':'white', 
+          // 'width': 60,
+          // 'height': 60,
+          'border-style': 'double',
+          'border-width': 6,
+          'text-outline-color': 'white', 
           'color': function(e){ return agens.styles.edgeDColor(e); },
           'z-index': 99,
         }}, {
