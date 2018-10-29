@@ -13,13 +13,14 @@ import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IProperty, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
-import * as d3 from 'd3-selection';
-import * as d3Scale from 'd3-scale';
-import * as d3Array from 'd3-array';
-import * as d3Axis from 'd3-axis';
+// import * as d3 from 'd3-selection';
+// import * as d3Scale from 'd3-scale';
+// import * as d3Array from 'd3-array';
+// import * as d3Axis from 'd3-axis';
 
 declare var _: any;
 declare var agens: any;
+declare var d3: any;
 
 @Component({
   selector: 'app-stat-graph',
@@ -49,17 +50,20 @@ export class StatGraphComponent implements OnInit {
     { name: 'Size', prop: 'size' },
   ];
   
+  propDescStat: any = { kurt: 0.0, max: 0.0, mean: 0.0, median: 0.0, min: 0.0, n: 0, skew: 0.0, stdev: 0.0, type: 'unknown' };
+  propFrequency: any[];
+
   // ** NOTE : 포함하면 AOT 컴파일 오류 떨어짐 (offset 지정 기능 때문에 사용)
   @ViewChild('tableProperties') tableProperties: DatatableComponent;
 
   ////////// d3 example //////////////
   private width: number;
   private height: number;
-  private margin = {top: 0, right: 0, bottom: 0, left: 0};
+  private margin = {top: 5, right: 20, bottom: 5, left: 20};
 
   private x: any;
   private y: any;
-  private svg: any;
+  private svg: any = undefined;
   private g: any;
 
   // material elements
@@ -124,6 +128,9 @@ export class StatGraphComponent implements OnInit {
     this.selectedProperties = [];
     this.tablePropertiesRows = this.selectedLabel ? [...this.selectedLabel.properties] : [];
     this.tableProperties.offset = 0;
+
+    this.propDescStat = { kurt: 0.0, max: 0.0, mean: 0.0, median: 0.0, min: 0.0, n: 0, skew: 0.0, stdev: 0.0, type: 'unknown' };
+    this.propFrequency = [];
   }  
 
   // qtipMenu 선택 이벤트
@@ -135,11 +142,83 @@ export class StatGraphComponent implements OnInit {
   // table for properties
   /////////////////////////////////////////////////////////////////
 
-  onSelectProperty(event){
-    console.log('onSelectProperty:', event);
-
+  onSelectProperty({ selected }) {
+    if( this.gid < 0 || !this.selectedLabel || !selected || selected.length == 0 ) return;   
+    this._api.grph_propStat(this.gid, this.selectedLabel.type, this.selectedLabel.name, selected[0]['key'])
+    .subscribe(
+      x => {
+        console.log('propStat: ', x);
+        if( x.state == 'SUCCESS' ){
+          if( x.stat ){
+            this.propDescStat = x.stat;
+            this.propDescStat['type'] = x.type.toLowerCase();
+          } 
+          if( x.rows ){
+            // **NOTE: maximum length = 50. If over then slice array.
+            let rows = (x.rows.length > 50) ? x.rows.slice(0,50) : x.rows;
+            this.drawD3Chart( x.type, rows );
+          } 
+        }
+        else{
+          this.propDescStat = { kurt: 0.0, max: 0.0, mean: 0.0, median: 0.0, min: 0.0, n: 0, skew: 0.0, stdev: 0.0, type: 'unknown' };
+          this.propFrequency = [];
+          this.initSvg();
+        }
+      }
+    );
   }
 
+  drawD3Chart(type, rows){    
+      this.width = +this.divD3Chart.nativeElement.offsetWidth - this.margin.left - this.margin.right;
+      this.height = +this.divD3Chart.nativeElement.offsetHeight - this.margin.top - this.margin.bottom;
+
+      if( this.svg ) this.svg.remove();
+      this.svg = d3.select('#div-d3-chart').append('svg')
+                    .style("width", (this.divD3Chart.nativeElement.offsetWidth+40) + 'px')
+                    .style("height", (this.divD3Chart.nativeElement.offsetHeight+40) + 'px');
+      this.g = this.svg.append('g')
+                    .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+      this.x = d3.scaleBand().rangeRound([0, this.width]).padding(0.1);
+      this.y = d3.scaleLinear().rangeRound([this.height, 0]);
+      this.x.domain(rows.map((d) => d.value));
+      this.y.domain([0, d3.max(rows, (d) => Number(d['freq']))]);
+
+      let tool_tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-8, 0])
+        .html(function(d) {
+          let title = (type == 'STRING' || type == 'BOOLEAN') ? '"'+d.value+'"' : ('"~'+d.value).substring(0,8)+'"';
+          return "<strong> "+title+"</strong>=<span style='color:red'>" + d.freq + "</span>";
+        });
+      this.svg.call(tool_tip);
+
+      this.g.append('g')
+          .attr('class', 'axis axis--x')
+          .attr('transform', 'translate(0,' + this.height + ')')
+          .call(d3.axisBottom(this.x));
+      this.g.append('g')
+          .attr('class', 'axis axis--y')
+          .call(d3.axisLeft(this.y).ticks(10, '%'))
+          .append('text')
+          .attr('class', 'axis-title')
+          .attr('transform', 'rotate(-90)')
+          .attr('y', 6)
+          .attr('dy', '0.71em')
+          .attr('text-anchor', 'end')
+          .text('Frequency');
+
+      this.g.selectAll('.bar')
+          .data(rows)
+          .enter().append('rect')
+          .attr('class', 'bar')
+          .attr('x', (d) => this.x(d.value) )
+          .attr('y', (d) => this.y(Number(d.freq)) )
+          .attr('width', this.x.bandwidth())
+          .attr('height', (d) => this.height - this.y(Number(d.freq)) )
+          .on('mouseover', tool_tip.show)
+          .on('mouseout', tool_tip.hide);
+  }
   
   /////////////////////////////////////////////////////////////////
   // load meta graph for statistics
@@ -207,6 +286,7 @@ export class StatGraphComponent implements OnInit {
 
   }
 
+
   /////////////////////////////////////////////////////////////////
   // Graph Controllers
   /////////////////////////////////////////////////////////////////
@@ -224,7 +304,7 @@ export class StatGraphComponent implements OnInit {
   } 
 
   // 결과들만 삭제 : runQuery 할 때 사용
-  clear( option:boolean = true ){
+  clear( option:boolean = false ){
     // 그래프 비우고
     this.cy.elements().remove();
 
@@ -251,15 +331,8 @@ export class StatGraphComponent implements OnInit {
     // metaGraph 불러오기 by gid
     this.loadMetaGraph(this.gid);
 
-    if( this.isVisible ){
-      this.width = this.divD3Chart.nativeElement.offsetWidth;  //document.querySelector('div#div-d3-chart').offsetWidth;
-      this.height = this.divD3Chart.nativeElement.offsetHeight;
-      console.log( 'ngAfterViewInit():', this.width, this.height );
-
+    if( this.isVisible ){      
       this.initSvg();
-      this.initAxis();
-      this.drawAxis();
-      this.drawBars();  
     }
   }
 
@@ -284,57 +357,26 @@ export class StatGraphComponent implements OnInit {
   /////////////////////////////////////////////////////////////////
   // D3 Chart Controllers
   // ** 참고
-  // http://bl.ocks.org/Jverma/887877fc5c2c2d99be10
+  // https://bl.ocks.org/caravinden/d04238c4c9770020ff6867ee92c7dac1
   /////////////////////////////////////////////////////////////////
 
   private initSvg() {
-    this.svg = d3.select('#svg-d3-chart');
-    // this.width = +this.svg.attr('width') - this.margin.left - this.margin.right;
-    // this.height = +this.svg.attr('height') - this.margin.top - this.margin.bottom;
-    this.width = 600; //+this.svg.attr('width');
-    this.height = 150;  //+this.svg.attr('height');
+    if( this.svg ) this.svg.remove();
+    this.width = +this.divD3Chart.nativeElement.offsetWidth - this.margin.left - this.margin.right;
+    this.height = +this.divD3Chart.nativeElement.offsetHeight - this.margin.top - this.margin.bottom;
 
-    console.log( 'initSvg():', this.svg, this.width, this.height );
-
-    this.g = this.svg.append('g');
-        //.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+    this.svg = d3.select('#div-d3-chart').append('svg')
+              .style("width", this.width + 'px')
+              .style("height", this.height + 'px');
+    this.g = this.svg.append('g')
+              .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+    
+    this.x = d3.scaleBand().rangeRound([0, this.width]).padding(0.1);
+    this.y = d3.scaleLinear().rangeRound([this.height, 0]);
+    this.x.domain([]);
+    this.y.domain([0, 100]);
   }
-
-  private initAxis() {
-      this.x = d3Scale.scaleBand().rangeRound([0, this.width]).padding(0.1);
-      this.y = d3Scale.scaleLinear().rangeRound([this.height, 0]);
-      this.x.domain(STATISTICS.map((d) => d.letter));
-      this.y.domain([0, d3Array.max(STATISTICS, (d) => d.frequency)]);
-  }
-
-  private drawAxis() {
-      this.g.append('g')
-          .attr('class', 'axis axis--x')
-          .attr('transform', 'translate(0,' + this.height + ')')
-          .call(d3Axis.axisBottom(this.x));
-      this.g.append('g')
-          .attr('class', 'axis axis--y')
-          .call(d3Axis.axisLeft(this.y).ticks(10, '%'))
-          .append('text')
-          .attr('class', 'axis-title')
-          .attr('transform', 'rotate(-90)')
-          .attr('y', 6)
-          .attr('dy', '0.71em')
-          .attr('text-anchor', 'end')
-          .text('Frequency');
-  }
-
-  private drawBars() {
-      this.g.selectAll('.bar')
-          .data(STATISTICS)
-          .enter().append('rect')
-          .attr('class', 'bar')
-          .attr('x', (d) => this.x(d.letter) )
-          .attr('y', (d) => this.y(d.frequency) )
-          .attr('width', this.x.bandwidth())
-          .attr('height', (d) => this.height - this.y(d.frequency) );
-  }
-
+  
 }
 
 export interface Frequency {
@@ -393,54 +435,5 @@ export const STATISTICS: Frequency[] = [
   {letter: 'W2', frequency: .02360},
   {letter: 'X2', frequency: .00150},
   {letter: 'Y2', frequency: .01974},
-  {letter: 'A3', frequency: .08167},
-  {letter: 'B3', frequency: .01492},
-  {letter: 'C3', frequency: .02782},
-  {letter: 'D3', frequency: .04253},
-  {letter: 'E3', frequency: .12702},
-  {letter: 'F3', frequency: .02288},
-  {letter: 'G3', frequency: .02015},
-  {letter: 'H3', frequency: .06094},
-  {letter: 'I3', frequency: .06966},
-  {letter: 'J3', frequency: .00153},
-  {letter: 'K3', frequency: .00772},
-  {letter: 'L3', frequency: .04025},
-  {letter: 'M3', frequency: .02406},
-  {letter: 'N3', frequency: .06749},
-  {letter: 'O3', frequency: .07507},
-  {letter: 'P3', frequency: .01929},
-  {letter: 'Q3', frequency: .00095},
-  {letter: 'R3', frequency: .05987},
-  {letter: 'S3', frequency: .06327},
-  {letter: 'T3', frequency: .09056},
-  {letter: 'U3', frequency: .02758},
-  {letter: 'V3', frequency: .00978},
-  {letter: 'W3', frequency: .02360},
-  {letter: 'X3', frequency: .00150},
-  {letter: 'Y3', frequency: .01974},
-  {letter: 'A4', frequency: .08167},
-  {letter: 'B4', frequency: .01492},
-  {letter: 'C4', frequency: .02782},
-  {letter: 'D4', frequency: .04253},
-  {letter: 'E4', frequency: .12702},
-  {letter: 'F4', frequency: .02288},
-  {letter: 'G4', frequency: .02015},
-  {letter: 'H4', frequency: .06094},
-  {letter: 'I4', frequency: .06966},
-  {letter: 'J4', frequency: .00153},
-  {letter: 'K4', frequency: .00772},
-  {letter: 'L4', frequency: .04025},
-  {letter: 'M4', frequency: .02406},
-  {letter: 'N4', frequency: .06749},
-  {letter: 'O4', frequency: .07507},
-  {letter: 'P4', frequency: .01929},
-  {letter: 'Q4', frequency: .00095},
-  {letter: 'R4', frequency: .05987},
-  {letter: 'S4', frequency: .06327},
-  {letter: 'T4', frequency: .09056},
-  {letter: 'U4', frequency: .02758},
-  {letter: 'V4', frequency: .00978},
-  {letter: 'W4', frequency: .02360},
-  {letter: 'X4', frequency: .00150},
-  {letter: 'Y4', frequency: .01974},
+  // size=50
 ];

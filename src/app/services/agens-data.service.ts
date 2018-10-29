@@ -8,7 +8,7 @@ import { Observable, Subject, BehaviorSubject, Subscription, empty } from 'rxjs'
 import { tap, map, filter, concatAll, share } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IGraphDto, IDoubleListDto } from '../models/agens-response-types';
+import { IClientDto, ISchemaDto, IResponseDto, ILabelDto, IResultDto, IPropStatDto, IDoubleListDto } from '../models/agens-response-types';
 import { IDatasource, IGraph, ILabel, IElement, INode, IEdge, IProperty, IRecord, IColumn, IRow } from '../models/agens-data-types';
 import { ILogs, IProject } from '../models/agens-manager-types';
 
@@ -362,6 +362,15 @@ export class AgensDataService {
   graph_findCycles(gid:number):Observable<IDoubleListDto> {
     const url = `${this.api.grph}/findcycles/${gid}`;
     return this._http.get<IDoubleListDto>(url, {headers: this.createAuthorizationHeader()});
+  }
+
+  grph_propStat(gid:number, group:string, label:string, prop:string):Observable<IPropStatDto> {
+    const url = `${this.api.grph}/propstat/${gid}`;
+    let params:HttpParams = new HttpParams();
+    params = params.append('group', group);   // nodes, edges
+    params = params.append('label', label);
+    params = params.append('prop', prop);
+    return this._http.get<IPropStatDto>(url, {params: params, headers: this.createAuthorizationHeader()});
   }
 
   //////////////////////////////////////////////////////

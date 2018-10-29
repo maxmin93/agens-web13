@@ -152,6 +152,39 @@
                     </div>
                 </ng-container>
 
+                <!-- 입력상자 : 속성값 centrality -->
+                <ng-container *ngIf="btnStatus.valueCentrality">
+                    <div id="slide-toggle-timeline" class="sidebar col side-short-component">
+                        <div class="mb20">
+                            <h4>by Value <strong>Centrality</strong></h4>
+                        </div>
+                        <div class="col flex-1">
+                            <mat-form-field>
+                                <mat-select placeholder="select Label" 
+                                    [formControl]="timelineLabelCtl">
+                                    <mat-option *ngFor="let label of labels" [value]="label">
+                                    {{label.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            
+                            <mat-form-field>
+                                <mat-select placeholder="select Property"
+                                    [formControl]="timelinePropertyCtl" (selectionChange)="onChangeCentralityProperty($event)">
+                                    <mat-option *ngFor="let prop of timelineLabelCtl.value.properties" [value]="prop">
+                                    {{prop.key}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput type="text" placeholder="Check type"
+                                    [formControl]="timelineSampleCtl" readonly="true">
+                            </mat-form-field>
+                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="doByValueCentrality()">byValue Centrality</button>
+                        </div>
+                    </div>
+                </ng-container>
+
                 <!-- 입력상자 : 타임라인 timeLine -->
                 <ng-container *ngIf="btnStatus.timeLine">
                     <div id="slide-toggle-timeline" class="sidebar col side-short-component">
@@ -308,13 +341,15 @@
                                 <mat-divider></mat-divider>
                                     <button mat-menu-item (click)="graphCentrality('reset')">Reset styles</button>
                                 <mat-divider></mat-divider>
+                                    <button mat-menu-item (click)="graphCentrality('betweenness')">Betweenness</button>
+                                <mat-divider></mat-divider>
+                                    <button mat-menu-item (click)="graphCentrality('closeness')">Closeness</button>
+                                <mat-divider></mat-divider>
                                     <button mat-menu-item (click)="graphCentrality('degree')">Degree</button>
                                 <mat-divider></mat-divider>
                                     <button mat-menu-item (click)="graphCentrality('pagerank')">PageRank</button>
                                 <mat-divider></mat-divider>
-                                    <button mat-menu-item (click)="graphCentrality('closeness')">Closeness</button>
-                                <mat-divider></mat-divider>
-                                    <button mat-menu-item (click)="graphCentrality('betweenness')">Betweenness</button>
+                                    <button mat-menu-item (click)="graphCentrality('byValue')">by Value</button>
                             </mat-menu>
                         
         

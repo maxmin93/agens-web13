@@ -56,7 +56,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     timeLine: false,          // 타임라인
     findCycles: false,        // 사이클 디텍션
     editGraph: false,
-    megaGraph: false,
+    megtGraph: false,
+    valueCentrality: false,   // centrality by property's value 
     labelStyle: false,
     editMode: false,          // Edit Mode : create node/edge, edit data
     overlayGraph: false       // overlay Graph : when false, then remove overlayed graph
@@ -148,6 +149,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cy.on('tap', (e) => { 
       if( e.target === this.cy ) this.cyCanvasCallback(e);
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
+
+      // sideEffect actions
+      if( this.btnStatus.valueCentrality ) this.btnStatus.valueCentrality = false;  // close box
+
       // change Detection by force
       this._cd.detectChanges();
     });
@@ -898,7 +903,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /////////////////////////////////////////////////////////////////
-  // graph Toolbar button controlls
+  // Toolbar controllers : centrality
   /////////////////////////////////////////////////////////////////
 
   // _style의 width 데이터를 직접 수정, 원복시 _styleBak를 복사
@@ -908,14 +913,61 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'degree': this._graph.centralrityDg( this.cy );      break;
       case 'pagerank': this._graph.centralrityPR( this.cy );    break;
       case 'closeness': this._graph.centralrityCn( this.cy );   break;
-      case 'betweenness': this._graph.centralrityBt(this.cy ); break;
-      default: 
+      case 'betweenness': this._graph.centralrityBt(this.cy );  break;
+      case 'byValue':                                           // by property's value
+            this.btnStatus.valueCentrality = true;
+            this.initCentrality();
+            break;
+      default:                                                  // restore original style
         this.cy.elements().forEach(e => {
           e._private.scratch._style.width = e._private.scratch._styleBak.width;
         });
     }
     this.cy.style(agens.graph.stylelist['dark']).update();
   }
+
+  initCentrality(){
+    this.timelineDisabled = true;
+    if( this.labels.length > 0 ){
+      let property:IProperty = (this.labels[0].properties && this.labels[0].properties.length > 0) ?
+              this.labels[0].properties[0] : undefined;
+      this.timelineLabelCtl = new FormControl(this.labels[0], []);
+      this.timelinePropertyCtl = new FormControl( property, [] );
+      this.timelineSampleCtl = new FormControl( property.type, [] );
+      if( ['STRING', 'BOOLEAN', 'NUMBER'].includes(property.type) ) this.timelineDisabled = false;
+    }
+    else{
+      this.timelineLabelCtl = new FormControl( {value: { name: "" }, disabled: true} , []);
+      this.timelinePropertyCtl = new FormControl( {value: { key: "" }, disabled: true}, [] );
+      this.timelineSampleCtl = new FormControl( '', [] );
+    }
+  }
+
+  onChangeCentralityProperty(event){
+    let property = <IProperty>event.value;
+    if( ['STRING', 'BOOLEAN', 'NUMBER'].includes(property.type) ) this.timelineDisabled = false;
+    else this.timelineDisabled = true;
+    this.timelineSampleCtl.setValue(property.type);
+    this._cd.detectChanges();
+  }
+
+  doByValueCentrality(){
+    this._api.grph_propStat(this.gid, this.timelineLabelCtl.value.type, this.timelineLabelCtl.value.name, this.timelinePropertyCtl.value['key'])
+    .subscribe(
+      x => {
+        if( x.state == 'SUCCESS' ){
+          this._graph.centralrityValue(this.cy, this.timelineLabelCtl.value.type, x);
+        }
+        this._api.setResponses(<IResponseDto>{
+          group: x.group, state: x.state, message: x.message
+        });
+      }
+    );
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // graph Toolbar button controlls
+  /////////////////////////////////////////////////////////////////
 
   clearFindShortestPath(){
     this.shortestPathOptions = { sid: undefined, eid: undefined, directed: false, order: 0, distTo: undefined };

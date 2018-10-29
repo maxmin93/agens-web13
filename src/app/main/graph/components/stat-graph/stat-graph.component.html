@@ -6,49 +6,50 @@
 
     <!-- Graph content -->
     <div class="row flex-1 p20">
-        <div class="row flex-1 mr20 border">
-            <div class="col flex-1">
-                <div id="statistics-canvas" #divCanvas class="graph-canvas flex-1">
-                    <!-- [style.height.px]="graphDivStyleHeightValue" [style.height.px]="graphDivStyleWidthValue"> -->
-                </div>
-            </div>            
-            <!-- Graph.Meta : toolbar -->
-            <div id="agens-graph-toolbar" class="box-view">
-                <div class="box-scroll">
-                    <ul class="box-content">
-                        <div class="btn-group btn-group-v">
-                            <a class="btn btn-icon" (click)="refreshCanvas()" matTooltip="refresh Canvas" matTooltipPosition="above"><mat-icon>refresh</mat-icon></a>
-                        </div>
-                    </ul>
-                </div>
-            </div>
+      <div class="row flex-1 mr40 border">
+          <div class="col flex-1">
+            <div id="statistics-canvas" #divCanvas class="graph-canvas flex-1"></div>
+          </div>
+          <div class="col flex-1">
+              <ngx-datatable #tableProperties class="material flex-1"
+              [columnMode]="'force'" [limit]="8"
+              [rows]='tablePropertiesRows' [columns]='tablePropertiesColumns'
+              [footerHeight]="48" [rowHeight]="'auto'"
+              [selected]="selectedProperties" [selectionType]="'single'"
+              (select)="onSelectProperty($event)"
+              >
+              <!-- <ngx-datatable-column name="Type" [width]="40"></ngx-datatable-column>
+              <ngx-datatable-column name="ID" [width]="20"></ngx-datatable-column>
+              <ngx-datatable-column name="Name" ></ngx-datatable-column>
+              <ngx-datatable-column name="Size" [width]="40">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                      <span>{{row.size | number}}</span>
+                  </ng-template>
+              </ngx-datatable-column> -->
+            </ngx-datatable>
+          </div>
         </div> 
         <div class="col flex-1">
 
-            <div id="div-d3-chart" #divD3Chart class="col flex-1 border p20">
+            <div class="col flex-1 border p20">
                 <h5><strong>CHART</strong></h5>
-                <div>
-                    <svg id="svg-d3-chart" width="600" height="150"></svg>
+                <div id="div-d3-chart" #divD3Chart style="width: 100%; height: 100%;">
                 </div>
             </div>
 
             <div class="col flex-1 border p20 mt20">
-              <ngx-datatable #tableProperties class="material flex-1"
-                [columnMode]="'force'" [limit]="8"
-                [rows]='tablePropertiesRows' [columns]='tablePropertiesColumns'
-                [footerHeight]="48" [rowHeight]="'auto'"
-                [selected]="selectedProperties" [selectionType]="'single'"
-                (select)="onSelectProperty($event)"
-                >
-                <!-- <ngx-datatable-column name="Type" [width]="40"></ngx-datatable-column>
-                <ngx-datatable-column name="ID" [width]="20"></ngx-datatable-column>
-                <ngx-datatable-column name="Name" ></ngx-datatable-column>
-                <ngx-datatable-column name="Size" [width]="40">
-                    <ng-template let-row="row" ngx-datatable-cell-template>
-                        <span>{{row.size | number}}</span>
-                    </ng-template>
-                </ngx-datatable-column> -->
-              </ngx-datatable>
+                <h4><strong>Descriptive Statistics</strong> (type:{{propDescStat.type}})</h4>
+                <h5>NOTE: In case of categorical data, statistics present freqeuncy distribution.</h5>
+                <div><br />
+                  <span>n = {{propDescStat.n}}</span>, &nbsp;
+                  <span>min = {{propDescStat.min}}</span>, &nbsp;
+                  <span>max = {{propDescStat.max}}</span>, &nbsp;<br />
+                  <span>mean = {{propDescStat.mean}}</span>, &nbsp;
+                  <span>median = {{propDescStat.median}}</span>, &nbsp;<br />
+                  <span>stdev = {{propDescStat.stdev}}</span>, &nbsp;
+                  <span>skew = {{propDescStat.skew}}</span>, &nbsp;
+                  <span>kurt = {{propDescStat.kurt}}</span>, &nbsp;
+                </div>
             </div>
         </div>
     </div>

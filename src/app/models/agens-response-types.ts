@@ -70,3 +70,14 @@ export interface IDoubleListDto extends IResponseDto {
   eid?: number;
   result?: Array<Array<string>>;
 }
+
+export interface IPropStatDto extends IResponseDto {
+  // group == 'prop_stat'
+
+  gid: number;
+  label: string;
+  prop: string;
+  type: string;
+  stat: any;
+  rows: any[];
+}
