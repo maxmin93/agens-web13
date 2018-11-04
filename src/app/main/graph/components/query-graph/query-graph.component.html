@@ -61,19 +61,19 @@
 
                 <!-- 출력상자 : Label 스타일 정보 -->
                 <ng-container *ngIf="!!selectedLabel && !selectedElement">
-                    <div id="slide-toggle" class="sidebar">
+                    <div id="slide-toggle" class="sidebar col">
                         <div class="mb20">
                           <h4><strong>Label</strong> Styles</h4>
                         </div>
                         <div class="col flex-2">
-                          <div class="border p20 row row-space">
+                          <div class="border p15 row row-space">
                             <h5><strong>Visibility </strong></h5>
                             <mat-slide-toggle matTooltip="Visibility"
                                 [checked]="!selectedLabel.scratch._style.hasOwnProperty('visible') || selectedLabel.scratch._style.visible"
                                 (change)="onChangeStyleVisible($event)">
                             </mat-slide-toggle>
                           </div>
-                          <div class="col flex-1 border mt20 p20 color-box">
+                          <div class="col flex-1 border mt20 p15 color-box">
                             <h5><strong>COLOR </strong></h5>
                             <div class="col mt20 flex-1" id="colorPalette">
                               <ul class="row wrap">
@@ -99,7 +99,7 @@
                                         (change)="onChangeStyleWidth($event)">
                             </mat-slider>
                           </div>
-                          <div class="border mt20 pl20 pr20 row row-space row-m">    
+                          <div class="border mt20 pl15 pr15 row row-space row-m">    
                               <h5 class="mr20"><strong>TITLE </strong></h5>
                               <mat-form-field class="flex-1">
                                 <mat-select [value]="selectedLabel.scratch._style.title"
@@ -139,13 +139,15 @@
                 <!-- 입력상자 : CycleDetection -->
                 <ng-container *ngIf="btnStatus.findCycles">
                     <div id="slide-toggle" class="col sidebar side-short-component">
-                        <div class="mb20">
+                        <div class="mb15">
                             <h4>Find <strong>Cycles</strong></h4>
+                            <small>Cycles can see you the starting and<br/>ending points of the node.</small>
                         </div>
                         <div>
-                            <ul>
-                                <li *ngFor="let row of grph_data; let i = index" class="row row-space row-m border-bottom mt20">
-                                    <mat-icon>rotate_right</mat-icon> <p href="javascript:void(0)" (click)="onClickCyclePath(i)"> {{ row.join(' > ') }} </p>
+                            <ul class="find-cycles">
+                                <li *ngFor="let row of grph_data; let i = index" class="row">
+                                    <span><mat-icon>rotate_right</mat-icon></span>
+                                    <p href="javascript:void(0)" (click)="onClickCyclePath(i)" class="flex-1"> {{ row.join(' > ') }} </p>
                                 </li>
                             </ul>
                         </div>
@@ -219,9 +221,10 @@
                                 <input matInput type="text" placeholder="Date format" value="YYYY-MM-DD"
                                     [formControl]="timelineFormatCtl" (input)="onChangeTimelineFormat($event.target.value)">
                             </mat-form-field>
+
                             <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="setTimelineData()">Set Timeline</button>
 
-                            <timeline-slider #timelineSlider
+                            <timeline-slider class="mt20" #timelineSlider
                                 [values]="timeline_data"
                                 [interval]="3000"
                                 (onChange)="onChangeTimelineSlider($event)"
@@ -244,27 +247,27 @@
                         <ul>
                             <li class="row row-m row-space">
                                 <mat-icon class="mr20">adjust</mat-icon>
-                                <div class="flex-1 border-bottom p5">
-                                    <span>Start Node </span>
-                                    <span>[{{ shortestPathOptions.sid }}]</span>
+                                <div class="row row-space flex-1 border-bottom p5">
+                                    <span class="tit">Start Node </span>
+                                    <span>{{ shortestPathOptions.sid }}</span>
                                 </div>
                             </li>
                             <li class="mt10"><mat-icon>more_vert</mat-icon></li>
                             <li class="row row-m row-space">
                                 <mat-icon class="mr20">pin_drop</mat-icon>
-                                <div class="flex-1 border-bottom p5">
-                                    <span>End Node </span>
-                                    <span>[{{ shortestPathOptions.eid }}]</span>
+                                <div class="row row-space flex-1 border-bottom p5">
+                                    <span class="tit">End Node </span>
+                                    <span>{{ shortestPathOptions.eid }}</span>
                                 </div>
                             </li>
                         </ul>                            
                         
-                        <div class="mt20 row">
-                            <button class="row row-m row-c flex-1 mr10" color="primary" (click)="doFindShortestPath()"><mat-icon>search</mat-icon>search</button>
-                            <button class="row row-m row-c flex-1" (click)="clearFindShortestPath()"><mat-icon>refresh</mat-icon></button>
+                        <div class="btn-group mt20 row">
+                            <button class="flex-1" mat-flat-button color="primary" (click)="doFindShortestPath()">search</button>
+                            <button mat-stroked-button color="primary" (click)="clearFindShortestPath()">refresh</button>
                         </div>
                         <div class="mt20 row row-space row-m border p10">
-                            <span>Distance :</span><div *ngIf="shortestPathOptions.distTo"> <strong>{{ shortestPathOptions.distTo }}</strong></div>
+                            <span class="tit">Distance :</span><div *ngIf="shortestPathOptions.distTo"> <strong>{{ shortestPathOptions.distTo }}</strong></div>
                         </div>
                     </div>
                 </ng-container>

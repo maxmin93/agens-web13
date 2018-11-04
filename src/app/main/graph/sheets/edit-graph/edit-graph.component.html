@@ -5,44 +5,50 @@
 -->
 <div id="graphCard" class="col flex-1 p20">
   <div class="mb20 row row-c row-space">
-    <h4>{{ element.group | uppercase }} <strong>Editor</strong></h4>
+    <div class="dialog-tit">
+      <span><mat-icon>edit</mat-icon></span>
+      <h4>{{ element.group | uppercase }} <strong>Editor</strong></h4>
+    </div>
   </div>
-  <ul class="property-list col flex-1">
-    <li class="row row-m row-space">
-      <span>ID</span>
-      <mat-form-field class="col">
-        <input matInput [value]="element.data.id" readonly="true">
-      </mat-form-field>
-    </li>
-    <li *ngIf="element.group == 'edges'" class="row row-m row-space">
-        <span>source-nodeID</span>
+  <div class="detail_list row flex-1">
+    <div class="form-group">
+      <div class="input-block">
+        <h5>ID</h5>
         <mat-form-field class="col">
-          <input matInput [value]="element.data.source" readonly="true">
+          <input matInput [value]="element.data.id" readonly="true">
         </mat-form-field>
-    </li>
-    <li *ngIf="element.group == 'edges'" class="row row-m row-space">
-        <span>target-node ID</span>
-        <mat-form-field class="col">
-          <input matInput [value]="element.data.target" readonly="true">
+      </div>
+      <div *ngIf="element.group == 'edges'" class="input-block">
+          <h5>source-node ID</h5>
+          <mat-form-field class="col">
+            <input matInput [value]="element.data.source" readonly="true">
+          </mat-form-field>
+        </div>
+      <div *ngIf="element.group == 'edges'" class="input-block">
+          <h5>target-node ID</h5>
+          <mat-form-field class="col">
+            <input matInput [value]="element.data.target" readonly="true">
+          </mat-form-field>
+        </div>
+      <div class="input-block">
+        <h5>Label</h5>
+        <mat-form-field>
+          <!-- case : old element -->
+          <input matInput *ngIf="!created" [value]="element.data.label" type="text" readonly="true">
+          <!-- case : new element -->
+          <input matInput *ngIf="created" placeholder="label name" [formControl]="editLabelCtl" 
+              [matAutocomplete]="autoSelector">
+          <mat-autocomplete #autoSelector="matAutocomplete">
+            <mat-option *ngFor="let label of labels" [value]="label.name">
+              {{label.name}}
+            </mat-option>
+          </mat-autocomplete>
         </mat-form-field>
-    </li>
-    <li class="row row-m row-space">
-      <span>Label</span>
-      <mat-form-field>
-        <!-- case : old element -->
-        <input matInput *ngIf="!created" [value]="element.data.label" type="text" readonly="true">
-        <!-- case : new element -->
-        <input matInput *ngIf="created" placeholder="label name" [formControl]="editLabelCtl" 
-            [matAutocomplete]="autoSelector">
-        <mat-autocomplete #autoSelector="matAutocomplete">
-          <mat-option *ngFor="let label of labels" [value]="label.name">
-            {{label.name}}
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
-    </li>
-    <li class="col flex-1">
-      <span>Properties</span>
+      </div>
+    </div>
+    
+    <div class="col flex-1">
+      <h5>Properties</h5>
       <!-- <div class="json-box col flex-1">
         <pre [innerHtml]="element.data.props | prettyjson:3"></pre>
       </div> -->
@@ -94,9 +100,10 @@
             </ng-template>
           </ngx-datatable-column>        
       </ngx-datatable>        
-    </li>
-  </ul>
-
-  <button mat-raised-button color="accent" (click)="addNewProperty()">add Property</button>
-  <button mat-raised-button color="primary" [disabled]="!changed" (click)="close()">Update</button>
+    </div>
+  </div>
+  <div class="btn-group row row-r">
+    <button mat-stroked-button color="primary" (click)="addNewProperty()">add Property</button>
+    <button mat-flat-button color="primary" [disabled]="!changed" (click)="close()">Update</button>
+  </div>
 </div>

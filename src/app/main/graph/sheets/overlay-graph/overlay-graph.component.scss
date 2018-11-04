@@ -1,7 +1,6 @@
-.border-styles {
-  margin: 2px 0;
-  padding: 1px 3px;
-  border-width: 2px;
-  border-color: #aaa;
-  border-style: solid;
-} 
+.wrapped-box-flex textarea { 
+  width: 100%; 
+  border: 1px solid #ddd; 
+  padding: .5rem 1rem; 
+  margin-bottom: 1rem; 
+}

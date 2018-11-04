@@ -61,7 +61,7 @@
                                         <span class="sub-title">{{ item.label }}</span>
                                         <p>{{ item.prop }} <span>({{ item.type | lowercase }})</span></p>
                                     </div>
-                                    <button class="btn btn-icon" (click)="removeItemFilterBy(i)"><mat-icon>delete_outline</mat-icon></button>
+                                    <button class="btn btn-icon btn-fill primary" (click)="removeItemFilterBy(i)"><mat-icon>delete_outline</mat-icon></button>
                                 </div>
                                 <div class="col mt10 mb10">
                                     <div class="mt10 row row-m row-space">
@@ -88,7 +88,7 @@
                                     <span>{{ item.label }}</span> 
                                     <p title= "{{ item.prop }}" > {{ item.prop }} <span>({{ item.type | lowercase }})</span></p>
                                 </div>
-                                <button class="btn btn-icon" (click)="removeItemGroupBy(i)"><mat-icon>delete_outline</mat-icon></button>
+                                <button class="btn btn-icon btn-fill" (click)="removeItemGroupBy(i)"><mat-icon>delete_outline</mat-icon></button>
                             </li>
                         </ul>
                     </div>

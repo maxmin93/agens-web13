@@ -20,7 +20,7 @@
 }
 
 html, body, material-app  {  
-  background: #f9f9f9; 
+  background: #F2F3F2; 
   width: 100%;
   height: 100vh;
   font-size: 16px;   
@@ -133,11 +133,13 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 .mt20 { margin-top: 1.25rem; }
 .mt10 { margin-top: .625rem; }
 
+.mr30 { margin-right: 1.875rem; }
 .mr20 { margin-right: 1.25rem; }
 .mr15 { margin-right: .9375rem; }
 .mr10 { margin-right: .625rem; }
 
 .mb20 { margin-bottom: 1.25rem; }
+.mb15 { margin-bottom: 1rem; }
 .mb10 { margin-bottom: .625rem; }
 
 .ml20 { margin-left: 1.25rem; }
@@ -148,17 +150,21 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 .p-side { padding: .625rem 1.25rem; }
 
 .p20 { padding: 1.25rem; }
+.p15 { padding: 1rem !important; }
 .p10 { padding: .625rem !important; }
 .p5 { padding: .325rem !important; }
 
 .pt20 { padding-top: 1.25rem; }
+.pt15 { padding-top: 1rem; }
 .pt10 { padding-top: .625rem; }
 
 .pb20 { padding-bottom: 1.25rem; }
 .pb10 { padding-bottom: .625rem; }
 
 .pr20 { padding-right: 1.25rem; }
+.pr15 { padding-right: 1rem; }
 .pl20 { padding-left: 1.25rem; }
+.pl15 { padding-left: 1rem; }
 
 // border 값 설정 ---------------------------------------------
 
@@ -188,7 +194,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
     &:last-child { margin-right: 0; }
   }
 
-  &.side-l .btn { margin-left: .625rem; &:first-child {margin: 0} }
+  &.side-l .btn, button { margin-left: .625rem; &:first-child {margin: 0} }
   &.side-r .btn { margin-right: .625rem; &:last-child {margin: 0} }
 }
 
@@ -251,11 +257,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   }
 }
 
-.btn.btn-disabled { }
-
 .btn.btn-icon.btn-ink { width: initial; }
-
-
 
 // list 값 설정
 
@@ -266,6 +268,24 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
     align-items: center; 
   }
 }
+
+.detail_list .input-block:first-child { margin-top: 0; }
+.detail_list .input-block { margin-top: 1rem; }
+
+.detail_list h5 { 
+  margin-bottom: 1rem;
+  color: #585858;  
+  font-size: .825rem; 
+}
+.detail_list .input-block input {
+  height: 25px; 
+  padding-bottom: .5rem;  
+  border-bottom: 1px solid #ddd; 
+  font-size: .9rem !important; 
+}
+.detail_list .mat-form-field-wrapper { padding: 0 !important; }
+.detail_list .mat-form-field-infix { padding: 0 !important; border: 0 !important; }
+.detail_list .mat-form-field-appearance-legacy .mat-form-field-underline { display: none !important; }
 
 .property-name { 
   background: linear-gradient(to right, rgb(0,90,168), rgba(0,90,168,.7));
@@ -306,7 +326,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 
   &:last-child { margin: 0; border: 0; padding-bottom: 0; }
 
-  span { 
+  > span { 
     text-transform: uppercase; 
     font-size: .825rem; 
     color: #585858;
@@ -346,6 +366,35 @@ div.graph-canvas {
   }
 }
 
+// dialog input ---------------------------------------------
+
+.dialog-tit { 
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 1.25rem; 
+  
+  span { 
+    background: #005aa8; 
+    width: 45px; 
+    height: 45px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-right: .85rem; 
+    border-radius: 2px;  
+    color: #fff; 
+    mat-icon { color: inherit; }
+  }
+}
+
+.dialog-subtit { 
+  display: inline-block; 
+  margin-bottom: 1.5rem; 
+  font-size: .825rem; 
+  color: #828282; 
+}
+
+.dialog-subtit.red { color: #ea614a; }
 
 // form input ---------------------------------------------
 
@@ -408,7 +457,8 @@ input {
 .mat-subhead::before, 
 .sidebar h4::before,
 .title::before, 
-.sheet-bottom h4::before  {
+.sheet-bottom h4::before, 
+.detail_list h5::before  {
   content:'';
   background: #005aa8; 
   width: 8px; 
@@ -501,7 +551,7 @@ input {
   flex: 1;
   flex-direction: column;
 }
-.card-footer {}
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -539,6 +589,17 @@ input {
 
 //////////////////////////////////////////////////////////////////////////
 
+
+timeline-slider { display: flex; flex-wrap: wrap; }
+
+timeline-slider button, 
+timeline-slider .range-slider { 
+  flex: 1;
+  margin-top: 1.25rem; 
+  padding: 0 1rem; 
+  border: 1px dashed #ddd;  
+}
+timeline-slider .range-slider .mat-slider { width: 100%; }
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -649,6 +710,9 @@ pre {
   background-color: #ddd !important; 
 }
 
+.mat-form-field-appearance-legacy .mat-form-field-infix { 
+  padding: .4875em 0; 
+}
 
 // tab ---------------------------------------------
 
@@ -745,6 +809,7 @@ mat-chip-list {
   align-items: flex-start; 
 
   div.visible { 
+    width: 100%; 
     display: flex; 
     flex-direction: column; 
     flex: 1; 
@@ -839,6 +904,8 @@ mat-chip-list {
   cursor: pointer;
 }
 
+.ngx-datatable .datatable-header .datatable-header-cell { background: #eee; }
+
 .ngx-datatable.material .datatable-body .datatable-row-detail { 
   background: #f8f9f9; 
   padding: .4rem 1.25rem; 
@@ -853,12 +920,15 @@ mat-chip-list {
 
 // button css ---------------------------------------------
 
+button { text-transform: uppercase; }
+
 .mat-button, .mat-fab, .mat-flat-button, 
 .mat-icon-button, .mat-mini-fab, 
 .mat-raised-button, .mat-stroked-button {
-  font-size: .75rem; 
+  font-size: .75rem !important; 
   padding: 0 1rem !important; 
   min-width: 88rem; 
+  font-weight: 700 !important; 
 }
 
 .mat-button-toggle-group, 

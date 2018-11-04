@@ -8,20 +8,19 @@ import { MatInputModule } from '@angular/material/input';
   selector: 'app-image-export-dialog',
   template: `
     <div mat-dialog-content>
-      <form class="example-form" novalidate [formGroup]="exportForm"></form>
-      <div class="example-container">
-        <div id="export-image" class="example-full-width div__export-image-box">
+      <form novalidate [formGroup]="exportForm"></form>
+      <div class="dialog-tit"><span><mat-icon>image</mat-icon></span> <h4>Image <strong>Export</strong></h4></div>
+      <span class="dialog-subtit">Save PNG image file with watermark</span>
+      
+      <div>
+        <div id="export-image">
           <img #divGraphImage />
-          <div id="export-watermark" class="div__export-image-watermark">
-            <span><strong>{{exportWatermarkCtl.value}}</strong></span>
+          <div id="export-watermark" class="row row-r mt10">
+            <span>{{exportWatermarkCtl.value}}</span>
           </div>
         </div>   
-        <div> 
-          <h2 mat-dialog-title>
-            Image Export <br/>
-            <small> save PNG image file with watermark</small>
-          </h2>
-          <mat-form-field class="example-full-width">
+        <div class="col mt20">           
+          <mat-form-field>
             <input matInput [formControl]="exportWatermarkCtl" placeholder="Water-mark">
             <button mat-button *ngIf="exportWatermarkCtl.value" matSuffix mat-icon-button aria-label="Clear" 
                     (click)="exportWatermarkCtl.setValue('')">
@@ -31,11 +30,11 @@ import { MatInputModule } from '@angular/material/input';
               Watermark is <strong>too long</strong>. (max={{MAX_WATERMARK_SIZE}})
             </mat-error>
           </mat-form-field>
-          <mat-form-field class="example-full-width">
+          <mat-form-field>
             <input matInput [formControl]="exportFilenameCtl" placeholder="File name" required>
-            <button mat-button *ngIf="exportFilenameCtl.value" matSuffix mat-icon-button aria-label="Clear" 
+            <button disableRipple mat-icon-button *ngIf="exportFilenameCtl.value" matSuffix aria-label="Clear" 
                   (click)="exportFilenameCtl.setValue('')">
-              <mat-icon>close</mat-icon>
+              <mat-icon >close</mat-icon>
             </button>
             <mat-error *ngIf="exportFilenameCtl.hasError('pattern') && !exportFilenameCtl.hasError('required')">
               Filename has to <strong>start [a-zA-Z] char and length is 3~30</strong>
@@ -44,47 +43,22 @@ import { MatInputModule } from '@angular/material/input';
               Filename is <strong>required</strong>
             </mat-error>
           </mat-form-field>
-          <div mat-dialog-actions>
-            <button mat-button type="submit" class="btn btn-default" 
-                [disabled]="!exportForm.valid" (click)="onSubmit()" tabindex="2">Submit</button>
-            <button mat-button (click)="onCancel()" tabindex="-1" class="btn">Cancel</button>
-          </div> 
         </div>   
+      </div>
+      <div class="btn-group row row-r">
+        <button mat-stroked-button color="primary" type="submit" 
+            [disabled]="!exportForm.valid" (click)="onSubmit()" tabindex="2">Submit</button>
+        <button mat-flat-button color="primary" (click)="onCancel()" tabindex="-1" >Cancel</button>
       </div>
     </div>    
      
     `,
   styles: [`
-    div.example-container { 
-      width: 700px;
-      display: flex;
-      flex-direction: row;  
-       
-    }
-    div.example-container div { 
-      flex-grow: 1; 
-      flex-basis: 250px; 
-    }
-
-    .div__export-image-box { 
-      background-color: #8e8e8e; 
-      flex-basis: 300px;  
-      margin-right: 20px; 
-      padding: 20px; 
-      border: 1px solid #ccc; 
-      text-align: center; 
-      position: relative;
-    }
-
-    .div__export-image-watermark { 
-      position: absolute; 
-      right: 12px; 
-      bottom: 8px;
-      font-size: .785rem; 
-      color: #585858;  
-    }
-
-    img { width: 50%; }
+    #export-image { background: #f8f8f8; width: 600px; padding: 1.5rem; border: 1px dashed #ccc; }
+    #export-image span { font-size: .825rem; color: #585858; }
+    img { width: 100%; }
+    mat-form-field button { height: 31px; }
+    mat-form-field mat-icon { font-size: 15px !important; margin-left: -11px; margin-top: 8px; }
   `]
 })
 export class ImageExportDialog implements OnInit {

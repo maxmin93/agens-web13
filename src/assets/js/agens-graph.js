@@ -95,12 +95,12 @@
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.bc;
-      return '#a6a6a6';
+      return '#ddd';
     },
     edgeDColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.dc;
-      return '#a6a6a6';
+      return '#ddd';
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
@@ -266,6 +266,9 @@
           'width':  function(e){ return agens.styles.edgeWidth(e); },
           'visibility': function(e){ return agens.styles.visibility(e); },
           'text-rotation':'autorotate',
+          'text-outline-color':'#828282', 
+          'text-outline-width':'1', 
+          'color':'white', 
           'text-valign': 'top',             // **Not Working at EDGE: top, center, bottom
           'line-style': 'solid',            // line-style: solid, dotted, dashed
           'curve-style': 'bezier',
