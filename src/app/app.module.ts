@@ -39,7 +39,7 @@ import { AgensDataService } from './services/agens-data.service'
 import { AgensUtilService } from './services/agens-util.service'
 import { AgensGraphService } from './services/agens-graph.service';
 
-// // Dialogs
+// Dialogs
 import { ConfirmDeleteLabelDialog } from './main/dashboard/dialogs/confirm-delete-label.dialog';
 import { QueryResultComponent } from './main/graph/components/query-result/query-result.component';
 import { QueryGraphComponent } from './main/graph/components/query-graph/query-graph.component';
@@ -55,7 +55,10 @@ import { ImageExportDialog } from './main/graph/dialogs/image-export.dialog';
 import { ProjectOpenDialog } from './main/graph/dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './main/graph/dialogs/project-save-dialog';
 import { OverlayGraphComponent } from './main/graph/sheets/overlay-graph/overlay-graph.component';
-// import { SearchResultDialog } from './main/graph/search-result.dialog';
+
+// Report (public page)
+import { ReportComponent } from './report/report.component';
+import { RoundProgressModule } from 'angular-svg-round-progressbar';
 
 @NgModule({
   declarations: [
@@ -82,6 +85,8 @@ import { OverlayGraphComponent } from './main/graph/sheets/overlay-graph/overlay
     ProjectOpenDialog,
     ProjectSaveDialog,
     OverlayGraphComponent,
+
+    ReportComponent,
   ], 
   // directives, components, and pipes owned by this NgModule
   imports: [
@@ -102,7 +107,8 @@ import { OverlayGraphComponent } from './main/graph/sheets/overlay-graph/overlay
     
     NgxDatatableModule, 
     PrettyJsonModule,
-
+    RoundProgressModule,
+    
     appRoutes
   ], 
   // modules needed to run this module

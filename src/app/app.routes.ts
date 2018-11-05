@@ -9,6 +9,7 @@ import { PlpyEditorComponent } from './main/plpy-editor/plpy-editor.component';
 import { GraphComponent } from './main/graph/graph.component';
 import { HistoryComponent } from './main/history/history.component';
 
+import { ReportComponent } from './report/report.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -19,6 +20,7 @@ const routes: Routes = [
       ,{ path: 'graph', component: GraphComponent }
       ,{ path: 'history', component: HistoryComponent }
     ]},
+  { path: 'report/:id', component: ReportComponent },
   // all other routes
   { path: '**', redirectTo: '' }
 ];

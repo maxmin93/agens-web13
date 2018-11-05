@@ -1,0 +1,14 @@
+<div class="report-wrapper">
+  <div style="text-align:center">
+    <h1>
+      AgensBrowser report[ {{ id }} ]:
+    </h1>
+    <button mat-fab (click)="launchWindow()" matTooltip="AgensBrowser" matTooltipPosition="below">
+      <mat-icon>home</mat-icon></button>
+    <button mat-fab color="#03DAC5" (click)="reloadProject()" matTooltip="Reload project" matTooltipPosition="below">
+      <mat-icon>autorenew</mat-icon></button>
+  </div>
+  <div class="progress-wrapper" *ngIf="state == 'loading'">
+    <round-progress [max]="timer_max" [current]="timer_curr" [radius]="100" [stroke]="25"></round-progress>
+  </div>
+</div>
