@@ -5,14 +5,14 @@
     </div>
 
     <!-- Graph content -->
-    <div class="row flex-1 p20">
-        <div class="row flex-1 mr20 border">
-            <div class="col flex-1">
-                <div id="statistics-canvas" #divCanvas class="graph-canvas flex-1"></div>
+    <div class="p20">
+        <div class="border">
+            <div class="col" style="height: 540px">
+                <div id="statistics-canvas" #divCanvas class="graph-canvas" ></div>
             </div>
-            <div class="col flex-1 sidebar">
+            <div class="col flex-1 sidebar" style="top: 2.5rem; right: 2.5rem;">
                 <ngx-datatable #tableProperties class="material flex-1"
-                [columnMode]="'force'" [limit]="8"
+                [columnMode]="'force'" [limit]="200"
                 [rows]='tablePropertiesRows' [columns]='tablePropertiesColumns'
                 [footerHeight]="48" [rowHeight]="'auto'"
                 [selected]="selectedProperties" [selectionType]="'single'"
@@ -30,29 +30,27 @@
             </div>
         </div> 
 
-        <div class="col flex-1">
-
-            <div class="col flex-1 border p20">
-                <h5><strong>CHART</strong></h5>
-                <div id="div-d3-chart" #divD3Chart style="width: 100%; height: 100%;">
-                </div>
-            </div>
-
-            <div class="col flex-1 border p20 mt20">
-                <h4><strong>Descriptive Statistics</strong> (type:{{propDescStat.type}})</h4>
-                <h5>NOTE: In case of categorical data, statistics present freqeuncy distribution.</h5>
-                <div><br />
-                  <span>n = {{propDescStat.n}}</span>, &nbsp;
-                  <span>min = {{propDescStat.min}}</span>, &nbsp;
-                  <span>max = {{propDescStat.max}}</span>, &nbsp;<br />
-                  <span>mean = {{propDescStat.mean}}</span>, &nbsp;
-                  <span>median = {{propDescStat.median}}</span>, &nbsp;<br />
-                  <span>stdev = {{propDescStat.stdev}}</span>, &nbsp;
-                  <span>skew = {{propDescStat.skew}}</span>, &nbsp;
-                  <span>kurt = {{propDescStat.kurt}}</span>, &nbsp;
-                </div>
+        <div class="border p20 mt20">
+            <h5><strong>CHART</strong></h5>
+            <div id="div-d3-chart" class="mt20" #divD3Chart style="width: 100%; height: 100%;">
             </div>
         </div>
+
+        <div class="border p20 mt20">
+            <h4><strong>Descriptive Statistics</strong> (type:{{propDescStat.type}})</h4>
+            <h5>NOTE: In case of categorical data, statistics present freqeuncy distribution.</h5>
+            <div><br />
+                <span>n = {{propDescStat.n}}</span>, &nbsp;
+                <span>min = {{propDescStat.min}}</span>, &nbsp;
+                <span>max = {{propDescStat.max}}</span>, &nbsp;<br />
+                <span>mean = {{propDescStat.mean}}</span>, &nbsp;
+                <span>median = {{propDescStat.median}}</span>, &nbsp;<br />
+                <span>stdev = {{propDescStat.stdev}}</span>, &nbsp;
+                <span>skew = {{propDescStat.skew}}</span>, &nbsp;
+                <span>kurt = {{propDescStat.kurt}}</span>, &nbsp;
+            </div>
+        </div>
+        
     </div>
     
 </div>    

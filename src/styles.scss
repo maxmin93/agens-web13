@@ -388,7 +388,7 @@ div.graph-canvas {
 }
 
 .dialog-subtit { 
-  display: inline-block; 
+  display: flex; 
   margin-bottom: 1.5rem; 
   font-size: .825rem; 
   color: #828282; 
@@ -472,7 +472,7 @@ input {
 
 .sidebar { 
   background: #fff; 
-  width: 21.875rem; 
+  width: 25.875rem; 
   height: calc(100% - 2.5rem); 
   padding: 1.25rem; 
   border-radius: .225rem; 
@@ -597,7 +597,7 @@ timeline-slider .range-slider {
   flex: 1;
   margin-top: 1.25rem; 
   padding: 0 1rem; 
-  border: 1px dashed #ddd;  
+  border-top: 1px dashed #ddd;  
 }
 timeline-slider .range-slider .mat-slider { width: 100%; }
 
@@ -867,6 +867,8 @@ mat-chip-list {
     }
   }
 }
+
+
 
 .ngx-datatable.material .empty-row { line-height: 28px; }
 
