@@ -42,7 +42,7 @@
         </ngx-datatable-row-detail>
 
         <!-- Column Templates -->
-        <ngx-datatable-column [width]="auto" 
+        <ngx-datatable-column [width]="'auto'" 
               [resizeable]="false" [sortable]="false" [draggable]="false" [canAutoResize]="false">
           <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
             <a href="javascript:void(0)"
@@ -52,25 +52,25 @@
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="ID" [width]="auto" >
+        <ngx-datatable-column name="ID" [width]="'auto'" >
           <ng-template let-row="row" ngx-datatable-cell-template>
             <strong><a (click)="close(row)">{{row.id}}</a></strong>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Title" [width]="auto">
+        <ngx-datatable-column name="Title" [width]="'auto'">
           <ng-template let-row="row" ngx-datatable-cell-template>
             <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="close(row)">{{row.title}}</a></span>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="auto" >
+        <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="'auto'" >
           <ng-template let-row="row" ngx-datatable-cell-template>
             <span>{{ row.create_dt | date:'MM/dd HH:mm' }}</span>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="auto" >
+        <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="'auto'" >
           <ng-template let-row="row" ngx-datatable-cell-template>
             <span>{{ row.update_dt | date:'MM/dd HH:mm' }}</span>
           </ng-template>

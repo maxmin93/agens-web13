@@ -8,7 +8,7 @@
             <!-- // selection-cell 이 작동하지 않음. 예제는 되는데.. -->
             <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
-            <ngx-datatable-column name="Index" [width]="auto" [canAutoResize]="false" [sortable]="false">
+            <ngx-datatable-column name="Index" [width]="'auto'" [canAutoResize]="false" [sortable]="false">
                 <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
                     <span>{{ rowIndex }}</span>
                 </ng-template>

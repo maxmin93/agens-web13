@@ -43,16 +43,16 @@
                         [selected]="selectedLabels" [selectionType]="'single'"
                         (select)="onSelectTableLabels($event)"
                         >
-                        <ngx-datatable-column name="Type" [width]="auto"></ngx-datatable-column>
-                        <ngx-datatable-column name="ID" [width]="auto"></ngx-datatable-column>
-                        <ngx-datatable-column name="Name" [width]="auto" ></ngx-datatable-column>
-                        <ngx-datatable-column name="Size" [width]="auto">
+                        <ngx-datatable-column name="Type" [width]="'auto'"></ngx-datatable-column>
+                        <ngx-datatable-column name="ID" [width]="'auto'"></ngx-datatable-column>
+                        <ngx-datatable-column name="Name" [width]="'auto'" ></ngx-datatable-column>
+                        <ngx-datatable-column name="Size" [width]="'auto'">
                             <ng-template let-row="row" ngx-datatable-cell-template>
                                 <span>{{row.size | number}}</span>
                             </ng-template>
                         </ngx-datatable-column>
                         <!-- <ngx-datatable-column name="Volume" [width]="40"></ngx-datatable-column> -->
-                        <ngx-datatable-column name="Delete" [width]="auto" [sortable]="false">
+                        <ngx-datatable-column name="Delete" [width]="'auto'" [sortable]="false">
                             <ng-template let-row="row" ngx-datatable-cell-template>
                                 <a class="btn btn-link" (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
                                     <mat-icon>delete</mat-icon>
