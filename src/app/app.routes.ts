@@ -20,7 +20,7 @@ const routes: Routes = [
       ,{ path: 'graph', component: GraphComponent }
       ,{ path: 'history', component: HistoryComponent }
     ]},
-  { path: 'report/:id', component: ReportComponent },
+  { path: 'report/:pid', component: ReportComponent },
   // all other routes
   { path: '**', redirectTo: '' }
 ];

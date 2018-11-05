@@ -12,3 +12,19 @@
   border-radius: 50%;
   perspective: 800px;
 }
+
+.progress-wrapper {
+  position: relative;
+  margin: 20px auto;
+  font-size: 20px;
+}
+
+round-progress { 
+  margin: auto;
+}
+
+ul li a:hover, ul li a:focus {  
+  color:#fff;  
+  border:1px solid #f40;  
+  background-color:#f40;  
+}  

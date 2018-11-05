@@ -1,14 +1,85 @@
-<div class="report-wrapper">
+<!-- 
+<div>
   <div style="text-align:center">
     <h1>
-      AgensBrowser report[ {{ id }} ]:
+      AgensBrowser report[ {{ pid }} ]:
     </h1>
     <button mat-fab (click)="launchWindow()" matTooltip="AgensBrowser" matTooltipPosition="below">
       <mat-icon>home</mat-icon></button>
     <button mat-fab color="#03DAC5" (click)="reloadProject()" matTooltip="Reload project" matTooltipPosition="below">
       <mat-icon>autorenew</mat-icon></button>
   </div>
-  <div class="progress-wrapper" *ngIf="state == 'loading'">
+  <div class="progress-wrapper" *ngIf="isLoading">
     <round-progress [max]="timer_max" [current]="timer_curr" [radius]="100" [stroke]="25"></round-progress>
-  </div>
+  </div> 
+</div> 
+-->
+
+<!-- Graph content -->
+<div id="graph-canvas" #divCanvas 
+  style="border: solid; width: 99%; height: 95%; margin: 10px 10px 10px 10px;"
+  (mouseover)="canvasHover=true" (mouseleave)="canvasHover=false">
+
+  <!-- 출력상자 : Node/Edge 상세 정보 -->
+  <ng-container *ngIf="!!selectedElement">
+    <div id="slide-toggle" class="sidebar col">
+        <div class="mb20 row row-c row-space">
+            <h4>{{ selectedElement.group() || uppercase }} <strong>info</strong></h4>
+            <mat-slide-toggle *ngIf="selectedElement.isNode()" #nodeLockSlideToggle
+            [checked]="selectedElement.locked()" (change)="selectedLockToggle(selectedElement)" matTooltip="Location Rock">
+            </mat-slide-toggle>
+        </div>
+        <ul class="property-list col flex-1">
+            <li class="row row-m row-space"><span>Label</span>{{ selectedElement.data('label') }} [{{ (selectedElement.id().length>8) ? (selectedElement.id() | slice:0:8)+'..' : selectedElement.id() }}]</li>
+            <!-- <li class="row row-m row-space"><span>Name</span>{{ selectedElement.data('props')['name'] }}</li> -->
+            <li class="col flex-1">
+                <span>Data</span>
+                <div class="json-box col flex-1"><pre [innerHtml]="selectedElement.data('props') | prettyjson:3"></pre></div>
+            </li>
+        </ul>
+    </div>
+  </ng-container>
+</div>
+
+<!-- Graph.Meta : Labels content -->
+<mat-chip-list id="agens-graph-labels" *ngIf="projectGraph && projectGraph.hasOwnProperty('labels')">
+  <mat-chip *ngFor="let label of projectGraph.labels" [selected]="true"
+      (click)="clickGraphLabelChip(label)"
+      [style.background]="label.scratch['_style'].color ? label.scratch['_style'].color.bc : '#a6a6a6'">
+      <span *ngIf="label.type=='nodes'" class="nodeType" style="font-weight: bold">
+        {{label.name}} ({{label.size}})</span>
+      <span *ngIf="label.type=='edges'" class="edgeType" style="text-decoration: underline">
+        {{label.name}} ({{label.size}})</span>
+  </mat-chip>
+</mat-chip-list>
+
+<!--
+  /////////////////////////////////////////////////////////////////
+  //
+  //  qtip Menu template : not displayed
+  //
+  /////////////////////////////////////////////////////////////////
+-->
+
+<div id="divCxtMenu" style="display:none;">
+  <h4><strong>CxtMenu</strong></h4>
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('selectAll')">select All</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('toggleSelection')">toggle Selection</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('remove')">remove</a></li>
+  </ul>
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('copy')">copy (Ctrl+C)</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('cut')">cut (Ctrl+X)</a></li>
+    <!-- <li *ngIf="ur && ur.clipboard && ur.clipboard['nodes']">       // 왜 안되지?? (_cd 써도 안됨) -->
+    <li>
+      <a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('paste')">paste (Ctrl+V)</a>
+    </li>
+  </ul>
+    <!-- <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('showAll')">show All</a></li> -->
+    <!-- <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('makeInvisible')">make Invisible</a></li> -->
+  <ul style="border-top: 1px solid;">
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('grouping')">grouping</a></li>
+    <li><a href="javascript:void(0)" onclick="(window['angularComponentRef'].qtipCxtMenu)('degrouping')">degrouping</a></li>
+  </ul>
 </div>
