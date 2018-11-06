@@ -1,31 +1,34 @@
 <div id="graphTable" class="col flex-1 p20">
-    <div class="row flex-1" >
+  <!-- <button mat-fab color="warning" (click)="refresh()" matTooltip="refresh" matTooltipPosition="below">
+    <mat-icon>autorenew</mat-icon></button> -->
+  <div class="row flex-1" >
         <ngx-datatable #recordTable  class="material selection-cell flex-1 col"
             [limit]="10" [reorderable]="'reorderable'" [scrollbarH]="true"
-            [columnMode]="'force'" [rows]='recordRows' [columns]='recordColumns'
-            [headerHeight]="40" [footerHeight]="40" [rowHeight]="40"
+            [columnMode]="'flex'" [rows]='recordRows' [columns]='recordColumns'
+            [headerHeight]="40" [footerHeight]="40" [rowHeight]="'auto'"
             >
             <!-- // selection-cell 이 작동하지 않음. 예제는 되는데.. -->
             <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
-            <ngx-datatable-column name="Index" [width]="'auto'" [canAutoResize]="false" [sortable]="false">
+            <ngx-datatable-column name="Index" [width]="60" [canAutoResize]="false" [sortable]="false">
                 <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
                     <span>{{ rowIndex }}</span>
                 </ng-template>
             </ngx-datatable-column>
 
-            <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false" [width]="auto" >
+            <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}"
+                 [sortable]="false" [flexGrow]="1" >
                 <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
                     <span>{{col.name}}</span>
                 </ng-template>
                 <ng-template let-rowIndex="rowIndex" let-column="col" let-row="row" ngx-datatable-cell-template>
                     <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) >= 0"
-                      (click)="onSelectCell(col, row[col.name])">
-                        {{ row[col.name] | json }}
+                      (click)="onSelectCell(col, row[col.index])">
+                        {{ row[col.index] | json }}
                     </span>
                     <span *ngIf="['GRAPH','EDGE','NODE','OBJECT','ARRAY'].indexOf(col.type) &lt; 0"
-                      (click)="onSelectCell(col, row[col.name])">
-                        {{ row[col.type] === 'NUMBER' ? row[col.name].toLocaleString('en') : row[col.name] }}
+                      (click)="onSelectCell(col, row[col.index])">
+                        {{ row[col.type] === 'NUMBER' ? row[col.index].toLocaleString('en') : row[col.index] }}
                     </span>
                 </ng-template>
             </ngx-datatable-column>

@@ -1,3 +1,16 @@
+// How to work with CodeMirror 
+// ==> https://bl.ocks.org/jcla1/2938024
 .CodeMirror {
+  font-family: monospace;
   .cm-s-default .cm-comment {color: #a50; font-size: 80%;}
+  div.CodeMirror-cursor {
+    border-left: 1px solid black;
+    z-index: 3;
+  }
+  div.CodeMirror-secondarycursor {
+    border-left: 1px solid silver;
+  }  
+  .CodeMirror-focused div.CodeMirror-cursor {
+    visibility: visible;
+  }
 }

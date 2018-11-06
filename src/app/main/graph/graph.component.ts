@@ -133,7 +133,7 @@ return path1, path2;
       smartIndent: true,
       styleActiveLine: true,
       matchBrackets: true,
-      autofocus: true,
+      // autofocus: true,
       theme: 'idea'
     });
     // CodeMirror : initial value
@@ -150,16 +150,27 @@ return path1, path2;
     // ** NOTE: 이거 안하면 이 아래쪽에 Canvas 영역에서 마우스 포커스 miss-position 문제 발생!!
     //
     // keyup event
-    this.editor.on('keyup', function(cm, e){      
-      // console.log('this.editor is keyup:', e.keyCode );
-      if( e.keyCode == 13 ) agens.cy.resize();
+    this.editor.on('keyup', (cm, e)=>{      
+      if( e.keyCode == 13 ){
+        setTimeout(function(){ 
+          agens.cy.resize();
+          cm.resize();
+        }, 1);
+      } 
+    });
+    // 
+    // ** NOTE: cursor 가 사라지는 문제가 있는데 아직 해결 못했음 
+    //          커서는 정상적으로 동작하나 selected-line style 에 가려 invisible 할 뿐인듯
+    //
+    this.editor.on('focus', (cm, e) => {
+      setTimeout(()=>{ cm.refresh(); }, 1);
     });
 
     Promise.resolve(null).then(()=>{
       // new graph to call API
       this._api.grph_new().pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
         x => {
-          console.log( 'grph_new:', x );
+          // console.log( 'grph_new:', x );
           if( x.hasOwnProperty('gid') && x['gid'] > 0 ){
             this.gid = x.gid;
             this.queryGraph.setGid( x.gid );
@@ -211,7 +222,8 @@ return path1, path2;
           break;
       case 1: 
           this.queryGraph.isVisible = false;
-          this.statGraph.isVisible = false;
+          this.statGraph.isVisible = false;          
+          Promise.resolve(null).then(() => this.queryTable.refresh() ); 
           break;
       case 2: 
           this.queryGraph.isVisible = false;
