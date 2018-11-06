@@ -25,6 +25,7 @@ export class AgensDataService {
     auth: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_AUTH_API}`,
     grph: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_GRPH_API}`,
     file: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_FILE_API}`,
+    rprt: `${window.location.protocol}//${window.location.host}/${CONFIG.AGENS_RPRT_API}`,
   };
 
   private lastResponse$ = new Subject<IResponseDto>();
@@ -45,6 +46,7 @@ export class AgensDataService {
         auth: 'http://127.0.0.1:8085/'+CONFIG.AGENS_AUTH_API,
         grph: 'http://127.0.0.1:8085/'+CONFIG.AGENS_GRPH_API,
         file: 'http://127.0.0.1:8085/'+CONFIG.AGENS_FILE_API,
+        rprt: 'http://127.0.0.1:8085/'+CONFIG.AGENS_RPRT_API,
       };
     }
 
@@ -471,4 +473,16 @@ export class AgensDataService {
     };
     return this._http.get<string>(url, httpOptions);
   }
+
+  //////////////////////////////////////////////////////
+
+  report_graph(pid:number, guestKey:string):Observable<any> {    
+    const url = `${this.api.rprt}/graph/${pid}`;
+    // let params:HttpParams = new HttpParams();
+    // params = params.append('guestKey', guestKey);
+    let headers = new HttpHeaders({'Content-Type': 'application/json', 'Authorization': guestKey })
+    return this._http.get<any>(url, { headers: headers })
+        .pipe( concatAll(), filter(x => x.hasOwnProperty('group')), share() );
+  }
+
 }

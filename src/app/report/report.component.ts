@@ -16,12 +16,18 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IRecord, IColumn, IRow,
 import { IProject } from '../models/agens-manager-types';
 
 import * as _ from 'lodash';
+
 declare var agens : any;
+declare var jQuery: any;
 
 @Component({
   selector: 'app-report',
   templateUrl: './report.component.html',
-  styleUrls: ['./report.component.scss']
+  styleUrls: ['./report.component.scss'],
+  host: {
+    '(document:keyup)': 'handleKeyUpEvent($event)',
+    '(document:keydown)': 'handleKeyDownEvent($event)'
+  }  
 })
 export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -32,7 +38,8 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   private todo$:Subject<any> = new Subject();
 
   // AgensBrowser API
-  pid: number;
+  private pid: number;
+  private guestKey: string;
   private handlers: Subscription[] = [ undefined, undefined, undefined, undefined, undefined, undefined ];
   private projectDto: IGraphDto = undefined;
   private projectGraph: IGraph = undefined;
@@ -76,10 +83,11 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(){
     this.handler_param = this._path.params.subscribe(params => {
-      this.pid = +params['pid']; // (+) converts string 'id' to a number
-
+      this.guestKey = params['guestKey'];   // guestKey is defined at agens-config.yml
+      this.pid = +params['pid'];            // (+) converts string 'id' to a number
+      this.clear();
       // In a real app: dispatch action to load the details here.
-      this.getReport(this.pid);
+      this.getReport(this.pid, this.guestKey);
     });
 
     // get return url from route parameters or default to '/'
@@ -126,7 +134,6 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // cy events : click
     this.cy.on('tap', (e) => { 
-      console.log( 'tap:', e.target );
       if( e.target === this.cy ) this.cyCanvasCallback(e);
       else if( e.target.isNode() || e.target.isEdge() ) this.cyElemCallback(e.target);
 
@@ -142,7 +149,55 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
               , position: originalTapEvent.position, classes: "new" };
       }
     });    
+
+    // cy undoRedo initialization
+    this.ur = this.initUndoRedo(this.cy, this.gid);
+
+    Promise.resolve(null).then(() => {
+      // Cytoscape 바탕화면 qTip menu
+      let tooltip = this.cy.qtip({
+        content: jQuery('#divCxtMenu').html(),
+        show: { event: 'cxttap', cyBgOnly: false /* true */ },    // cyBgOnly : element 위에서는 작동 안되게 할 것인지
+        hide: { event: 'click unfocus' },
+        position: { target: 'mouse', adjust: { mouse: false } },
+        style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } },
+        events: { visible: (event, api) => { jQuery('.qtip').click(() => { jQuery('.qtip').hide(); }); }}
+      });
+    });
   }
+
+
+  // ** Copy/Cut/Paste: Ctrl+C, +X, Ctrl+V
+  handleKeyUpEvent(event: KeyboardEvent) { 
+    let charCode = String.fromCharCode(event.which).toLowerCase();
+    if (this.canvasHover && event.ctrlKey) {
+      console.log( 'keyPress: Ctrl + '+charCode, this.canvasHover );
+      // key : undo/redo
+      if( charCode == "z" ) this.cy.$api.unre.undo();
+      else if( charCode == "y" ) this.cy.$api.unre.redo();
+      // key : copy/cut/paste
+      // **참고 https://github.com/iVis-at-Bilkent/cytoscape.js-clipboard
+      else if( charCode == "a" ) { 
+        this.cy.elements(":visible").select(); event.preventDefault(); 
+      }
+      else if( charCode == "c" ) this.ur.do('copy', this.cy.elements(":selected"));
+      else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"));
+      else if( charCode == "v" ) this.ur.do('paste');
+    }
+    if (!event.shiftKey) {
+      this.withShiftKey = false;    // multi selection 해제
+    }
+  }
+
+  handleKeyDownEvent(event: KeyboardEvent) { 
+    if (event.shiftKey) {
+      this.withShiftKey = true;     // multi selection 가능
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////
+  // clear, getData : Main functions
+  /////////////////////////////////////////////////////////////////
 
   ngOnDestroy(){
     if( this.handler_param ){
@@ -159,67 +214,74 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  getReport(id:number) {
+  clear(option:boolean=true){
+    this.isLoading = true;
+    if( this.cy ) this.cy.elements().remove();
+    // 그래프 라벨 칩리스트 비우고, gid도 초기화
+    if( option ) { this.projectGraph = undefined; this.gid = undefined; }
+  }
 
-      // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
-      let data$:Observable<any> = this._api.grph_load(id);
-      // load GraphDto to QueryGraph
-      this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
-        (x:IGraphDto) => {
-          this.projectDto = x;
-        },
-        err => {
-          console.log( 'project_load: ERROR=', err instanceof HttpErrorResponse, err.error );
-          this._api.setResponses(<IResponseDto>{
-            group: 'project::load',
-            state: err.statusText,
-            message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
+  getReport(id:number, guestKey:string) {         
+    // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
+    let data$:Observable<any> = this._api.report_graph(id, guestKey);
+    
+    // load GraphDto to QueryGraph
+    this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
+      (x:IGraphDto) => {
+        this.projectDto = x;
+      },
+      err => {
+        console.log( 'project_load: ERROR=', err instanceof HttpErrorResponse, err.error );
+        this._api.setResponses(<IResponseDto>{
+          group: 'project::load',
+          state: err.statusText,
+          message: (err instanceof HttpErrorResponse) ? err.error.message : err.message
+        });
+        
+        this.clearSubscriptions();
+        // service is unavailable
+        // this._router.navigate(['/login']);
+      });
+
+    /////////////////////////////////////////////////
+    // Graph 에 표시될 내용은 누적해서 유지
+    this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
+      (x:IGraph) => {
+        this.projectGraph = x;
+        this.projectGraph.labels = new Array<ILabel>();
+        this.projectGraph.nodes = new Array<INode>();
+        this.projectGraph.edges = new Array<IEdge>();
+      });
+    this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
+      (x:ILabel) => { 
+        this.projectGraph.labels.push( x );
+      });
+    this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
+      (x:INode) => {
+        // setNeighbors from this.resultGraph.labels;
+        x.scratch['_neighbors'] = new Array<string>();
+        this.projectGraph.labels
+          .filter(val => val.type == 'nodes' && val.name == x.data.label)
+          .map(label => {
+            x.scratch['_neighbors'] += label.targets;
           });
-          
-          this.clearSubscriptions();
-          // service is unavailable
-          // this._router.navigate(['/login']);
-        });
-  
-      /////////////////////////////////////////////////
-      // Graph 에 표시될 내용은 누적해서 유지
-      this.handlers[1] = data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
-        (x:IGraph) => {
-          this.projectGraph = x;
-          this.projectGraph.labels = new Array<ILabel>();
-          this.projectGraph.nodes = new Array<INode>();
-          this.projectGraph.edges = new Array<IEdge>();
-        });
-      this.handlers[2] = data$.pipe( filter(x => x['group'] == 'labels') ).subscribe(
-        (x:ILabel) => { 
-          this.projectGraph.labels.push( x );
-        });
-      this.handlers[3] = data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
-        (x:INode) => {
-          // setNeighbors from this.resultGraph.labels;
-          x.scratch['_neighbors'] = new Array<string>();
-          this.projectGraph.labels
-            .filter(val => val.type == 'nodes' && val.name == x.data.label)
-            .map(label => {
-              x.scratch['_neighbors'] += label.targets;
-            });
-          this.projectGraph.nodes.push( x );
-        });
-      this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
-        (x:IEdge) => {
-          this.projectGraph.labels
-            .filter(val => val.type == 'edges' && val.name == x.data.label)
-            .map(label => {
-            });   
-          this.projectGraph.edges.push( x );  
-        });     
-      this.handlers[5] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
-        (x:IEnd) => {
-          console.log('END:', this.projectDto, this.projectGraph);
-          this.isLoading = false;   
-          this.initGraph(this.projectGraph);
-          this.refreshCanvas();
-        });    
+        this.projectGraph.nodes.push( x );
+      });
+    this.handlers[4] = data$.pipe( filter(x => x['group'] == 'edges') ).subscribe(
+      (x:IEdge) => {
+        this.projectGraph.labels
+          .filter(val => val.type == 'edges' && val.name == x.data.label)
+          .map(label => {
+          });   
+        this.projectGraph.edges.push( x );  
+      });     
+    this.handlers[5] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
+      (x:IEnd) => {
+        // console.log('END:', this.projectDto, this.projectGraph);
+        this.isLoading = false;   
+        this.initGraph(this.projectGraph);
+        this.refreshCanvas();
+      });    
   }
 
   initGraph(graph:IGraph){
@@ -244,10 +306,213 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  /////////////////////////////////////////////////////////////////
+  // Copy/Cut/Paste : 
+  // ** gid 가 생성되지 않기 때문에 canvas 내에서만 이루어짐
+  /////////////////////////////////////////////////////////////////
+
+  /*
+  updateGraph(oper:string, nodes:any[], edges:any[], callback:Function=undefined){
+    let data:any = { gid: this.gid, graph: { labels: [],
+      nodes: nodes.map(x => { 
+        return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
+                  "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
+      edges: edges.map(x => { 
+        return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
+                  "source": x.data.source, "target": x.data.target, "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
+    }};
+    this._api.grph_update(this.gid, oper, data).subscribe(
+      x => {
+        if( callback ) (callback)();
+        // console.log( 'grph_update:', this.gid, oper, x );
+        this._api.setResponses(<IResponseDto>{
+          group: 'update::'+oper,
+          state: x.state,
+          message: (<string>x.message).replace('tinkergraph','')
+        });        
+      }
+    );
+  }
+  */
+
+  initUndoRedo(cy, gid):any{
+    if( !cy || !cy.undoRedo ) return undefined;
+
+    let ur = cy.undoRedo({}, true);
+    ur.clipboard = {};
+    ur.ids = new Map<string,string>();    // element's id Mapper for paste
+
+    ur.newId = function(length:number=12):string{
+      let chars = "abcdefghijklmnopqrstufwxyzABCDEFGHIJKLMNOPQRSTUFWXYZ1234567890"
+      let newId = (_.sampleSize(chars, length || 12)).join('');   // lodash v4
+      let exists = Array.from(ur.ids.values());
+      while( exists.includes(newId) ){
+        newId = (_.sampleSize(chars, length || 12)).join('');     // again
+      }
+      return newId;
+    }
+  
+    ur.copy2cb = function(eles:any){
+      eles.unselect();
+      let descs = eles.nodes().descendants();
+      let nodes = eles.nodes().union(descs).filter(":visible");
+      let edges = nodes.edgesWith(nodes).filter(":visible");
+  
+      // **NOTE: clone() 사용시 scratch{} 내용이 복사되지 않음
+      let nodes_json = nodes.map( e => {
+        let obj = e.json();
+        obj.scratch = _.cloneDeep(e._private.scratch);
+        obj.position = _.clone(e._private.position);
+        obj.classes = 'clone';
+        return obj;
+      });
+      ur.clipboard['nodes'] = nodes_json;
+      let edges_json = edges.map( e => {
+        let obj = e.json();
+        obj.scratch = _.cloneDeep(e._private.scratch);
+        obj.position = {};
+        obj.classes = 'clone';
+        return obj;
+      });
+      ur.clipboard['edges'] = edges_json;
+    }
+  
+    // register actions
+    ur.action('invisible',      
+      (eles:any) => { 
+        // style('visibility', 'hidden') 시키면, eles 가 삭제되어 찾을 수 없음
+        ur.clipboard['hidden'] = eles; 
+        eles.style('visibility', 'hidden'); 
+        return eles;
+      },
+      (eles:any) => { 
+        if( ur.clipboard['hidden'] ){
+          ur.clipboard['hidden'].style('visibility', 'visible');
+          ur.clipboard['hidden'] = undefined;
+        } 
+        return eles;
+      });      
+    ur.action('grouping',
+      (eles:any) => { 
+        parent = this.cy.$api.grouping( eles );      
+        return eles;   
+      },
+      (eles:any) => { 
+        let parents:any = eles.parent();
+        parents.forEach(target => { this.cy.$api.degrouping(target); });
+        return eles;   
+      });
+    ur.action('degrouping',
+      (target:any) => { 
+        if( !target || target.hasClass('overlay') ) return undefined;
+        this.cy.$api.degrouping( target ); 
+        return target;
+      },
+      (target:any) => { 
+        if( !target || target.hasClass('overlay') ) return undefined;
+        target.restore();
+        if( target.scratch('_memebers') ) this.cy.$api.grouping( target.scratch('_memebers'), target );
+        return target;
+      });
+
+    ur.action('copy',      // actionName
+      (eles:any) => {      // do Func
+        ur.copy2cb(eles);
+        return eles;
+      },
+      () => {              // undo Func
+        ur.clipboard = {};
+      });
+
+    ur.action('cut',       // actionName
+      (eles:any) => {      // do Func
+        ur.copy2cb(eles);
+        // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
+        ur.clipboard['removed'] = eles.remove();
+        return eles;
+      },
+      () => {              // undo Func
+        // restore removed elements
+        if( ur.clipboard['removed'] ){
+          ur.clipboard['removed'].restore();
+          ur.clipboard['removed'] = undefined;
+        } 
+      });
+
+    ur.action('delete',    // actionName
+      (eles:any) => {      // do Func
+        ur.copy2cb(eles);
+        // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
+        ur.clipboard['removed'] = eles.remove();        
+      },
+      () => {              // undo Func
+        // restore removed elements
+        if( ur.clipboard['removed'] ){
+          ur.clipboard['removed'].restore();
+          ur.clipboard['removed'] = undefined;
+        } 
+      });
+    ur.action('create',
+      (json:any) => {
+        return this.cy.add( json );
+      },
+      (ele:any) => {
+        return ele.remove();
+      }
+    );
+
+    ur.action('paste',     // actionName
+      () => {              // do Func
+        let stack = ur.getUndoStack();
+        if( stack.length < 1 || !['copy','cut','paste'].includes(stack[stack.length-1]['name']) ) return;
+        if( !ur.clipboard['nodes'] || !ur.clipboard['edges'] ) return;        
+
+        let eles = cy.collection();
+        // **NOTE: nodes 는 id만 변경, 
+        //         edges 는 id 외에도 source와 target 변경
+        let nodes = ur.clipboard['nodes'].map(e => {
+          let x = _.cloneDeep(e);
+          let newId = ur.newId();
+          ur.ids.set( x.data.id, newId);   
+          x.data.id = newId;      // new ID : random string
+          x.position.x += 70;     // 우측 상단
+          x.position.y -= 20;     // 우측 상단
+          return cy.add(x);
+        });
+        nodes.forEach( e => eles = eles.add( e ) );
+        let edges = ur.clipboard['edges'].map(e => {
+          let x = _.cloneDeep(e);
+          let newId = ur.newId(); 
+          ur.ids.set( x.data.id, newId);
+          x.data.id = newId;      // new ID : random string
+          x.data.source = ur.ids.get(x.data.source);
+          x.data.target = ur.ids.get(x.data.target);
+          return cy.add(x);
+        });
+        edges.forEach( e => eles = eles.add( e ) );
+        ur.clipboard['pasted'] = eles;
+      },
+      () => {           // undo Func
+        if( ur.clipboard['pasted'] ){
+          ur.clipboard['pasted'].remove();
+          ur.clipboard['pasted'] = undefined;
+        } 
+      });
+
+    return ur;
+  }
+
   /////////////////////////////////////////////////
 
   clickGraphLabelChip(target:ILabel){
+    this.selectedElement = undefined;
+    this.cy.elements(':selected').unselect();
 
+    setTimeout(()=>{
+      let group = (target.type == 'edges') ? 'edge' : 'node';
+      this.cy.elements(`${group}[label='${target.name}']`).select();
+    }, 20);
+    this._cd.detectChanges();
   }
 
   /////////////////////////////////////////////////////////////////
@@ -268,10 +533,9 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log('target:', target._private);
     // null 이 아니면 정보창 (infoBox) 출력
+    this.selectedElement = target;
     if( !target.isParent() ){         // parent 는 정보창 출력 대상에서 제외
-      this.selectedElement = target;
       let selected = this.cy.elements(':selected').filter(x => x != target );
       // edge 일 경우, 연결된 nodes 까지 선택
       if( target.group() == 'edges' ){
@@ -286,6 +550,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
     }
+    // console.log('target:', this.cy.elements(':selected'), this.selectedElement._private);
   }  
 
   refreshCanvas(){
@@ -297,9 +562,9 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // qtipMenu 선택 이벤트
   qtipCxtMenu( action ){
-    console.log( 'qtipCxtMenu:', action, this.cy.scratch('_position') );
+    // console.log( 'qtipCxtMenu:', action, this.cy.scratch('_position') );
     let targets = this.cy.nodes(':selected');
-    let target = targets.empty() ? undefined : targets.first();
+    let target = targets.empty() ? this.selectedElement : targets.first();
 
     switch( action )    {
       case 'selectAll': 

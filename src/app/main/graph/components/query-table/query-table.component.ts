@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
 
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material';
-import { DatatableComponent } from '@swimlane/ngx-datatable';
+import { DatatableComponent, ColumnMode } from '@swimlane/ngx-datatable';
 
 import { CellViewerComponent } from '../../sheets/cell-viewer/cell-viewer.component';
 
@@ -13,12 +13,13 @@ import * as CONFIG from '../../../../app.config';
   templateUrl: './query-table.component.html',
   styleUrls: ['./query-table.component.scss','../../graph.component.scss']
 })
-export class QueryTableComponent implements OnInit {
+export class QueryTableComponent implements OnInit, AfterViewInit {
 
   @Input() data:IRecord;
 
-  recordColumns: Array<IColumn> = new Array();
-  recordRows: Array<IRow> = new Array<IRow>();
+  record:IRecord;
+  recordColumns: IColumn[] = [];
+  recordRows: IRow[] = [];
   recordRowsCount: number = 0;
   isJsonCell: boolean = false;
 
@@ -35,6 +36,10 @@ export class QueryTableComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit(){
+    this.recordTable.columnMode = ColumnMode.force;
   }
 
   /////////////////////////////////////////////////////////////////
@@ -57,23 +62,33 @@ export class QueryTableComponent implements OnInit {
   }
 
   setData(record:IRecord){
-    this.recordColumns = record.columns;
-    this.recordRows = this.convertRowToAny(record.columns, record.rows);
+    // console.log( record );
+    this.record = record;
+    this.recordColumns = [...record.columns];
+    this.recordRows = this.convertRowToAny(this.recordColumns, record.rows);
     this.recordRowsCount = this.recordRows.length;
-    
-    // change Detection by force
-    this._cd.detectChanges();
+  }
+
+  refresh(){
+    // this.recordColumns = [...this.record.columns];
+    this.recordTable.columnMode = ColumnMode.flex;
+    // **NOTE: tab 에 의해 가려진 이후에 refresh 필요!!
+    this.recordRows = [...this.recordRows];           
+    setTimeout(()=>{ 
+      this.recordTable.recalculate();
+      this._cd.detectChanges();
+    }, 10);
   }
 
   // rows를 변환 : Array<Array<any>> ==> Array<Map<string,any>>
-  convertRowToAny(columns:Array<IColumn>, rows:Array<IRow>):Array<any>{
-    let tempArray: Array<any> = new Array<any>();
+  // **NOTE: key 를 name 으로 할 경우 같은 이름의 컬럼에 대해 overwrite 가 된다!!
+  convertRowToAny(columns:IColumn[], rows:IRow[]):any[]{
+    let tempArray: any[] = [];
     for( let row of rows ){
       let temp:any = {};
       for( let col of columns ){
-        let key:string = col.name;
-        let val:any = row.row[col.index];
-        temp[key] = val;
+        // key: col.name; <== when same names exist, overwrite values
+        temp[col.index] = <any> row.row[col.index];
       }
       tempArray.push(temp);
     }
@@ -94,7 +109,7 @@ export class QueryTableComponent implements OnInit {
   // }
 
   onSelectCell(col:IColumn, cell:any) {
-    console.log('select-cell:', col, cell);
+    // console.log('select-cell:', col, cell);
     this.openBottomSheet(col, cell);
   }
 
@@ -106,7 +121,7 @@ export class QueryTableComponent implements OnInit {
     });
 
     bottomSheetRef.afterDismissed().subscribe(() => {
-      console.log('Bottom sheet has been dismissed.');
+      // console.log('Bottom sheet has been dismissed.');
     });
   }
 

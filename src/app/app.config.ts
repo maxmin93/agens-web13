@@ -7,6 +7,7 @@ export const AGENS_MNGR_API: string = 'api/manager';
 export const AGENS_AUTH_API: string = 'api/auth';
 export const AGENS_GRPH_API: string = 'api/graph';
 export const AGENS_FILE_API: string = 'api/file';
+export const AGENS_RPRT_API: string = 'api/report';
 
 export const USER_KEY: string = 'agens-ssid';
 

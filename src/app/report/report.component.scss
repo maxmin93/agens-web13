@@ -1,7 +1,25 @@
-.report-wrapper {            
-  background: linear-gradient(to bottom right, #3f51b5 0%, #d3d3d3 100%);
+#graph-canvas {
+  background: '#FFFFFF';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.report-wrapper {
   font-family: 'Noto Sans', sans-serif; 
 }
+
+.sidebar { top: 1.25rem; right: 1.25rem; }
+
+.side-short-component { 
+  height: auto; 
+  top: 20px; 
+  right: 20px; 
+  bottom: initial; 
+}
+
 
 .loader {
   position: absolute;
