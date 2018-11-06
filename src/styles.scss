@@ -33,7 +33,7 @@ html, body, material-app  {
 
 h1, h2, h3, h4, h5, h6 {   
   font-weight: 400; 
-  text-transform: uppercase; 
+  text-transform: capitalize; 
   color: #242424;
 }
 
@@ -181,6 +181,8 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 
 .border-no { border: 0 !important; }
 
+.theme_ivy { background: #f6f6f6; }
+
 
 /* button 관련 정리로 --------------------------------------------- 
 ------------------------------------------------------------------------------------------*/
@@ -211,7 +213,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   border-radius: .225rem; 
   text-decoration: none; 
   text-align: center; 
-  text-transform: uppercase; 
+  text-transform: capitalize; 
   align-items: center; 
   justify-content: center; 
   font-size: .875rem;  
@@ -245,8 +247,6 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   align-items: center; 
   justify-content: center; 
   mat-icon { color: #999; }
-
-  &:hover mat-icon { color: #005aa8; }
 }
 
 .btn.btn-fill { 
@@ -303,7 +303,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
 }
 
 .property-name-link { 
-  text-transform: uppercase; 
+  text-transform: capitalize; 
   font-size: .825rem; 
   color: #999; 
 }
@@ -327,7 +327,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   &:last-child { margin: 0; border: 0; padding-bottom: 0; }
 
   > span { 
-    text-transform: uppercase; 
+    text-transform: capitalize; 
     font-size: .825rem; 
     color: #585858;
   }
@@ -396,6 +396,20 @@ div.graph-canvas {
 
 .dialog-subtit.red { color: #ea614a; }
 
+.graph-image { 
+  background: #f8f8f8; 
+  width: 600px;
+  padding: 1.5rem; 
+  border: 1px dashed #ccc; 
+}
+
+.graph-image span { 
+  font-size: .825rem; 
+  color: #585858; 
+}
+
+.graph-image img { width: 100%; }
+
 // form input ---------------------------------------------
 
 form, input, textarea, select { 
@@ -458,10 +472,12 @@ input {
 .sidebar h4::before,
 .title::before, 
 .sheet-bottom h4::before, 
-.detail_list h5::before  {
+.detail_list h5::before, 
+h5.meta-tit::before, 
+.qtip-content h4::before  {
   content:'';
   background: #005aa8; 
-  width: 8px; 
+  width: 8px;
   height: 8px; 
   display: inline-block; 
   border-radius: 50%; 
@@ -499,7 +515,7 @@ input {
   &.shadow-none { box-shadow: none; border-left: 1px solid #ddd; }
 
   .box-scroll {
-    width: 5rem; 
+    width: 7rem; 
     height: inherit; 
     overflow-y: scroll; 
     overflow-x: hidden; 
@@ -571,8 +587,6 @@ input {
 }
 //////////////////////////////////////////////////////////////////////////
 
-
-
 //////////////////////////////////////////////////////////////////////////
 
 // svg 변경 css 
@@ -621,8 +635,6 @@ timeline-slider .range-slider .mat-slider { width: 100%; }
 .cm-s-idea .CodeMirror-activeline-background { background-color: transparent !important; }
 
 //////////////////////////////////////////////////////////////////////////
-
-
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -673,8 +685,6 @@ pre {
 
 //////////////////////////////////////////////////////////////////////////
 
-
-
 //////////////////////////////////////////////////////////////////////////
 
 // angular material css 변경 공간 
@@ -683,6 +693,7 @@ pre {
 // bottom sheets styles ---------------------------------------------
 
 .mat-form-field-label-wrapper { top: -.95375em; }
+.mat-form-field-label { height: 18px; }
 .mat-dialog-container { box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; }
 
 .mat-bottom-sheet-container {
@@ -690,7 +701,6 @@ pre {
   border-radius: .325rem .325rem 0 0; 
   box-shadow: 0 0 3px rgba(0,0,0,0.3) !important; 
 }
-
 
 // spinner ---------------------------------------------
 
@@ -702,7 +712,6 @@ pre {
 
  .cdk-global-overlay-wrapper { width: 100%; }
  .mat-slider-horizontal { height: 44px !important; }
-
 
 // tab ---------------------------------------------
 
@@ -785,7 +794,6 @@ pre {
   .mat-tab-header { border: none; }
 }
 
-
 // chip ---------------------------------------------
 
 mat-chip-list {
@@ -799,7 +807,6 @@ mat-chip-list {
   border-radius: .225rem !important; 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
-
 
 // datatable css ---------------------------------------------
 
@@ -821,9 +828,15 @@ mat-chip-list {
       align-items: center; 
       overflow: initial; 
       border-bottom: 0;   
-      .datatable-header-cell { 
-        font-size: .75rem; 
-      }
+      .datatable-header-inner { 
+        width: 100% !important; 
+        .datatable-row-center { 
+          width: 100% !important; 
+        }
+        .datatable-header-cell { 
+          font-size: .75rem; 
+        }
+      }      
     }
 
     .datatable-body {  
@@ -867,8 +880,6 @@ mat-chip-list {
     }
   }
 }
-
-
 
 .ngx-datatable.material .empty-row { line-height: 28px; }
 
@@ -919,10 +930,9 @@ mat-chip-list {
   color: #fff; 
 }
 
-
 // button css ---------------------------------------------
 
-button { text-transform: uppercase; }
+button { text-transform: capitalize }
 
 .mat-button, .mat-fab, .mat-flat-button, 
 .mat-icon-button, .mat-mini-fab, 
@@ -969,3 +979,23 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; 
 .mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
 
  //////////////////////////////////////////////////////////////////////////
+
+.qtip-content { 
+  width: 140px; 
+  h4 { margin-bottom: .5rem; }
+  ul { 
+    padding: .5rem 0; 
+    border-color: #ddd !important; 
+    a { 
+      display: block; 
+      border: none; 
+      transition: all .25s ease-in-out; 
+      &:hover { 
+        background: #ddd !important;
+        padding-left: .25rem;  
+        border: none !important; 
+        color: initial !important; 
+      }
+    }
+  }
+}

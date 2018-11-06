@@ -6,79 +6,77 @@
   <div class="mb20 row row-c row-space">
     <div class="dialog-tit">
       <span><mat-icon>edit</mat-icon></span>
-      <h4>User Projects <small> (select project and overlay test) </small></h4>
+      <h4>User Projects <small> (Select project and overlay test) </small></h4>
     </div>
   </div>
-
-  <div>
     
-    <div class="wrapped-box-flex">
-      <!-- <span><i class="fa fa-search" aria-hidden="true"></i><input
-          type='text' #inputFilter
-          placeholder='Type to filter the title column...'
-          (keyup)='updateFilter($event)'
-        /></span> -->
+  <div class="wrapped-box-flex">
+    <!-- <span><i class="fa fa-search" aria-hidden="true"></i><input
+        type='text' #inputFilter
+        placeholder='Type to filter the title column...'
+        (keyup)='updateFilter($event)'
+      /></span> -->
 
-        <!-- <img #imgProjectCapture style="width:100; height:100;" class="border-styles" /> -->
+      <!-- <img #imgProjectCapture style="width:100; height:100;" class="border-styles" /> -->
 
-        <textarea #matchTestMessage placeholder="Matching Test" readonly="true" mat-autosize="false"
-            rows="2"></textarea>
-    </div>
-
-    <div class="wrapped-box-flex">
-      <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
-      [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
-      [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
-      (activate)="onActivateTableLabels($event)" >
-
-      <!-- [selected]="selected" [selectionType]="'single'" (select)="onSelect($event)" > -->
-
-        <ngx-datatable-row-detail [rowHeight]="'auto'" #projectRow (toggle)="onRowDetailToggle($event)">
-          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
-            <div class="span__row-detail-content">
-              <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.description }}</span>              
-            </div>
-          </ng-template>
-        </ngx-datatable-row-detail>
-
-        <!-- Column Templates -->
-        <ngx-datatable-column [width]="'auto'" 
-              [resizeable]="false" [sortable]="false" [draggable]="false" [canAutoResize]="false">
-          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-            <a href="javascript:void(0)"
-              [class.datatable-icon-right]="!expanded" [class.datatable-icon-down]="expanded"
-              title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
-            </a>
-          </ng-template>
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="ID" [width]="'auto'" >
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <strong><a (click)="close(row)">{{row.id}}</a></strong>
-          </ng-template>
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="Title" [width]="'auto'">
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="close(row)">{{row.title}}</a></span>
-          </ng-template>
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="'auto'" >
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <span>{{ row.create_dt | date:'MM/dd HH:mm' }}</span>
-          </ng-template>
-        </ngx-datatable-column>
-
-        <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="'auto'" >
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <span>{{ row.update_dt | date:'MM/dd HH:mm' }}</span>
-          </ng-template>
-        </ngx-datatable-column>
-
-      </ngx-datatable>
-    </div>
+      <textarea #matchTestMessage placeholder="Matching Test" readonly="true" mat-autosize="false"
+          rows="2"></textarea>
   </div>
+
+  <div class="wrapped-box-flex flex-1">
+    <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
+    [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
+    [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
+    (activate)="onActivateTableLabels($event)" >
+
+    <!-- [selected]="selected" [selectionType]="'single'" (select)="onSelect($event)" > -->
+
+      <ngx-datatable-row-detail [rowHeight]="'80'" #projectRow (toggle)="onRowDetailToggle($event)">
+        <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
+          <div class="span__row-detail-content">
+            <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.description }}</span>              
+          </div>
+        </ng-template>
+      </ngx-datatable-row-detail>
+
+      <!-- Column Templates -->
+      <ngx-datatable-column [width]="'20'" 
+            [resizeable]="false" [sortable]="false" [draggable]="false" [canAutoResize]="false">
+        <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+          <a href="javascript:void(0)"
+            [class.datatable-icon-right]="!expanded" [class.datatable-icon-down]="expanded"
+            title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
+          </a>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="ID" [width]="'100'" >
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <strong><a (click)="close(row)">{{row.id}}</a></strong>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Title" [width]="'600'">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="close(row)">{{row.title}}</a></span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="'210'" >
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span>{{ row.create_dt | date:'MM/dd HH:mm' }}</span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="'210'" >
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span>{{ row.update_dt | date:'MM/dd HH:mm' }}</span>
+        </ng-template>
+      </ngx-datatable-column>
+
+    </ngx-datatable>
+  </div>
+  
   <div class="btn-group row row-r">
     <button mat-stroked-button color="primary">OK</button>
     <button mat-flat-button color="primary" (click)="close()" tabindex="-1">Close</button>

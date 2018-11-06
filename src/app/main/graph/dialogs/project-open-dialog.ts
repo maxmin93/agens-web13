@@ -17,16 +17,19 @@ declare var jQuery:any;
   selector: 'app-project-open-dialog',
   template: `
 
-<h2 mat-dialog-title>
-  <div>
-    <a matTooltip="Refresh" matTooltipPosition="above" (click)="loadProjects()"><mat-icon>refresh</mat-icon></a>  
+ 
+<div class="row row-space">
+  <div class="dialog-tit">
+    <span><mat-icon>folder</mat-icon></span>
+    <h4>User <strong>Projects</strong></h4>
   </div>
-  User Projects <br/><small> select project and edit query</small>    
-</h2>
+  <a matTooltip="Refresh" matTooltipPosition="above" (click)="loadProjects()"><mat-icon>refresh</mat-icon></a>  
+</div>
+<span class="dialog-subtit">Select project and edit query</span>
 
 <div>
   <div>
-    <div class="wrapped-box-flex">
+    <div class="dialog-search">
       <span><i class="fa fa-search" aria-hidden="true"></i><input
           type='text' #inputFilter
           placeholder='Type to filter the title column...'
@@ -34,7 +37,7 @@ declare var jQuery:any;
         /></span>
     </div>
     <img #imgProjectCapture style="width:100; height:100;" class="border-styles" />
-    <div class="wrapped-box-flex">
+    <div>
 
     <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
       [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
@@ -62,13 +65,13 @@ declare var jQuery:any;
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="ID" [width]="60" >
+        <ngx-datatable-column name="ID" [width]="70" >
           <ng-template let-row="row" ngx-datatable-cell-template>
             <strong><a (click)="onSubmit(row)">{{row.id}}</a></strong>
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Title" [minWidth]="200">
+        <ngx-datatable-column name="Title" [minWidth]="300">
           <ng-template let-row="row" ngx-datatable-cell-template>
             <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row)">{{row.title}}</a></span>
           </ng-template>
@@ -98,8 +101,8 @@ declare var jQuery:any;
     </div>
   </div>
 </div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onCancel()" tabindex="-1" class="btn">Close</button>
+<div class="btn-group row row-r">
+  <button mat-flat-button color="primary" (click)="onCancel()" tabindex="-1">Close</button>
 </div>  
 
 <!-- JQuery dialog-confirm : project overwrite -->
@@ -108,13 +111,8 @@ declare var jQuery:any;
 </div>
 `,
 styles: [`
-.border-styles {
-  margin: 2px 0;
-  padding: 1px 3px;
-  border-width: 2px;
-  border-color: #aaa;
-  border-style: solid;
-} 
+
+.dialog-search { border-bottom: 1px solid #ddd; padding-bottom: .25rem; }
   `]
 })
 export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {

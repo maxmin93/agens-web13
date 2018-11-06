@@ -8,13 +8,13 @@
             <!-- // selection-cell 이 작동하지 않음. 예제는 되는데.. -->
             <!-- [selected]="selected" [selectionType]="'cell'" (select)="onSelect($event)" -->
 
-            <ngx-datatable-column name="Index" [width]="'auto'" [canAutoResize]="false" [sortable]="false">
+            <ngx-datatable-column name="Index" [width]="'80'" [canAutoResize]="false" [sortable]="false">
                 <ng-template let-rowIndex="rowIndex" let-row="row" ngx-datatable-cell-template>
                     <span>{{ rowIndex }}</span>
                 </ng-template>
             </ngx-datatable-column>
 
-            <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false" [width]="auto" >
+            <ngx-datatable-column *ngFor="let col of recordColumns" name="{{col.name}}" [sortable]="false" [width]="850" >
                 <ng-template let-column="col" ngx-datatable-header-template let-sort="sortFn">
                     <span>{{col.name}}</span>
                 </ng-template>

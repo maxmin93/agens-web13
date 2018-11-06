@@ -21,21 +21,26 @@ declare var agens:any;
 @Component({
   selector: 'app-project-save-dialog',
   template: `
-<h2 mat-dialog-title>
-  Project Save<br/>
-  <small>type title and description about your project</small>
-</h2>
-<div mat-dialog-content>
-  
-  <form class="example-form" novalidate [formGroup]="projectForm">
-  <img #divGraphImage />
-  <div class="example-container">
 
-    <mat-form-field class="example-full-width">
+<div class="dialog-tit">
+  <span><mat-icon>save</mat-icon></span>
+    <h4>Project <strong>Save</strong></h4>
+</div>
+<span class="dialog-subtit">Type title and description about your project</span>
+
+<div mat-dialog-content>
+
+  <div class="graph-image">
+    <img #divGraphImage />
+  </div>
+
+  <form class="col" novalidate [formGroup]="projectForm">
+  
+    <mat-form-field class="mt10">
       <input matInput name="projectId" value="{{project.id}}" placeholder="ID" readonly="true" >
     </mat-form-field>
 
-    <mat-form-field class="example-full-width">
+    <mat-form-field>
       <input matInput name="projectTitle" [formControl]="projectTitleCtl" placeholder="Title" required>
       <button mat-button *ngIf="projectTitleCtl.value" matSuffix mat-icon-button aria-label="Clear" 
             (click)="projectTitleCtl.setValue('')">
@@ -48,7 +53,8 @@ declare var agens:any;
         Title is <strong>required</strong>
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="example-full-width">
+
+    <mat-form-field>
       <textarea matInput name="projectDescription" [formControl]="projectDescriptionCtl" placeholder="Description"
             matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="5"></textarea>
       <button mat-button *ngIf="projectDescriptionCtl.value" matSuffix mat-icon-button aria-label="Clear" 
@@ -60,20 +66,20 @@ declare var agens:any;
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field class="example-full-width">
+    <mat-form-field>
       <input matInput name="projectCreateDt" value="{{project.create_dt | date:'yyyy-MM-dd HH:mm'}}" placeholder="Create Date" disabled>
     </mat-form-field>
-    <mat-form-field class="example-full-width">
+    <mat-form-field>
       <input matInput name="projectUpdateDt" value="{{project.update_dt | date:'yyyy-MM-dd HH:mm'}}" placeholder="Update Date" disabled>
     </mat-form-field>
 
-  </div>
   </form>
 </div>
-<div mat-dialog-actions>
-  <button mat-button type="submit" class="btn btn-default" 
+
+<div class="btn-group row row-r">
+  <button mat-stroked-button color="primary" type="submit" 
         [disabled]="!projectForm.valid" (click)="onSubmit()" tabindex="2">Submit</button>
-  <button mat-button (click)="onCancel()" tabindex="-1" class="btn">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onCancel()" tabindex="-1" >Cancel</button>
 </div>  
 
 <!-- JQuery dialog-confirm : project overwrite -->

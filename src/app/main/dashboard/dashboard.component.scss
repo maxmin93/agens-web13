@@ -10,9 +10,13 @@
     z-index: 10000;
 }
 
-#dataSourceLabel {
-    max-width: 36.25rem; 
-}
+#dataSourceLabel, 
+#dashGraphList { width: 30%; }
+
+#dashboard-canvas, #dashGraphCard { width: 70%; }
+
+#dashGraphCard { padding: 0; position: relative; }
+
 
 
  

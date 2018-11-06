@@ -1,7 +1,7 @@
 <div id="top" class="content col">
     <div class="row flex-1">
         
-        <div class="col flex-1 mr20" id="dataSourceLabel">
+        <div class="col mr20" id="dataSourceLabel">
 
             <!-- /////////////////////////////  
                 data source card 
@@ -43,16 +43,16 @@
                         [selected]="selectedLabels" [selectionType]="'single'"
                         (select)="onSelectTableLabels($event)"
                         >
-                        <ngx-datatable-column name="Type" [width]="'auto'"></ngx-datatable-column>
-                        <ngx-datatable-column name="ID" [width]="'auto'"></ngx-datatable-column>
-                        <ngx-datatable-column name="Name" [width]="'auto'" ></ngx-datatable-column>
-                        <ngx-datatable-column name="Size" [width]="'auto'">
+                        <ngx-datatable-column name="Type" ></ngx-datatable-column>
+                        <ngx-datatable-column name="ID" ></ngx-datatable-column>
+                        <ngx-datatable-column name="Name"  ></ngx-datatable-column>
+                        <ngx-datatable-column name="Size" >
                             <ng-template let-row="row" ngx-datatable-cell-template>
                                 <span>{{row.size | number}}</span>
                             </ng-template>
                         </ngx-datatable-column>
                         <!-- <ngx-datatable-column name="Volume" [width]="40"></ngx-datatable-column> -->
-                        <ngx-datatable-column name="Delete" [width]="'auto'" [sortable]="false">
+                        <ngx-datatable-column name="Delete" [sortable]="false">
                             <ng-template let-row="row" ngx-datatable-cell-template>
                                 <a class="btn btn-link" (click)="openConfirmDeleteLabelDialog(row)" mdTooltip="Delete" mdTooltipPosition="before">
                                     <mat-icon>delete</mat-icon>
@@ -64,13 +64,11 @@
             </div> 
         </div>
 
-        <div class="row flex-3" id="dashboard-canvas">
+        <div class="row" id="dashboard-canvas">
 
-            <!-- /////////////////////////////
-                graph card 
-            ///////////////////////////// -->
+            <!-- /////////////////////////////graph card ///////////////////////////// -->
 
-            <div class="row flex-2 card card-space-no mr20">
+            <div class="row card mr20" id="dashGraphCard">
                 <div class="card-header pos-abs">
                   <div #progressBar style='visibility:hidden; z-index: 10; width: 100%;'>
                     <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
@@ -95,11 +93,9 @@
                 </div>
             </div>
 
-            <!-- /////////////////////////////
-                label info card
-            ///////////////////////////// -->
+            <!-- /////////////////////////////label info card///////////////////////////// -->
 
-            <div class="col flex-1">
+            <div class="col" id="dashGraphList">
                 <div class="card col flex-1" id="schemaList">
                     <div class="card-header">
                         <h4 class="row row-m"><mat-icon class="mr10">info</mat-icon>Label <strong> Info.</strong></h4>

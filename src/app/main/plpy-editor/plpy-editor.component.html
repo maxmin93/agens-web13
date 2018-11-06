@@ -36,21 +36,23 @@
             <div class="card-content">
                 <!-- CodeMirror: Python editor -->
                 <form novalidate [formGroup]="procFormGrp" class="col flex-1">
-
-                    <mat-form-field>
-                        <input matInput placeholder="Name" [formControl]="procNameCtl" required />
-                        <mat-error *ngIf="procNameCtl.hasError('pattern') || procNameCtl.hasError('required')">
-                        Name has to <strong>start [a-zA-Z] char and length is 3~50</strong>
-                        </mat-error>
-                    </mat-form-field>
+                    <div class="row">
+                        <mat-form-field class="flex-1">
+                            <input matInput placeholder="Name" [formControl]="procNameCtl" required />
+                            <mat-error *ngIf="procNameCtl.hasError('pattern') || procNameCtl.hasError('required')">
+                            Name has to <strong>start [a-zA-Z] char and length is 3~50</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        
+                        <mat-form-field class="flex-1 ml20">
+                            <mat-select [formControl]="procLangCtl" placeholder="Language" required>
+                            <mat-option *ngFor="let lang of pglangs" [value]="lang">
+                                {{lang}}
+                            </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
                     
-                    <mat-form-field>
-                        <mat-select [formControl]="procLangCtl" placeholder="Language" required>
-                        <mat-option *ngFor="let lang of pglangs" [value]="lang">
-                            {{lang}}
-                        </mat-option>
-                        </mat-select>
-                    </mat-form-field>
                     
                     <mat-form-field>
                         <input matInput [formControl]="procArgsCtl" placeholder="Arguments &lt;name,type&gt;" />

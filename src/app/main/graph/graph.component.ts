@@ -576,7 +576,7 @@ return path1, path2;
     // let imageBlob = this._util.dataURItoBlob(png64);
 
     let dialogRef = this.dialog.open(ProjectSaveDialog, {
-      width: '800px', height: 'auto',
+      width: 'auto', height: 'auto',
       data: { "gid": this.queryGraph.gid, "project": this.currProject }
     });
 

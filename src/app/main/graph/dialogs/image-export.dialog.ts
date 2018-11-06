@@ -13,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
       <span class="dialog-subtit">Save PNG image file with watermark</span>
       
       <div>
-        <div id="export-image">
+        <div id="export-image" class="graph-image">
           <img #divGraphImage />
           <div id="export-watermark" class="row row-r mt10">
             <span>{{exportWatermarkCtl.value}}</span>
@@ -53,10 +53,7 @@ import { MatInputModule } from '@angular/material/input';
     </div>    
      
     `,
-  styles: [`
-    #export-image { background: #f8f8f8; width: 600px; padding: 1.5rem; border: 1px dashed #ccc; }
-    #export-image span { font-size: .825rem; color: #585858; }
-    img { width: 100%; }
+  styles: [`    
     mat-form-field button { height: 31px; }
     mat-form-field mat-icon { font-size: 15px !important; margin-left: -11px; margin-top: 8px; }
   `]

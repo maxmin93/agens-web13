@@ -7,14 +7,17 @@
     <!-- Graph content -->
     <div class="col flex-1 p20">
         <div class="row row-m row-space">
-            <h4 class="title">Search in <strong>Result</strong></h4>
-            <ul class="sheet btn-group">
+            <!-- <ul class="sheet btn-group">
                 <li><a class="btn btn-link" (click)="close()" matTooltip="Close" matTooltipPosition="above">
                     <mat-icon>close</mat-icon></a></li>
-            </ul>
+            </ul> -->
+            <div class="dialog-tit">
+                <span><mat-icon>search</mat-icon></span>
+                <h4>Search in <strong>Result</strong></h4>
+            </div>
         </div>
         <div class="row flex-1 mt10">
-            <div class="row flex-3 mr20">
+            <div class="row flex-2 mr20">
                 <div class="col flex-1">
                     <!-- graph canvas -->
                     <div id="meta-canvas" class="graph-canvas flex-1 border" #divCanvas></div>
@@ -39,10 +42,11 @@
                                 </li>
                             </ul>
                             <div class="btn-group side-l mt10 row-r">
-                                <a class="btn btn-fill" (click)="addItemGroupBy()"
-                                  [ngClass]="{ 'adisabled': selectedElement.data('label') != 'nodes' }">+ Group</a>
-                                <a class="btn btn-fill" (click)="addItemFilterBy()">+ Filter</a>
-                                <a class="btn btn-icon btn-fill" (click)="resetChecked()"><mat-icon>refresh</mat-icon></a>  
+                                <button mat-flat-button color="primary" (click)="addItemGroupBy()"
+                                  [ngClass]="{ 'adisabled': selectedElement.data('label') != 'nodes' }">+ Group</button>
+                                <button mat-flat-button color="primary" (click)="addItemFilterBy()">+ Filter</button>
+                                <!-- <button mat-stroked-button color="primary" (click)="resetChecked()"><mat-icon>refresh</mat-icon></button>   -->
+                                <button mat-stroked-button color="primary" (click)="resetChecked()">Refresh</button>  
                             </div>
                         </div>
                     </ng-container>
@@ -50,10 +54,10 @@
                 </div>
                 
             </div>    
-            <div class="col flex-2">
+            <div class="col flex-1">
                 <div class="col flex-1">
-                    <h5><strong>filter By List </strong></h5>
-                    <div *ngIf="filterByList" class="flex-1 border mt10 overflow-y">
+                    <h5 class="meta-tit"><strong>filter By List </strong></h5>
+                    <div *ngIf="filterByList" class="flex-1 border overflow-y theme_ivy">
                         <ul>
                             <li *ngFor="let item of filterByList; let i = index" class="border-bottom p20 col">
                                 <div class="row row-m row-space">
@@ -63,15 +67,13 @@
                                     </div>
                                     <button class="btn btn-icon btn-fill primary" (click)="removeItemFilterBy(i)"><mat-icon>delete_outline</mat-icon></button>
                                 </div>
-                                <div class="col mt10 mb10">
-                                    <div class="mt10 row row-m row-space">
-                                        <span class="flex-1">title</span>
+                                <div class="row mt10 mb10">
+                                    <div class="flex-1">                             
                                         <select name="fOper" [(ngModel)]="item.oper" class="flex-1">
                                             <option *ngFor="let oper of filterOpers" [value]="oper">{{ oper }}</option>
                                         </select>
                                     </div>
-                                    <div class="mt10 row row-m row-space">
-                                        <span class="flex-1">title</span>
+                                    <div class="ml20 flex-1">                                      
                                         <input class="flex-1 border-bottom" flex-1name="fValue" [(ngModel)]="item.value" required type="text">
                                     </div>
                                 </div>
@@ -80,12 +82,12 @@
                     </div>
                 </div>
                 <div class="col flex-1 mt20">
-                    <h5><strong>groupBy List</strong></h5>
-                    <div class="mt10 border flex-1 overflow-y" *ngIf="groupByList">
+                    <h5 class="meta-tit"><strong>groupBy List</strong></h5>
+                    <div class="border flex-1 overflow-y theme_ivy" *ngIf="groupByList">
                         <ul>
                             <li *ngFor="let item of groupByList; let i = index" class="row row-m row-space p20 border-bottom">
                                 <div>
-                                    <span>{{ item.label }}</span> 
+                                    <span class="sub-title">{{ item.label }}</span> 
                                     <p title= "{{ item.prop }}" > {{ item.prop }} <span>({{ item.type | lowercase }})</span></p>
                                 </div>
                                 <button class="btn btn-icon btn-fill" (click)="removeItemGroupBy(i)"><mat-icon>delete_outline</mat-icon></button>
