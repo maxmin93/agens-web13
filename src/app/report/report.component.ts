@@ -38,7 +38,8 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   private todo$:Subject<any> = new Subject();
 
   // AgensBrowser API
-  pid: number;
+  private pid: number;
+  private guestKey: string;
   private handlers: Subscription[] = [ undefined, undefined, undefined, undefined, undefined, undefined ];
   private projectDto: IGraphDto = undefined;
   private projectGraph: IGraph = undefined;
@@ -82,10 +83,11 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(){
     this.handler_param = this._path.params.subscribe(params => {
-      this.pid = +params['pid']; // (+) converts string 'id' to a number
+      this.guestKey = params['guestKey'];   // guestKey is defined at agens-config.yml
+      this.pid = +params['pid'];            // (+) converts string 'id' to a number
       this.clear();
       // In a real app: dispatch action to load the details here.
-      this.getReport(this.pid);
+      this.getReport(this.pid, this.guestKey);
     });
 
     // get return url from route parameters or default to '/'
@@ -178,11 +180,9 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       else if( charCode == "a" ) { 
         this.cy.elements(":visible").select(); event.preventDefault(); 
       }
-      else if( charCode == "c" ) this.ur.do('copy', this.cy.elements(":selected"), this.gid);
-      else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"), this.updateGraph);
-      else if( charCode == "v" ){
-        this.ur.do('paste', this.updateGraph);
-      }
+      else if( charCode == "c" ) this.ur.do('copy', this.cy.elements(":selected"));
+      else if( charCode == "x" ) this.ur.do('cut', this.cy.elements(":selected"));
+      else if( charCode == "v" ) this.ur.do('paste');
     }
     if (!event.shiftKey) {
       this.withShiftKey = false;    // multi selection 해제
@@ -221,9 +221,9 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     if( option ) { this.projectGraph = undefined; this.gid = undefined; }
   }
 
-  getReport(id:number) {         
+  getReport(id:number, guestKey:string) {         
     // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
-    let data$:Observable<any> = this._api.grph_load(id);
+    let data$:Observable<any> = this._api.report_graph(id, guestKey);
     
     // load GraphDto to QueryGraph
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
@@ -307,9 +307,11 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /////////////////////////////////////////////////////////////////
-  // Copy/Cut/Paste : TinkerGraph sync
+  // Copy/Cut/Paste : 
+  // ** gid 가 생성되지 않기 때문에 canvas 내에서만 이루어짐
   /////////////////////////////////////////////////////////////////
 
+  /*
   updateGraph(oper:string, nodes:any[], edges:any[], callback:Function=undefined){
     let data:any = { gid: this.gid, graph: { labels: [],
       nodes: nodes.map(x => { 
@@ -331,6 +333,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     );
   }
+  */
 
   initUndoRedo(cy, gid):any{
     if( !cy || !cy.undoRedo ) return undefined;
@@ -424,15 +427,11 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     ur.action('cut',       // actionName
       (eles:any) => {      // do Func
         ur.copy2cb(eles);
-        // TinkerGraph update::delete
-        this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
         // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
         ur.clipboard['removed'] = eles.remove();
         return eles;
       },
       () => {              // undo Func
-        // TinkerGraph update::upsert
-        this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
         // restore removed elements
         if( ur.clipboard['removed'] ){
           ur.clipboard['removed'].restore();
@@ -443,14 +442,10 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     ur.action('delete',    // actionName
       (eles:any) => {      // do Func
         ur.copy2cb(eles);
-        // TinkerGraph update::delete
-        this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
         // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
         ur.clipboard['removed'] = eles.remove();        
       },
       () => {              // undo Func
-        // TinkerGraph update::upsert
-        this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
         // restore removed elements
         if( ur.clipboard['removed'] ){
           ur.clipboard['removed'].restore();
@@ -459,13 +454,9 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     ur.action('create',
       (json:any) => {
-        if( json.group == 'nodes' ) this.updateGraph('upsert', [json], []);
-        else this.updateGraph('upsert', [], [json]);
         return this.cy.add( json );
       },
       (ele:any) => {
-        if( ele.group() == 'nodes' ) this.updateGraph('delete', [ele.json()], []);
-        else this.updateGraph('delete', [], [ele.json()]);
         return ele.remove();
       }
     );
@@ -475,9 +466,6 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
         let stack = ur.getUndoStack();
         if( stack.length < 1 || !['copy','cut','paste'].includes(stack[stack.length-1]['name']) ) return;
         if( !ur.clipboard['nodes'] || !ur.clipboard['edges'] ) return;        
-
-        // TinkerGraph update::upsert
-        this.updateGraph('upsert', ur.clipboard['nodes'], ur.clipboard['edges']);
 
         let eles = cy.collection();
         // **NOTE: nodes 는 id만 변경, 
@@ -505,8 +493,6 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
         ur.clipboard['pasted'] = eles;
       },
       () => {           // undo Func
-        // TinkerGraph update::delete
-        this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
         if( ur.clipboard['pasted'] ){
           ur.clipboard['pasted'].remove();
           ur.clipboard['pasted'] = undefined;
@@ -576,7 +562,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // qtipMenu 선택 이벤트
   qtipCxtMenu( action ){
-    console.log( 'qtipCxtMenu:', action, this.cy.scratch('_position') );
+    // console.log( 'qtipCxtMenu:', action, this.cy.scratch('_position') );
     let targets = this.cy.nodes(':selected');
     let target = targets.empty() ? this.selectedElement : targets.first();
 
