@@ -43,7 +43,7 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
   private guestKey: string;
   private handlers: Subscription[] = [ undefined, undefined, undefined, undefined, undefined, undefined ];
   private projectDto: IGraphDto = undefined;
-  private projectGraph: IGraph = undefined;
+  projectGraph: IGraph = undefined;
   currProject: IProject =  <IProject>{
     id: null,
     title: '',
