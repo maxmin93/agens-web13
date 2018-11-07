@@ -13,12 +13,9 @@ import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IProperty, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
-// import * as d3 from 'd3-selection';
-// import * as d3Scale from 'd3-scale';
-// import * as d3Array from 'd3-array';
-// import * as d3Axis from 'd3-axis';
+import * as _ from 'lodash';
+import * as moment from 'moment';
 
-declare var _: any;
 declare var agens: any;
 declare var d3: any;
 
@@ -117,7 +114,7 @@ export class StatGraphComponent implements OnInit {
 
   // graph elements 클릭 콜백 함수
   cyElemCallback(target:any):void {
-    console.log("statGraph.tap:", target._private);
+    // console.log("statGraph.tap:", target._private);
 
     // null 이 아니면 정보창 (infoBox) 출력
     this.selectedElement = target;
@@ -144,10 +141,17 @@ export class StatGraphComponent implements OnInit {
 
   onSelectProperty({ selected }) {
     if( this.gid < 0 || !this.selectedLabel || !selected || selected.length == 0 ) return;   
+
+    // **TEST
+    console.log(`**propertyStatAPI[${ selected[0]['key'] }] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+    
     this._api.grph_propStat(this.gid, this.selectedLabel.type, this.selectedLabel.name, selected[0]['key'])
     .subscribe(
       x => {
-        console.log('propStat: ', x);
+        // console.log('propStat: ', x);
+    // **TEST
+    console.log(`**propertyStatAPI[${ selected[0]['key'] }] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
         if( x.state == 'SUCCESS' ){
           if( x.stat ){
             this.propDescStat = x.stat;
@@ -228,12 +232,15 @@ export class StatGraphComponent implements OnInit {
     if( gid < 0 ) return;
     this.clear();
 
+    // **TEST
+    console.log(`**metaAPI[${gid}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
     // call API
     let data$:Observable<any> = this._api.grph_schema(gid);
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
-        console.log(`statGraph receiving : gid=${x.gid} (${gid})`);
+        // console.log(`statGraph receiving : gid=${x.gid} (${gid})`);
       });
     data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
@@ -274,13 +281,16 @@ export class StatGraphComponent implements OnInit {
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
+    // **TEST
+    console.log(`**metaAPI[${gid}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
         this._util.calcElementStyles( this.statGraph.nodes, (x)=>40+x*5, false );
         this._util.calcElementStyles( this.statGraph.edges, (x)=>2+x, false );
         this.cy.style(agens.graph.stylelist['dark']).update();
         // **NOTE: delay 가 작으면 style(width)가 반영되기 전에 layout 이 완료되어 동일한 간격이 된다!
         setTimeout(() => {
           this.changeLayout( this.cy.elements(':visible') );
-        }, 400);
+        }, 10);
         // this.initDone.emit(this.isVisible);
       });
 

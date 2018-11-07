@@ -6,7 +6,6 @@ import { Router, } from '@angular/router';
 import { MatDialog, MatSnackBar, MatButtonToggle, MatInput } from '@angular/material';
 import { MatTabGroup } from '@angular/material/tabs';
 
-import * as _ from 'lodash';
 import { Observable, Subscription, of } from 'rxjs';
 import { filter, share, concatAll } from 'rxjs/operators';
 
@@ -27,6 +26,9 @@ import { StatGraphComponent } from './components/stat-graph/stat-graph.component
 // Dialogs
 import { ProjectOpenDialog } from './dialogs/project-open-dialog';
 import { ProjectSaveDialog } from './dialogs/project-save-dialog';
+
+import * as _ from 'lodash';
+import * as moment from 'moment';
 
 declare var CodeMirror: any;
 declare var agens: any;
@@ -391,6 +393,9 @@ return path1, path2;
 
   parseGraphDto2Data(data$:Observable<any>){
 
+    // **TEST
+    console.log(`**queryAPI[${this.gid}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'result') ).subscribe(
       (x:IResultDto) => {
         this.resultDto = <IResultDto>x;
@@ -496,6 +501,9 @@ return path1, path2;
     //  ==> ILabel.size, IGraph.labels_size/nodes_size/edges_size
     this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
+    // **TEST
+    console.log(`**queryAPI[${this.gid}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
         this.isLoading = false;
         this.queryResult.setData(<IResponseDto>this.resultDto);   // 메시지 출력
 

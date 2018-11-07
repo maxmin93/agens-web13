@@ -908,6 +908,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // _style의 width 데이터를 직접 수정, 원복시 _styleBak를 복사
   graphCentrality(option:string='degree'){ 
+    // **TEST
+    console.log(`**centrality[${option}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
     // options: degree, pagerank, closeness, betweenness
     switch( option ){
       case 'degree': this._graph.centralrityDg( this.cy );      break;
@@ -923,6 +926,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           e._private.scratch._style.width = e._private.scratch._styleBak.width;
         });
     }
+
+    // **TEST
+    console.log(`**centrality[${option}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
     this.cy.style(agens.graph.stylelist['dark']).update();
   }
 
@@ -1012,6 +1018,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   doFindShortestPath(directed:boolean=false){
     this.cy.elements(':selected').unselect();
 
+    // **TEST
+    console.log(`**shortestPath Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
     let dijkstra = this.cy.elements().dijkstra(
       this.cy.getElementById(this.shortestPathOptions.sid)
       , function(edge){ return !edge.data('weight') ? 1 : edge.data('weight'); }
@@ -1023,6 +1032,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cy.$api.view.highlight(pathTo);
       pathTo.select();
     }
+
+    // **TEST
+    console.log(`**shortestPath End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
   }
 
   toggleFindConnectedGroup(option:boolean=undefined){
@@ -1031,10 +1043,16 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // enable 모드이면 start_id, end_id 리셋
     if( this.btnStatus.connectedGroup ) {
+    // **TEST
+    console.log(`**connectedGroup[${option}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
       let groups:any[] = this.cy.elements(':visible').components();
       groups.forEach((grp,idx) => {
         this.cy.$api.grouping(grp.nodes(), undefined, 'group#'+idx);
       });
+
+    // **TEST
+    console.log(`**connectedGroup[${option}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));      
     }
     else {
       let parents:any = this.cy.nodes().parent();
@@ -1428,6 +1446,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         let exact_matched:string[] = [];     // 완전 매치
         let half_matched:string[] = [];      // 부분 매치 : same direction, same label
 
+    // **TEST
+    console.log(`**overlayMerge Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+        
         // 새로운 overlay graph 붙이기
         // ** match 전략
         // 1) 같은 ID 의 node 에 대해 동일 position 부여 (최우선)
@@ -1467,6 +1488,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           if( isMatched ) e.classes += ' half_match';    // 사용된 edge 에도 match 표식
           this.cy.add( e );
         });
+
+    // **TEST
+    console.log(`**overlayMerge End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
 
         this.cy.fit( this.cy.elements(), 50);
       });
