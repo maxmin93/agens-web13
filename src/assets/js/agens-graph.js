@@ -609,9 +609,14 @@
         animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: function(){
           if( options && options.hasOwnProperty('ready') ) (options.ready)();
+          // **TEST
+          console.log(`**layout[${layout}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
         }, 
         stop: function(){ 
           if( options && options.hasOwnProperty('stop') ) (options.stop)();
+          // **TEST
+          console.log(`**layout[${layout}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+
           Promise.resolve(null).then(()=>{
             if( partial_layout ) cy.fit( cy.elements(':visible'), 50 );
           });
