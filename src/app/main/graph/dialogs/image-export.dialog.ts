@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-image-export-dialog',
   template: `
-    <div mat-dialog-content>
+    <div>
       <form novalidate [formGroup]="exportForm"></form>
       <div class="dialog-tit"><span><mat-icon>image</mat-icon></span> <h4>Image <strong>Export</strong></h4></div>
       <span class="dialog-subtit">Save PNG image file with watermark</span>

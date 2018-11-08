@@ -182,7 +182,7 @@
                                 <input matInput type="text" placeholder="Check type"
                                     [formControl]="timelineSampleCtl" readonly="true">
                             </mat-form-field>
-                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="doByValueCentrality()">byValue Centrality</button>
+                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-flat-button color="primary" (click)="doByValueCentrality()">by Value Centrality</button>
                         </div>
                     </div>
                 </ng-container>

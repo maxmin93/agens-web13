@@ -28,7 +28,7 @@ declare var agens:any;
 </div>
 <span class="dialog-subtit">Type title and description about your project</span>
 
-<div mat-dialog-content>
+<div>
 
   <div class="graph-image">
     <img #divGraphImage />
