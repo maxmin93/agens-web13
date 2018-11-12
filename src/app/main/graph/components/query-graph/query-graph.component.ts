@@ -284,12 +284,12 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateGraph(oper:string, nodes:any[], edges:any[], callback:Function=undefined){
     let data:any = { gid: this.gid, graph: { labels: [],
-      nodes: nodes.map(x => { 
+      nodes: nodes ? nodes.map(x => { 
         return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
-                  "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
-      edges: edges.map(x => { 
+                  "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }) : [],
+      edges: edges ? edges.map(x => { 
         return { "group": 'nodes', "id": x.data.id, "label": x.data.label, "size": x.data.size, "props": x.data.props,
-                  "source": x.data.source, "target": x.data.target, "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }),
+                  "source": x.data.source, "target": x.data.target, "name": x.data.hasOwnProperty('name') ? x.data.name : '' }; }) : [],
     }};
     this._api.grph_update(this.gid, oper, data).subscribe(
       x => {
@@ -400,6 +400,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
         // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
         ur.clipboard['removed'] = eles.remove();
+        this.recountingLabels();        // recount labels
         return eles;
       },
       () => {              // undo Func
@@ -410,6 +411,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           ur.clipboard['removed'].restore();
           ur.clipboard['removed'] = undefined;
         } 
+        this.recountingLabels();        // recount labels
       });
 
     ur.action('delete',    // actionName
@@ -418,7 +420,8 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         // TinkerGraph update::delete
         this.updateGraph('delete', ur.clipboard['nodes'], ur.clipboard['edges']);
         // **NOTE: copy 대상이 아닌 edge 들이 덩달아 지워진것도 포함됨
-        ur.clipboard['removed'] = eles.remove();        
+        ur.clipboard['removed'] = eles.remove();       
+        this.recountingLabels();        // recount labels        
       },
       () => {              // undo Func
         // TinkerGraph update::upsert
@@ -428,17 +431,22 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           ur.clipboard['removed'].restore();
           ur.clipboard['removed'] = undefined;
         } 
+        this.recountingLabels();        // recount labels        
       });
     ur.action('create',
       (json:any) => {
         if( json.group == 'nodes' ) this.updateGraph('upsert', [json], []);
         else this.updateGraph('upsert', [], [json]);
-        return this.cy.add( json );
+        let ele = this.cy.add( json );
+        this.recountingLabels();        // recount labels        
+        return ele;
       },
       (ele:any) => {
         if( ele.group() == 'nodes' ) this.updateGraph('delete', [ele.json()], []);
         else this.updateGraph('delete', [], [ele.json()]);
-        return ele.remove();
+        let tmp = ele.remove();
+        this.recountingLabels();        // recount labels        
+        return tmp;
       }
     );
 
@@ -475,6 +483,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         edges.forEach( e => eles = eles.add( e ) );
         ur.clipboard['pasted'] = eles;
+        this.recountingLabels();        // recount labels
       },
       () => {           // undo Func
         // TinkerGraph update::delete
@@ -483,6 +492,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           ur.clipboard['pasted'].remove();
           ur.clipboard['pasted'] = undefined;
         } 
+        this.recountingLabels();        // recount labels
       });
 
     return ur;
@@ -908,9 +918,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // _style의 width 데이터를 직접 수정, 원복시 _styleBak를 복사
   graphCentrality(option:string='degree'){ 
-    // **TEST
-    console.log(`**centrality[${option}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
     // options: degree, pagerank, closeness, betweenness
     switch( option ){
       case 'degree': this._graph.centralrityDg( this.cy );      break;
@@ -927,8 +934,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    // **TEST
-    console.log(`**centrality[${option}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
     this.cy.style(agens.graph.stylelist['dark']).update();
   }
 
@@ -1018,9 +1023,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   doFindShortestPath(directed:boolean=false){
     this.cy.elements(':selected').unselect();
 
-    // **TEST
-    console.log(`**shortestPath Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
     let dijkstra = this.cy.elements().dijkstra(
       this.cy.getElementById(this.shortestPathOptions.sid)
       , function(edge){ return !edge.data('weight') ? 1 : edge.data('weight'); }
@@ -1032,9 +1034,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cy.$api.view.highlight(pathTo);
       pathTo.select();
     }
-
-    // **TEST
-    console.log(`**shortestPath End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
   }
 
   toggleFindConnectedGroup(option:boolean=undefined){
@@ -1043,16 +1042,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // enable 모드이면 start_id, end_id 리셋
     if( this.btnStatus.connectedGroup ) {
-    // **TEST
-    console.log(`**connectedGroup[${option}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
       let groups:any[] = this.cy.elements(':visible').components();
       groups.forEach((grp,idx) => {
         this.cy.$api.grouping(grp.nodes(), undefined, 'group#'+idx);
       });
-
-    // **TEST
-    console.log(`**connectedGroup[${option}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));      
     }
     else {
       let parents:any = this.cy.nodes().parent();
@@ -1446,9 +1439,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         let exact_matched:string[] = [];     // 완전 매치
         let half_matched:string[] = [];      // 부분 매치 : same direction, same label
 
-    // **TEST
-    console.log(`**overlayMerge Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-        
         // 새로운 overlay graph 붙이기
         // ** match 전략
         // 1) 같은 ID 의 node 에 대해 동일 position 부여 (최우선)
@@ -1488,9 +1478,6 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
           if( isMatched ) e.classes += ' half_match';    // 사용된 edge 에도 match 표식
           this.cy.add( e );
         });
-
-    // **TEST
-    console.log(`**overlayMerge End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
 
         this.cy.fit( this.cy.elements(), 50);
       });

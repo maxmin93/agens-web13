@@ -224,9 +224,6 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getReport(id:number, guestKey:string) {         
 
-    // **TEST
-    console.log(`**reportDataAPI[${id}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
     // **NOTE: load 대상 graph 에 아직 gid 연결 안했음 (2018-10-12)
     let data$:Observable<any> = this._api.report_graph(id, guestKey);
     
@@ -283,19 +280,9 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this.handlers[5] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
         // console.log('END:', this.projectDto, this.projectGraph);
-    // **TEST
-    console.log(`**reportDataAPI[${id}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
-    // **TEST
-    console.log(`**reportRendering[${id}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
         this.isLoading = false;   
         this.initGraph(this.projectGraph);
         this.refreshCanvas();
-
-    // **TEST
-    console.log(`**reportRendering[${id}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
       });    
   }
 

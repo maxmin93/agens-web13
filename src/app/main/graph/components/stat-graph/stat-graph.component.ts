@@ -142,16 +142,10 @@ export class StatGraphComponent implements OnInit {
   onSelectProperty({ selected }) {
     if( this.gid < 0 || !this.selectedLabel || !selected || selected.length == 0 ) return;   
 
-    // **TEST
-    console.log(`**propertyStatAPI[${ selected[0]['key'] }] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-    
     this._api.grph_propStat(this.gid, this.selectedLabel.type, this.selectedLabel.name, selected[0]['key'])
     .subscribe(
       x => {
         // console.log('propStat: ', x);
-    // **TEST
-    console.log(`**propertyStatAPI[${ selected[0]['key'] }] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
         if( x.state == 'SUCCESS' ){
           if( x.stat ){
             this.propDescStat = x.stat;
@@ -232,9 +226,6 @@ export class StatGraphComponent implements OnInit {
     if( gid < 0 ) return;
     this.clear();
 
-    // **TEST
-    console.log(`**metaAPI[${gid}] Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
     // call API
     let data$:Observable<any> = this._api.grph_schema(gid);
 
@@ -281,9 +272,6 @@ export class StatGraphComponent implements OnInit {
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-    // **TEST
-    console.log(`**metaAPI[${gid}] End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
         this._util.calcElementStyles( this.statGraph.nodes, (x)=>40+x*5, false );
         this._util.calcElementStyles( this.statGraph.edges, (x)=>2+x, false );
         this.cy.style(agens.graph.stylelist['dark']).update();

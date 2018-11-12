@@ -103,7 +103,7 @@ export class MetaGraphComponent implements OnInit {
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
-        console.log(`metaGraph receiving : gid=${x.gid} (${gid})`);
+        // console.log(`metaGraph receiving : gid=${x.gid} (${gid})`);
       });
     data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {
@@ -173,7 +173,6 @@ export class MetaGraphComponent implements OnInit {
     this.selectedLabel = this.findLabel(target);
     this.selectedProps = Object.keys(this.selectedElement.data('props')['propsCount']);
                       // (this.selectedLabel) ? this.selectedLabel.properties : <IProperty[]>[];
-    console.log( 'meta-graph.click:', this.selectedElement._private);
 
     this.makeFormGroup(this.selectedProps, this.selectedElement._private.data.label == 'nodes');
   }  
@@ -214,7 +213,7 @@ export class MetaGraphComponent implements OnInit {
       .map((v, i) => v ? this.selectedProps[i] : null)
       .filter(v => v !== null);
 
-    console.log('addItemGroupBy:', selected, this.selectedLabel);
+    // console.log('addItemGroupBy:', selected, this.selectedLabel);
     if( this.selectedLabel )
       selected.forEach(item => {
         let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
@@ -227,13 +226,14 @@ export class MetaGraphComponent implements OnInit {
       .map((v, i) => v ? this.selectedProps[i] : null)
       .filter(v => v !== null);
 
-    selected.forEach(item => {
-      if( item == '$ALL' ) return true;
-      let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
-      this.filterByList.push({ label: this.selectedElement.data('props')['name'], prop: item
-            , oper: "eq", value: ""
-            , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
-    });
+    if( this.selectedLabel )
+      selected.forEach(item => {
+        if( item == '$ALL' ) return true;
+        let info:IProperty[] = this.selectedLabel.properties.filter(x => x.key == item);
+        this.filterByList.push({ label: this.selectedElement.data('props')['name'], prop: item
+              , oper: "eq", value: ""
+              , type: (info.length > 0) ? info[0].type : ((item == '$ALL')? "label" : "unknown") });
+      });
   }
 
   removeItemGroupBy(i:number):any {
@@ -261,7 +261,9 @@ export class MetaGraphComponent implements OnInit {
       }, {});
     };
     options.groups = _translate( gList, 'label', x => x.prop );
-    options.filters = _translate( fList, 'label', x => [x.prop, x.oper, x.value] );
+    options.filters = _translate( fList, 'label', 
+        x => [x.prop, x.oper, x.type == 'NUMBER' ? Number(x.value):String(x.value), x.type] 
+      );
 
     // groupBy 에 '$ALL'이 있으면 다른 prop 들 무시하고 그것만 남기기
     Object.keys(options.groups).forEach( key => {

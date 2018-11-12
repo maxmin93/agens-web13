@@ -322,9 +322,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     // call API
     let data$:Observable<any> = this._api.core_schema();
     
-    // **TEST
-    console.log(`**schemaAPI Start: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
     this.handlers[0] = data$.pipe( filter(x => x['group'] == 'schema') ).subscribe(
       (x:ISchemaDto) => {
         this.datasource = x.datasource;
@@ -366,9 +363,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       });
     this.handlers[5] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-    // **TEST
-    console.log(`*schemaAPI End: `+moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
-
         this.showGraph();
         // 화면 출력 : ngAfterViewInit emitter 이후 실행
         Promise.resolve(null).then(() => {
