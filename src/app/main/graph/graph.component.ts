@@ -581,7 +581,7 @@ return path1, path2;
 
     this.currProject.sql = this.editor.getValue();
     this.currProject.graph = { "labels": [], "nodes": nodes, "edges": edges };
-    this.currProject.image = this.queryGraph.cy.png({ full: true, scale: 0.2, maxWidth:100, maxHeight:100 });
+    this.currProject.image = this.queryGraph.cy.png({ full: true, scale: 0.5, maxWidth:200, maxHeight:250 });
 
     // make snapshot image of GRAPH
     // 참고 https://stackoverflow.com/questions/24218382/how-to-upload-encoded-base64-image-to-the-server-using-spring

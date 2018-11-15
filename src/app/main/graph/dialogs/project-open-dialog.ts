@@ -36,9 +36,8 @@ declare var jQuery:any;
           (keyup)='updateFilter($event)'
         /></span>
     </div>
-    <img #imgProjectCapture style="width:100; height:100;" class="border-styles" />
-    <div>
 
+    <div>
     <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
       [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
       [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
@@ -98,6 +97,10 @@ declare var jQuery:any;
         </ngx-datatable-column>            
 
       </ngx-datatable>
+    </div>
+
+    <div style="width: 150px; min-height: 120px; max-height: auto; float: left; margin: 3px; padding: 3px;">
+      <img #imgProjectCapture style="max-width: 100%; height: auto;" class="border-styles" />
     </div>
   </div>
 </div>

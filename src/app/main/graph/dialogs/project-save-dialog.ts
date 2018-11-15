@@ -30,8 +30,8 @@ declare var agens:any;
 
 <div>
 
-  <div class="graph-image">
-    <img #divGraphImage />
+  <div style="width: 150px; min-height: 120px; max-height: auto; float: left; margin: 3px; padding: 3px;">
+    <img #divGraphImage style="max-width: 100%; height: auto;" class="border-styles" />
   </div>
 
   <form class="col" novalidate [formGroup]="projectForm">
