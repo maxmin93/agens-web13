@@ -592,6 +592,8 @@
       let elements = cy.elements(':visible');
       let boundingBox = undefined;
       let partial_layout = false;
+      let animation_enabled = 'false';
+      let padding = 50;
       if( options ){
         if( options.hasOwnProperty('elements') && options['elements'] ){ 
           elements = options['elements'];
@@ -599,30 +601,32 @@
         }
         if( options.hasOwnProperty('boundingBox') && options['boundingBox'] ) 
           boundingBox = options['boundingBox'];
+        if( options.hasOwnProperty('animate') && options['animate'] ) 
+          animation_enabled = options['animate'];
+        if( options.hasOwnProperty('padding') && options['padding'] ) 
+          padding = options['padding'];
       }
 
       let layoutOption = {
-        name: layout,
-        fit: (partial_layout) ? false : true, padding: 50, 
-        boundingBox: (partial_layout) ? boundingBox : undefined, 
-        nodeDimensionsIncludeLabels: true, randomize: false,
-        animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
-        ready: function(){
+        "name": layout,
+        "fit": (partial_layout) ? false : true, 
+        "padding": padding, 
+        "boundingBox": (partial_layout) ? boundingBox : undefined, 
+        "nodeDimensionsIncludeLabels": true, randomize: false,
+        "animate": animation_enabled == 'true' ? 'end' : false,
+        "refresh": 30, "animationDuration": 800, "maxSimulationTime": 2800,
+        "ready": function(){
           if( options && options.hasOwnProperty('ready') ) (options.ready)();
         }, 
-        stop: function(){ 
+        "stop": function(){ 
           if( options && options.hasOwnProperty('stop') ) (options.stop)();
           Promise.resolve(null).then(()=>{
             if( partial_layout ) cy.fit( cy.elements(':visible'), 50 );
           });
         },
         // for euler
-        springLength: edge => 120, springCoeff: edge => 0.0008,
+        "springLength": edge => 120, springCoeff: edge => 0.0008,
       };
-      if( options && options.hasOwnProperty('animate') ) layoutOption.animate = options.animate;
-      if( options && options.hasOwnProperty('padding') ) layoutOption.padding = options.padding;
-      // if( options && options.hasOwnProperty('ready') ) layoutOption.ready = options.ready;
-      // if( options && options.hasOwnProperty('stop') ) layoutOption.stop = options.stop;
 
       // adjust layout
       let layoutHandler = elements.layout(layoutOption);

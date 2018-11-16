@@ -27,6 +27,8 @@ export interface IClientDto extends IResponseDto {
   product_name: string;
   product_version: string;
   timestamp: string;
+  mode?: string;
+  animation_enabled?: boolean;
 };
 
 export interface ISchemaDto extends IResponseDto {

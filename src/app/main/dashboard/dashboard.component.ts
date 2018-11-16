@@ -413,6 +413,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   changeLayout( elements ){
 
+    let animation_enabled = localStorage.getItem(CONFIG.ANIMATION_ENABLED_KEY);
     let options = { name: 'klay',
       klay: {
         // Following descriptions taken from http://layout.rtsys.informatik.uni-kiel.de:9444/Providedlayout.html?algorithm=de.cau.cs.kieler.klay.layered
@@ -449,8 +450,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       randomize: false,
       spacingFactor: undefined,             // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
       nodeDimensionsIncludeLabels: false,   // whether labels should be included in determining the space used by a node
-      animate: false,                       // 'end',  // whether to transition the node positions
-      animateFilter: function( node, i ){ return true; }, // whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
+      animate: animation_enabled == 'true' ? 'end' : false,  // whether to transition the node positions
+      animateFilter: function( node, i ){ return true; },    // whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
       animationDuration: 500,               // duration of animation in ms if enabled
       animationEasing: undefined,           // easing of animation if enabled
       boundingBox: undefined,               // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }

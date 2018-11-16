@@ -12,6 +12,8 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IProperty, IEnd } from 
 import { Label, Element, Node, Edge } from '../../../../models/agens-graph-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
+import * as CONFIG from '../../../../app.config';
+
 declare var _: any;
 declare var $: any;
 declare var agens: any;
@@ -318,18 +320,14 @@ export class MetaGraphComponent implements OnInit {
   }
 
   changeLayout( elements ){
-    // let options = { name: 'cose',
-    //   nodeDimensionsIncludeLabels: true, fit: true, padding: 50, animate: false, 
-    //   randomize: false, componentSpacing: 80, nodeOverlap: 4,
-    //   idealEdgeLength: 50, edgeElasticity: 50, nestingFactor: 1.5,
-    //   gravity: 0.5, numIter: 1000
-    // };    
+    let animation_enabled = localStorage.getItem(CONFIG.ANIMATION_ENABLED_KEY);
     let options = { name: 'cose-bilkent',
       ready: function () {}, stop: function () {},
       nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 100,
       randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
       nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
-      animate: 'end', tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
+      animate: animation_enabled == 'true' ? 'end' : false, 
+      tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
       gravityRangeCompound: 1.5, gravityCompound: 1.0, gravityRange: 3.8,
       initialEnergyOnIncremental: 0.5    
     };    

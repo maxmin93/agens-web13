@@ -13,6 +13,7 @@ import { AgensUtilService } from '../../../../services/agens-util.service';
 import { IGraph, ILabel, IProperty, INode, IEdge, IStyle, IEnd } from '../../../../models/agens-data-types';
 import { IGraphDto } from '../../../../models/agens-response-types';
 
+import * as CONFIG from '../../../../app.config';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
@@ -339,12 +340,14 @@ export class StatGraphComponent implements OnInit {
   }
 
   private changeLayout( elements ){
+    let animation_enabled = localStorage.getItem(CONFIG.ANIMATION_ENABLED_KEY);
     let options = { name: 'cose-bilkent',
       ready: function () {}, stop: function () {},
       nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 50,
       randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
       nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
-      animate: 'end', tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
+      animate: animation_enabled == 'true' ? 'end' : false, 
+      tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
       gravityRangeCompound: 1.5, gravityCompound: 1.0, gravityRange: 3.8,
       initialEnergyOnIncremental: 0.5    
     };

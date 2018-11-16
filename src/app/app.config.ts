@@ -9,10 +9,13 @@ export const AGENS_GRPH_API: string = 'api/graph';
 export const AGENS_FILE_API: string = 'api/file';
 export const AGENS_RPRT_API: string = 'api/report';
 
+///////////////////////////////////////////////////////////////
+
 export const USER_KEY: string = 'agens-ssid';
+export const CLIENT_MODE_KEY: string = 'agens-mode';
+export const ANIMATION_ENABLED_KEY: string = 'agens-animation-enabled';
 
 export const MOBILE_WIDTH: number = 1024;
-
 export const MAX_COLOR_SIZE:number = 40;
 
 ///////////////////////////////////////////////////////////////

@@ -134,6 +134,11 @@ export class AgensDataService {
     this.client = dto;
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
     localStorage.setItem(CONFIG.USER_KEY, dto.ssid);
+    
+    if( dto.hasOwnProperty('mode') ) 
+      localStorage.setItem(CONFIG.CLIENT_MODE_KEY, dto['mode']);
+    if( dto.hasOwnProperty('animation_enabled') ) 
+      localStorage.setItem(CONFIG.ANIMATION_ENABLED_KEY, dto['animation_enabled']+'');
   }
 
   core_schema():Observable<any> {

@@ -755,11 +755,13 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toggleProgressBar(true);
       let remains:any[] = this._util.loadPositions(this.cy);
 
+      let animation_enabled = localStorage.getItem(CONFIG.ANIMATION_ENABLED_KEY);
       let layoutOption = {
         name: 'random',
         fit: false, padding: 50, boundingBox: undefined, 
         nodeDimensionsIncludeLabels: true, randomize: false,
-        animate: 'end', refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
+        animate: animation_enabled == 'true' ? 'end' : false, 
+        refresh: 30, animationDuration: 800, maxSimulationTime: 2800,
         ready: () => {}, stop: () => { this.cy.fit( this.cy.elements(), 50); this.toggleProgressBar(false); }
       };
       // rest random layout
@@ -783,6 +785,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       , "boundingBox": (targets.size() > 2) ? targets.boundingBox() : undefined
       , "ready": () => { }
       , "stop": () => { this.toggleProgressBar(false); }
+      , "animate": localStorage.getItem(CONFIG.ANIMATION_ENABLED_KEY)
     });
   }
 
