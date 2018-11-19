@@ -1239,7 +1239,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
-        console.log(`graph_dto receiving : gid=${x.gid} (${this.gid})`);
+        // console.log(`graph_dto receiving : gid=${x.gid} (${this.gid})`);
       });
     data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
       (x:IGraph) => {

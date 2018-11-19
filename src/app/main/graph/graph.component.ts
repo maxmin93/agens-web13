@@ -82,6 +82,7 @@ return path1, path2;
   };
   currentTabIndex: number = 0;
 
+  @ViewChild('uploader', {read: ElementRef}) uploader: ElementRef;
   @ViewChild('queryEditor', {read: ElementRef}) queryEditor: ElementRef;
   @ViewChild('queryResult') queryResult: QueryResultComponent;
 
@@ -300,7 +301,7 @@ return path1, path2;
       this.gid = -1;
       this._api.grph_new().pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
         x => {
-          console.log( 'grph_new:', x );
+          // console.log( 'grph_new:', x );
           if( x.hasOwnProperty('gid') && x['gid'] > 0 ){
             this.gid = x.gid;
             this.queryGraph.setGid( x.gid );
@@ -563,7 +564,9 @@ return path1, path2;
 
     let nodes = this.queryGraph.cy.nodes().map(e => {
       let x = e.json();
-      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "props": {} };
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label
+          , "props": x.data.hasOwnProperty('props') && x.data.props ? x.data.props : {} 
+          };
       if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
       if( x.classes ) data['props']['$$classes'] = x.classes;
       if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
@@ -571,8 +574,9 @@ return path1, path2;
     });
     let edges = this.queryGraph.cy.edges().map(e => {
       let x = e.json();
-      let data = { "group": x.group, "id": x.data.id, "label": x.data.label, "props": {}, 
-                   "source": x.data.source, "target": x.data.target };
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label
+          , "props": x.data.hasOwnProperty('props') && x.data.props ? x.data.props : {} 
+          , "source": x.data.source, "target": x.data.target };
       // edge는 position 정보가 없음
       if( x.classes ) data['props']['$$classes'] = x.classes;
       if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
@@ -596,7 +600,7 @@ return path1, path2;
 
     dialogRef.afterClosed().subscribe(result => {
       if( result === null ) return;
-      console.log('close ProjectSaveDialog:', result.id, result.hasOwnProperty('title') ? result['title'] : '(undefined)');
+      // console.log('close ProjectSaveDialog:', result.id, result.hasOwnProperty('title') ? result['title'] : '(undefined)');
       // saved Project
       this.currProject = result;
 
@@ -617,7 +621,7 @@ return path1, path2;
 
     dialogRef.afterClosed().subscribe(result => {
       if( !result ) return;
-      console.log('ProjectOpenDialog:', result);
+      // console.log('ProjectOpenDialog:', result);
 
       // Project Open 위한 API 호출
       this.currProject = result;
@@ -733,7 +737,7 @@ return path1, path2;
     //  ==> ILabel.size, IGraph.labels_size/nodes_size/edges_size
     this.handlers[8] = data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        console.log('END:', this.projectDto);
+        // console.log('END:', this.projectDto);
         this.isLoading = false;        
         this.queryResult.setData(<IResponseDto>this.projectDto);   // 메시지 출력
 
@@ -775,7 +779,7 @@ return path1, path2;
       return;
     }
 
-    console.log( 'importFile:', fileItem,  event.target.files);
+    // console.log( 'importFile:', fileItem,  event.target.files);
     this.handlers[9] = this._api.importFile( this.gid, fileItem ).subscribe(
       x => {
         // progress return 
@@ -792,9 +796,13 @@ return path1, path2;
       },
       err => {
         this.queryResult.setMessage(StateType.FAIL, 'import.FAIL: '+JSON.stringify(err) );
+        this.uploader.nativeElement.value = '';
       },
       () => {
         this.queryResult.setMessage(StateType.SUCCESS, 'import.complete: '+fileItem.name );
+        // **NOTE: 동일한 파일 선택시 input value 가 변하지 않아 event trigger가 발생하지 않는다
+        //  ==> 초기화 해주어야 함 (참고 https://stackoverflow.com/a/30357800/6811653)
+        this.uploader.nativeElement.value = '';
       }
     );
   }
@@ -803,7 +811,7 @@ return path1, path2;
 
     data$.pipe( filter(x => x['group'] == 'graph_dto') ).subscribe(
       (x:IGraphDto) => {
-        console.log(`graph_dto receiving : gid=${x.gid}`);
+        // console.log(`graph_dto receiving : gid=${x.gid}`);
         // gid 갱신 안함
       });
     data$.pipe( filter(x => x['group'] == 'graph') ).subscribe(
@@ -826,13 +834,14 @@ return path1, path2;
       });
     data$.pipe( filter(x => x['group'] == 'nodes') ).subscribe(
       (x:INode) => {
+        console.log( JSON.stringify(x) );
         // setNeighbors from this.resultGraph.labels;
         x.scratch['_neighbors'] = new Array<string>();
         this.resultTemp.labels
           .filter(val => val.type == 'nodes' && val.name == x.data.label)
           .map(label => {
             x.scratch['_neighbors'] += label.targets;
-            x.scratch['_style'] = label.scratch['_style'];
+            if( !x.scratch.hasOwnProperty('_style') ) x.scratch['_style'] = label.scratch['_style'];
             x.scratch['_styleBak'] = label.scratch['_styleBak'];
           });
         this.resultTemp.nodes.push( x );
@@ -843,7 +852,7 @@ return path1, path2;
         this.resultTemp.labels
         .filter(val => val.type == 'edges' && val.name == x.data.label)
         .map(label => {
-          x.scratch['_style'] = label.scratch['_style'];
+          if( !x.scratch.hasOwnProperty('_style') ) x.scratch['_style'] = label.scratch['_style'];
           x.scratch['_styleBak'] = label.scratch['_styleBak'];
         });
         this.resultTemp.edges.push( x );
@@ -851,19 +860,43 @@ return path1, path2;
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        this.queryGraph.initCanvas(true);
-        // this.queryGraph.graphChangeLayout('cose');
+        this.queryGraph.refreshCanvas();
+        // this.queryGraph.initCanvas(true);
       });
   }
 
   ///////////////////////////////////////////////////
 
   exportGraph(fileType:string){
-    let fileName = `graph_${this.gid}` + (fileType == 'graphson' ? '.json' : '.xml');
+    let fileName = `graph_${this.gid}` + (fileType == 'json' ? '.graphson' : '.graphml');
 
-    this._api.exportFile(this.gid, fileType).subscribe(
+    let nodes = this.queryGraph.cy.nodes().map(e => {
+      let x = e.json();
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label
+          , "props": x.data.hasOwnProperty('props') && x.data.props ? x.data.props : {} 
+          };
+      if( x.position && x.position != {} ) data['props']['$$position'] = x.position;
+      if( x.classes ) data['props']['$$classes'] = x.classes;
+      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
+      return data;
+    });
+    let edges = this.queryGraph.cy.edges().map(e => {
+      let x = e.json();
+      let data = { "group": x.group, "id": x.data.id, "label": x.data.label
+          , "props": x.data.hasOwnProperty('props') && x.data.props ? x.data.props : {} 
+          , "source": x.data.source, "target": x.data.target };
+      // edge는 position 정보가 없음
+      if( x.classes ) data['props']['$$classes'] = x.classes;
+      if( e.scratch('_style') ) data['props']['$$style'] = e.scratch('_style');
+      return data;
+    });
+    // structure: GraphDto
+    let data:any  = { "gid": this.gid, "graph": { "labels": [], "nodes": nodes, "edges": edges } };
+
+    console.log( 'exportFile: ', fileType, data );
+    this._api.exportFile(fileType, data).subscribe(
       x => {
-        const blob = new Blob([x], { type: (fileType == 'graphson' ? 'application/json' : 'application/xml') });
+        const blob = new Blob([x], { type: (fileType == 'json' ? 'application/json' : 'application/xml') });
         saveAs(blob, fileName);
       },
       err => {

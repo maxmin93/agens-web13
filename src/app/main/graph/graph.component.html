@@ -21,9 +21,9 @@
               <mat-menu #exportMenu="matMenu" [yPosition]="'below'">
                   <div td-menu-header><h4 class="mat-subhead">format</h4></div>
                   <mat-divider></mat-divider>
-                      <button mat-menu-item (click)="exportGraph('graphson')">graphson (JSON)</button>
+                      <button mat-menu-item (click)="exportGraph('json')">graphson (JSON)</button>
                   <mat-divider></mat-divider>
-                      <button mat-menu-item (click)="exportGraph('graphml')">graphml (XML)</button>
+                      <button mat-menu-item (click)="exportGraph('xml')">graphml (XML)</button>
               </mat-menu>
             <button color="primary" mat-button [disabled]="isLoading || currentTabIndex != 0" (click)="openProjectOpenDialog()"
                 matTooltip="open Project" matTooltipPosition="above">Load</button>

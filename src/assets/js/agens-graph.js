@@ -95,7 +95,7 @@
     edgeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.bc;
-      return '#a8a8a8';     // '#ddd';
+      return '#c8c8c8';     // '#ddd';
     },
     edgeDColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 

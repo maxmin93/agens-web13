@@ -444,7 +444,7 @@ export class AgensDataService {
     const url = `${this.api.file}/import`;
     const formData: FormData = new FormData();
 
-    formData.append('gid', gid+'');   // convert number to string 
+    formData.append('gid', gid+'');    // convert number to string 
     formData.append('file', fileItem, fileItem.name);
     if (extraData) {
       for(let key in extraData){
@@ -455,28 +455,43 @@ export class AgensDataService {
 
     const req = new HttpRequest('POST', url, formData, {
       // **NOTE: 이거 필요 없음! 오류만 발생함 ==> 'Content-Type': 'multipart/form-data'
-      headers: new HttpHeaders({ 'Authorization': this.getSSID() }),
+      headers: new HttpHeaders({ 
+        // 'Content-Type': 'application/octet-stream; charset=utf-8',
+        'Authorization': this.getSSID() 
+      }),
       reportProgress: true // for progress data
     });
     return this._http.request(req);
   }
 
-  exportFile(gid: number, fileType:string):any{
-    const url = `${this.api.file}/export`;
+  // exportFile(gid: number, fileType:string):any{
+  //   const url = `${this.api.file}/export`;
 
-    let params:HttpParams = new HttpParams();
-    params = params.append('gid', gid+'');   
-    params = params.append('type', fileType);   // graphson or graphml
+  //   let params:HttpParams = new HttpParams();
+  //   params = params.append('gid', gid+'');   
+  //   params = params.append('type', fileType);   // graphson or graphml
 
+  //   let httpOptions = {
+  //     headers: new HttpHeaders({
+  //       'Content-Type': 'application/octet-stream; charset=utf-8',
+  //       'Authorization': this.getSSID()
+  //     }),
+  //     params: params,
+  //     'responseType': 'text' as 'json'      // httpclient Requesting non-JSON data 
+  //   };
+  //   return this._http.get<string>(url, httpOptions);
+  // }
+
+  exportFile(fileType:string, data:any):any{
+    const url = `${this.api.file}/export/${fileType}`;
     let httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/octet-stream; charset=utf-8',
+        'Content-Type': 'application/json; charset=utf-8',
         'Authorization': this.getSSID()
       }),
-      params: params,
       'responseType': 'text' as 'json'      // httpclient Requesting non-JSON data 
     };
-    return this._http.get<string>(url, httpOptions);
+    return this._http.post<string>(url, data, httpOptions);
   }
 
   //////////////////////////////////////////////////////
