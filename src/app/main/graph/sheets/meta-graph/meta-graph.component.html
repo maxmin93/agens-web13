@@ -57,7 +57,7 @@
             <div class="col flex-1">
                 <div class="col flex-1">
                     <h5 class="meta-tit"><strong>filter By List </strong></h5>
-                    <div *ngIf="filterByList" class="flex-1 border overflow-y theme_ivy">
+                    <div *ngIf="filterByList" class="flex-1 border overflow-y">
                         <ul>
                             <li *ngFor="let item of filterByList; let i = index" class="border-bottom p20 col">
                                 <div class="row row-m row-space">
@@ -83,7 +83,7 @@
                 </div>
                 <div class="col flex-1 mt20">
                     <h5 class="meta-tit"><strong>groupBy List</strong></h5>
-                    <div class="border flex-1 overflow-y theme_ivy" *ngIf="groupByList">
+                    <div class="border flex-1 overflow-y" *ngIf="groupByList">
                         <ul>
                             <li *ngFor="let item of groupByList; let i = index" class="row row-m row-space p20 border-bottom">
                                 <div>

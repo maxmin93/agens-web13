@@ -1,6 +1,23 @@
 .sidebar { top: 1.25rem; right: 1.25rem; width: 23rem; }
 .subtit { font-size: .8rem; color: #525252; margin-top: .5rem; }
 
+table { 
+  border: 1px solid #ddd; 
+  border-collapse: collapse; 
+  margin-top: 1rem; 
+}
+
+thead { background: #f2f2f2; }
+
+th, td { 
+  min-width: 68px; 
+  padding: .5rem 0; 
+  border: 1px solid #ddd; 
+  text-align: center; 
+  font-size: .825rem; 
+  color: #242424; 
+}
+
 .bar{
   fill: steelblue;
 }
