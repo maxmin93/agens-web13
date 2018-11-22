@@ -190,7 +190,7 @@ export class AgensDataService {
     params = params.append('target', target.name);                             // target
     params = params.append('options', target.desc);                            // label.desc
     
-    console.log( `core_command_drop_label => ${params.toString()}`);
+    // console.log( `core_command_drop_label => ${params.toString()}`);
     return this._http.get<ILabelDto>(url, {params: params, headers: this.createAuthorizationHeader()});
   }
 

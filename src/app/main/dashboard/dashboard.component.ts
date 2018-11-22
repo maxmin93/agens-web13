@@ -720,10 +720,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     // **NOTE: empty 일 경우에는 subscribe 되지 않는다 (필터링 필요없음)
     concat( desc$, name$ ).pipe(tap(x => console.log)).subscribe( 
       x => {
-      // console.log( 'saveElement:', x.request.type, x );
       if( !x.label ) return;
       let targetsRow = this.tableLabelsRows.filter(y => y.id == x.label.id && y.type == x.label.type );
       let targetsEle = this.cy.getElementById(x.label.id);
+      // console.log( 'saveElement:', x.request.type, x.label, targetsRow, targetsEle );
       // update information
       if( x.request && x.request.type )
         switch( x.request.type ){
