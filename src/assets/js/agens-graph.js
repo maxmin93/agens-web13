@@ -100,11 +100,11 @@
     edgeDColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
         return e.scratch('_style').color.dc;
-      return '#8e8e8e';     // '#ddd';
+      return '#c8c8c8';     // '#ddd';
     },
     edgeWidth: function(e){
       if( e.scratch('_style') && e.scratch('_style').width ) 
-        return e.scratch('_style').width + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+10))*2 : 0 );
+        return e.scratch('_style').width + ( e.data('size') > 1 ? Math.floor(Math.log10(e.data('size')+5))*2 : 0 );
       return 3;
     }
   };
@@ -301,7 +301,7 @@
           'opacity': 1,
           'width': 12,
           'line-style': 'solid',            // line-style: solid, dotted, dashed
-          'line-color': '#8e8e8e',
+          'line-color': '#c8c8c8',
           'target-arrow-color': '#83878d',
           'source-arrow-color': '#83878d',
           'text-outline-width': 1,

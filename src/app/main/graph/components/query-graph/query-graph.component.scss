@@ -49,22 +49,21 @@
 .sidebar { top: 1.25rem; right: 1.25rem; }
 
 .side-short-component { 
-  height: auto; 
+  height: initial; 
+  max-height: 29.9375rem;
   top: 20px; 
   right: 20px; 
   bottom: initial; 
 }
 
 #colorPalette {    
-    padding-bottom: 1.25rem; 
     align-content: flex-start; 
     overflow-y: auto;     
 
     li { 
         width: 1.25rem; 
         height: 1.25rem; 
-        margin-right: .325rem; 
-        margin-bottom: .325rem; 
+        margin: 0 .3rem .3rem 0; 
         border-radius: .125rem; 
         border: 2px solid transparent; 
         cursor: pointer;

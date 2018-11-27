@@ -12,9 +12,9 @@
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
                 <ng-container *ngIf="btnStatus.showHideTitle">
-                    <div id="slide-toggle" class="sidebar side-short-component">
-                        <h4 class="mb20">find <strong>Title</strong></h4>   
-                        <div class="search mb20">
+                    <div id="slide-toggle" class="sidebar col">
+                        <h4>find <strong>Title</strong></h4>   
+                        <div class="search mt20">
                             <span><mat-icon>search</mat-icon></span>
                             <!-- <div class="strech row-center border-bottom">
                                 <span class="subtitle">Start Node</span>
@@ -27,10 +27,9 @@
                                 (keyup)='updateFilterTitle($event)'/>
                             </label>
                         </div>
-                        <div class="row row-m row-space">
-                          <span class="property-name">Total Found Elements:</span> &nbsp;&nbsp; <span>{{ labelSearchCount }}</span>
-                          <br />
-                          <ul *ngIf="labelSearchCount > 0" class="property-list col flex-1">
+                        <span class="property-name row row-m row-space mt20 mb20">Total Found Elements : <span>{{ labelSearchCount }}</span></span>                       
+                        <div class="title-list flex-1 overflow-y border">
+                          <ul *ngIf="labelSearchCount > 0" >
                             <li class="row row-m row-space" *ngFor="let item of labelSearchItems; let i = index">
                               <span>{{ (item.length > 16)? (item | slice:0:16)+'..':(item) }}</span>
                             </li>
@@ -61,54 +60,55 @@
 
                 <!-- 출력상자 : Label 스타일 정보 -->
                 <ng-container *ngIf="!!selectedLabel && !selectedElement">
-                    <div id="slide-toggle" class="sidebar col">
-                        <div class="mb20">
-                          <h4><strong>Label</strong> Styles</h4>
+                    <div id="slide-toggle" class="sidebar col side-short-component">
+                        <div class="mb20 row row-m row-space">
+                            <h4><strong>Label</strong> Styles</h4>
+                            <div class="row row-space row-m">
+                                <h5 class="mr10"><strong>Visibility </strong></h5>
+                                <mat-slide-toggle matTooltip="Visibility"
+                                    [checked]="!selectedLabel.scratch._style.hasOwnProperty('visible') || selectedLabel.scratch._style.visible"
+                                    (change)="onChangeStyleVisible($event)">
+                                </mat-slide-toggle>
+                            </div>
                         </div>
                         <div class="col flex-2">
-                          <div class="border p15 row row-space">
-                            <h5><strong>Visibility </strong></h5>
-                            <mat-slide-toggle matTooltip="Visibility"
-                                [checked]="!selectedLabel.scratch._style.hasOwnProperty('visible') || selectedLabel.scratch._style.visible"
-                                (change)="onChangeStyleVisible($event)">
-                            </mat-slide-toggle>
-                          </div>
-                          <div class="col flex-1 border mt20 p15 color-box">
-                            <h5><strong>COLOR </strong></h5>
-                            <div class="col mt20 flex-1" id="colorPalette">
-                              <ul class="row wrap">
-                                <li *ngFor="let c of colorsPallet; let i = index" [attr.data-index]="i"
-                                    [style.background-color]="c.bc" (click)="onChangeStyleColor(i)"
-                                    [style.border-color]="'black'"
-                                    [style.border-width]="(selectedLabel.scratch._style.color && selectedLabel.scratch._style.color.bc == c.bc) ? '2px' : '0px'"
-                                ></li>
-                              </ul>
+                            <div class="row row-space row-m">
+                                <h5 class="mr20"><strong>SIZE </strong></h5>
+                                <mat-slider *ngIf="selectedLabel.type == 'nodes'" class="flex-1 p-no"
+                                            [min]="10" [max]="120" [step]="5" [thumbLabel]="true"
+                                            [value]="selectedLabel.scratch._style.width"
+                                            (change)="onChangeStyleWidth($event)">
+                                </mat-slider>
+                                <mat-slider *ngIf="selectedLabel.type == 'edges'" class="flex-1 p-no"
+                                            [min]="1" [max]="12" [step]="1" [thumbLabel]="true"
+                                            [value]="selectedLabel.scratch._style.width"
+                                            (change)="onChangeStyleWidth($event)">
+                                </mat-slider>
                             </div>
-                            <!-- <div><h6 class="row row-space">Select Color : <span>rgb(255,255,255)</span></h6></div> -->
-                          </div>
-                          <div class="border mt20 p-side row row-space row-m">
-                            <h5 class="mr20"><strong>SIZE </strong></h5>
-                            <mat-slider *ngIf="selectedLabel.type == 'nodes'" class="flex-1 p-no"
-                                        [min]="10" [max]="120" [step]="5" [thumbLabel]="true"
-                                        [value]="selectedLabel.scratch._style.width"
-                                        (change)="onChangeStyleWidth($event)">
-                            </mat-slider>
-                            <mat-slider *ngIf="selectedLabel.type == 'edges'" class="flex-1 p-no"
-                                        [min]="1" [max]="12" [step]="1" [thumbLabel]="true"
-                                        [value]="selectedLabel.scratch._style.width"
-                                        (change)="onChangeStyleWidth($event)">
-                            </mat-slider>
-                          </div>
-                          <div class="border mt20 pl15 pr15 row row-space row-m">    
-                              <h5 class="mr20"><strong>TITLE </strong></h5>
-                              <mat-form-field class="flex-1">
+                            <div class="row row-space row-m">    
+                                <h5 class="mr20"><strong>TITLE </strong></h5>
+                                <mat-form-field class="flex-1">
                                 <mat-select [value]="selectedLabel.scratch._style.title"
-                                              (selectionChange)="onChangeStyleTitle($event)" required>
-                                  <mat-option value="_null_">_NONE_</mat-option>
-                                  <mat-option *ngFor="let prop of selectedLabel.properties" [value]="prop.key">{{ prop.key }}</mat-option>
+                                                (selectionChange)="onChangeStyleTitle($event)" required>
+                                    <mat-option value="_null_">_NONE_</mat-option>
+                                    <mat-option *ngFor="let prop of selectedLabel.properties" [value]="prop.key">{{ prop.key }}</mat-option>
                                 </mat-select>
-                              </mat-form-field>                
-                          </div>
+                                </mat-form-field>                
+                            </div>
+                            <div class="col flex-1 mt10 color-box">
+                                <h5><strong>COLOR </strong></h5>
+                                <div class="col mt10 flex-1" id="colorPalette">
+                                <ul class="row wrap">
+                                    <li *ngFor="let c of colorsPallet; let i = index" [attr.data-index]="i"
+                                        [style.background-color]="c.bc" (click)="onChangeStyleColor(i)"
+                                        [style.border-color]="'black'"
+                                        [style.border-width]="(selectedLabel.scratch._style.color && selectedLabel.scratch._style.color.bc == c.bc) ? '2px' : '0px'"
+                                    ></li>
+                                </ul>
+                                </div>
+                                <!-- <div><h6 class="row row-space">Select Color : <span>rgb(255,255,255)</span></h6></div> -->
+                            </div>
+                          
                         </div>
                         <!-- <ul>
                             <li><span>Group</span>{{ selectedLabel.type }} (cnt={{ selectedLabel.size }})</li>
@@ -222,7 +222,7 @@
                                     [formControl]="timelineFormatCtl" (input)="onChangeTimelineFormat($event.target.value)">
                             </mat-form-field>
 
-                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-raised-button (click)="setTimelineData()">Set Timeline</button>
+                            <button #btnSetTimeline [disabled]="timelineDisabled" mat-flat-button (click)="setTimelineData()">Set Timeline</button>
 
                             <timeline-slider class="mt20" #timelineSlider
                                 [values]="timeline_data"

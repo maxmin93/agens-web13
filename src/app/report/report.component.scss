@@ -13,13 +13,13 @@
 
 .sidebar { top: 1.25rem; right: 1.25rem; }
 
+.hiddenLabelToggle { position: absolute; top: 0; left: 0; }
+
 .side-short-component { 
-  height: auto; 
   top: 20px; 
   right: 20px; 
   bottom: initial; 
 }
-
 
 .loader {
   position: absolute;

@@ -12,9 +12,10 @@
 </div> 
 -->
 
+
+
 <!-- Graph content -->
 <div id="graph-canvas" #divCanvas 
-  style="border: solid; margin: 10px 10px 10px 10px;"
   (mouseover)="canvasHover=true" (mouseleave)="canvasHover=false">
 
   <div class="progress-wrapper" *ngIf="isLoading">
@@ -40,6 +41,8 @@
         </ul>
     </div>
   </ng-container>
+
+  <mat-slide-toggle matTooltip="Visibility" class="hiddenLabelToggle"></mat-slide-toggle>
 </div>
 
 <!-- Graph.Meta : Labels content -->

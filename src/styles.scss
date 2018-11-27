@@ -319,6 +319,14 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
   color: rgba(0, 0, 0, 0.75); 
 }
 
+.title-list { box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05), inset 0px 0px 3px rgba(0,0,0,0.25) }
+
+.title-list li { 
+  padding: .625rem; 
+  font-size: .925rem; 
+  border-bottom: 1px solid #dedede; 
+}
+
 .property-list li { 
   margin-bottom: .625rem; 
   padding: .525rem 0; 
@@ -340,7 +348,7 @@ flex-1부터 flex-6까지는 태그 요소의 범위를 분할시킵니다.
     padding: 1rem; 
     border: 1px solid #ddd; 
     overflow-y: auto; 
-    box-shadow: inset 0 0 1px rgba(0,0,0,.25); 
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.05), inset 0px 0px 3px rgba(0,0,0,0.25); 
   }
 }
 
@@ -358,7 +366,7 @@ div.graph-canvas {
 
   // zoom 버튼 위치수정 
   div.cy-panzoom { 
-    top: 10rem; 
+    top: 5rem; 
     left: 1.25rem; 
     // canvas 반응형높이값을위해 설정
     + div {
@@ -367,6 +375,8 @@ div.graph-canvas {
     } 
   }
 }
+
+#graphCard div.cy-panzoom { top: 2rem; }
 
 // dialog input ---------------------------------------------
 
@@ -455,6 +465,48 @@ input {
     input {
       width: 100%; 
       height: 100%; 
+    }
+  }
+}
+
+.meta-tit { 
+  background: #f6f6f6; 
+  padding: .5rem; 
+  border: 1px solid #ddd; 
+  border-bottom: 0; 
+}
+
+.wrap-component {
+  width: 100%; 
+  padding-left: 1rem; 
+  margin-left: 1rem; 
+  border-left: 1px dashed #dedede; 
+  span, textarea { 
+    width: 100%; 
+    border: 1px solid #ddd; 
+    padding: 1rem; 
+  }
+  span { 
+    width: 300px; 
+    height: 100%;   
+  }
+  img { width: 100%; }
+}
+
+.dialog-search { 
+  span { display: inline-block; 
+    i { 
+      background: #005aa8; 
+      width: 35px; 
+      height: 35px; 
+      line-height: 35px; 
+      text-align: center; 
+      color: #fff; 
+    }
+    input { 
+      height: 35px; 
+      padding: 0 1rem; 
+      border-bottom: 1px solid #dedede; 
     }
   }
 }
@@ -583,7 +635,12 @@ h5.meta-tit::before,
   height: 650px;
 }
 
-.sheet-meta-graph, .sheet-label-style {
+#searchInRslt { width: 1200px; height: 700px; }
+#userProject { width: 1000px; height: 500px; }
+// .sheet-meta-graph.ng-tns-c26-29 { width: 1000px; height: 500px; }
+// .sheet-meta-graph.ng-tns-c26-17 { width: 1200px; height: 650px; }
+
+.sheet-label-style {
   width: 1200px;
   height: 650px;
 }
@@ -606,16 +663,29 @@ h5.meta-tit::before,
 //////////////////////////////////////////////////////////////////////////
 
 
-timeline-slider { display: flex; flex-wrap: wrap; }
+timeline-slider button { width: 33.3%; }
 
-timeline-slider button, 
 timeline-slider .range-slider { 
-  flex: 1;
-  margin-top: 1.25rem; 
-  padding: 0 1rem; 
-  border-top: 1px dashed #ddd;  
+  display: flex; 
+  align-items: center; 
+
+  .mat-slider { flex: 1; }
+
+  > span { 
+    padding: .5rem; 
+    border-bottom: 1px solid #dedede; 
+    font-size: .85rem;    
+  }
 }
-timeline-slider .range-slider .mat-slider { width: 100%; }
+
+// timeline-slider button, 
+// timeline-slider .range-slider { 
+//   flex: 1;
+//   margin-top: 1.25rem; 
+//   padding: 0 1rem; 
+//   border-top: 1px dashed #ddd;  
+// }
+// timeline-slider .range-slider .mat-slider { width: 100%; }
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -979,7 +1049,7 @@ mat-icon { width: 1.5rem !important; height: 1.5rem !important; color: #005aa8; 
 .mat-button-toggle { color: rgba(255,255,255,0.4); }
 .expand-cell { color: #585858; }
 .mat-menu-item, .sub-title { font-size: .895rem; color: #9e9e9e; line-height: 1.35rem; } 
-
+#cdk-overlay-13 
  //////////////////////////////////////////////////////////////////////////
 
 .qtip-content { 

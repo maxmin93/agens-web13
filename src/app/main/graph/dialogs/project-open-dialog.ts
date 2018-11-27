@@ -17,96 +17,101 @@ declare var jQuery:any;
   selector: 'app-project-open-dialog',
   template: `
 
- 
-<div class="row row-space">
-  <div class="dialog-tit">
-    <span><mat-icon>folder</mat-icon></span>
-    <h4>User <strong>Projects</strong></h4>
-  </div>
-  <a matTooltip="Refresh" matTooltipPosition="above" (click)="loadProjects()"><mat-icon>refresh</mat-icon></a>  
-</div>
-<span class="dialog-subtit">Select project and edit query</span>
-
-<div>
-  <div>
-    <div class="dialog-search">
-      <span><i class="fa fa-search" aria-hidden="true"></i><input
-          type='text' #inputFilter
-          placeholder='Type to filter the title column...'
-          (keyup)='updateFilter($event)'
-        /></span>
+<div class="col">
+  <div class="row row-space">
+    <div class="dialog-tit">
+      <span><mat-icon>folder</mat-icon></span>
+      <h4>User <strong>Projects</strong></h4>
     </div>
+    <a matTooltip="Refresh" matTooltipPosition="above" (click)="loadProjects()"><mat-icon>refresh</mat-icon></a>  
+  </div>
+  <span class="dialog-subtit">Select project and edit query</span>
 
+  <div class="row flex-1 mb20">
     <div>
-    <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
-      [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
-      [headerHeight]="38" [footerHeight]="38" [rowHeight]="'auto'"
-      (activate)="onActivateTableLabels($event)" >
+      <div class="dialog-search row row-r mb20">
+        <span><i class="fa fa-search" aria-hidden="true"></i><input
+            type='text' #inputFilter
+            placeholder='Type to filter the title column...'
+            (keyup)='updateFilter($event)'
+          /></span>
+      </div>
 
-      <!-- [selected]="selected" [selectionType]="'single'" (select)="onSelect($event)" > -->
+      <div>
+        <ngx-datatable #projectsTable class='material' [columnMode]="'fixed'"
+          [rows]="projectRows" [reorderable]="'reorderable'" [limit]="10"
+          [headerHeight]="30" [footerHeight]="30" [rowHeight]="'auto'"
+          (activate)="onActivateTableLabels($event)" >
 
-        <ngx-datatable-row-detail [rowHeight]="'auto'" #projectRow (toggle)="onRowDetailToggle($event)">
-          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
-            <div class="span__row-detail-content">
-              <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.description }}</span>              
-            </div>
-          </ng-template>
-        </ngx-datatable-row-detail>
+        <!-- [selected]="selected" [selectionType]="'single'" (select)="onSelect($event)" > -->
 
-        <!-- Column Templates -->
-        <ngx-datatable-column [width]="60" 
-              [resizeable]="false" [sortable]="false" [draggable]="false" [canAutoResize]="false">
-          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-            <a href="javascript:void(0)"
-              [class.datatable-icon-right]="!expanded" [class.datatable-icon-down]="expanded"
-              title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
-            </a>
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-row-detail [rowHeight]="'auto'" #projectRow (toggle)="onRowDetailToggle($event)">
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
+              <div class="span__row-detail-content">
+                <span><i class="fa fa-reply fa-rotate-180" aria-hidden="true"></i> {{ row.description }}</span>              
+              </div>
+            </ng-template>
+          </ngx-datatable-row-detail>
 
-        <ngx-datatable-column name="ID" [width]="70" >
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <strong><a (click)="onSubmit(row)">{{row.id}}</a></strong>
-          </ng-template>
-        </ngx-datatable-column>
+          <!-- Column Templates -->
+          <!--
+          <ngx-datatable-column [width]="60" 
+                [resizeable]="false" [sortable]="false" [draggable]="false" [canAutoResize]="false">
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+              <a href="javascript:void(0)"
+                [class.datatable-icon-right]="!expanded" [class.datatable-icon-down]="expanded"
+                title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
+              </a>
+            </ng-template>
+          </ngx-datatable-column>
+          -->
 
-        <ngx-datatable-column name="Title" [minWidth]="300">
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row)">{{row.title}}</a></span>
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column name="ID" [width]="70" >
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <strong><a (click)="onSubmit(row)">{{row.id}}</a></strong>
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="120" >
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <span>{{ row.create_dt | date:'MM/dd HH:mm' }}</span>
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column name="Title" [width]="250">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <span><a matTooltip="{{row.title}}" matTooltipPosition="above" (click)="onSubmit(row)">{{row.title}}</a></span>
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="120" >
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <span>{{ row.update_dt | date:'MM/dd HH:mm' }}</span>
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column name="Create Date" [sortable]="true" prop="create_dt" [width]="150" >
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <span>{{ row.create_dt | date:'MM/dd HH:mm' }}</span>
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column name="Remove" [sortable]="false" [width]="80">
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            <a (click)="deleteProjectAfterConfirm(row)" mdTooltip="Delete" mdTooltipPosition="before">
-                <mat-icon>delete</mat-icon>
-            </a>
-          </ng-template>
-        </ngx-datatable-column>            
+          <ngx-datatable-column name="Update Date" [sortable]="true" prop="update_dt" [width]="150" >
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <span>{{ row.update_dt | date:'MM/dd HH:mm' }}</span>
+            </ng-template>
+          </ngx-datatable-column>
 
-      </ngx-datatable>
+          <ngx-datatable-column name="Remove" [sortable]="false" [width]="80">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <a (click)="deleteProjectAfterConfirm(row)" mdTooltip="Delete" mdTooltipPosition="before">
+                  <mat-icon>delete</mat-icon>
+              </a>
+            </ng-template>
+          </ngx-datatable-column>        
+        </ngx-datatable>
+      </div>    
     </div>
 
-    <div style="width: 150px; min-height: 120px; max-height: auto; float: left; margin: 3px; padding: 3px;">
-      <img #imgProjectCapture style="max-width: 100%; height: auto;" class="border-styles" />
+    <div class="wrap-component col col-c"> 
+      <h5 class="meta-tit">Preview</h5>
+      <span class="row row-m"><img #imgProjectCapture /></span>
     </div>
+
   </div>
+
+  <div class="btn-group row row-r">
+    <button mat-flat-button color="primary" (click)="onCancel()" tabindex="-1">Close</button>
+  </div>  
 </div>
-<div class="btn-group row row-r">
-  <button mat-flat-button color="primary" (click)="onCancel()" tabindex="-1">Close</button>
-</div>  
 
 <!-- JQuery dialog-confirm : project overwrite -->
 <div id="confirm-project-delete" title="[WARNING] delete project" style="display:none;">
@@ -115,7 +120,6 @@ declare var jQuery:any;
 `,
 styles: [`
 
-.dialog-search { border-bottom: 1px solid #ddd; padding-bottom: .25rem; }
   `]
 })
 export class ProjectOpenDialog implements OnInit, OnDestroy, AfterViewInit {

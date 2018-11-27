@@ -30,7 +30,7 @@ declare var agens:any;
 
 <div>
 
-  <div style="width: 150px; min-height: 120px; max-height: auto; float: left; margin: 3px; padding: 3px;">
+  <div class="img-box">
     <img #divGraphImage style="max-width: 100%; height: auto;" class="border-styles" />
   </div>
 
@@ -88,7 +88,12 @@ declare var agens:any;
 </div>
 `,
 styles: [`
-
+  .img-box { 
+    background: #f6f6f6; 
+    width: 500px; 
+    padding: 2rem 1rem; 
+    border: 1px dashed #dedede; 
+  }
   `]
 })
 export class ProjectSaveDialog implements OnInit, OnDestroy {

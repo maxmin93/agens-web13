@@ -615,7 +615,7 @@ return path1, path2;
 
   openProjectOpenDialog(){
     let dialogRef = this.dialog.open(ProjectOpenDialog, {
-      width: '800px', height: 'auto',
+      width: 'auto', height: 'auto',
       data: this.currProject            // **NOTE: dialog 에 undefined 를 전달하면 오류 발생 
     });
 

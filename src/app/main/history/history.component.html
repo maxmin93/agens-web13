@@ -1,7 +1,7 @@
 <div id="top" class="content">
       <div class="card col flex-1">
-        <div class="row row-m row-space">
-          <h4>HISTORY <strong>QUERY LOGS</strong></h4>  
+        <div class="card-header row row-m row-space">
+          <h4 class="row row-m"><mat-icon class="mr10">list_alt</mat-icon>HISTORY <strong> QUERY LOGS</strong></h4>  
           <div class='row row-m'>
             <a class="btn btn-link mr20" matTooltip="Refresh" matTooltipPosition="above" (click)="reload()"><mat-icon>refresh</mat-icon></a>
             
@@ -14,7 +14,7 @@
             
           </div>
         </div>
-        <div class="col mt20 flex-1">
+        <div class="col flex-1">
           <div #progressBar style='visibility:hidden; z-index: 10; width: 100%;'>
             <mat-progress-bar color="accent" mode="indeterminate">Loading...</mat-progress-bar>
           </div>
