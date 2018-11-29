@@ -103,6 +103,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('divCanvas', {read: ElementRef}) divCanvas: ElementRef;
   @ViewChild('timelineSlider') timelineSlider: TimelineSliderComponent;
   @ViewChild('btnSetTimeline') public btnSetTimeline: MatButton;
+  @ViewChild('divFindTitle', {read: ElementRef}) divFindTitle: ElementRef;
 
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
   todo$:Subject<any> = new Subject();
@@ -807,6 +808,24 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   //   this.btnStatus.mouseWheel = this.btnMouseWheelZoom.checked;
   // }
 
+  focusAllItems(){
+    if( this.labelSearchItems.length == 0 ) return;
+    let elements = this.cy.collection();
+    this.labelSearchItems.forEach(x => {
+      elements = elements.add(this.cy.getElementById(x["id"]));
+    });
+    console.log("focustAll:", elements);
+    setTimeout(() => { if( !elements.empty() ) this.cy.$api.view.highlight( elements )}, 10);
+  }
+  focusSearchedLabel(item:any){
+    let element = this.cy.getElementById(item["id"]);
+    if( !element.empty() ){
+      this.cy.$api.view.removeHighlights();
+    }
+    console.log( 'focusLabel', element );
+    setTimeout(() => { if( !element.empty() ) this.cy.$api.view.highlight( element )}, 10);
+  }
+
   updateFilterTitle($event){
     const kwd = $event.target.value.toLowerCase();
     this.cy.$api.view.removeHighlights();
@@ -817,7 +836,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       return title.toLowerCase().indexOf(kwd) > -1;
     });
     this.labelSearchCount = elements.size();
-    this.labelSearchItems = elements.map(x => x.style('label') );
+    this.labelSearchItems = elements.map(x => {
+      return { "id": x.id(), "title": x.style('label') };
+    });
     // console.log('updateFilterLabel', kwd, elements);
     setTimeout(() => { if( !elements.empty() ) this.cy.$api.view.highlight( elements )}, 10);
   }

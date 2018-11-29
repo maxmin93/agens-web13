@@ -12,7 +12,7 @@
             <nav>
                 <!-- 입력상자 : 라벨검색 -->
                 <ng-container *ngIf="btnStatus.showHideTitle">
-                    <div id="slide-toggle" class="sidebar col">
+                    <div #divFindTitle id="slide-toggle" class="sidebar col">
                         <h4>find <strong>Title</strong></h4>   
                         <div class="search mt20">
                             <span><mat-icon>search</mat-icon></span>
@@ -27,11 +27,14 @@
                                 (keyup)='updateFilterTitle($event)'/>
                             </label>
                         </div>
-                        <span class="property-name row row-m row-space mt20 mb20">Total Found Elements : <span>{{ labelSearchCount }}</span></span>                       
+                        <span id="divFindTitleAll" class="property-name row row-m row-space mt20 mb20"
+                         (click)="focusAllItems()" style="cursor: pointer">
+                          Total Found Elements : <span>{{ labelSearchCount }}</span></span>                       
                         <div class="title-list flex-1 overflow-y border">
-                          <ul *ngIf="labelSearchCount > 0" >
-                            <li class="row row-m row-space" *ngFor="let item of labelSearchItems; let i = index">
-                              <span>{{ (item.length > 16)? (item | slice:0:16)+'..':(item) }}</span>
+                          <ul id="divFindTitleSelect" *ngIf="labelSearchCount > 0" >
+                            <li class="row row-m row-space" *ngFor="let item of labelSearchItems; let i = index"
+                              (click)="focusSearchedLabel(item)" style="cursor: pointer">
+                              <span>{{ (item.title.length > 50)? (item.title | slice:0:50)+'..':(item.title) }}</span>
                             </li>
                           </ul>
                         </div>
