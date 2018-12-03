@@ -18,7 +18,7 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd, IProperty } from 
 import { IGraphDto, IDoubleListDto, IResponseDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../app.config';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 
 import * as moment from 'moment';
 
@@ -85,6 +85,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ** Styles **
   colorsPallet: any[] = [];         // colors Pallet  
+  myFormGroup: FormGroup;
+  iconCss = new FormControl();
+  fallbackIcon = 'fa fa-book';
+  icon: string;
 
   // ** Timelines **
   timelineLabelCtl: FormControl;
@@ -107,7 +111,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
   todo$:Subject<any> = new Subject();
-  
+    
   constructor(
     private _ngZone: NgZone,
     private _cd: ChangeDetectorRef,
@@ -139,6 +143,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
+    this.myFormGroup = new FormGroup({iconCss: this.iconCss});
   }
 
   ngOnDestroy(){
@@ -512,6 +517,10 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   //   3) scratch() 함수로 _style 에 저장 
   //   4) _style 값을 close()에서 data-graph, label, meta-graph 에 반영 
 
+  onIconPickerSelect(icon: string): void {
+    this.iconCss.setValue(icon);
+  }
+  
   // Style: Visibility
   onChangeStyleVisible(event){
     // console.log( 'onChangeStyleVisible:', event.checked );
@@ -737,7 +746,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
       let group = (label.type == 'edges') ? 'edge' : 'node';
       this.cy.elements(`${group}[label='${label.name}']`).select();
     }, 20);
-    console.log('clickGraphLabelChip:', this.selectedLabel.scratch._style);
+    // console.log('clickGraphLabelChip:', this.selectedLabel.scratch._style);
     this._cd.detectChanges();
   }
 

@@ -725,7 +725,7 @@
                       "props": { "$$size": nodes.size(), "$$members": nodes.map(x=>x.id()) }
                     }
                     , "position": { "x": (parentPos.x1+parentPos.x2)/2, "y": (parentPos.y1+parentPos.y2)/2 } 
-                    , "selectable": false       // 선택 대상에서 제외
+                    , "selectable": true       // 선택 대상에 포함 (2018-12-03)
                   }
         target = cy.add(parent);
       }

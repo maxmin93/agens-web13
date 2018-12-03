@@ -42,7 +42,9 @@
     </div>
   </ng-container>
 
-  <mat-slide-toggle matTooltip="Visibility" class="hiddenLabelToggle"></mat-slide-toggle>
+  <div class="hiddenLabelToggle" *ngIf="!isLoading">
+    <mat-slide-toggle matTooltip="show Title" (checked)="false" (change)="toggleShowTitle($event)"></mat-slide-toggle>
+  </div> 
 </div>
 
 <!-- Graph.Meta : Labels content -->

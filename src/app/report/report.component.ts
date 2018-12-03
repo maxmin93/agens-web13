@@ -517,6 +517,13 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this._cd.detectChanges();
   }
 
+  toggleShowTitle(event){
+    // console.log("toggle :", event.chekced);
+    // graph의 hideNodeTitle 설정 변경
+    this.cy.scratch('_config').hideNodeTitle = !event.checked;
+    this.cy.style(agens.graph.stylelist['dark']).update();
+  }
+
   /////////////////////////////////////////////////////////////////
   // Canvas Controllers
   /////////////////////////////////////////////////////////////////

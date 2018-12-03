@@ -61,6 +61,7 @@
     "material-design-icons": "^3.0.1",
     "moment": "^2.22.2",
     "ngx-color-picker": "^6.3.3",
+    "ngx-icon-picker": "0.0.8",
     "node-sass": "^4.9.0",
     "rxjs": "^6.2.2",
     "watermark": "^1.0.1",

@@ -98,6 +98,21 @@
                                 </mat-select>
                                 </mat-form-field>                
                             </div>
+                            <div [formGroup]="myFormGroup" class="row row-space row-m">    
+                              <h5><strong>ICON </strong></h5>
+                              <input [iconPicker]="icon" (iconPickerSelect)="onIconPickerSelect(newIcon)"/>
+                              <!-- <div class="input-group">
+                                <span class="input-group-addon"><i [ngClass]="iconCss.value"></i></span>
+                                <input type="text" name="iconCss" class="form-control"
+                                       formControlName="iconCss"
+                                       [iconPicker]="icon"
+                                       [ipPosition]="'bottom'"
+                                       [ipWidth]="'250px'"
+                                       [ipPlaceHolder]="'Choose an icon'"
+                                       [ipFallbackIcon]="fallbackIcon"
+                                       (iconPickerSelect)="onIconPickerSelect($event)"/>
+                              </div> -->
+                            </div>
                             <div class="col flex-1 mt10 color-box">
                                 <h5><strong>COLOR </strong></h5>
                                 <div class="col mt10 flex-1" id="colorPalette">
@@ -111,7 +126,6 @@
                                 </div>
                                 <!-- <div><h6 class="row row-space">Select Color : <span>rgb(255,255,255)</span></h6></div> -->
                             </div>
-                          
                         </div>
                         <!-- <ul>
                             <li><span>Group</span>{{ selectedLabel.type }} (cnt={{ selectedLabel.size }})</li>

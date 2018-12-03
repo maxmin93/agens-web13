@@ -24,6 +24,7 @@ import {
 // UI Libraries
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { PrettyJsonModule } from 'angular2-prettyjson';
+import { IconPickerModule } from 'ngx-icon-picker';
 
 // Components
 import { AppComponent } from './app.component';
@@ -108,6 +109,7 @@ import { RoundProgressModule } from 'angular-svg-round-progressbar';
     NgxDatatableModule, 
     PrettyJsonModule,
     RoundProgressModule,
+    IconPickerModule,
     
     appRoutes
   ], 

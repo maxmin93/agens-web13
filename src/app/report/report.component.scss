@@ -13,7 +13,13 @@
 
 .sidebar { top: 1.25rem; right: 1.25rem; }
 
-.hiddenLabelToggle { position: absolute; top: 0; left: 0; }
+.hiddenLabelToggle { 
+  position: absolute;
+  top: 15rem;
+  left: 0.5rem;
+  width: 64px;
+  height: 64px;
+}
 
 .side-short-component { 
   top: 20px; 
