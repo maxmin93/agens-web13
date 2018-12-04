@@ -301,19 +301,23 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     // label 정렬 : node>edge 순으로, size 역순으로
     graph.labels = [... _.orderBy(graph.labels, ['type','size'], ['desc','desc'])];
-    
+    // add elements
     graph.nodes.forEach(e => {    
       let node = this.cy.add( e );
-      // set node style of background-image
-      if( e.scratch._style['image'] ){
-        let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
-        if( baseUrl != null && baseUrl.length > 0 )
-          node.style('background-image', baseUrl+e.scratch._style['image']);
-      }
     });
     graph.edges.forEach(e => {
       this.cy.add( e );
-    });
+    });   
+    // set node style of background-image
+    let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
+    if( baseUrl != null && baseUrl.length > 0 )
+      setTimeout(()=>{
+        this.cy.nodes().forEach(e=>{
+          if( e._private.scratch._style['image'] ){
+            e.style('background-image', baseUrl+e._private.scratch._style['image']);
+          } 
+        });
+      },100);
   }
 
   /////////////////////////////////////////////////////////////////
@@ -622,4 +626,8 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log( 'qtipEleMenu:', action, targets );
   }
   
+  selectedLockToggle(target:any){
+    if( target.locked() ) target.unlock();
+    else target.lock();
+  }
 }

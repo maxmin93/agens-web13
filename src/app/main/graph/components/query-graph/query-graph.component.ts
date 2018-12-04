@@ -231,13 +231,15 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // label 정렬 : node>edge 순으로, size 역순으로
     this.labels = [... _.orderBy(dataGraph.labels, ['type','size'], ['desc','desc'])];    
     // set node style of background-image
-    this.cy.nodes().forEach(e => {
-      if( e._private.scratch._style['image'] ){
-        let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
-        if( baseUrl != null && baseUrl.length > 0 )
-          e.style('background-image', baseUrl+e._private.scratch._style['image']);
-      }
-    });
+    setTimeout(()=>{
+      let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
+      if( baseUrl != null && baseUrl.length > 0 )
+        this.cy.nodes().forEach(e => {
+          if( e._private.scratch._style['image'] ){
+            e.style('background-image', baseUrl+e._private.scratch._style['image']);
+          }
+        });
+    }, 100);
   }
 
   // ** Copy/Cut/Paste: Ctrl+C, +X, Ctrl+V
@@ -553,16 +555,18 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         else if (x instanceof HttpResponse) {
           // console.log('File is completely uploaded!', fileItem.name, x);
-          // save file-name to label and nodes of label
+          // save file-name to label style
           this.imageSelected.nativeElement.value = fileItem.name;
           label.scratch._style['image'] = fileItem.name;
-          this.cy.nodes(`[label='${label.name}']`).forEach(e => {
-            e._private.scratch._style['image'] = fileItem.name;
-            let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
-            if( baseUrl != null && baseUrl.length > 0 )
+          // set node style of background-image
+          let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
+          if( baseUrl != null && baseUrl.length > 0 ){
+            this.cy.nodes(`[label='${label.name}']`).forEach(e => {
+              e._private.scratch._style['image'] = fileItem.name;
               e.style('background-image', baseUrl+fileItem.name);
-            else console.log('ERROR: background-image does not working because DOWNLOAD_URL is empty');
-          });
+            });
+          }
+          else console.log('ERROR: background-image does not working because DOWNLOAD_URL is empty');
         }
       },
       err => {
