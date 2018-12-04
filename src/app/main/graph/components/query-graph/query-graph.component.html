@@ -98,20 +98,25 @@
                                 </mat-select>
                                 </mat-form-field>                
                             </div>
-                            <div [formGroup]="myFormGroup" class="row row-space row-m">    
-                              <h5><strong>ICON </strong></h5>
-                              <input [iconPicker]="icon" (iconPickerSelect)="onIconPickerSelect(newIcon)"/>
-                              <!-- <div class="input-group">
-                                <span class="input-group-addon"><i [ngClass]="iconCss.value"></i></span>
-                                <input type="text" name="iconCss" class="form-control"
-                                       formControlName="iconCss"
-                                       [iconPicker]="icon"
-                                       [ipPosition]="'bottom'"
-                                       [ipWidth]="'250px'"
-                                       [ipPlaceHolder]="'Choose an icon'"
-                                       [ipFallbackIcon]="fallbackIcon"
-                                       (iconPickerSelect)="onIconPickerSelect($event)"/>
+                            <div *ngIf="selectedLabel.type == 'nodes'" class="row row-space row-m">    
+                              <h5><strong>IMAGE </strong> </h5> &nbsp; &nbsp;
+                              <!-- <div *ngIf="selectedLabel.scratch._style.hasOwnProperty('image')" class="flex-1" 
+                                  style="width:20px; height:20px; background-image: url('{{selectedLabel.scratch._style.image}}')">
                               </div> -->
+                              <!-- SELECT image -->
+                              <div class="flex-1">
+                                <form class="flex-1">
+                                  <mat-form-field style="width: 120px;">
+                                    <input matInput #imageSelected placeholder="upload image" readonly 
+                                      [value]="selectedLabel.scratch._style['image'] ? selectedLabel.scratch._style['image'] : ''" />
+                                  </mat-form-field>
+                                  &nbsp; &nbsp;
+                                  <input id="file-upload" #imageSelector type="file" style="display:none;" accept="image/*" 
+                                  (change)="importNodeImage(selectedLabel, $event)">
+                                  <button mat-raised-button style="height: 30px;" color="primary" (click)="imageSelector.click()">upload</button>
+                                  <button mat-raised-button style="height: 30px;" (click)="resetNodeImage(selectedLabel)">reset</button>
+                                </form>
+                              </div>
                             </div>
                             <div class="col flex-1 mt10 color-box">
                                 <h5><strong>COLOR </strong></h5>
@@ -296,7 +301,9 @@
                     (click)="clickGraphLabelChip(label)"
                     [style.background]="label.scratch['_style'].color ? label.scratch['_style'].color.bc : '#a6a6a6'">
                     <span *ngIf="label.type=='nodes'" class="nodeType" style="font-weight: bold">
-                      {{label.name}} ({{label.size}})</span>
+                      <!-- <div *ngIf="label.scratch['_style']['image']" 
+                              style="background-image: url('{{label.scratch['_style']['image']}}'); width:20px; height:20px;"></div> -->
+                        {{label.name}} ({{label.size}})</span>
                     <span *ngIf="label.type=='edges'" class="edgeType" style="text-decoration: underline">
                       {{label.name}} ({{label.size}})</span>
                 </mat-chip>

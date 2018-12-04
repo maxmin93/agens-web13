@@ -63,6 +63,11 @@
     dataLabel: function(e){
       if( e.scratch('_style') ){
         if( e.data('props') && e.data('props').hasOwnProperty(e.scratch('_style').title) ) 
+          // **NOTE: label with FontAwesome ICON
+          // https://github.com/cytoscape/cytoscape.js/issues/1867#issuecomment-310727838
+          // https://github.com/micc83/fontIconPicker/issues/17
+          // https://github.com/micc83/fontIconPicker/issues/41
+          // return '\uF007 '+e.data('props')[e.scratch('_style').title];
           return e.data('props')[e.scratch('_style').title];
       }
       return '';
@@ -71,6 +76,11 @@
       if( e.data('props') && e.data('props').hasOwnProperty('name') ) 
         return e.data('props')['name'] + '\n(' + e.data('size') +')';
       return '(no-name)';
+    },
+    nodeImage: function(e){
+      if( e.scratch('_style') && e.scratch('_style').hasOwnProperty('image') ) 
+        return e.scratch('_style')['image'];
+      return null;      // **NOTE: undefined 를 반환하면 ERROR 발생 ==> 사후 style() 처리하도록 
     },
     nodeBColor: function(e){
       if( e.scratch('_style') && e.scratch('_style').color ) 
@@ -152,6 +162,10 @@
               if( e._private.cy.scratch('_config').hideNodeTitle ) return '';
               return agens.styles.dataLabel(e);
               },
+          // **NOTE: 값 자체가 undefined 가 아니면, null 이라도 http://localhost/null 호출하게됨
+          // ==> background-image 는 data 로딩시 따로 처리 필요: e.style('background-image',<URL>)
+          // 'background-image': undefined, 
+          'background-fit': 'cover cover',    // **NOTE: 이거 적용한 순간부터 성능 저하된 거 같은데, 확인 필요!!
           'background-color': function(e){ return agens.styles.nodeDColor(e); },
           'border-width': function(e){ return e.data('size') > 1 ? 5 : 2; },
           'border-color': function(e){ return agens.styles.nodeBColor(e); },
@@ -168,7 +182,8 @@
           'text-outline-color': function(e){ return agens.styles.nodeBColor(e); },
           'font-weight': 400,
           'font-size': 10,
-          'font-family':"Noto Sans, Noto Sans Bold, sans-serif",
+          // 'font-family':"Noto Sans, Noto Sans Bold, sans-serif",
+          'font-family':"FontAwesome",
           'min-zoomed-font-size': 5,  // not shown when less than this
           'text-opacity': 1,
           'transition-property': 'width, height, border-style, border-width, background-color, text-outline-color, color',

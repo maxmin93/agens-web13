@@ -1,7 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, NgZone, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatButtonToggle, MatButton, MatSlideToggle, MatBottomSheet } from '@angular/material';
+import { FormControl } from '@angular/forms';
 
-import { Observable, Subject, interval } from 'rxjs';
+import { HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
+
+import { Observable, Subject, interval, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { OverlayGraphComponent } from '../../sheets/overlay-graph/overlay-graph.component';
@@ -18,7 +21,6 @@ import { IGraph, ILabel, IElement, INode, IEdge, IStyle, IEnd, IProperty } from 
 import { IGraphDto, IDoubleListDto, IResponseDto } from '../../../../models/agens-response-types';
 
 import * as CONFIG from '../../../../app.config';
-import { FormControl, FormGroup } from '@angular/forms';
 
 import * as moment from 'moment';
 
@@ -36,6 +38,8 @@ declare var agens: any;
   }
 })
 export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  private api_handler:Subscription = undefined;
 
   isVisible: boolean = false;
   isLoading: boolean = false;
@@ -85,11 +89,7 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ** Styles **
   colorsPallet: any[] = [];         // colors Pallet  
-  myFormGroup: FormGroup;
-  iconCss = new FormControl();
-  fallbackIcon = 'fa fa-book';
-  icon: string;
-
+  
   // ** Timelines **
   timelineLabelCtl: FormControl;
   timelinePropertyCtl: FormControl;
@@ -108,7 +108,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('timelineSlider') timelineSlider: TimelineSliderComponent;
   @ViewChild('btnSetTimeline') public btnSetTimeline: MatButton;
   @ViewChild('divFindTitle', {read: ElementRef}) divFindTitle: ElementRef;
-
+  @ViewChild('imageSelector', {read: ElementRef}) imageSelector: ElementRef;
+  @ViewChild('imageSelected', {read: ElementRef}) imageSelected: ElementRef;
+  
   @Output() initDone:EventEmitter<boolean> = new EventEmitter();
   todo$:Subject<any> = new Subject();
     
@@ -143,11 +145,11 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.divCanvas.nativeElement.style.cursor = 'pointer';   // Finger
-    this.myFormGroup = new FormGroup({iconCss: this.iconCss});
   }
 
   ngOnDestroy(){
     window['angularComponentRef'] = null;
+    if( this.api_handler ) this.api_handler.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -228,10 +230,15 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     // label 정렬 : node>edge 순으로, size 역순으로
     this.labels = [... _.orderBy(dataGraph.labels, ['type','size'], ['desc','desc'])];    
+    // set node style of background-image
+    this.cy.nodes().forEach(e => {
+      if( e._private.scratch._style['image'] ){
+        let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
+        if( baseUrl != null && baseUrl.length > 0 )
+          e.style('background-image', baseUrl+e._private.scratch._style['image']);
+      }
+    });
   }
-  // setMeta(metaGraph:IGraph){
-  //   this.metaGraph = metaGraph;
-  // }
 
   // ** Copy/Cut/Paste: Ctrl+C, +X, Ctrl+V
   handleKeyUpEvent(event: KeyboardEvent) { 
@@ -517,8 +524,61 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
   //   3) scratch() 함수로 _style 에 저장 
   //   4) _style 값을 close()에서 data-graph, label, meta-graph 에 반영 
 
-  onIconPickerSelect(icon: string): void {
-    this.iconCss.setValue(icon);
+  resetNodeImage(label:ILabel){
+    this.imageSelector.nativeElement.value = '';
+    if( label ) label.scratch._style['image'] = undefined;
+    this.cy.nodes(`[label='${label.name}']`).forEach(e => {
+      e._private.scratch._style['image'] = undefined;
+      e.style('background-image', null);
+    });
+  }
+
+  importNodeImage(label:ILabel, event){
+    let fileItem:File = event.target.files[0];
+    if( fileItem.size > 2097152 ){
+      // error message
+      this._api.setResponses(<IResponseDto>{ group: 'label-style', state: 'WARNING', 
+          message: `**NOTE: image file is too big more than 2M. recommend 32x32 ` });
+      return;
+    }
+
+    console.log( 'importImage:', label, fileItem);
+    this.api_handler = this._api.fileUpload( fileItem ).subscribe(
+      x => {
+        // progress return 
+        // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
+        if( x.type === HttpEventType.UploadProgress) {
+          const percentDone = Math.round(100 * ( x.loaded / x.total ) );
+          if( percentDone ) console.log(`import.progress: ${percentDone}%` );
+        }
+        else if (x instanceof HttpResponse) {
+          // console.log('File is completely uploaded!', fileItem.name, x);
+          // save file-name to label and nodes of label
+          this.imageSelected.nativeElement.value = fileItem.name;
+          label.scratch._style['image'] = fileItem.name;
+          this.cy.nodes(`[label='${label.name}']`).forEach(e => {
+            e._private.scratch._style['image'] = fileItem.name;
+            let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
+            if( baseUrl != null && baseUrl.length > 0 )
+              e.style('background-image', baseUrl+fileItem.name);
+            else console.log('ERROR: background-image does not working because DOWNLOAD_URL is empty');
+          });
+        }
+      },
+      err => {
+        // error message
+        this._api.setResponses(<IResponseDto>{ group: 'label-style', state: 'ERROR', 
+            message: 'upload FAIL!!: '+JSON.stringify(err) });
+        this.imageSelector.nativeElement.value = '';
+      },
+      () => {
+        this._api.setResponses(<IResponseDto>{ group: 'label-style', state: 'SUCCESS', 
+            message: 'upload completed!: '+fileItem.name });
+        // **NOTE: 동일한 파일 선택시 input value 가 변하지 않아 event trigger가 발생하지 않는다
+        //  ==> 초기화 해주어야 함 (참고 https://stackoverflow.com/a/30357800/6811653)
+        this.imageSelector.nativeElement.value = '';
+      }
+    );
   }
   
   // Style: Visibility
@@ -743,6 +803,9 @@ export class QueryGraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.selectedLabel = label;
     setTimeout(()=>{
+      // Load with default options
+
+      // select elements with selected label
       let group = (label.type == 'edges') ? 'edge' : 'node';
       this.cy.elements(`${group}[label='${label.name}']`).select();
     }, 20);

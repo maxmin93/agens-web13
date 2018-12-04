@@ -1,8 +1,10 @@
-// import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { Title } from '@angular/platform-browser';
-// import { HttpModule } from '@angular/http';            // !!deprecated
+
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -24,7 +26,6 @@ import {
 // UI Libraries
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { PrettyJsonModule } from 'angular2-prettyjson';
-import { IconPickerModule } from 'ngx-icon-picker';
 
 // Components
 import { AppComponent } from './app.component';
@@ -92,7 +93,9 @@ import { RoundProgressModule } from 'angular-svg-round-progressbar';
   // directives, components, and pipes owned by this NgModule
   imports: [
     FormsModule,
+    CommonModule,
     ReactiveFormsModule,
+    BrowserModule,
     BrowserAnimationsModule,
 
     HttpClientModule,
@@ -109,8 +112,7 @@ import { RoundProgressModule } from 'angular-svg-round-progressbar';
     NgxDatatableModule, 
     PrettyJsonModule,
     RoundProgressModule,
-    IconPickerModule,
-    
+
     appRoutes
   ], 
   // modules needed to run this module

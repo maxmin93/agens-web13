@@ -1,7 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
 
-@import "~font-awesome/css/font-awesome.min.css";
+// @import '~bootstrap/dist/css/bootstrap.min.css';   // **NOTE: 포함시키면 layout 깨짐 
+@import '~font-awesome/css/font-awesome.min.css';
 
 @import '~@swimlane/ngx-datatable/release/index.css';
 @import '~@swimlane/ngx-datatable/release/themes/material.css';
@@ -57,6 +58,16 @@ ul, html, body, material-app, input, textarea,
 }
 
 // Custom style for loading elements without height
+
+.svg-icon {
+  display: inline-block;
+  // color: #444444;
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
 
 .will-load { min-height: 80px; }
 

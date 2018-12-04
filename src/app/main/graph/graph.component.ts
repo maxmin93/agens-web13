@@ -748,26 +748,6 @@ return path1, path2;
       });    
   }
 
-  uploadFile(event){
-    let fileItem:File = event.target.files[0];
-    this.handlers[9] = this._api.fileUpload( fileItem ).subscribe(
-      x => {
-        // progress return 
-        // => {type: 1, loaded: 35557, total: 35557} ... {type: 3, loaded: 147}
-        if( x.type === HttpEventType.UploadProgress) {
-          const percentDone = Math.round(100 * ( x.loaded / x.total ) );
-          if( percentDone ) this.queryResult.setMessage(StateType.PENDING, `upload.progress: ${percentDone}%` );
-        } 
-      },
-      err => {
-        this.queryResult.setMessage(StateType.FAIL, 'upload.FAIL: '+JSON.stringify(err) );
-      },
-      () => {
-        this.queryResult.setMessage(StateType.SUCCESS, 'upload.complete: '+fileItem.name );
-      }
-    );
-  }
-
   importFile(event){
     let fileItem:File = event.target.files[0];
     let fileExt = undefined

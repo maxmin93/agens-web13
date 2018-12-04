@@ -6,7 +6,9 @@
 
     <div id="queryCard" [ngClass]="{'flex-1':isExpanded}" class="card col flex-1">
         <div class="card-header row row-m row-space">
-          <h4 class="row row-m"><mat-icon class="mr10">code</mat-icon><span class="row row-b"> Query <strong>Editor </strong> <small> (Cypher or Ansi-SQL)</small></span></h4>
+          <h4 class="row row-m">
+            <mat-icon class="mr10">code</mat-icon><span class="row row-b"> Query <strong>Editor </strong> <small> (Cypher or Ansi-SQL)</small></span>
+          </h4>
           <div class="btn-group">
             <button color="primary" mat-button [disabled]="isLoading || currentTabIndex != 0" (click)="runQuery()"
                 matTooltip="run Query" matTooltipPosition="above">Run</button>

@@ -18,6 +18,8 @@ import { IProject } from '../models/agens-manager-types';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
+import * as CONFIG from '../app.config';
+
 declare var agens : any;
 declare var jQuery: any;
 
@@ -301,7 +303,13 @@ export class ReportComponent implements OnInit, AfterViewInit, OnDestroy {
     graph.labels = [... _.orderBy(graph.labels, ['type','size'], ['desc','desc'])];
     
     graph.nodes.forEach(e => {    
-      this.cy.add( e );
+      let node = this.cy.add( e );
+      // set node style of background-image
+      if( e.scratch._style['image'] ){
+        let baseUrl = localStorage.getItem(CONFIG.DOWNLOAD_URL);
+        if( baseUrl != null && baseUrl.length > 0 )
+          node.style('background-image', baseUrl+e.scratch._style['image']);
+      }
     });
     graph.edges.forEach(e => {
       this.cy.add( e );

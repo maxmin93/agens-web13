@@ -95,6 +95,7 @@ export interface IStyle {             // <== element.scratch('_style')
   width: number;                      // NODE: width, height | EDGE: width
   title: string;                      // one of keys of props (default: 'name')
   visible: boolean;                   // 'visible' = true, 'hidden' = false
+  image?: string;                     // background-image (only for node)
   opacity?: number;                   // 0.0 ~ 1.0
 };
 

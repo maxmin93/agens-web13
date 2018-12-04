@@ -24,6 +24,7 @@ export interface IClientDto extends IResponseDto {
   user_name: string;
   user_ip: string;
   gid: number;
+  download_url: string;
   product_name: string;
   product_version: string;
   timestamp: string;

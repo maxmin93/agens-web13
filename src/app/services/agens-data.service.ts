@@ -48,6 +48,7 @@ export class AgensDataService {
         file: 'http://127.0.0.1:8085/'+CONFIG.AGENS_FILE_API,
         rprt: 'http://127.0.0.1:8085/'+CONFIG.AGENS_RPRT_API,
       };
+      localStorage.setItem(CONFIG.DOWNLOAD_URL, 'http://localhost:8085/api/file/download/');
     }
 
     this.lastResponse$.subscribe(
@@ -135,6 +136,8 @@ export class AgensDataService {
     this.productTitle$.next( dto.product_name + ' ' + dto.product_version );
     localStorage.setItem(CONFIG.USER_KEY, dto.ssid);
     
+    if( !CONFIG.DEV_MODE && dto.hasOwnProperty('download_url') ) 
+      localStorage.setItem(CONFIG.DOWNLOAD_URL, dto['download_url']);    
     if( dto.hasOwnProperty('mode') ) 
       localStorage.setItem(CONFIG.CLIENT_MODE_KEY, dto['mode']);
     if( dto.hasOwnProperty('animation_enabled') ) 
