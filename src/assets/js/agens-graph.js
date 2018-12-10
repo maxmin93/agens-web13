@@ -287,12 +287,13 @@
           'text-valign': 'top',             // **Not Working at EDGE: top, center, bottom
           'line-style': 'solid',            // line-style: solid, dotted, dashed
           'curve-style': 'bezier',
+          'edge-distances': 'node-position',  // 'node-position', 'intersection'
           'font-size': 10,
           'target-arrow-shape': 'triangle',
           'source-arrow-shape': 'none',
           'transition-property': 'width, target-arrow-color, line-color, source-arrow-color, color',
           'transition-duration': '0.1s',
-          // 'transition-timing-function': 'ease-out-cubic'
+          // 'transition-timing-function': 'ease-out-cubic',
         }}, {
         selector: 'edge.clone',
         css: {

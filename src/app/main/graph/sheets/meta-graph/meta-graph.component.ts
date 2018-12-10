@@ -146,10 +146,12 @@ export class MetaGraphComponent implements OnInit {
       });
     data$.pipe( filter(x => x['group'] == 'end') ).subscribe(
       (x:IEnd) => {
-        this._util.calcElementStyles( this.metaGraph.nodes, (x)=>40+x*5, false );
+        this._util.calcElementStyles( this.metaGraph.nodes, (x)=>30+x*3, false );
         this._util.calcElementStyles( this.metaGraph.edges, (x)=>2+x, false );
         this.cy.style(agens.graph.stylelist['dark']).update();
         this.changeLayout( this.cy.elements() );
+        // setTimeout(()=>{
+        // },20);
       });
 
   }
@@ -324,10 +326,10 @@ export class MetaGraphComponent implements OnInit {
     let options = { name: 'cose-bilkent',
       ready: function () {}, stop: function () {},
       nodeDimensionsIncludeLabels: false, refresh: 50, fit: true, padding: 100,
-      randomize: true, nodeRepulsion: 4500, idealEdgeLength: 50, edgeElasticity: 0.45,
-      nestingFactor: 0.1, gravity: 0.25, numIter: 2500, tile: true,
+      randomize: true, nodeRepulsion: 4500, idealEdgeLength: 100, edgeElasticity: 0.45,
+      nestingFactor: 0.3, gravity: 0.25, numIter: 2500, tile: true,
       animate: animation_enabled == 'true' ? 'end' : false, 
-      tilingPaddingVertical: 10, tilingPaddingHorizontal: 10,
+      tilingPaddingVertical: 20, tilingPaddingHorizontal: 20,
       gravityRangeCompound: 1.5, gravityCompound: 1.0, gravityRange: 3.8,
       initialEnergyOnIncremental: 0.5    
     };    

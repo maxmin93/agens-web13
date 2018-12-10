@@ -404,7 +404,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   showGraph(){
-    this._util.calcElementStyles( this.graph.nodes, (x)=>40+x*5 );
+    this._util.calcElementStyles( this.graph.nodes, (x)=>30+x*3 );
     this._util.calcElementStyles( this.graph.edges, (x)=>2+x );
     this.cy.style(agens.graph.stylelist['dark']).update();
     // this.cy.$api.changeLayout('klay');    
